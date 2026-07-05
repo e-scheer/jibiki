@@ -1,0 +1,35 @@
+from django.urls import path
+
+from .views import (
+    AddCardView,
+    BulkAddView,
+    CardDetailView,
+    CardListView,
+    CardStatesView,
+    DeckEnrollView,
+    DeckQueueView,
+    DecksView,
+    ExportView,
+    FavoriteView,
+    OptimizeView,
+    QueueView,
+    ReviewView,
+    StatsView,
+)
+
+urlpatterns = [
+    path("queue", QueueView.as_view(), name="srs_queue"),
+    path("stats", StatsView.as_view(), name="srs_stats"),
+    path("optimize", OptimizeView.as_view(), name="srs_optimize"),
+    path("export", ExportView.as_view(), name="srs_export"),
+    path("add", AddCardView.as_view(), name="srs_add"),
+    path("add/bulk", BulkAddView.as_view(), name="srs_add_bulk"),
+    path("states", CardStatesView.as_view(), name="srs_card_states"),
+    path("decks", DecksView.as_view(), name="srs_decks"),
+    path("decks/<str:deck_id>/enroll", DeckEnrollView.as_view(), name="srs_deck_enroll"),
+    path("decks/<str:deck_id>/queue", DeckQueueView.as_view(), name="srs_deck_queue"),
+    path("cards", CardListView.as_view(), name="srs_cards"),
+    path("cards/<int:pk>", CardDetailView.as_view(), name="srs_card_detail"),
+    path("cards/<int:pk>/review", ReviewView.as_view(), name="srs_review"),
+    path("cards/<int:pk>/favorite", FavoriteView.as_view(), name="srs_favorite"),
+]

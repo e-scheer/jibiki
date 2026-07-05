@@ -1,0 +1,22 @@
+# Reverse proxy + automatic TLS (Let's Encrypt) + static/media off the volumes.
+# {$SITE_DOMAIN} comes from the caddy service env (defaults to api.jibiki.app).
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# Django static (admin/DRF) and locally-stored mnemonic images served
+	# directly by Caddy, never through gunicorn. When mnemonic uploads are
+	# offloaded to Cloudflare R2 (MEDIA_S3_BUCKET set), those are served from the
+	# bucket / MEDIA_S3_CUSTOM_DOMAIN instead — this still serves /static.
+	handle_path /media/* {
+		root * /srv/media
+		file_server
+	}
+	handle_path /static/* {
+		root * /srv/static
+		file_server
+	}
+
+	# Everything else (API, allauth headless, admin) to Django.
+	reverse_proxy api:8000
+}

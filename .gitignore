@@ -1,0 +1,39 @@
+# Python / Django
+__pycache__/
+*.pyc
+.venv/
+server/.venv/
+server/staticfiles/
+*.sqlite3
+*.sqlite3-journal
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Env / secrets
+.env
+data/
+
+# Flutter / Dart
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/ios/Pods/
+app/android/.gradle/
+app/**/GeneratedPluginRegistrant.*
+*.iml
+
+# EDRDG source dumps (downloaded, not committed) — scoped so it never swallows
+# generated platform manifests (e.g. Android's AndroidManifest.xml).
+JMdict*
+kanjidic2*
+kradfile*
+radkfile*
+
+# OS
+.DS_Store
+
+# fvm — commit .fvmrc (pins the version), ignore the cache symlink dir
+app/.fvm/

@@ -1,0 +1,47 @@
+{
+  "schema": "jibiki-content/1",
+  "version": "2026.07.05",
+  "source": "seed",
+  "languages": [
+    "en",
+    "fr"
+  ],
+  "counts": {
+    "kana": 142,
+    "radicals": 20,
+    "kanji": 43,
+    "words": 30
+  },
+  "files": [
+    {
+      "name": "kana.json",
+      "sha256": "ce04ed3afcba87304a0b29ca6b420e31c5652c9004ea9c62d26117c49fc1e1e5",
+      "bytes": 12267,
+      "count": 142
+    },
+    {
+      "name": "radicals.json",
+      "sha256": "3d0af76d163fb1d1587628452e03a902c7de6a52a8bd80f75f558422c66007c8",
+      "bytes": 1380,
+      "count": 20
+    },
+    {
+      "name": "kanji.json",
+      "sha256": "6c0b267c8754d14c42406fcc8279710199b24e13bfc50eea2614ae9f158ebf74",
+      "bytes": 29510,
+      "count": 43
+    },
+    {
+      "name": "words.json",
+      "sha256": "37f1078d6f655b43493c2b45003c40173a4f3eaf66753786427897b5ef47e750",
+      "bytes": 7267,
+      "count": 30
+    }
+  ],
+  "attribution": {
+    "words": "JMdict © EDRDG, used under the EDRDG Licence.",
+    "kanji": "KANJIDIC2 © EDRDG, used under the EDRDG Licence.",
+    "components": "KRADFILE © EDRDG (CC BY-SA 3.0).",
+    "strokes": "KanjiVG © Ulrich Apel (CC BY-SA 3.0)."
+  }
+}

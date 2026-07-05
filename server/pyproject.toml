@@ -1,0 +1,44 @@
+[project]
+name = "jibiki-server"
+version = "0.1.0"
+description = "jibiki API — dictionary-first Japanese memorization tool (Django + DRF over Postgres)"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2,<6.0",
+    "djangorestframework>=3.15",
+    # Auth: allauth in headless mode is the native/mobile auth surface (signup,
+    # login, email verification, password reset, social, MFA) — the same choice
+    # as the tusorsou stack. mfa→qrcode (TOTP QR); socialaccount→requests/oauthlib.
+    "django-allauth[mfa,socialaccount]>=65.4",
+    "dj-database-url>=2.3",
+    "psycopg[binary]>=3.2",
+    "gunicorn>=23.0",
+    "pillow>=11.0",              # decode + downscale user mnemonic images, strip EXIF/GPS on ingest
+    "django-storages[s3]>=1.14", # prod media → Cloudflare R2 / S3 (zero-egress); pulls boto3
+    "django-cors-headers>=4.6",  # the Flutter web build talks to the API cross-origin in dev
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.9",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+extend-select = ["I", "B", "SIM", "RUF"]
+# RUF012: Django's Meta/class-attribute idiom is consumed by metaclasses — ClassVar
+# annotations would be pure noise. RUF001/002/003: this project stores Japanese text
+# and CJK radicals as data (é, 一, ×), deliberate, not ASCII ambiguity to "fix".
+ignore = ["RUF012", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["I001"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "jibiki_server.settings_test"
+python_files = ["test_*.py"]

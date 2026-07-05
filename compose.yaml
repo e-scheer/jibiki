@@ -1,0 +1,85 @@
+# Production topology. Local dev uses compose.override.yaml (auto-loaded, exposes
+# the DB port). On the server the override is absent and this file IS what runs.
+#
+#   db      Postgres — the store for dictionary + SRS + community mnemonics
+#   api     Django + gunicorn (DRF + allauth headless)
+#   caddy   reverse proxy + TLS, serves /media + /static   (profile "web")
+#
+# Mnemonic images can be offloaded to Cloudflare R2 (zero egress) by setting the
+# MEDIA_S3_* vars in .env; otherwise they land on the local media volume, which
+# Caddy serves from /media.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: jibiki
+      POSTGRES_USER: jibiki
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jibiki}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jibiki -d jibiki"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build: ./server
+    environment:
+      DATABASE_URL: postgres://jibiki:${POSTGRES_PASSWORD:-jibiki}@db:5432/jibiki
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-api.jibiki.app}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-https://api.jibiki.app}
+      DJANGO_STATIC_ROOT: /app/staticfiles
+      MEDIA_STORE: /data/media
+      HEADLESS_FRONTEND_BASE: ${HEADLESS_FRONTEND_BASE:-jibiki://auth}
+      # Community image storage → Cloudflare R2 when set (see .env.example).
+      MEDIA_S3_BUCKET: ${MEDIA_S3_BUCKET:-}
+      MEDIA_S3_ENDPOINT_URL: ${MEDIA_S3_ENDPOINT_URL:-}
+      MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:-}
+      MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-}
+      MEDIA_S3_CUSTOM_DOMAIN: ${MEDIA_S3_CUSTOM_DOMAIN:-}
+      # Auth / email (allauth). Empty in dev → verification "optional", console mail.
+      ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-mandatory}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-jibiki <noreply@jibiki.app>}
+      SOCIALACCOUNT_GOOGLE_CLIENT_ID: ${SOCIALACCOUNT_GOOGLE_CLIENT_ID:-}
+      SOCIALACCOUNT_GOOGLE_CLIENT_SECRET: ${SOCIALACCOUNT_GOOGLE_CLIENT_SECRET:-}
+      TZ: UTC
+    volumes:
+      - mediadata:/data/media
+      - staticfiles:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    profiles: [web]
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-api.jibiki.app}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - mediadata:/srv/media:ro
+      - staticfiles:/srv/static:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  mediadata:
+  staticfiles:
+  caddy_data:
+  caddy_config:
