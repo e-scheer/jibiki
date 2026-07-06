@@ -28,14 +28,16 @@ dependencies:
   # On-device Japanese text-to-speech for the learn carousel + card audio.
   flutter_tts: ^4.2.0
   cupertino_icons: ^1.0.8
+  # Native launch screen: also used at runtime (preserve/remove) to hold the OS
+  # splash through bootstrap, so there's no flash to a second splash.
+  flutter_native_splash: ^2.4.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  # Generate launcher icons (Android adaptive + monochrome, iOS, web) + the splash.
+  # Generate launcher icons (Android adaptive + monochrome, iOS, web).
   flutter_launcher_icons: ^0.14.1
-  flutter_native_splash: ^2.4.3
 
 # The app icon: white 字 on the vermilion 朱 seal (see scripts/gen_icon.py).
 flutter_launcher_icons:

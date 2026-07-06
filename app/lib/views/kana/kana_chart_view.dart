@@ -14,6 +14,7 @@ import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
 import '../widgets/status_views.dart';
 import '../widgets/study_mark.dart';
+import 'kana_cell.dart';
 
 class KanaChartView extends StatelessWidget {
   const KanaChartView({super.key});
@@ -59,19 +60,9 @@ class _KanaChartState extends State<_KanaChart> {
   final Set<String> _selected = {};
   Map<String, int> _states = const {};
 
-  // +1 when the new script sits to the right of the old one in the toggle, -1 to
-  // the left — so the matrix slides in the direction you moved the pill.
-  double _slideDir = 1;
-
-  static int _scriptIndex(String s) => switch (s) { 'hiragana' => 0, 'katakana' => 1, _ => 2 };
-
   void _changeScript(KanaViewModel vm, String s) {
     if (s == vm.script) return;
-    final dir = _scriptIndex(s) >= _scriptIndex(vm.script) ? 1.0 : -1.0;
-    setState(() {
-      _slideDir = dir;
-      _selected.clear();
-    });
+    setState(() => _selected.clear());
     vm.setScript(s);
   }
 
@@ -218,18 +209,14 @@ class _KanaChartState extends State<_KanaChart> {
           : vm.hasError
               ? ErrorRetry(message: vm.error!, onRetry: vm.load)
               : AnimatedSwitcher(
-                  duration: Motion.timed(context, Motion.base),
+                  duration: Motion.timed(context, Motion.fast),
                   switchInCurve: Motion.out,
                   switchOutCurve: Motion.out,
-                  // Crossfade + a small slide in the direction the toggle moved.
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(begin: Offset(0.05 * _slideDir, 0), end: Offset.zero)
-                          .animate(animation),
-                      child: child,
-                    ),
-                  ),
+                  // A clean, quick crossfade between scripts. The three matrices
+                  // share the same rows, so heights match and nothing jumps — no
+                  // more half-sliding matrices ghosting over each other.
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
                   child: ListView(
                     key: ValueKey(vm.script),
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
@@ -347,14 +334,31 @@ class _KanaMatrix extends StatelessWidget {
 
     final headerStyle = TextStyle(color: jc.muted, fontWeight: FontWeight.w800, fontSize: 12);
 
-    Widget cell(List<KanaEntry>? entries) => Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(2.5),
-            child: (entries == null || entries.isEmpty)
-                ? const SizedBox(height: 48)
-                : _TableCell(entries: entries, sel: sel),
+    Widget cell(List<KanaEntry>? entries) {
+      if (entries == null || entries.isEmpty) {
+        return const Expanded(child: Padding(padding: EdgeInsets.all(2.5), child: SizedBox(height: 56)));
+      }
+      final picked = sel.active && entries.map((e) => e.char).every(sel.contains);
+      // Study status = the furthest-along state among this cell's glyphs.
+      int? maxState;
+      for (final e in entries) {
+        final s = sel.states[e.char];
+        if (s != null && (maxState == null || s > maxState)) maxState = s;
+      }
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(2.5),
+          child: KanaCell(
+            entries: entries,
+            selected: picked,
+            mark: studyMarkFor(maxState),
+            onTap: sel.active
+                ? () => sel.onToggle(entries)
+                : () => context.push('/kana/${entries.first.char}'),
           ),
-        );
+        ),
+      );
+    }
 
     return Column(
       children: [
@@ -388,65 +392,3 @@ class _KanaMatrix extends StatelessWidget {
   }
 }
 
-class _TableCell extends StatelessWidget {
-  const _TableCell({required this.entries, required this.sel});
-  final List<KanaEntry> entries; // 1 (single script) or 2 (Both: hiragana, katakana)
-  final _Selection sel;
-
-  @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    final both = entries.length > 1;
-    final romaji = entries.first.romaji;
-
-    // Study status = the furthest-along state among this cell's glyphs.
-    int? maxState;
-    for (final e in entries) {
-      final s = sel.states[e.char];
-      if (s != null && (maxState == null || s > maxState)) maxState = s;
-    }
-    final mark = studyMarkFor(maxState);
-
-    final picked = sel.active && entries.map((e) => e.char).every(sel.contains);
-
-    return Material(
-      color: picked ? jc.brandSoft : jc.surface,
-      borderRadius: BorderRadius.circular(Radii.sm),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Radii.sm),
-        onTap: sel.active ? () => sel.onToggle(entries) : () => context.push('/kana/${entries.first.char}'),
-        child: Stack(
-          children: [
-            Container(
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Radii.sm),
-                border: Border.all(color: picked ? jc.brand : jc.hairline, width: picked ? 2 : 1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (both)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(entries[0].char, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 3),
-                        Text(entries[1].char,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: jc.muted)),
-                      ],
-                    )
-                  else
-                    Text(entries.first.char, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w600)),
-                  Text(romaji, style: TextStyle(fontSize: 9, color: jc.muted, height: 1)),
-                ],
-              ),
-            ),
-            // A small status dot; selection itself reads from the border + tint.
-            if (mark != StudyMark.none) Positioned(top: 4, right: 4, child: StudyDot(mark: mark)),
-          ],
-        ),
-      ),
-    );
-  }
-}

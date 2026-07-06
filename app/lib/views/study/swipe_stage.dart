@@ -95,6 +95,7 @@ class _PeekCard extends StatelessWidget {
             color: jc.surface,
             borderRadius: BorderRadius.circular(Radii.xl),
             border: Border.all(color: jc.hairline),
+            boxShadow: Shadows.soft(context),
           ),
           alignment: Alignment.center,
           child: Opacity(
@@ -180,19 +181,32 @@ class _GradeButton extends StatelessWidget {
         onTap();
       },
       child: Container(
-        height: 66,
+        height: 68,
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.45)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(ratingIcon(rating), color: color, size: 22),
-            const SizedBox(height: 3),
-            Text(rating.label,
-                style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12.5)),
+            Icon(ratingIcon(rating), color: color, size: 21),
+            const SizedBox(height: 4),
+            // The arrow ties the button to its swipe direction, so the two ways to
+            // grade teach each other.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(ratingArrow(rating),
+                      style: TextStyle(color: color.withValues(alpha: 0.7), fontWeight: FontWeight.w900, fontSize: 12)),
+                  const SizedBox(width: 4),
+                  Text(rating.label,
+                      style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12.5)),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -210,10 +224,10 @@ class _Face extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 36, 28, 36),
+      padding: const EdgeInsets.fromLTRB(26, 28, 26, 26),
       child: Column(
         children: [
-          _TypeBadge(card: card),
+          Align(alignment: Alignment.centerLeft, child: _TypeBadge(card: card)),
           const Spacer(),
           Flexible(
             flex: 8,
@@ -232,22 +246,58 @@ class _Face extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           if (!revealed)
             const _Hint(icon: Icons.touch_app_outlined, text: 'Tap to reveal')
-          else ...[
-            if (card.reading.isNotEmpty && card.reading != card.front)
-              Text(card.reading, style: TextStyle(fontSize: 22, color: jc.brand, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            Text(card.meaning(lang),
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 19, color: jc.body, height: 1.35)),
-            const SizedBox(height: 4),
-            SpeechButton(text: _cardSpeech(card), size: 26),
-          ],
+          else
+            _AnswerBlock(card: card, lang: lang),
           const Spacer(),
-          if (revealed) const _Hint(icon: Icons.swipe_outlined, text: 'Swipe, or use the buttons'),
+          if (revealed) const _Hint(icon: Icons.swipe_outlined, text: 'Swipe any way, or tap a button'),
         ],
       ),
+    );
+  }
+}
+
+/// The revealed answer: a hairline lead-in, the reading in vermilion, the meaning
+/// below, and a play button. A clear stack instead of loose stacked lines.
+class _AnswerBlock extends StatelessWidget {
+  const _AnswerBlock({required this.card, required this.lang});
+  final StudyCard card;
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    final hasReading = card.reading.isNotEmpty && card.reading != card.front;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 44,
+          height: 3,
+          decoration: BoxDecoration(color: jc.hairline, borderRadius: BorderRadius.circular(Radii.pill)),
+        ),
+        const SizedBox(height: 16),
+        if (hasReading) ...[
+          Text(card.reading,
+              textAlign: TextAlign.center,
+              // Readings are kana; pin a JP face so they never fall back to a
+              // Latin font (which renders them as tofu).
+              style: TextStyle(
+                  fontFamily: 'NotoSansJP',
+                  fontSize: 23,
+                  color: jc.brand,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3)),
+          const SizedBox(height: 8),
+        ],
+        Text(card.meaning(lang),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 19, color: jc.body, height: 1.35, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 12),
+        SpeechButton(text: _cardSpeech(card), size: 26),
+      ],
     );
   }
 }

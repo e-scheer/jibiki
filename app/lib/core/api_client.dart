@@ -8,7 +8,15 @@ import 'session_store.dart';
 /// every request and normalizes failures to [ApiException]. All services talk to
 /// the API through this one client.
 class ApiClient {
-  ApiClient(this._session) : _dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)) {
+  ApiClient(this._session)
+      : _dio = Dio(BaseOptions(
+          baseUrl: ApiConfig.baseUrl,
+          // Fail promptly when the API is unreachable instead of hanging the
+          // splash / a screen on the OS default (which can be minutes).
+          connectTimeout: const Duration(seconds: 12),
+          receiveTimeout: const Duration(seconds: 20),
+          sendTimeout: const Duration(seconds: 20),
+        )) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {

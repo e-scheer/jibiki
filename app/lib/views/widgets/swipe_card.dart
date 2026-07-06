@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import '../../models/enums.dart';
 import '../../theme/app_theme.dart';
@@ -76,23 +77,35 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
   Offset _drag = Offset.zero;
   bool _revealed = false;
   bool _gone = false;
+  bool _motion = true; // mirrors reduce-motion, refreshed each build
 
+  // Drives both the settle (spring) and the throw (eased tween) by interpolating
+  // _drag between these anchors; _animCurve is null for the raw spring value.
   late final AnimationController _return = AnimationController(vsync: this, duration: Motion.base);
   // Snappy flip, the answer should appear quickly.
   late final AnimationController _flip =
       AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-  Animation<Offset>? _returnAnim;
+  Offset _animFrom = Offset.zero;
+  Offset _animTo = Offset.zero;
+  Curve? _animCurve;
+  bool _animating = false;
   Rating? _lastCrossed;
+
+  // A critically damped spring: it continues the finger's motion and settles home
+  // with no overshoot (a natural spring, not a dated bounce).
+  static final SpringDescription _snapSpring =
+      SpringDescription.withDampingRatio(mass: 1, stiffness: 260, ratio: 1.0);
 
   @override
   void initState() {
     super.initState();
     widget.controller._bind(this);
     _return.addListener(() {
-      if (_returnAnim != null) {
-        setState(() => _drag = _returnAnim!.value);
-        widget.onProgress?.call(_progress(_drag).clamp(0.0, 1.0));
-      }
+      if (!_animating) return;
+      final raw = _return.value;
+      final t = _animCurve == null ? raw : _animCurve!.transform(raw.clamp(0.0, 1.0));
+      setState(() => _drag = Offset.lerp(_animFrom, _animTo, t)!);
+      widget.onProgress?.call(_progress(_drag).clamp(0.0, 1.0));
     });
   }
 
@@ -137,6 +150,7 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
   void _onPanUpdate(DragUpdateDetails d) {
     // A swipe reveals the card too, no need to tap first, then it grades.
     if (!_revealed) _reveal();
+    _animating = false;
     _return.stop();
     setState(() => _drag += d.delta);
     widget.onProgress?.call(_progress(_drag).clamp(0.0, 1.0));
@@ -149,21 +163,36 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
 
   void _onPanEnd(DragEndDetails d) {
     if (!_revealed) return;
-    if (_progress(_drag) >= 1) {
-      _flingOut(_ratingFor(_drag));
+    final v = d.velocity.pixelsPerSecond;
+    // Commit on distance OR on a decisive flick: a quick throw grades even before
+    // the card crosses the distance threshold, the way a swipe deck should feel.
+    if (_progress(_drag) >= 1 || (v.distance > 1000 && _progress(_drag) > 0.35)) {
+      _flingOut(_ratingFor(_drag), v);
     } else {
-      _snapBack();
+      _snapBack(v);
     }
   }
 
-  void _snapBack() {
+  void _snapBack(Offset velocity) {
     _lastCrossed = null;
-    _returnAnim = Tween(begin: _drag, end: Offset.zero)
-        .animate(CurvedAnimation(parent: _return, curve: Motion.outStrong));
-    _return.forward(from: 0);
+    if (!_motion) {
+      _animating = false;
+      setState(() => _drag = Offset.zero);
+      widget.onProgress?.call(0);
+      return;
+    }
+    final dist = _drag.distance;
+    _animFrom = _drag;
+    _animTo = Offset.zero;
+    _animCurve = null; // raw spring position
+    _animating = true;
+    // Release velocity projected onto the drag→centre axis, in [0,1]/s, so the
+    // settle carries the finger's momentum instead of restarting from rest.
+    final vNorm = dist == 0 ? 0.0 : (velocity.dx * -_drag.dx + velocity.dy * -_drag.dy) / (dist * dist);
+    _return.animateWith(SpringSimulation(_snapSpring, 0.0, 1.0, vNorm));
   }
 
-  void _flingOut(Rating r) {
+  void _flingOut(Rating r, [Offset velocity = Offset.zero]) {
     if (_gone) return;
     if (!_revealed) {
       _reveal();
@@ -178,8 +207,19 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
       Rating.easy => Offset(_drag.dx, -s.height * 1.4),
       Rating.hard => Offset(_drag.dx, s.height * 1.4),
     };
-    _returnAnim =
-        Tween(begin: _drag, end: target).animate(CurvedAnimation(parent: _return, curve: Motion.out));
+    if (!_motion) {
+      _animating = false;
+      setState(() => _drag = target);
+      widget.onRate(r);
+      return;
+    }
+    _animFrom = _drag;
+    _animTo = target;
+    _animCurve = Motion.out;
+    _animating = true;
+    // A harder flick leaves faster; a button tap (no velocity) uses the full time.
+    final ms = (260 - velocity.distance / 24).clamp(150, 260).toInt();
+    _return.duration = Duration(milliseconds: ms);
     _return.forward(from: 0).whenComplete(() => widget.onRate(r));
   }
 
@@ -188,8 +228,8 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
     // Reduce-motion alternative: collapse the flip + fling/snap to instant so the
     // 3D rotation and the off-screen throw don't play. Direct-drag feedback
     // (rotation, colour wash) stays, it tracks the finger, it isn't animation.
+    _motion = Motion.enabled(context);
     _flip.duration = Motion.timed(context, const Duration(milliseconds: 300));
-    _return.duration = Motion.timed(context, Motion.base);
 
     final s = MediaQuery.sizeOf(context);
     final angle = (_drag.dx / s.width) * 0.18;
@@ -246,7 +286,7 @@ class _CardShell extends StatelessWidget {
         color: jc.surface,
         borderRadius: BorderRadius.circular(Radii.xl),
         border: Border.all(
-          color: wash != null ? wash.withValues(alpha: (0.3 + progress).clamp(0.0, 1.0)) : jc.hairline,
+          color: wash != null ? wash.withValues(alpha: (0.35 + progress * 0.65).clamp(0.0, 1.0)) : jc.hairline,
           width: wash != null ? 2.5 : 1,
         ),
         boxShadow: Shadows.lifted(context),
@@ -257,7 +297,7 @@ class _CardShell extends StatelessWidget {
         children: [
           RepaintBoundary(child: child),
           if (wash != null)
-            IgnorePointer(child: Container(color: wash.withValues(alpha: progress * 0.14))),
+            IgnorePointer(child: _DirectionalWash(dir: dir!, color: wash, progress: progress)),
           if (wash != null) _Stamp(rating: dir!, color: wash, progress: progress),
         ],
       ),
@@ -265,8 +305,39 @@ class _CardShell extends StatelessWidget {
   }
 }
 
+/// A colour glow that grows from the edge you're dragging toward, so the card
+/// leans into the grade instead of tinting uniformly. Stronger, more directional
+/// than a flat overlay: it reads like the card is being pulled that way.
+class _DirectionalWash extends StatelessWidget {
+  const _DirectionalWash({required this.dir, required this.color, required this.progress});
+  final Rating dir;
+  final Color color;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final (begin, end) = switch (dir) {
+      Rating.again => (Alignment.centerLeft, Alignment.centerRight),
+      Rating.good => (Alignment.centerRight, Alignment.centerLeft),
+      Rating.easy => (Alignment.topCenter, Alignment.bottomCenter),
+      Rating.hard => (Alignment.bottomCenter, Alignment.topCenter),
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: begin,
+          end: end,
+          colors: [color.withValues(alpha: (progress * 0.3).clamp(0.0, 0.3)), Colors.transparent],
+          stops: const [0.0, 0.72],
+        ),
+      ),
+    );
+  }
+}
+
 /// The Tinder-style grade stamp: a bold badge that fades + scales in toward the
-/// drag direction.
+/// drag direction, set on an opaque plate with a coloured halo so the label stays
+/// crisp over the glyph beneath it.
 class _Stamp extends StatelessWidget {
   const _Stamp({required this.rating, required this.color, required this.progress});
   final Rating rating;
@@ -276,14 +347,14 @@ class _Stamp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final align = switch (rating) {
-      Rating.easy => const Alignment(0, -0.62),
-      Rating.hard => const Alignment(0, 0.62),
-      Rating.again => const Alignment(-0.75, -0.35),
-      Rating.good => const Alignment(0.75, -0.35),
+      Rating.easy => const Alignment(0, -0.66),
+      Rating.hard => const Alignment(0, 0.66),
+      Rating.again => const Alignment(-0.72, -0.4),
+      Rating.good => const Alignment(0.72, -0.4),
     };
     final tilt = switch (rating) {
-      Rating.again => -0.24,
-      Rating.good => 0.24,
+      Rating.again => -0.22,
+      Rating.good => 0.22,
       _ => 0.0,
     };
     final t = ((progress - 0.06) / 0.5).clamp(0.0, 1.0);
@@ -295,22 +366,25 @@ class _Stamp extends StatelessWidget {
           child: Transform.rotate(
             angle: tilt,
             child: Transform.scale(
-              scale: 0.7 + 0.5 * t,
+              scale: 0.72 + 0.42 * t,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
+                  color: context.jc.surface.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(Radii.md),
-                  border: Border.all(color: color, width: 3),
+                  border: Border.all(color: color, width: 3.5),
+                  boxShadow: [
+                    BoxShadow(color: color.withValues(alpha: 0.28), blurRadius: 18, offset: const Offset(0, 6)),
+                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(ratingIcon(rating), color: color, size: 26),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 9),
                     Text(
                       rating.label.toUpperCase(),
-                      style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 22, letterSpacing: 2),
+                      style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 23, letterSpacing: 1.5),
                     ),
                   ],
                 ),

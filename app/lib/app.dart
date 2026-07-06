@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +41,7 @@ class _JibikiAppState extends State<JibikiApp> {
       MnemonicDeckRepository(MnemonicDeckService(_api));
   late final AuthRepository _authRepo = AuthRepository(AuthService(_api), widget.session);
 
-  late final AppState _app = AppState(_authRepo)..bootstrap();
+  late final AppState _app = AppState(_authRepo);
   late final GoRouter _router = buildRouter(_app);
 
   // Built once, ColorScheme.fromSeed does real colour science; recomputing it on
@@ -51,6 +52,10 @@ class _JibikiAppState extends State<JibikiApp> {
   @override
   void initState() {
     super.initState();
+    // Resolve the session behind the held native splash, then reveal the app
+    // straight onto its real first screen (no second splash, no flash). Runs
+    // regardless of outcome — success, login, or the offline retry state.
+    _app.bootstrap().whenComplete(FlutterNativeSplash.remove);
     // Warm the TTS engine after the first frame so the first "play audio" tap
     // fires instantly instead of cold-starting the platform voice.
     WidgetsBinding.instance.addPostFrameCallback((_) => Speech.instance.warmUp());

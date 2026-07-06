@@ -191,7 +191,7 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                 ? const SkeletonCardGrid(
                     count: 12,
                     crossAxisCount: 4,
-                    childAspectRatio: 0.82,
+                    childAspectRatio: 0.9,
                     padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
                   )
                 : _error != null
@@ -204,7 +204,7 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                               maxCrossAxisExtent: 88, // ~4 across on phones, denser on tablets
                               mainAxisSpacing: 10,
                               crossAxisSpacing: 10,
-                              childAspectRatio: 0.82,
+                              childAspectRatio: 0.9,
                             ),
                             itemCount: list.length,
                             itemBuilder: (_, i) {
@@ -274,36 +274,42 @@ class _KanjiTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final meaning = kanji.meaningsFor(lang);
-    return Material(
-      color: selected ? jc.brandSoft : jc.surface,
-      borderRadius: BorderRadius.circular(Radii.md),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Radii.md),
-        onTap: selecting ? onToggle : () => context.push('/kanji/${kanji.literal}'),
+    // Soft filled tile (no per-tile border) to match the kana chart: a calm grid
+    // where the glyph is the loudest thing. Selected lifts with the vermilion
+    // wash + ring; a press gives a real button response via Pressable.
+    return Pressable(
+      label: '${kanji.literal} ${meaning.isNotEmpty ? meaning.first : ''}',
+      selected: selected,
+      onTap: selecting ? onToggle : () => context.push('/kanji/${kanji.literal}'),
+      child: AnimatedContainer(
+        duration: Motion.timed(context, Motion.fast),
+        curve: Motion.out,
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: selected ? jc.brandSoft : jc.surfaceAlt,
+          borderRadius: BorderRadius.circular(Radii.md),
+          border: Border.all(color: selected ? jc.brand : Colors.transparent, width: 1.5),
+        ),
         child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Radii.md),
-                border: Border.all(color: selected ? jc.brand : jc.hairline, width: selected ? 2 : 1),
-              ),
+            Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(kanji.literal, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
+                  Text(kanji.literal,
+                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600, height: 1, color: jc.ink)),
+                  const SizedBox(height: 5),
                   Text(
                     meaning.isNotEmpty ? meaning.first : '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 10.5, color: jc.muted),
+                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: jc.muted, height: 1.1),
                   ),
                 ],
               ),
             ),
-            if (mark != StudyMark.none) Positioned(top: 5, right: 5, child: StudyDot(mark: mark)),
+            if (mark != StudyMark.none) Positioned(top: 4, right: 4, child: StudyDot(mark: mark)),
           ],
         ),
       ),

@@ -55,3 +55,38 @@ flutter run --dart-define=JIBIKI_API_BASE=http://localhost:8000
 
 The base URL defaults to `http://10.0.2.2:8000` on the Android emulator and
 `http://localhost:8000` elsewhere; override with `--dart-define=JIBIKI_API_BASE=…`.
+
+### ⚠️ Running on a physical Android device — read this
+
+`10.0.2.2` is the **emulator-only** alias for the host. A **physical device cannot
+reach it**, so any build without `--dart-define=JIBIKI_API_BASE` will sit on the
+splash showing *"Can't reach the server"*. On a real device you MUST point the app
+at the dev machine's LAN IP (or tunnel to it):
+
+```bash
+# Build / run for the physical device — ALWAYS pass the LAN IP:
+flutter run   --dart-define=JIBIKI_API_BASE=http://192.168.1.6:8000
+flutter build apk --release --target-platform android-arm64 \
+  --dart-define=JIBIKI_API_BASE=http://192.168.1.6:8000
+```
+
+Gotcha that already bit us once: a bare `flutter run` (no `--dart-define`) installs
+a **debug** build that targets `10.0.2.2` and **silently overwrites** a correctly
+built release APK on the device — the app then can't reach the server. If you see
+*"Can't reach the server"*, first check the target URL printed under the message,
+then reinstall with the define. Confirm which build is actually installed with:
+
+```bash
+adb shell pm path app.jibiki.jibiki     # then pull + grep the APK for the baked URL
+```
+
+Fallback that works regardless of LAN IP (tunnels device `localhost` → host over USB):
+
+```bash
+adb reverse tcp:8000 tcp:8000
+flutter run --dart-define=JIBIKI_API_BASE=http://localhost:8000
+```
+
+The splash's *"Sign in instead"* button is an escape hatch: even when the server is
+unreachable, a user is never trapped — they can always drop the session and reach
+the login screen (see `SplashView` / `AppState.logout`).

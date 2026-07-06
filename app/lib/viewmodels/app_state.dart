@@ -16,9 +16,20 @@ class AppState extends ChangeNotifier {
 
   AuthStatus _status = AuthStatus.unknown;
   AppUser? _user;
+  String? _bootstrapError;
+  bool _bootstrapping = false;
 
   AuthStatus get status => _status;
   AppUser? get user => _user;
+
+  /// Set when cold-start bootstrap couldn't reach the server (not an auth
+  /// failure). The session is kept intact and the splash offers a retry, instead
+  /// of silently dumping a signed-in user at the login screen.
+  String? get bootstrapError => _bootstrapError;
+
+  /// True while a (re)connect attempt is in flight — so the splash's "Try again"
+  /// gives immediate feedback instead of looking inert when it fails again.
+  bool get bootstrapping => _bootstrapping;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
   bool get onboarded => _auth.onboarded;
 
@@ -26,18 +37,34 @@ class AppState extends ChangeNotifier {
   String get mnemonicLanguage => _user?.profile.mnemonicLanguage ?? 'en';
   UserProfile? get profile => _user?.profile;
 
-  /// Called once at launch to resolve the start destination.
+  /// Called once at launch (and on "Try again") to resolve the start destination.
   Future<void> bootstrap() async {
     if (!_auth.hasSession) {
       _set(AuthStatus.unauthenticated, null);
       return;
     }
+    // Flip into the loading state up front so a retry visibly re-enters
+    // "connecting…" even when it will fail again with the same message.
+    _bootstrapping = true;
+    _bootstrapError = null;
+    notifyListeners();
     try {
       final user = await _auth.me();
+      _bootstrapping = false;
       _set(AuthStatus.authenticated, user);
-    } on ApiException {
-      await _auth.logout();
-      _set(AuthStatus.unauthenticated, null);
+    } on ApiException catch (e) {
+      _bootstrapping = false;
+      if (e.isUnauthorized) {
+        // The session really is invalid — clear it and go to login.
+        await _auth.logout();
+        _set(AuthStatus.unauthenticated, null);
+      } else {
+        // Server unreachable / network down: keep the session, stay on the
+        // splash, and let the user retry. Never log a valid session out because
+        // the API was momentarily down.
+        _bootstrapError = e.message;
+        notifyListeners();
+      }
     }
   }
 
@@ -53,6 +80,10 @@ class AppState extends ChangeNotifier {
 
   Future<void> logout() async {
     await _auth.logout();
+    // Clear any stuck cold-start error so the splash never lingers after we've
+    // dropped the session and handed off to the login screen.
+    _bootstrapError = null;
+    _bootstrapping = false;
     _set(AuthStatus.unauthenticated, null);
   }
 
