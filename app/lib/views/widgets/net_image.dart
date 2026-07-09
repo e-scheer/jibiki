@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +16,7 @@ class NetImage extends StatelessWidget {
   const NetImage({
     super.key,
     required this.url,
+    this.bytes,
     this.fit = BoxFit.cover,
     this.cacheWidth,
     this.errorBuilder,
@@ -21,6 +24,9 @@ class NetImage extends StatelessWidget {
   });
 
   final String url;
+
+  /// In-memory image (an offline pack BLOB); wins over [url] when set.
+  final Uint8List? bytes;
   final BoxFit fit;
 
   /// Target decode width in device pixels (memory downscale). Null = full size.
@@ -33,14 +39,23 @@ class NetImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final image = CachedNetworkImage(
-      imageUrl: url,
-      fit: fit,
-      memCacheWidth: cacheWidth,
-      fadeInDuration: Motion.timed(context, Motion.fast),
-      placeholder: (_, __) => Container(color: jc.surfaceAlt),
-      errorWidget: (c, _, __) => errorBuilder?.call(c) ?? Container(color: jc.surfaceAlt),
-    );
+    final Widget image = bytes != null
+        ? Image.memory(
+            bytes!,
+            fit: fit,
+            cacheWidth: cacheWidth,
+            errorBuilder: (c, _, __) =>
+                errorBuilder?.call(c) ?? Container(color: jc.surfaceAlt),
+          )
+        : CachedNetworkImage(
+            imageUrl: url,
+            fit: fit,
+            memCacheWidth: cacheWidth,
+            fadeInDuration: Motion.timed(context, Motion.fast),
+            placeholder: (_, __) => Container(color: jc.surfaceAlt),
+            errorWidget: (c, _, __) =>
+                errorBuilder?.call(c) ?? Container(color: jc.surfaceAlt),
+          );
     if (semanticLabel == null) return ExcludeSemantics(child: image);
     return Semantics(image: true, label: semanticLabel, child: image);
   }

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki — 10 explorations de design</title>
+<style>
+  :root {
+    --bg: oklch(0.16 0.01 260);
+    --surface: oklch(0.21 0.012 260);
+    --ink: oklch(0.95 0.005 260);
+    --muted: oklch(0.72 0.01 260);
+    --line: oklch(0.32 0.012 260);
+    --accent: oklch(0.62 0.19 35);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 3rem 1.5rem 5rem;
+  }
+  header { max-width: 1200px; margin: 0 auto 3rem; }
+  h1 { font-size: 2rem; letter-spacing: -0.01em; }
+  h1 .jp { color: var(--accent); font-weight: 400; margin-left: 0.5rem; font-size: 1.4rem; }
+  header p { color: var(--muted); max-width: 62ch; margin-top: 0.5rem; }
+  main {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  }
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 160ms ease-out, translate 160ms ease-out;
+  }
+  a.card:hover, a.card:focus-visible { border-color: var(--accent); translate: 0 -3px; }
+  a.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .preview {
+    height: 300px; overflow: hidden; position: relative;
+    background: oklch(0.13 0.01 260);
+  }
+  .preview iframe {
+    width: 1380px; height: 1080px;
+    border: 0;
+    transform: scale(0.26);
+    transform-origin: top left;
+    position: absolute; top: 0; left: 50%;
+    margin-left: -179px; /* 1380 * 0.26 / 2 */
+    pointer-events: none;
+  }
+  .meta { padding: 1rem 1.25rem 1.25rem; border-top: 1px solid var(--line); }
+  .meta h2 { font-size: 1.1rem; display: flex; align-items: baseline; gap: 0.6rem; }
+  .meta h2 small { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+  .meta p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+  @media (prefers-reduced-motion: reduce) {
+    a.card { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>10 explorations de design<span class="jp">辞引き</span></h1>
+  <p>Dix directions volontairement contrastées pour jibiki, sur les trois mêmes écrans
+  (accueil, fiche du mot 桜, session de révision). Cliquer sur une carte ouvre la
+  version pleine taille.</p>
+</header>
+<main>
+  <a class="card" href="01-kodomo.html">
+    <div class="preview"><iframe src="01-kodomo.html" title="Aperçu Kodomo" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Kodomo <small>pour enfants</small></h2>
+      <p>Couleurs bonbon, mascotte, révision transformée en jeu à étoiles.</p>
+    </div>
+  </a>
+  <a class="card" href="02-encre.html">
+    <div class="preview"><iframe src="02-encre.html" title="Aperçu Encre" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Encre <small>sobre éditorial</small></h2>
+      <p>Dictionnaire papier : serif japonais, filets fins, un seul sceau vermillon.</p>
+    </div>
+  </a>
+  <a class="card" href="03-neon.html">
+    <div class="preview"><iframe src="03-neon.html" title="Aperçu Néon" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Néon <small>très visuel</small></h2>
+      <p>Tokyo la nuit : le kanji en enseigne lumineuse, mnémoniques plein écran.</p>
+    </div>
+  </a>
+  <a class="card" href="04-pixel.html">
+    <div class="preview"><iframe src="04-pixel.html" title="Aperçu Pixel" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Pixel <small>rétro 8-bit</small></h2>
+      <p>RPG de poche : la révision est un combat, la progression une barre d'EXP.</p>
+    </div>
+  </a>
+  <a class="card" href="05-riso.html">
+    <div class="preview"><iframe src="05-riso.html" title="Aperçu Riso" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Riso <small>fanzine brutaliste</small></h2>
+      <p>Bichromie risographe, tampons de travers, typo massive, énergie punk print.</p>
+    </div>
+  </a>
+  <a class="card" href="06-riso-calme.html">
+    <div class="preview"><iframe src="06-riso-calme.html" title="Aperçu Riso calme" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Riso calme <small>v2 lisible</small></h2>
+      <p>La même encre risographe, mais l'information d'abord : blancs, hiérarchie, signal.</p>
+    </div>
+  </a>
+  <a class="card" href="07-carnet.html">
+    <div class="preview"><iframe src="07-carnet.html" title="Aperçu Carnet" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Carnet <small>sobre fait main</small></h2>
+      <p>Le cahier d'étude annoté : surligneur, post-it, hanamaru au stylo rouge.</p>
+    </div>
+  </a>
+  <a class="card" href="08-otona.html">
+    <div class="preview"><iframe src="08-otona.html" title="Aperçu Otona" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Otona <small>ludique adulte</small></h2>
+      <p>La joie de Kodomo sans l'enfantin : couleurs franches, gros boutons, copy complice.</p>
+    </div>
+  </a>
+  <a class="card" href="09-cupertino.html">
+    <div class="preview"><iframe src="09-cupertino.html" title="Aperçu Cupertino" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Cupertino <small>natif iOS</small></h2>
+      <p>Facture Apple Design Award : large titles, grouped lists, tab bar translucide.</p>
+    </div>
+  </a>
+  <a class="card" href="10-neopop.html">
+    <div class="preview"><iframe src="10-neopop.html" title="Aperçu Neo-pop" tabindex="-1"></iframe></div>
+    <div class="meta">
+      <h2>Neo-pop <small>brutalisme adulte</small></h2>
+      <p>L'ADN de Kodomo assumé pour adultes : contours épais, ombres dures, couleurs acides.</p>
+    </div>
+  </a>
+</main>
+</body>
+</html>

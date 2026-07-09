@@ -9,7 +9,7 @@ import '../../theme/app_theme.dart';
 typedef Lookupable = ({String char, bool isKanji});
 
 // Small (sutegana) kana and marks are never standalone learnable units, so we
-// don't linkify them — tapping ゃ or っ shouldn't try to open a detail page.
+// don't linkify them - tapping ゃ or っ shouldn't try to open a detail page.
 const Set<int> _smallKana = {
   0x3041, 0x3043, 0x3045, 0x3047, 0x3049, 0x3063, 0x3083, 0x3085, 0x3087, 0x308E, 0x3095, 0x3096,
   0x30A1, 0x30A3, 0x30A5, 0x30A7, 0x30A9, 0x30C3, 0x30E3, 0x30E5, 0x30E7, 0x30EE, 0x30F5, 0x30F6,
@@ -43,7 +43,7 @@ List<Lookupable> lookupableChars(String text) {
   return out;
 }
 
-/// Renders a Japanese string as a single "look it up" target — the elegant way
+/// Renders a Japanese string as a single "look it up" target - the elegant way
 /// back down to the basics from anywhere text appears. Tapping it drills in: a
 /// lone kana/kanji jumps straight to its detail page; a longer word or sentence
 /// opens a breakdown sheet where each kana/kanji is itself tappable through to
@@ -155,7 +155,7 @@ class _CharTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     // Kana carry their romaji reading (in the accent colour, since it's the
-    // useful bit); kanji just say "Kanji" — their readings live on the detail.
+    // useful bit); kanji just say "Kanji" - their readings live on the detail.
     final isRomaji = !lookup.isKanji && (romaji?.isNotEmpty ?? false);
     final sub = lookup.isKanji ? 'Kanji' : (romaji ?? 'Kana');
     return GestureDetector(

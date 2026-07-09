@@ -18,7 +18,7 @@ void main() {
         ),
       ),
     );
-    // Mid-animation frame — must not throw while tracing partial strokes.
+    // Mid-animation frame - must not throw while tracing partial strokes.
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('Replay strokes'), findsOneWidget);
     expect(tester.takeException(), isNull);

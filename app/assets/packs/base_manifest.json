@@ -1,0 +1,36 @@
+{
+  "id": "dict-base",
+  "kind": "sqlite",
+  "schema_version": 1,
+  "version": "2026.07.09",
+  "dataset_rev": 1,
+  "file": "base.db.gz",
+  "bytes": 10647240,
+  "installed_bytes": 28127232,
+  "sha256": "40cda8e2db0351102fc0077544284d19f0ed4419e414130fdd0459afb2b9c140",
+  "sha256_db": "0d0afe2f438d2fa35377ce4b38eec6b2832a8806bfb486ccfa8de4f24d752f91",
+  "counts": {
+    "words": 23371,
+    "word_forms": 55997,
+    "senses": 163968,
+    "kanji": 2211,
+    "kanji_components": 8309,
+    "kanji_words": 17309,
+    "kana": 142,
+    "radicals": 20,
+    "glosses": 119292,
+    "kanji_meanings": 15404
+  },
+  "languages": [
+    "en",
+    "fr"
+  ],
+  "min_app_version": "0.2.0",
+  "attribution": {
+    "words": "JMdict © EDRDG, used under the EDRDG Licence.",
+    "kanji": "KANJIDIC2 © EDRDG, used under the EDRDG Licence.",
+    "components": "KRADFILE © EDRDG (CC BY-SA 3.0).",
+    "strokes": "KanjiVG © Ulrich Apel (CC BY-SA 3.0).",
+    "pitch": "Kanjium pitch-accent data (CC BY-SA 4.0)."
+  }
+}

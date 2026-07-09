@@ -4,15 +4,11 @@ import '../../models/enums.dart';
 import '../../models/study.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/review_viewmodel.dart';
+import '../../core/breakpoints.dart';
 import '../widgets/pressable.dart';
 import '../widgets/speech_button.dart';
-
-/// The Japanese to read aloud once an answer is locked (reinforcement, never a
-/// giveaway): the reading for words, the glyph itself for kana/kanji.
-String _quizSpeech(StudyCard c) => switch (c.itemType) {
-      ItemType.word => c.reading.isNotEmpty ? c.reading : c.front,
-      _ => c.front,
-    };
+import 'study_feedback.dart';
+import 'study_prompts.dart';
 
 String _question(ItemType t) => switch (t) {
       ItemType.kana => 'How do you read this?',
@@ -31,7 +27,8 @@ class QuizStage extends StatefulWidget {
   State<QuizStage> createState() => _QuizStageState();
 }
 
-class _QuizStageState extends State<QuizStage> with SingleTickerProviderStateMixin {
+class _QuizStageState extends State<QuizStage>
+    with SingleTickerProviderStateMixin {
   late final String _correct;
   late final List<String> _options;
   String? _picked;
@@ -39,16 +36,17 @@ class _QuizStageState extends State<QuizStage> with SingleTickerProviderStateMix
 
   // Options rise + fade in on a short stagger so a fresh question feels dealt,
   // not swapped. Collapses to instant under reduce-motion (handled in build).
-  late final AnimationController _intro = AnimationController(vsync: this, duration: Motion.slow)..forward();
+  late final AnimationController _intro =
+      AnimationController(vsync: this, duration: Motion.slow)..forward();
 
   @override
   void initState() {
     super.initState();
     final card = widget.vm.current!;
-    _correct = _answer(card);
+    _correct = answerLabel(card, widget.lang);
     final pool = widget.vm.sessionCards
         .where((c) => c.id != card.id)
-        .map(_answer)
+        .map((c) => answerLabel(c, widget.lang))
         .where((a) => a.isNotEmpty && a != _correct)
         .toSet()
         .toList()
@@ -60,19 +58,6 @@ class _QuizStageState extends State<QuizStage> with SingleTickerProviderStateMix
   void dispose() {
     _intro.dispose();
     super.dispose();
-  }
-
-  String _answer(StudyCard c) {
-    switch (c.itemType) {
-      case ItemType.kana:
-        return c.kana?.romaji ?? '';
-      case ItemType.kanji:
-        final m = c.kanji?.meaningsFor(widget.lang) ?? const [];
-        return m.isNotEmpty ? m.first : '';
-      case ItemType.word:
-        final g = c.word?.summaryGloss(widget.lang) ?? '';
-        return g.split(';').first.trim();
-    }
   }
 
   Future<void> _pick(String option) async {
@@ -101,43 +86,66 @@ class _QuizStageState extends State<QuizStage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final card = widget.vm.current!;
     if (!Motion.enabled(context)) _intro.value = 1;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      child: Column(
-        children: [
-          Expanded(flex: 5, child: _Prompt(card: card, answered: _locked)),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 6,
-            child: Column(
+    final prompt = _Prompt(card: card, answered: _locked);
+    final options = _optionsColumn();
+    // Rotation-adaptive: landscape splits prompt | options into two panes so both
+    // fit on a short wide screen; portrait stacks them, bounded so a tablet shows a
+    // centred column rather than a stretched one.
+    final Widget content = context.isLandscape
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < _options.length; i++)
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: i == _options.length - 1 ? 0 : 10),
-                      child: AnimatedBuilder(
-                        animation: _intro,
-                        builder: (_, child) {
-                          final t = _introT(i);
-                          return Opacity(
-                            opacity: t,
-                            child: Transform.translate(offset: Offset(0, 14 * (1 - t)), child: child),
-                          );
-                        },
-                        child: _OptionTile(
-                          letter: String.fromCharCode(65 + i),
-                          label: _options[i],
-                          state: _tileState(_options[i]),
-                          onTap: _locked ? null : () => _pick(_options[i]),
-                        ),
-                      ),
-                    ),
-                  ),
+                Expanded(child: prompt),
+                const SizedBox(width: 20),
+                Expanded(child: options),
               ],
             ),
+          )
+        : Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: BoundedBoard(
+              child: Column(
+                children: [
+                  Expanded(flex: 5, child: prompt),
+                  const SizedBox(height: 16),
+                  Expanded(flex: 6, child: options),
+                ],
+              ),
+            ),
+          );
+    return WinOverlay(show: _locked && _picked == _correct, child: content);
+  }
+
+  Widget _optionsColumn() {
+    return Column(
+      children: [
+        for (var i = 0; i < _options.length; i++)
+          Expanded(
+            child: Padding(
+              padding:
+                  EdgeInsets.only(bottom: i == _options.length - 1 ? 0 : 10),
+              child: AnimatedBuilder(
+                animation: _intro,
+                builder: (_, child) {
+                  final t = _introT(i);
+                  return Opacity(
+                    opacity: t,
+                    child: Transform.translate(
+                        offset: Offset(0, 14 * (1 - t)), child: child),
+                  );
+                },
+                child: _OptionTile(
+                  letter: String.fromCharCode(65 + i),
+                  label: _options[i],
+                  state: _tileState(_options[i]),
+                  onTap: _locked ? null : () => _pick(_options[i]),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -172,7 +180,10 @@ class _Prompt extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(_question(card.itemType),
-              style: TextStyle(color: jc.muted, fontSize: 13.5, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: jc.muted,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Flexible(
             child: FittedBox(
@@ -194,7 +205,9 @@ class _Prompt extends StatelessWidget {
             height: 28,
             child: AnimatedSwitcher(
               duration: Motion.timed(context, Motion.fast),
-              child: (answered && card.reading.isNotEmpty && card.reading != card.front)
+              child: (answered &&
+                      card.reading.isNotEmpty &&
+                      card.reading != card.front)
                   ? Text(card.reading,
                       key: const ValueKey('reading'),
                       style: TextStyle(
@@ -211,7 +224,10 @@ class _Prompt extends StatelessWidget {
             child: AnimatedSwitcher(
               duration: Motion.timed(context, Motion.fast),
               child: answered
-                  ? SpeechButton(key: const ValueKey('play'), text: _quizSpeech(card), size: 24)
+                  ? SpeechButton(
+                      key: const ValueKey('play'),
+                      text: speechText(card),
+                      size: 24)
                   : const SizedBox.shrink(),
             ),
           ),
@@ -224,7 +240,11 @@ class _Prompt extends StatelessWidget {
 enum _OptState { idle, correct, wrong, dimmed }
 
 class _OptionTile extends StatelessWidget {
-  const _OptionTile({required this.letter, required this.label, required this.state, required this.onTap});
+  const _OptionTile(
+      {required this.letter,
+      required this.label,
+      required this.state,
+      required this.onTap});
   final String letter;
   final String label;
   final _OptState state;
@@ -235,10 +255,34 @@ class _OptionTile extends StatelessWidget {
     final jc = context.jc;
     // (tile bg, label colour, border, chip bg, chip fg)
     final (bg, fg, border, chipBg, chipFg) = switch (state) {
-      _OptState.idle => (jc.surface, jc.ink, jc.hairline, jc.surfaceAlt, jc.body),
-      _OptState.correct => (jc.ratingGood.withValues(alpha: 0.14), jc.ink, jc.ratingGood, jc.ratingGood, Colors.white),
-      _OptState.wrong => (jc.ratingAgain.withValues(alpha: 0.14), jc.ink, jc.ratingAgain, jc.ratingAgain, Colors.white),
-      _OptState.dimmed => (jc.surface, jc.muted, jc.hairline, jc.surfaceAlt, jc.muted),
+      _OptState.idle => (
+          jc.surface,
+          jc.ink,
+          jc.hairline,
+          jc.surfaceAlt,
+          jc.body
+        ),
+      _OptState.correct => (
+          jc.ratingGood.withValues(alpha: 0.14),
+          jc.ink,
+          jc.ratingGood,
+          jc.ratingGood,
+          Colors.white
+        ),
+      _OptState.wrong => (
+          jc.ratingAgain.withValues(alpha: 0.14),
+          jc.ink,
+          jc.ratingAgain,
+          jc.ratingAgain,
+          Colors.white
+        ),
+      _OptState.dimmed => (
+          jc.surface,
+          jc.muted,
+          jc.hairline,
+          jc.surfaceAlt,
+          jc.muted
+        ),
     };
     final icon = switch (state) {
       _OptState.correct => Icons.check_rounded,
@@ -266,7 +310,11 @@ class _OptionTile extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: Text(label,
-                  style: TextStyle(color: fg, fontSize: 16, fontWeight: FontWeight.w600, height: 1.2),
+                  style: TextStyle(
+                      color: fg,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis),
             ),
@@ -279,7 +327,11 @@ class _OptionTile extends StatelessWidget {
 
 /// The leading square: a letter while choosing, a check/cross once answered.
 class _OptionChip extends StatelessWidget {
-  const _OptionChip({required this.bg, required this.fg, required this.letter, required this.icon});
+  const _OptionChip(
+      {required this.bg,
+      required this.fg,
+      required this.letter,
+      required this.icon});
   final Color bg;
   final Color fg;
   final String letter;
@@ -294,10 +346,13 @@ class _OptionChip extends StatelessWidget {
       width: 30,
       height: 30,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(Radii.sm)),
+      decoration: BoxDecoration(
+          color: bg, borderRadius: BorderRadius.circular(Radii.sm)),
       child: icon != null
           ? Icon(icon, color: fg, size: 19)
-          : Text(letter, style: TextStyle(color: fg, fontWeight: FontWeight.w800, fontSize: 14)),
+          : Text(letter,
+              style: TextStyle(
+                  color: fg, fontWeight: FontWeight.w800, fontSize: 14)),
     );
   }
 }

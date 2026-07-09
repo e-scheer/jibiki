@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/dev_login.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/auth_viewmodel.dart';
@@ -28,6 +29,20 @@ class _LoginFormState extends State<_LoginForm> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Dev builds land with a working test account already filled in.
+    if (DevLogin.enabled) _fill(DevLogin.accounts.first);
+  }
+
+  void _fill(({String label, String email, String password}) a) {
+    setState(() {
+      _email.text = a.email;
+      _password.text = a.password;
+    });
+  }
 
   @override
   void dispose() {
@@ -82,6 +97,36 @@ class _LoginFormState extends State<_LoginForm> {
                       const SizedBox(height: 12),
                       Text(vm.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                     ],
+                    if (DevLogin.enabled) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text('DEV',
+                              style: TextStyle(
+                                  color: context.jc.muted,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                for (final a in DevLogin.accounts)
+                                  ActionChip(
+                                    label: Text(a.label),
+                                    onPressed: () {
+                                      Haptics.tick();
+                                      _fill(a);
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 22),
                     FilledButton(
                       onPressed: vm.isLoading ? null : _submit,
@@ -93,6 +138,14 @@ class _LoginFormState extends State<_LoginForm> {
                     TextButton(
                       onPressed: () => context.go('/register'),
                       child: const Text("New here? Create an account"),
+                    ),
+                    // The paid app works fully offline; an account only adds
+                    // sync + community. Signing up later uploads the whole
+                    // local history, nothing is lost by starting here.
+                    TextButton(
+                      onPressed: () =>
+                          context.read<AppState>().continueWithoutAccount(),
+                      child: const Text('Continue without an account'),
                     ),
                   ],
                 ),

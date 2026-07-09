@@ -1,9 +1,9 @@
-# jibiki content pack — the data model you own
+# jibiki content pack - the data model you own
 
 The dictionary lives in **jibiki's own versioned JSON model**, not in any upstream
 format. Upstream sources (JMdict / KANJIDIC2 / KRADFILE / KanjiVG) are parsed
-**once** by `scripts/build_content_pack.py`; everything downstream — the backend
-DB, the app's offline store — consumes this pack and never touches XML again.
+**once** by `scripts/build_content_pack.py`; everything downstream - the backend
+DB, the app's offline store - consumes this pack and never touches XML again.
 
 **Enrich by adding to the model, not by re-scraping.** Meanings and glosses are
 keyed by language code, so adding French/German/… is adding a key. Add a new
@@ -37,9 +37,9 @@ content/
 
 ## Schema `jibiki-content/1`
 
-**kana.json** — `[{ char, romaji, script, kind, row, order }]`
+**kana.json** - `[{ char, romaji, script, kind, row, order }]`
 
-**radicals.json** — `[{ literal, strokes, reading, meaning }]`
+**radicals.json** - `[{ literal, strokes, reading, meaning }]`
 
 **kanji.json**
 ```json
@@ -64,13 +64,13 @@ content/
 }
 ```
 
-`meanings` (kanji) and `senses[].glosses` (words) are **language-maps** — the one
+`meanings` (kanji) and `senses[].glosses` (words) are **language-maps** - the one
 design decision that makes enrichment trivial.
 
 ## Pipeline
 
 ```bash
-# 1. Build the pack ONCE (curated seed — instant, always available):
+# 1. Build the pack ONCE (curated seed - instant, always available):
 python scripts/build_content_pack.py --from-seed --server server --out content
 
 #    …or from the full downloaded EDRDG + KanjiVG (also one-shot):
@@ -86,5 +86,5 @@ cd server && uv run python manage.py load_pack ../content
 ```
 
 The committed `content/` is the curated seed pack (small, ships in the repo). Full
-EDRDG packs are large — build locally and host them; the manifest's version +
+EDRDG packs are large - build locally and host them; the manifest's version +
 sha256 let the app cache and update.

@@ -1,4 +1,4 @@
-"""Curated, bundled demo dataset — small enough to commit, rich enough to exercise
+"""Curated, bundled demo dataset - small enough to commit, rich enough to exercise
 every screen offline (the DEEP_SEARCH stage-1 "seed bundled data, no upload infra"
 rule). The full EDRDG data loads over the top of this via the import_* commands.
 
@@ -105,7 +105,7 @@ KANA_ORIGINS: dict[str, tuple[str, str]] = {
 }
 
 # A voiced (dakuten ゛) or half-voiced (handakuten ゜) kana is not derived from its
-# own kanji — it is a base gojūon kana wearing a diacritic. Map each to its base.
+# own kanji - it is a base gojūon kana wearing a diacritic. Map each to its base.
 _DAKUTEN_BASE: dict[str, str] = {
     "ga": "ka", "gi": "ki", "gu": "ku", "ge": "ke", "go": "ko",
     "za": "sa", "ji": "shi", "zu": "su", "ze": "se", "zo": "so",
@@ -114,7 +114,7 @@ _DAKUTEN_BASE: dict[str, str] = {
     "pa": "ha", "pi": "hi", "pu": "fu", "pe": "he", "po": "ho",
 }
 
-# romaji → (hiragana char, katakana char) — for pointing a dakuten kana at its base.
+# romaji → (hiragana char, katakana char) - for pointing a dakuten kana at its base.
 _KANA_CHARS: dict[str, tuple[str, str]] = {
     romaji: (hira, kata) for romaji, hira, kata, _row, _kind in KANA
 }
@@ -145,34 +145,34 @@ def kana_origin(romaji: str, script: str, kind: str) -> tuple[str, str]:
         return ("", "")
     base_char = _KANA_CHARS[base][0 if is_hira else 1]
     if kind == "handakuten":
-        note = f"{base_char} with the handakuten mark (゜) — the “p” form of {base_char}."
+        note = f"{base_char} with the handakuten mark (゜) - the “p” form of {base_char}."
     else:
-        note = f"{base_char} with the dakuten mark (゛) — the voiced form of {base_char}."
+        note = f"{base_char} with the dakuten mark (゛) - the voiced form of {base_char}."
     return (base_char, note)
 
 
 # ── Kana grammatical role (particles) ──────────────────────────────────────────
-# Most kana are purely phonetic, but a handful pull double duty as grammar — the
+# Most kana are purely phonetic, but a handful pull double duty as grammar - the
 # particles (助詞) and a couple of special glyphs. This is what gives a kana a
 # *job in a sentence* beyond its sound. Written in hiragana, so only the hiragana
 # member of a pair carries it. romaji → (short role label, one-line explanation).
 KANA_USAGE: dict[str, tuple[str, str]] = {
-    "ha": ("Topic particle", "Marks the topic — “as for …”. Written は, but read wa when it's the particle."),
+    "ha": ("Topic particle", "Marks the topic - “as for …”. Written は, but read wa when it's the particle."),
     "ga": ("Subject particle", "Marks the grammatical subject; between clauses it also means “but”."),
     "wo": ("Object particle", "Marks the direct object of a verb. Only ever a particle, and read o."),
-    "ni": ("Particle", "Points to a destination, a time, or an indirect object — “to, at, in, on”."),
-    "he": ("Direction particle", "Marks the direction of movement — “to, toward”. Read e as the particle."),
-    "de": ("Particle", "Marks where an action happens or the means used — “at, by, with”."),
+    "ni": ("Particle", "Points to a destination, a time, or an indirect object - “to, at, in, on”."),
+    "he": ("Direction particle", "Marks the direction of movement - “to, toward”. Read e as the particle."),
+    "de": ("Particle", "Marks where an action happens or the means used - “at, by, with”."),
     "to": ("Particle", "Joins nouns as a full “and”, means “with”, and marks quotations."),
-    "no": ("Possessive particle", "Links nouns — “’s / of” — and can turn a whole clause into a noun."),
-    "mo": ("Particle", "“Also, too, even” — replaces は or が to add “as well”."),
-    "ya": ("Particle", "Lists nouns loosely — “… and … (among others)”."),
+    "no": ("Possessive particle", "Links nouns - “’s / of” - and can turn a whole clause into a noun."),
+    "mo": ("Particle", "“Also, too, even” - replaces は or が to add “as well”."),
+    "ya": ("Particle", "Lists nouns loosely - “… and … (among others)”."),
     "ka": ("Question particle", "At a sentence's end it makes a question; between nouns it means “or”."),
     "wa": ("Sentence-final particle", "Soft emphasis at a sentence's end, common in feminine speech."),
-    "ne": ("Sentence-final particle", "Seeks agreement — “…, right? / isn't it?”."),
-    "yo": ("Sentence-final particle", "Adds emphasis or new information — “… you know!”."),
+    "ne": ("Sentence-final particle", "Seeks agreement - “…, right? / isn't it?”."),
+    "yo": ("Sentence-final particle", "Adds emphasis or new information - “… you know!”."),
     "na": ("Sentence-final particle", "Emphasis or a soft prohibition; also links na-adjectives."),
-    "sa": ("Sentence-final particle", "Casual filler — “y’know, well …”."),
+    "sa": ("Sentence-final particle", "Casual filler - “y’know, well …”."),
     "zo": ("Sentence-final particle", "Strong, assertive emphasis (blunt, masculine)."),
     "ze": ("Sentence-final particle", "Casual emphasis (masculine)."),
     "n": ("Moraic nasal", "The one kana that never begins a word; also a casual squeeze of の (…んです)."),
@@ -188,6 +188,100 @@ def kana_usage(romaji: str, script: str) -> tuple[str, str]:
     if script != "hiragana":
         return ("", "")
     return KANA_USAGE.get(romaji, ("", ""))
+
+
+def _ex(before: str, particle: str, after: str, romaji: str, en: str) -> dict:
+    return {"before": before, "particle": particle, "after": after, "romaji": romaji, "en": en}
+
+
+# Two curated textbook sentences per grammatical kana, showing the particle at
+# work. The particle sits in its own segment so the app can highlight it in
+# place; romaji spells the particle as *pronounced* (は→wa, を→o, へ→e).
+KANA_USAGE_EXAMPLES: dict[str, list[dict]] = {
+    "ha": [
+        _ex("私", "は", "学生です。", "Watashi wa gakusei desu.", "I am a student."),
+        _ex("今日", "は", "暑いです。", "Kyō wa atsui desu.", "It's hot today."),
+    ],
+    "ga": [
+        _ex("猫", "が", "います。", "Neko ga imasu.", "There is a cat."),
+        _ex("雨", "が", "降っています。", "Ame ga futte imasu.", "It is raining."),
+    ],
+    "wo": [
+        _ex("水", "を", "飲みます。", "Mizu o nomimasu.", "I drink water."),
+        _ex("本", "を", "読みます。", "Hon o yomimasu.", "I read a book."),
+    ],
+    "ni": [
+        _ex("学校", "に", "行きます。", "Gakkō ni ikimasu.", "I go to school."),
+        _ex("七時", "に", "起きます。", "Shichiji ni okimasu.", "I get up at seven."),
+    ],
+    "he": [
+        _ex("日本", "へ", "行きます。", "Nihon e ikimasu.", "I'm going to Japan."),
+        _ex("家", "へ", "帰ります。", "Ie e kaerimasu.", "I'm heading home."),
+    ],
+    "de": [
+        _ex("図書館", "で", "勉強します。", "Toshokan de benkyō shimasu.", "I study at the library."),
+        _ex("バス", "で", "行きます。", "Basu de ikimasu.", "I go by bus."),
+    ],
+    "to": [
+        _ex("パン", "と", "牛乳を買います。", "Pan to gyūnyū o kaimasu.", "I buy bread and milk."),
+        _ex("友達", "と", "話します。", "Tomodachi to hanashimasu.", "I talk with a friend."),
+    ],
+    "no": [
+        _ex("私", "の", "本です。", "Watashi no hon desu.", "It's my book."),
+        _ex("日本", "の", "音楽が好きです。", "Nihon no ongaku ga suki desu.", "I like Japanese music."),
+    ],
+    "mo": [
+        _ex("私", "も", "行きます。", "Watashi mo ikimasu.", "I'm going too."),
+        _ex("彼", "も", "学生です。", "Kare mo gakusei desu.", "He is a student too."),
+    ],
+    "ya": [
+        _ex("本", "や", "ペンがあります。", "Hon ya pen ga arimasu.", "There are books, pens, and so on."),
+        _ex("りんご", "や", "みかんを買いました。", "Ringo ya mikan o kaimashita.", "I bought apples, mandarins, and such."),
+    ],
+    "ka": [
+        _ex("これは何です", "か", "。", "Kore wa nan desu ka.", "What is this?"),
+        _ex("犬", "か", "猫を飼いたいです。", "Inu ka neko o kaitai desu.", "I want to get a dog or a cat."),
+    ],
+    "wa": [
+        _ex("きれいだ", "わ", "。", "Kirei da wa.", "How pretty!"),
+        _ex("私も行く", "わ", "。", "Watashi mo iku wa.", "I'll go too."),
+    ],
+    "ne": [
+        _ex("いい天気です", "ね", "。", "Ii tenki desu ne.", "Nice weather, isn't it?"),
+        _ex("おいしいです", "ね", "。", "Oishii desu ne.", "This is delicious, isn't it?"),
+    ],
+    "yo": [
+        _ex("おいしいです", "よ", "。", "Oishii desu yo.", "It's delicious, I tell you!"),
+        _ex("もう八時です", "よ", "。", "Mō hachiji desu yo.", "It's already eight o'clock!"),
+    ],
+    "na": [
+        _ex("行く", "な", "。", "Iku na.", "Don't go!"),
+        _ex("静か", "な", "町です。", "Shizuka na machi desu.", "It's a quiet town."),
+    ],
+    "sa": [
+        _ex("まあ、いい", "さ", "。", "Mā, ii sa.", "Well, it's fine."),
+        _ex("それは", "さ", "、難しいよ。", "Sore wa sa, muzukashii yo.", "That, y'know, is difficult."),
+    ],
+    "zo": [
+        _ex("行く", "ぞ", "！", "Iku zo!", "Here we go!"),
+        _ex("頑張る", "ぞ", "！", "Ganbaru zo!", "I'm going to give it my all!"),
+    ],
+    "ze": [
+        _ex("行こう", "ぜ", "！", "Ikō ze!", "Let's go!"),
+        _ex("やる", "ぜ", "！", "Yaru ze!", "I'll do it!"),
+    ],
+    "n": [
+        _ex("どうした", "ん", "ですか。", "Dō shita n desu ka.", "What's the matter?"),
+        _ex("分からない", "ん", "です。", "Wakaranai n desu.", "The thing is, I don't understand."),
+    ],
+}
+
+
+def kana_usage_examples(romaji: str, script: str) -> list[dict]:
+    """Curated particle example sentences, or [] - hiragana only, like the role."""
+    if script != "hiragana":
+        return []
+    return KANA_USAGE_EXAMPLES.get(romaji, [])
 
 
 # ── Radicals / components (RADKFILE-style) ─────────────────────────────────────
@@ -931,29 +1025,29 @@ WORDS: list[dict] = [
 ]
 
 # ── Seed kana mnemonics (language-segmented; DEEP_SEARCH feature 6) ─────────────
-# (char, language, story). Concrete, vivid, sound-cued — English AND French, which
+# (char, language, story). Concrete, vivid, sound-cued - English AND French, which
 # key off different words for the same kana (the localization moat).
 KANA_MNEMONICS: list[tuple[str, str, str]] = [
-    ("く", "en", "く is a bird's beak opening to say 'coo' — a cuckoo goes 'ku-ku'."),
+    ("く", "en", "く is a bird's beak opening to say 'coo' - a cuckoo goes 'ku-ku'."),
     ("く", "fr", "く est un bec d'oiseau qui s'ouvre : le coucou fait « cou-cou » → ku."),
     ("し", "en", "し is a fish-hook swooping down: you 'sheee' as it hooks a fish."),
-    ("し", "fr", "し est un hameçon qui plonge — « chiii », il attrape le poisson (shi)."),
-    ("つ", "en", "つ is a wave curling — a tsunami ('tsu') builds and curls over."),
+    ("し", "fr", "し est un hameçon qui plonge - « chiii », il attrape le poisson (shi)."),
+    ("つ", "en", "つ is a wave curling - a tsunami ('tsu') builds and curls over."),
     ("つ", "fr", "つ est une vague qui s'enroule : le tsunami (tsu) déferle."),
-    ("さ", "en", "さ looks like a person doing a cartwheel — 'sah!' they land."),
+    ("さ", "en", "さ looks like a person doing a cartwheel - 'sah!' they land."),
     ("さ", "fr", "さ ressemble à un cerf-volant (sa) qui monte dans le ciel."),
-    ("お", "en", "お is a person kicking a ball — 'oh!' as it flies off the foot."),
-    ("お", "fr", "お : quelqu'un donne un coup de pied — « oh ! » le ballon part."),
-    ("あ", "en", "あ has an 'A' hidden in it — the antenna of the letter A."),
-    ("あ", "fr", "あ cache un « A » — l'antenne de la lettre A pour le son a."),
-    ("ま", "en", "ま is mama's face with two eyes — 'ma-ma'."),
-    ("ま", "fr", "ま est le visage de maman avec deux yeux — « ma-man »."),
-    ("ね", "en", "ね has a cat's tail curling — a cat says 'nyah' ('ne')."),
-    ("ね", "fr", "ね : la queue d'un chat qui s'enroule — le chat fait « nyé » (ne)."),
-    ("ん", "en", "ん is the tail-end 'n' hum — like the last stroke of a signature."),
+    ("お", "en", "お is a person kicking a ball - 'oh!' as it flies off the foot."),
+    ("お", "fr", "お : quelqu'un donne un coup de pied - « oh ! » le ballon part."),
+    ("あ", "en", "あ has an 'A' hidden in it - the antenna of the letter A."),
+    ("あ", "fr", "あ cache un « A » - l'antenne de la lettre A pour le son a."),
+    ("ま", "en", "ま is mama's face with two eyes - 'ma-ma'."),
+    ("ま", "fr", "ま est le visage de maman avec deux yeux - « ma-man »."),
+    ("ね", "en", "ね has a cat's tail curling - a cat says 'nyah' ('ne')."),
+    ("ね", "fr", "ね : la queue d'un chat qui s'enroule - le chat fait « nyé » (ne)."),
+    ("ん", "en", "ん is the tail-end 'n' hum - like the last stroke of a signature."),
     ("ん", "fr", "ん est le « n » final que l'on fredonne, comme un trait de signature."),
-    ("す", "en", "す is a swirl of noodles on a fork — you 'slurp' ('su')."),
-    ("す", "fr", "す est un tourbillon de nouilles — on aspire « sou » (su)."),
+    ("す", "en", "す is a swirl of noodles on a fork - you 'slurp' ('su')."),
+    ("す", "fr", "す est un tourbillon de nouilles - on aspire « sou » (su)."),
 ]
 
 # Full default pack: one sound-cued story per gojūon syllable, EN + FR. Keyed by
@@ -962,169 +1056,169 @@ KANA_MNEMONICS: list[tuple[str, str, str]] = [
 # glyph; until then this is the built-in text pack everyone gets.
 KANA_STORIES: dict[str, dict[str, str]] = {
     "a": {
-        "en": "あ hides a capital 'A' — its antenna cues the 'ah' sound.",
-        "fr": "あ cache un grand « A » — son antenne donne le son « a ».",
+        "en": "あ hides a capital 'A' - its antenna cues the 'ah' sound.",
+        "fr": "あ cache un grand « A » - son antenne donne le son « a ».",
     },
     "i": {
-        "en": "い is two reeds standing side by side — 'ee'.",
-        "fr": "い, deux roseaux dressés côte à côte — « i ».",
+        "en": "い is two reeds standing side by side - 'ee'.",
+        "fr": "い, deux roseaux dressés côte à côte - « i ».",
     },
     "u": {
         "en": "う is a face in profile going 'oooh'.",
         "fr": "う, un profil de visage qui fait « ou ».",
     },
     "e": {
-        "en": "え is an exotic, energetic bird — 'eh!'.",
-        "fr": "え, un oiseau exotique plein d'énergie — « é ».",
+        "en": "え is an exotic, energetic bird - 'eh!'.",
+        "fr": "え, un oiseau exotique plein d'énergie - « é ».",
     },
     "o": {
-        "en": "お is someone kicking a ball — 'oh!' as it flies off.",
-        "fr": "お, un coup de pied — « oh ! » le ballon part.",
+        "en": "お is someone kicking a ball - 'oh!' as it flies off.",
+        "fr": "お, un coup de pied - « oh ! » le ballon part.",
     },
     "ka": {
-        "en": "か is a karate chop cutting the air — 'ka!'.",
-        "fr": "か, un coup de karaté qui fend l'air — « ka ! ».",
+        "en": "か is a karate chop cutting the air - 'ka!'.",
+        "fr": "か, un coup de karaté qui fend l'air - « ka ! ».",
     },
-    "ki": {"en": "き is a key on a ring — 'kee'.", "fr": "き, une clé sur un anneau — « ki »."},
+    "ki": {"en": "き is a key on a ring - 'kee'.", "fr": "き, une clé sur un anneau - « ki »."},
     "ku": {
-        "en": "く is a bird's beak opening to say 'coo' — a cuckoo goes 'ku-ku'.",
+        "en": "く is a bird's beak opening to say 'coo' - a cuckoo goes 'ku-ku'.",
         "fr": "く est un bec d'oiseau : le coucou fait « cou-cou » → ku.",
     },
     "ke": {
-        "en": "け is a keg tipping over — 'keh'.",
-        "fr": "け, un tonnelet (keg) qui bascule — « ké ».",
+        "en": "け is a keg tipping over - 'keh'.",
+        "fr": "け, un tonnelet (keg) qui bascule - « ké ».",
     },
     "ko": {
-        "en": "こ are two short cords lying down — 'ko'.",
-        "fr": "こ, deux petites cordes posées — « ko ».",
+        "en": "こ are two short cords lying down - 'ko'.",
+        "fr": "こ, deux petites cordes posées - « ko ».",
     },
     "sa": {
-        "en": "さ is a kite catching the wind and rising — 'sah'.",
-        "fr": "さ, un cerf-volant qui monte dans le ciel — « sa ».",
+        "en": "さ is a kite catching the wind and rising - 'sah'.",
+        "fr": "さ, un cerf-volant qui monte dans le ciel - « sa ».",
     },
     "shi": {
-        "en": "し is a fish-hook swooping down — you 'sheee' as it hooks a fish.",
-        "fr": "し est un hameçon qui plonge — « chiii », il attrape le poisson.",
+        "en": "し is a fish-hook swooping down - you 'sheee' as it hooks a fish.",
+        "fr": "し est un hameçon qui plonge - « chiii », il attrape le poisson.",
     },
     "su": {
-        "en": "す is a swirl of noodles on a fork — you 'slurp' ('su').",
-        "fr": "す est un tourbillon de nouilles — on aspire « sou ».",
+        "en": "す is a swirl of noodles on a fork - you 'slurp' ('su').",
+        "fr": "す est un tourbillon de nouilles - on aspire « sou ».",
     },
     "se": {
         "en": "せ is a mouth with the tongue out saying 'seh'.",
-        "fr": "せ, une bouche tirant la langue — « sé ».",
+        "fr": "せ, une bouche tirant la langue - « sé ».",
     },
     "so": {
-        "en": "そ zig-zags like a line of sewing thread — 'so'.",
-        "fr": "そ, un fil de couture en zig-zag — « so ».",
+        "en": "そ zig-zags like a line of sewing thread - 'so'.",
+        "fr": "そ, un fil de couture en zig-zag - « so ».",
     },
     "ta": {
-        "en": "た is a hammer nailing a board — 'tah!'.",
-        "fr": "た, un marteau qui plante un clou — « ta ! ».",
+        "en": "た is a hammer nailing a board - 'tah!'.",
+        "fr": "た, un marteau qui plante un clou - « ta ! ».",
     },
     "chi": {
-        "en": "ち is a cheerleader bending back — 'chee'.",
-        "fr": "ち, un petit chien qui frétille — « tchi ».",
+        "en": "ち is a cheerleader bending back - 'chee'.",
+        "fr": "ち, un petit chien qui frétille - « tchi ».",
     },
     "tsu": {
-        "en": "つ is a wave curling — a tsunami ('tsu') builds and breaks.",
+        "en": "つ is a wave curling - a tsunami ('tsu') builds and breaks.",
         "fr": "つ est une vague qui s'enroule : le tsunami (tsu) déferle.",
     },
     "te": {
-        "en": "て is a hand / a table seen side-on — 'teh'.",
-        "fr": "て, une table (te) vue de profil — « té ».",
+        "en": "て is a hand / a table seen side-on - 'teh'.",
+        "fr": "て, une table (te) vue de profil - « té ».",
     },
     "to": {
-        "en": "と is a toe with a thorn stuck in it — 'toh!'.",
-        "fr": "と, un orteil avec une épine — « to ! ».",
+        "en": "と is a toe with a thorn stuck in it - 'toh!'.",
+        "fr": "と, un orteil avec une épine - « to ! ».",
     },
     "na": {
-        "en": "な is a knot tied in a rope — 'nah'.",
-        "fr": "な, un nœud dans une corde — « na ».",
+        "en": "な is a knot tied in a rope - 'nah'.",
+        "fr": "な, un nœud dans une corde - « na ».",
     },
-    "ni": {"en": "に is a knee bending — 'nee'.", "fr": "に, un genou qui plie — « ni »."},
+    "ni": {"en": "に is a knee bending - 'nee'.", "fr": "に, un genou qui plie - « ni »."},
     "nu": {
-        "en": "ぬ is a bowl of noodles twirled up — 'noo'.",
-        "fr": "ぬ, un bol de nouilles enroulées — « nou ».",
+        "en": "ぬ is a bowl of noodles twirled up - 'noo'.",
+        "fr": "ぬ, un bol de nouilles enroulées - « nou ».",
     },
     "ne": {
-        "en": "ね has a cat's tail curling — a cat says 'nyah' ('ne').",
-        "fr": "ね : la queue d'un chat qui s'enroule — « né ».",
+        "en": "ね has a cat's tail curling - a cat says 'nyah' ('ne').",
+        "fr": "ね : la queue d'un chat qui s'enroule - « né ».",
     },
     "no": {
-        "en": "の is a swirling no-entry sign — 'no'.",
-        "fr": "の, un panneau « sens interdit » qui tourbillonne — « no ».",
+        "en": "の is a swirling no-entry sign - 'no'.",
+        "fr": "の, un panneau « sens interdit » qui tourbillonne - « no ».",
     },
     "ha": {
         "en": "は is a person doubled over laughing 'ha-ha'.",
         "fr": "は, quelqu'un plié de rire « ha-ha ».",
     },
-    "hi": {"en": "ひ is a wide grinning smile — 'hee'.", "fr": "ひ, un grand sourire — « hi »."},
+    "hi": {"en": "ひ is a wide grinning smile - 'hee'.", "fr": "ひ, un grand sourire - « hi »."},
     "fu": {
-        "en": "ふ is Mount Fuji seen from afar — 'fu'.",
-        "fr": "ふ, le mont Fuji au loin — « fou ».",
+        "en": "ふ is Mount Fuji seen from afar - 'fu'.",
+        "fr": "ふ, le mont Fuji au loin - « fou ».",
     },
     "he": {
-        "en": "へ is a mountain slope you climb — 'heh'.",
-        "fr": "へ, une pente de montagne — « hé ».",
+        "en": "へ is a mountain slope you climb - 'heh'.",
+        "fr": "へ, une pente de montagne - « hé ».",
     },
     "ho": {
-        "en": "ほ is a sail hoisted on a mast — 'hoh'.",
-        "fr": "ほ, une voile hissée sur un mât — « ho ».",
+        "en": "ほ is a sail hoisted on a mast - 'hoh'.",
+        "fr": "ほ, une voile hissée sur un mât - « ho ».",
     },
     "ma": {
-        "en": "ま is mama's face with two eyes — 'ma-ma'.",
-        "fr": "ま est le visage de maman avec deux yeux — « ma ».",
+        "en": "ま is mama's face with two eyes - 'ma-ma'.",
+        "fr": "ま est le visage de maman avec deux yeux - « ma ».",
     },
     "mi": {
         "en": "み looks like '21' and hums the note 'mi'.",
         "fr": "み, comme un « 21 » qui chante la note « mi ».",
     },
-    "mu": {"en": "む is a cow mooing — 'muu'.", "fr": "む, une vache qui meugle — « mou »."},
+    "mu": {"en": "む is a cow mooing - 'muu'.", "fr": "む, une vache qui meugle - « mou »."},
     "me": {
-        "en": "め is an eye ('me' means eye in Japanese) — 'meh'.",
-        "fr": "め, un œil (me = œil en japonais) — « mé ».",
+        "en": "め is an eye ('me' means eye in Japanese) - 'meh'.",
+        "fr": "め, un œil (me = œil en japonais) - « mé ».",
     },
     "mo": {
-        "en": "も is a fishing hook baited with worms — 'mo'.",
-        "fr": "も, un hameçon appâté de vers — « mo ».",
+        "en": "も is a fishing hook baited with worms - 'mo'.",
+        "fr": "も, un hameçon appâté de vers - « mo ».",
     },
     "ya": {
-        "en": "や is a yak with two horns — 'yah'.",
-        "fr": "や, un yak avec deux cornes — « ya ».",
+        "en": "や is a yak with two horns - 'yah'.",
+        "fr": "や, un yak avec deux cornes - « ya ».",
     },
     "yu": {
-        "en": "ゆ is a looped fish swimming — 'yoo'.",
-        "fr": "ゆ, un poisson en boucle — « you ».",
+        "en": "ゆ is a looped fish swimming - 'yoo'.",
+        "fr": "ゆ, un poisson en boucle - « you ».",
     },
     "yo": {
-        "en": "よ is a person in a yoga pose — 'yoh'.",
-        "fr": "よ, une posture de yoga — « yo ».",
+        "en": "よ is a person in a yoga pose - 'yoh'.",
+        "fr": "よ, une posture de yoga - « yo ».",
     },
-    "ra": {"en": "ら is a rabbit sitting up — 'rah'.", "fr": "ら, un lapin assis — « ra »."},
+    "ra": {"en": "ら is a rabbit sitting up - 'rah'.", "fr": "ら, un lapin assis - « ra »."},
     "ri": {
-        "en": "り is a unicorn's horn ('ri'... uni-corn) — 'ree'.",
-        "fr": "り est une licorne (li-corne) — « ri ».",
+        "en": "り is a unicorn's horn ('ri'... uni-corn) - 'ree'.",
+        "fr": "り est une licorne (li-corne) - « ri ».",
     },
     "ru": {
-        "en": "る is a loop in a winding route — 'roo'.",
-        "fr": "る, une boucle sur une route sinueuse — « rou ».",
+        "en": "る is a loop in a winding route - 'roo'.",
+        "fr": "る, une boucle sur une route sinueuse - « rou ».",
     },
     "re": {
-        "en": "れ is a runner leaning forward — 'reh'.",
-        "fr": "れ, un coureur penché en avant — « ré ».",
+        "en": "れ is a runner leaning forward - 'reh'.",
+        "fr": "れ, un coureur penché en avant - « ré ».",
     },
-    "ro": {"en": "ろ is a road spiralling — 'roh'.", "fr": "ろ, une route en spirale — « ro »."},
+    "ro": {"en": "ろ is a road spiralling - 'roh'.", "fr": "ろ, une route en spirale - « ro »."},
     "wa": {
-        "en": "わ is a swan gliding on water — 'wah'.",
-        "fr": "わ, un cygne qui glisse sur l'eau — « wa ».",
+        "en": "わ is a swan gliding on water - 'wah'.",
+        "fr": "わ, un cygne qui glisse sur l'eau - « wa ».",
     },
     "wo": {
-        "en": "を is a person throwing an object away — 'woh'.",
-        "fr": "を, quelqu'un qui lance un objet — « wo ».",
+        "en": "を is a person throwing an object away - 'woh'.",
+        "fr": "を, quelqu'un qui lance un objet - « wo ».",
     },
     "n": {
-        "en": "ん is the final hum 'n' — like the last flick of a signature.",
+        "en": "ん is the final hum 'n' - like the last flick of a signature.",
         "fr": "ん est le « n » que l'on fredonne en fin de mot, comme un trait de signature.",
     },
 }

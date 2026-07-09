@@ -1,7 +1,7 @@
 """Draw recipes for the 46 base katakana.
 
 Same approach as hiragana (tint the real glyph + a few simple shapes), but
-katakana are angular — straight strokes and sharp corners — so props lean on
+katakana are angular - straight strokes and sharp corners - so props lean on
 lines, arrowheads and dots. Associations from research_katakana.json (Tofugu).
 """
 

@@ -78,7 +78,7 @@ def all_recipes(script: str | None = None, *, include_variants: bool = True) -> 
 
 
 def coverage() -> dict:
-    """Which kana still lack a recipe — a QA aid."""
+    """Which kana still lack a recipe - a QA aid."""
     missing = []
     for k in _kana_table():
         if recipe_for(k["char"], k["romaji"], k["script"]) is None:

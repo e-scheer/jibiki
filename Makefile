@@ -1,5 +1,6 @@
 .PHONY: sync db migrate makemigrations seed run test lint check shell \
-        up down prod prod-down logs superuser import-jmdict import-kanjidic app-get app-run
+        up down prod prod-down logs superuser import-jmdict import-kanjidic app-get app-run \
+        sync-vectors
 
 UV := uv run --project server
 SERVER := cd server &&
@@ -28,7 +29,7 @@ run:             ## Django dev server on :$(PORT)
 superuser:       ## create an admin user (email-only)
 	$(SERVER) $(UV) python manage.py createsuperuser
 
-test:            ## backend tests (sqlite in-memory, no network)
+test:            ## backend tests (Postgres - run `make db` first)
 	$(SERVER) $(UV) pytest -q
 
 lint:            ## ruff check + format check
@@ -40,6 +41,15 @@ check:           ## Django system checks
 
 shell:
 	$(SERVER) $(UV) python manage.py shell
+
+sync-vectors:    ## regenerate the FSRS parity vectors (server fsrs.py <-> app fsrs.dart)
+	python3 scripts/gen_fsrs_vectors.py
+
+build-base-pack: ## rebuild the bundled offline dictionary asset from the local DB
+	$(SERVER) $(UV) python manage.py build_packs --base --out ../app/assets/packs
+
+build-packs:     ## build the downloadable packs into content/packs (serve via CONTENT_PACK_DIR)
+	$(SERVER) $(UV) python manage.py build_packs --out ../content/packs
 
 # ── Loading the full EDRDG data (one-shot batch, over the seed) ───────────────
 

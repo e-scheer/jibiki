@@ -141,7 +141,7 @@ class _SoloGlyph extends StatelessWidget {
 }
 
 /// One elegant glyph, its romaji, and a small pill to jump to the other script's
-/// equivalent (あ ↔ ア) — the counterpart is a quiet link, never a second big
+/// equivalent (あ ↔ ア) - the counterpart is a quiet link, never a second big
 /// glyph. The side-by-side pair lives in the chart's "Both" view.
 class _PairHeader extends StatelessWidget {
   const _PairHeader({required this.pair});

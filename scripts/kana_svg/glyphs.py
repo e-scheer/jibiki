@@ -1,7 +1,7 @@
 """Glyph geometry extraction.
 
 The whole point of the *overlay* style is that the little drawing sits exactly on
-top of the real kana stroke — so we need the real outline of each character, not a
+top of the real kana stroke - so we need the real outline of each character, not a
 `<text>` element that depends on the viewer having a Japanese font installed.
 
 This module pulls the outline `d` path of any character out of a CJK font
@@ -46,7 +46,7 @@ class Glyph:
     """A character's outline plus the transform that maps it into the 0..100 box.
 
     We keep the path in raw font units and carry an SVG `transform` rather than
-    rewriting every coordinate — robust against every curve command the pen emits,
+    rewriting every coordinate - robust against every curve command the pen emits,
     and the render layer just wraps the path in `<g transform=...>`.
     """
 
@@ -93,7 +93,7 @@ def _extract(font: "TTFont", char: str) -> Glyph:
     # Ink bounds in font units (y up).
     bp = BoundsPen(glyph_set)
     g.draw(bp)
-    if bp.bounds is None:  # whitespace-only glyph — shouldn't happen for kana
+    if bp.bounds is None:  # whitespace-only glyph - shouldn't happen for kana
         raise ValueError(f"{char!r} has no outline")
     xmin, ymin, xmax, ymax = bp.bounds
 

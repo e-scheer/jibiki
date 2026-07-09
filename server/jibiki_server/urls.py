@@ -6,7 +6,7 @@ from django.urls import include, path
 
 
 def healthz(_request):
-    """Liveness probe (Caddy/uptime ping — mirrors tusorsou's /healthz)."""
+    """Liveness probe (Caddy/uptime ping - mirrors tusorsou's /healthz)."""
     return JsonResponse({"status": "ok"})
 
 
@@ -43,6 +43,7 @@ urlpatterns = [
     path("api/v1/content/", include("dictionary.content_urls")),
     path("api/v1/study/", include("srs.urls")),
     path("api/v1/mnemonics/", include("mnemonics.urls")),
+    path("api/v1/feedback", include("feedback.urls")),
     # DRF browsable-API login (dev convenience only).
     path("api-auth/", include("rest_framework.urls")),
 ]

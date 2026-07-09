@@ -1,6 +1,6 @@
-"""Shared fixtures. The offline SQLite DB is pinned in the root conftest.py
-(it must run before pytest-django configures Django); this file only holds
-fixtures used across the suite.
+"""Shared fixtures. The test database is Postgres, pinned in
+``jibiki_server.settings_test`` (it must be set before pytest-django configures
+Django); this file only holds fixtures used across the suite.
 """
 
 import pytest

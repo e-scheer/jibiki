@@ -1,7 +1,7 @@
 """Uploaded-image ingest: re-encode to WebP, strip EXIF/GPS, cap dimensions.
 
 Re-encoding (rather than storing the original) is what actually removes location
-metadata and bounds storage/egress — the DEEP_SEARCH moderation-pipeline rule
+metadata and bounds storage/egress - the DEEP_SEARCH moderation-pipeline rule
 ("resize/re-encode to WebP/AVIF, strip EXIF, cap dimensions before storing").
 """
 

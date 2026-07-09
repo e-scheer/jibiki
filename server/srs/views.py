@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from django.http import HttpResponse
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +13,9 @@ from .serializers import (
     CardSerializer,
     ReviewLogSerializer,
     ReviewSerializer,
+    SetStatusSerializer,
+    SyncCardSerializer,
+    SyncSerializer,
 )
 from .services import (
     add_card,
@@ -24,6 +27,7 @@ from .services import (
     optimize_user,
     queue_counts,
     review_card,
+    set_status,
     streak_days,
 )
 
@@ -75,6 +79,25 @@ class AddCardView(APIView):
             CardSerializer(card).data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
+
+
+class SetStatusView(APIView):
+    """Set one item's study status (none | learning | known) - the detail-screen
+    Study / I-know-it toggles. Idempotent; returns the resulting status."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "write"
+
+    def post(self, request):
+        serializer = SetStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = set_status(
+            request.user,
+            serializer.validated_data["item_type"],
+            serializer.validated_data["ref"],
+            serializer.validated_data["status"],
+        )
+        return Response({"status": result}, status=status.HTTP_200_OK)
 
 
 class BulkAddView(APIView):
@@ -148,9 +171,17 @@ class CardDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk: int):
-        deleted, _ = Card.objects.filter(pk=pk, user=request.user).delete()
-        if not deleted:
+        card = (
+            Card.objects.filter(pk=pk, user=request.user)
+            .select_related("kanji", "kana")
+            .first()
+        )
+        if card is None:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        from .services import write_tombstone
+
+        write_tombstone(request.user, card.item_type, card.item_ref)
+        card.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -159,7 +190,7 @@ class StatsView(APIView):
 
     def get(self, request):
         user = request.user
-        # Counts only — no need to materialize/serialize the whole queue here.
+        # Counts only - no need to materialize/serialize the whole queue here.
         counts = queue_counts(user)
         by_state = {
             "new": Card.objects.filter(user=user, state=State.NEW).count(),
@@ -240,8 +271,29 @@ class FavoriteView(APIView):
         if card is None:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         card.favorite = bool(request.data.get("value", not card.favorite))
-        card.save(update_fields=["favorite"])
+        card.save(update_fields=["favorite", "updated_at"])
         return Response({"id": card.id, "favorite": card.favorite})
+
+
+class SyncView(APIView):
+    """Offline replay + delta download in one round-trip: the client uploads
+    its outbox (reviews with idempotency UUIDs, last-write-wins ops), the
+    server applies it and answers with every card changed since the client's
+    watermark, deletions, and the fresh profile (incl. trained FSRS weights).
+    See srs/sync.py for the convergence rules."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "write"
+
+    def post(self, request):
+        from .sync import apply_sync
+
+        serializer = SyncSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = apply_sync(request.user, serializer.validated_data)
+        result["cards"] = SyncCardSerializer(result["cards"], many=True).data
+        result["synced_at"] = serializers.DateTimeField().to_representation(result["synced_at"])
+        return Response(result)
 
 
 class OptimizeView(APIView):

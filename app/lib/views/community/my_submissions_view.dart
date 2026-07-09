@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/languages.dart';
 import '../../models/mnemonic.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
@@ -112,7 +113,7 @@ class _SubmissionTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${m.character} · ${m.language.toUpperCase()}',
+                  Text('${m.character} · ${mnemonicLanguageName(m.language)}',
                       style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                   const SizedBox(height: 2),
                   Text(m.story, maxLines: 2, overflow: TextOverflow.ellipsis,

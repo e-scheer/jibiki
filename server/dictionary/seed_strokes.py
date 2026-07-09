@@ -1,6 +1,6 @@
 """KanjiVG stroke-order paths for the bundled demo kanji, so stroke animation
 works offline out of the box. Generated from KanjiVG (© Ulrich Apel, CC BY-SA
-3.0 — see NOTICE.md). Regenerate with the KanjiVG repo + import_kanjivg for the
+3.0 - see NOTICE.md). Regenerate with the KanjiVG repo + import_kanjivg for the
 full set. Each entry: {viewbox, paths[]} where paths are SVG `d` strings in
 stroke order."""
 

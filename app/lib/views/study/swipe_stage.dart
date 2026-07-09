@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/enums.dart';
 import '../../models/study.dart';
 import '../../theme/app_theme.dart';
@@ -41,36 +42,56 @@ class _SwipeStageState extends State<SwipeStage> {
   Widget build(BuildContext context) {
     final card = widget.vm.current!;
     final next = widget.vm.next;
-    return Column(
+    final cardStack = Stack(
       children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
-            child: Stack(
-              children: [
-                if (next != null)
-                  Positioned.fill(
-                    child: ValueListenableBuilder<double>(
-                      valueListenable: _peek,
-                      builder: (_, p, __) => _PeekCard(card: next, progress: p),
-                    ),
-                  ),
-                Positioned.fill(
-                  child: SwipeCard(
-                    controller: _controller,
-                    onRate: widget.vm.rate,
-                    onProgress: (p) => _peek.value = p,
-                    onRevealChanged: (v) => setState(() => _revealed = v),
-                    front: _Face(card: card, lang: widget.lang, revealed: false),
-                    back: _Face(card: card, lang: widget.lang, revealed: true),
-                  ),
-                ),
-              ],
+        if (next != null)
+          Positioned.fill(
+            child: ValueListenableBuilder<double>(
+              valueListenable: _peek,
+              builder: (_, p, __) => _PeekCard(card: next, progress: p),
             ),
           ),
+        Positioned.fill(
+          child: SwipeCard(
+            controller: _controller,
+            onRate: widget.vm.rate,
+            onProgress: (p) => _peek.value = p,
+            onRevealChanged: (v) => setState(() => _revealed = v),
+            front: _Face(card: card, lang: widget.lang, revealed: false),
+            back: _Face(card: card, lang: widget.lang, revealed: true),
+          ),
         ),
-        _ActionBar(revealed: _revealed, controller: _controller),
       ],
+    );
+
+    // Rotation-adaptive: landscape sets the card beside a vertical grade column so
+    // nothing fights for the short height; portrait keeps the card above the bar,
+    // bounded so a tablet centres a real card instead of a giant one.
+    if (context.isLandscape) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 16, 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: BoundedBoard(maxWidth: 480, child: cardStack)),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 150,
+              child: _ActionBar(revealed: _revealed, controller: _controller, axis: Axis.vertical),
+            ),
+          ],
+        ),
+      );
+    }
+    return BoundedBoard(
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 6), child: cardStack),
+          ),
+          _ActionBar(revealed: _revealed, controller: _controller),
+        ],
+      ),
     );
   }
 }
@@ -122,44 +143,64 @@ class _PeekCard extends StatelessWidget {
 /// The premium bottom controls: "Show answer" before reveal, then the four
 /// colour-coded grade buttons that mirror the swipe directions.
 class _ActionBar extends StatelessWidget {
-  const _ActionBar({required this.revealed, required this.controller});
+  const _ActionBar({required this.revealed, required this.controller, this.axis = Axis.horizontal});
   final bool revealed;
   final SwipeCardController controller;
+  final Axis axis;
 
   static const _grades = [Rating.again, Rating.hard, Rating.good, Rating.easy];
 
   @override
   Widget build(BuildContext context) {
+    final vertical = axis == Axis.vertical;
+
+    final revealBtn = SizedBox(
+      height: 54,
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () {
+          Haptics.light();
+          controller.reveal();
+        },
+        icon: const Icon(Icons.visibility_outlined, size: 20),
+        label: const Text('Show answer'),
+      ),
+    );
+
+    final Widget content = revealed
+        ? (vertical
+            ? Column(
+                key: const ValueKey('grades'),
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < _grades.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 8),
+                    _GradeButton(rating: _grades[i], onTap: () => controller.rate(_grades[i])),
+                  ],
+                ],
+              )
+            : Row(
+                key: const ValueKey('grades'),
+                children: [
+                  for (var i = 0; i < _grades.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    Expanded(child: _GradeButton(rating: _grades[i], onTap: () => controller.rate(_grades[i]))),
+                  ],
+                ],
+              ))
+        : KeyedSubtree(
+            key: const ValueKey('reveal'),
+            child: vertical ? Center(child: revealBtn) : revealBtn,
+          );
+
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-        child: AnimatedSwitcher(
-          duration: Motion.timed(context, Motion.fast),
-          child: revealed
-              ? Row(
-                  key: const ValueKey('grades'),
-                  children: [
-                    for (var i = 0; i < _grades.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
-                      Expanded(child: _GradeButton(rating: _grades[i], onTap: () => controller.rate(_grades[i]))),
-                    ],
-                  ],
-                )
-              : SizedBox(
-                  key: const ValueKey('reveal'),
-                  height: 54,
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Haptics.light();
-                      controller.reveal();
-                    },
-                    icon: const Icon(Icons.visibility_outlined, size: 20),
-                    label: const Text('Show answer'),
-                  ),
-                ),
-        ),
+        padding: vertical
+            ? const EdgeInsets.symmetric(vertical: 4)
+            : const EdgeInsets.fromLTRB(20, 4, 20, 12),
+        child: AnimatedSwitcher(duration: Motion.timed(context, Motion.fast), child: content),
       ),
     );
   }

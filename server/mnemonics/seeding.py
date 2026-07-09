@@ -2,7 +2,7 @@
 
 The tiles under `seed_art/` are pre-rendered PNGs (one per gojūon kana) produced by
 `scripts/kana_svg`. They are ingested through the *same* pipeline as a user upload
-— `imaging.process_upload` (Pillow → WebP, EXIF-stripped, dim-capped) — so a seeded
+- `imaging.process_upload` (Pillow → WebP, EXIF-stripped, dim-capped) - so a seeded
 mnemonic image is byte-for-byte the kind of file the app already serves. No new
 dependency: only Pillow, which the ingest already uses.
 """
@@ -27,7 +27,7 @@ def art_path(character: str) -> Path | None:
 def attach_art(mnemonic, *, overwrite: bool = False) -> bool:
     """Set `mnemonic.image` from the bundled tile if one exists. Idempotent: a
     mnemonic that already has an image is left alone unless `overwrite`. Never
-    raises — a missing tile or an unwritable media store just means "no image",
+    raises - a missing tile or an unwritable media store just means "no image",
     so seeding can't be broken by art. Returns True iff an image was written."""
     if mnemonic.image and not overwrite:
         return False
@@ -40,6 +40,6 @@ def attach_art(mnemonic, *, overwrite: bool = False) -> bool:
         mnemonic.image.save(name, content, save=False)
         mnemonic.image_width, mnemonic.image_height = w, h
         mnemonic.save(update_fields=["image", "image_width", "image_height", "updated_at"])
-    except Exception:  # missing WebP support, read-only media, bad file — skip quietly
+    except Exception:  # missing WebP support, read-only media, bad file - skip quietly
         return False
     return True

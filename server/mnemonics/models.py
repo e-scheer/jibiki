@@ -1,15 +1,15 @@
-"""Community-contributed, language-dependent visual mnemonics — the DEEP_SEARCH
+"""Community-contributed, language-dependent visual mnemonics - the DEEP_SEARCH
 differentiating feature (feature 5 & 6).
 
 A mnemonic is a first-class localized entity keyed by (character, language, kind):
 because kana mnemonics ride on *sound* association, "く = a cuckoo's beak" works in
-English while a French speaker keys off "coucou" — so the same character carries a
+English while a French speaker keys off "coucou" - so the same character carries a
 different ranked set per language. That per-language segmentation is the moat.
 
 Moderation is designed in from day one (the Memrise / Koohii lessons):
   * uploads from low-trust users post as PENDING (held); trusted users post VISIBLE;
   * enough distinct reporters auto-HIDE a visible mnemonic pending staff review;
-  * content is NEVER hard-deleted — REMOVED is a soft takedown kept for audit.
+  * content is NEVER hard-deleted - REMOVED is a soft takedown kept for audit.
 """
 
 from __future__ import annotations
@@ -39,11 +39,11 @@ class Mnemonic(models.Model):
     id = models.BigAutoField(primary_key=True)
     character = models.CharField(max_length=4)  # the kana / kanji literal
     kind = models.CharField(max_length=8, choices=Kind.choices)
-    # Mnemonic language (ISO-639-1-ish) — separate from the app's UI language.
+    # Mnemonic language (ISO-639-1-ish) - separate from the app's UI language.
     language = models.CharField(max_length=8, default="en")
 
     story = models.TextField()
-    # FileField (not ImageField) — no implicit Pillow machinery; imaging.py
+    # FileField (not ImageField) - no implicit Pillow machinery; imaging.py
     # re-encodes to WebP + strips EXIF/GPS on ingest, then sets width/height.
     image = models.FileField(upload_to=mnemonic_image_path, blank=True)
     image_width = models.PositiveIntegerField(default=0)
@@ -184,7 +184,7 @@ class MnemonicSave(models.Model):
 
 
 class UserMnemonicChoice(models.Model):
-    """A user's chosen mnemonic for one character — their per-character override of
+    """A user's chosen mnemonic for one character - their per-character override of
     the score-ranked default. Applying a whole pack materializes one row per pack
     item; a single swap upserts one row. Keyed like a Mnemonic: (character,
     language, kind), scoped to the user."""
@@ -221,7 +221,7 @@ class DeckStatus(models.TextChoices):
 
 
 class MnemonicDeck(models.Model):
-    """A user-authored, community-shared *pack* of visual mnemonics — e.g. "My
+    """A user-authored, community-shared *pack* of visual mnemonics - e.g. "My
     full hiragana mascots (FR)". The individual-mnemonic moderation model is
     mirrored here: DRAFT while assembled, PENDING/VISIBLE on publish depending on
     author trust, HIDDEN/REMOVED on moderation. Bundles existing Mnemonic rows
@@ -231,7 +231,7 @@ class MnemonicDeck(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=120)
     description = models.TextField(blank=True)
-    # Same per-language segmentation as mnemonics — a FR pack keys off FR sounds.
+    # Same per-language segmentation as mnemonics - a FR pack keys off FR sounds.
     language = models.CharField(max_length=8, default="en")
     kind = models.CharField(max_length=8, choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA)
 
@@ -271,7 +271,7 @@ class MnemonicDeck(models.Model):
         return self.status == DeckStatus.VISIBLE
 
     def cover_item(self):
-        """The first item carrying an image — used as the deck cover. Reads from
+        """The first item carrying an image - used as the deck cover. Reads from
         a prefetched `items` relation when available to avoid an N+1."""
         for it in self.items.all():
             if it.mnemonic and it.mnemonic.image:
@@ -301,7 +301,7 @@ class MnemonicDeckItem(models.Model):
 
 class MnemonicDeckVote(models.Model):
     """A community "❤ like" on a deck. One row per (deck, user); drives
-    MnemonicDeck.score. Likes only (+1) — Instagram has no dislike."""
+    MnemonicDeck.score. Likes only (+1) - Instagram has no dislike."""
 
     id = models.BigAutoField(primary_key=True)
     deck = models.ForeignKey(MnemonicDeck, on_delete=models.CASCADE, related_name="votes")

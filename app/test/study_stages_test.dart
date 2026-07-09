@@ -9,7 +9,10 @@ import 'package:jibiki/repositories/study_repository.dart';
 import 'package:jibiki/services/study_service.dart';
 import 'package:jibiki/theme/app_theme.dart';
 import 'package:jibiki/viewmodels/review_viewmodel.dart';
+import 'package:jibiki/views/study/listen_stage.dart';
+import 'package:jibiki/views/study/match_stage.dart';
 import 'package:jibiki/views/study/quiz_stage.dart';
+import 'package:jibiki/views/study/study_feedback.dart';
 import 'package:jibiki/views/study/swipe_stage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,7 +43,7 @@ StudyCard _kanji(int id, String literal, String meaning, String kun) => StudyCar
     );
 
 class _FakeStudyRepo extends StudyRepository {
-  _FakeStudyRepo(super.service, {required this.pool});
+  _FakeStudyRepo(StudyService service, {required this.pool}) : super(service, service);
   final List<StudyCard> pool;
 
   @override
@@ -113,6 +116,21 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1600)); // fire the advance timer (wrong = 1500ms)
       await tester.pumpAndSettle();
     });
+
+    testWidgets('a correct pick celebrates the win before advancing', (tester) async {
+      final vm = await _vm();
+      await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('water')); // correct (prompt is 水)
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // The won round is signalled unmistakably while the next card is queued.
+      expect(find.byType(SuccessBurst), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 900)); // drain the advance timer (correct = 850ms)
+      await tester.pumpAndSettle();
+    });
   });
 
   group('SwipeStage (flashcard)', () {
@@ -135,6 +153,54 @@ void main() {
       for (final arrow in ['←', '↓', '→', '↑']) {
         expect(find.text(arrow), findsOneWidget);
       }
+    });
+  });
+
+  group('MatchStage (memory)', () {
+    testWidgets('lays down face-down tiles and flips one on tap', (tester) async {
+      final vm = await _vm();
+      await tester.pumpWidget(_host(MatchStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Find the pairs'), findsOneWidget);
+      // 4 cards → 8 tiles, all hidden; no face content shown yet.
+      expect(find.bySemanticsLabel('Hidden tile'), findsNWidgets(8));
+      expect(find.text('water'), findsNothing);
+
+      await tester.tap(find.bySemanticsLabel('Hidden tile').first);
+      await tester.pumpAndSettle();
+      // One tile flipped up → seven remain hidden.
+      expect(find.bySemanticsLabel('Hidden tile'), findsNWidgets(7));
+    });
+  });
+
+  group('ListenStage (assemble the reading)', () {
+    testWidgets('fills cells from the tile bank and enables Check', (tester) async {
+      final vm = await _vm();
+      await tester.pumpWidget(_host(ListenStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Type what you hear'), findsOneWidget);
+      FilledButton check() => tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Check'));
+      expect(check().onPressed, isNull); // nothing placed yet
+
+      // 水's reading is みず: place both kana from the bank.
+      await tester.tap(find.text('み'));
+      await tester.pump();
+      await tester.tap(find.text('ず'));
+      await tester.pump();
+      expect(check().onPressed, isNotNull); // both cells filled
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Check'));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(check().onPressed, isNull); // locked after checking
+      // A correct build wins: the celebration shows and the word's meaning is
+      // now taught here, not just its spelling.
+      expect(find.byType(SuccessBurst), findsOneWidget);
+      expect(find.text('water'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 1700)); // drain the advance timer
+      await tester.pumpAndSettle();
     });
   });
 }

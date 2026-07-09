@@ -306,7 +306,7 @@ class JpFonts {
   JpFonts._();
   static const List<String> study = ['NotoSansJP', 'NotoSerifJP', 'YujiSyuku'];
 
-  /// A face chosen from [seed] — pass a card's repetition count so the learner
+  /// A face chosen from [seed] - pass a card's repetition count so the learner
   /// meets the same character in a different hand each time it comes back around.
   static String variant(int seed) => study[seed.abs() % study.length];
 }

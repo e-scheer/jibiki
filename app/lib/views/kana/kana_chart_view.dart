@@ -77,7 +77,7 @@ class _KanaChartState extends State<_KanaChart> {
       final s = await context.read<StudyRepository>().studyStates(type: ItemType.kana);
       if (mounted) setState(() => _states = s);
     } catch (_) {
-      // No study state (e.g. offline) just means no badges — never block the chart.
+      // No study state (e.g. offline) just means no badges - never block the chart.
     }
   }
 
@@ -156,7 +156,7 @@ class _KanaChartState extends State<_KanaChart> {
             : [
                 if (vm.current.isNotEmpty)
                   IconButton(
-                    tooltip: 'Mark what you know',
+                    tooltip: 'Select kana',
                     icon: const Icon(Icons.checklist_rounded),
                     onPressed: _enterSelect,
                   ),
@@ -213,7 +213,7 @@ class _KanaChartState extends State<_KanaChart> {
                   switchInCurve: Motion.out,
                   switchOutCurve: Motion.out,
                   // A clean, quick crossfade between scripts. The three matrices
-                  // share the same rows, so heights match and nothing jumps — no
+                  // share the same rows, so heights match and nothing jumps - no
                   // more half-sliding matrices ghosting over each other.
                   transitionBuilder: (child, animation) =>
                       FadeTransition(opacity: animation, child: child),
@@ -225,7 +225,7 @@ class _KanaChartState extends State<_KanaChart> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
-                            'Tap the checklist to mark the kana you already know.',
+                            'Tap the checklist to pick kana, then mark the ones you know or add the rest to learn.',
                             style: TextStyle(color: context.jc.muted, fontSize: 12.5),
                           ),
                         ),
@@ -245,46 +245,80 @@ class _KanaChartState extends State<_KanaChart> {
   }
 }
 
-/// A flat pill toggle in place of the Material SegmentedButton.
+/// A flat pill toggle where the vermilion selection **slides** between segments
+/// (a single moving pill) instead of snapping colour, so the active script reads
+/// as one continuous control. Collapses to an instant move under reduce-motion.
 class _ScriptToggle extends StatelessWidget {
   const _ScriptToggle({required this.script, required this.onChanged});
   final String script;
   final ValueChanged<String> onChanged;
 
+  static const _opts = [
+    (value: 'hiragana', label: 'Hiragana'),
+    (value: 'katakana', label: 'Katakana'),
+    (value: 'both', label: 'Both'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    Widget seg(String value, String label) {
-      final on = script == value;
-      return Expanded(
-        child: Pressable(
-          label: label,
-          selected: on,
-          onTap: () => onChanged(value),
-          child: AnimatedContainer(
-            duration: Motion.timed(context, Motion.fast),
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 9),
-            decoration: BoxDecoration(
-              color: on ? jc.brand : Colors.transparent,
-              borderRadius: BorderRadius.circular(Radii.sm),
-            ),
-            child: Text(label,
-                style: TextStyle(
-                    color: on ? Colors.white : jc.muted, fontWeight: FontWeight.w700, fontSize: 12.5)),
-          ),
-        ),
-      );
-    }
+    final index = _opts.indexWhere((o) => o.value == script).clamp(0, _opts.length - 1);
+    // -1 (first) … +1 (last): the alignment the pill slides to.
+    final x = -1.0 + index * (2.0 / (_opts.length - 1));
 
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
-      child: Row(children: [
-        seg('hiragana', 'Hiragana'),
-        seg('katakana', 'Katakana'),
-        seg('both', 'Both'),
-      ]),
+      child: SizedBox(
+        height: 34,
+        child: Stack(
+          children: [
+            // The single pill that glides to the selected segment.
+            AnimatedAlign(
+              alignment: Alignment(x, 0),
+              duration: Motion.timed(context, Motion.base),
+              curve: Motion.outStrong,
+              child: FractionallySizedBox(
+                widthFactor: 1 / _opts.length,
+                heightFactor: 1,
+                child: DecoratedBox(
+                  decoration:
+                      BoxDecoration(color: jc.brand, borderRadius: BorderRadius.circular(Radii.sm)),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final o in _opts)
+                    Expanded(
+                      child: Pressable(
+                        label: o.label,
+                        selected: script == o.value,
+                        haptic: false,
+                        onTap: () {
+                          Haptics.tick();
+                          onChanged(o.value);
+                        },
+                        child: AnimatedDefaultTextStyle(
+                          duration: Motion.timed(context, Motion.base),
+                          curve: Motion.out,
+                          style: TextStyle(
+                            color: script == o.value ? Colors.white : jc.muted,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                          child: Center(child: Text(o.label)),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

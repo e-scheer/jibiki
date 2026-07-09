@@ -11,7 +11,7 @@ class AddToStudyBar extends StatelessWidget {
     super.key,
     required this.added,
     required this.onAdd,
-    this.labelAdd = 'Add to study',
+    this.labelAdd = 'Learn this',
     this.labelAdded = 'In your deck',
   });
 

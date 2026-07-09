@@ -13,17 +13,30 @@ class WordDetailViewModel extends BaseViewModel {
   WordEntry? _word;
   WordEntry? get word => _word;
 
-  bool _added = false;
-  bool get added => _added;
+  // none | learning | known - drives the detail Study / I-know-it toggles.
+  String _status = 'none';
+  String get status => _status;
 
   Future<void> load() async {
     final w = await runGuarded(() => _dict.word(wordId));
     if (w != null) _word = w;
+    final states = await runGuarded(() => _study.studyStates(type: ItemType.word), silent: true);
+    if (states != null) {
+      final s = states[wordId.toString()];
+      _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
+      notifyListeners();
+    }
   }
 
-  Future<bool> addToStudy() async {
-    await runGuarded(() => _study.addCard(ItemType.word, wordId.toString()));
-    if (!hasError) _added = true;
-    return !hasError;
+  /// Toggle this word to [target] (none | learning | known); optimistic, then
+  /// reconciles with the server (or reverts on failure).
+  Future<void> setStatus(String target) async {
+    final prev = _status;
+    _status = target;
+    notifyListeners();
+    final res = await runGuarded(
+        () => _study.setStatus(ItemType.word, wordId.toString(), target), silent: true);
+    _status = res ?? prev;
+    notifyListeners();
   }
 }

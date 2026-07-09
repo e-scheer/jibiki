@@ -6,6 +6,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.languages import normalize_language_code
+
 from .models import (
     DeckStatus,
     Mnemonic,
@@ -39,6 +41,7 @@ from .services import (
     reset_choices,
     saved_for,
     set_choice,
+    set_save,
     toggle_save,
     visible_decks,
     visible_or_own_for,
@@ -88,7 +91,7 @@ _DECK_ITEMS = Prefetch(
 )
 
 # List view only needs each deck's cover image + item count, never the item
-# authors — so skip the author/profile joins the detail prefetch pulls in.
+# authors - so skip the author/profile joins the detail prefetch pulls in.
 _DECK_COVER = Prefetch(
     "items",
     queryset=MnemonicDeckItem.objects.select_related("mnemonic").order_by("position", "id"),
@@ -112,12 +115,15 @@ class MnemonicListView(APIView):
     def get(self, request):
         character = request.query_params.get("character", "")
         kind = request.query_params.get("kind", Mnemonic.Kind.KANA)
-        language = request.query_params.get("language")
-        if not language:
+        raw_lang = request.query_params.get("language")
+        if not raw_lang:
             profile = (
                 getattr(request.user, "profile", None) if request.user.is_authenticated else None
             )
-            language = profile.mnemonic_language if profile else "en"
+            raw_lang = profile.mnemonic_language if profile else None
+        # Lenient normalize (not validate): a browse request must resolve, not
+        # 400, and case must match the stored lowercase code.
+        language = normalize_language_code(raw_lang)
         if not character:
             return Response(
                 {"detail": "character is required."}, status=status.HTTP_400_BAD_REQUEST
@@ -200,7 +206,7 @@ class MnemonicReportView(APIView):
 
 class MyMnemonicsView(APIView):
     """The signed-in user's own contributions across all statuses (so they can see
-    a pending submission is being reviewed — never silently dropped)."""
+    a pending submission is being reviewed - never silently dropped)."""
 
     permission_classes = [IsAuthenticated]
 
@@ -222,7 +228,12 @@ class MnemonicSaveView(APIView):
         mnemonic = Mnemonic.objects.filter(pk=pk, status=MnemonicStatus.VISIBLE).first()
         if mnemonic is None:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        saved = toggle_save(request.user, mnemonic)
+        # An explicit {"value": bool} is replay-safe (offline sync); without it,
+        # keep the historical toggle behavior.
+        if "value" in request.data:
+            saved = set_save(request.user, mnemonic, bool(request.data["value"]))
+        else:
+            saved = toggle_save(request.user, mnemonic)
         return Response({"id": mnemonic.id, "saved": saved})
 
 
@@ -253,12 +264,13 @@ class MnemonicActiveView(APIView):
             return Response(
                 {"detail": "characters must be a list."}, status=status.HTTP_400_BAD_REQUEST
             )
-        language = request.data.get("language")
-        if not language:
+        raw_lang = request.data.get("language")
+        if not raw_lang:
             profile = (
                 getattr(request.user, "profile", None) if request.user.is_authenticated else None
             )
-            language = profile.mnemonic_language if profile else "en"
+            raw_lang = profile.mnemonic_language if profile else None
+        language = normalize_language_code(raw_lang)
         chars = [str(c) for c in characters][:500]
         resolved = active_for_many(request.user, chars, kind, language)
         ctx = _mnemonic_ctx(request, list(resolved.values()))
@@ -296,7 +308,7 @@ class MnemonicChooseView(APIView):
 
 
 class MnemonicResetView(APIView):
-    """Drop overrides (back to the default) — optionally scoped to one kind."""
+    """Drop overrides (back to the default) - optionally scoped to one kind."""
 
     permission_classes = [IsAuthenticated]
     throttle_scope = "write"
@@ -318,7 +330,10 @@ class MnemonicDeckListView(APIView):
 
     def get(self, request):
         mine = request.query_params.get("mine") in ("1", "true", "yes")
+        # Optional filter: absent → all languages; lowercase so case matches
+        # the stored code (no ISO gate - an unknown language just filters empty).
         language = request.query_params.get("language")
+        language = language.strip().lower() if language else None
         kind = request.query_params.get("kind")
         if mine:
             if not request.user.is_authenticated:

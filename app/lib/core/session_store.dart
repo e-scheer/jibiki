@@ -10,6 +10,9 @@ class SessionStore {
 
   static const _kToken = 'session_token';
   static const _kOnboarded = 'onboarded';
+  static const _kCachedUser = 'cached_user';
+  static const _kLocalOnly = 'local_only';
+  static const _kLocalProfile = 'local_profile';
 
   static Future<SessionStore> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,7 +33,29 @@ class SessionStore {
   bool get onboarded => _prefs.getBool(_kOnboarded) ?? false;
   Future<void> setOnboarded(bool value) => _prefs.setBool(_kOnboarded, value);
 
+  /// The last /auth/me payload, so a signed-in user still gets past the
+  /// router when the server is unreachable at cold start.
+  String? get cachedUser => _prefs.getString(_kCachedUser);
+  Future<void> setCachedUser(String? json) async {
+    if (json == null) {
+      await _prefs.remove(_kCachedUser);
+    } else {
+      await _prefs.setString(_kCachedUser, json);
+    }
+  }
+
+  /// "Continue without account": the paid app is fully usable with no login;
+  /// study state lives locally until (if ever) an account is created.
+  bool get localOnly => _prefs.getBool(_kLocalOnly) ?? false;
+  Future<void> setLocalOnly(bool value) => _prefs.setBool(_kLocalOnly, value);
+
+  /// Local-only users still pick a mode/mnemonic language at onboarding -
+  /// persisted here instead of a server profile.
+  String? get localProfile => _prefs.getString(_kLocalProfile);
+  Future<void> setLocalProfile(String json) => _prefs.setString(_kLocalProfile, json);
+
   Future<void> clear() async {
     await _prefs.remove(_kToken);
+    await _prefs.remove(_kCachedUser);
   }
 }

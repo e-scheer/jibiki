@@ -61,12 +61,35 @@ enum ItemType {
 
 enum MnemonicKind { kana, kanji }
 
-/// How a study session is played.
+/// How a study session is played. One deck, several games (Quizlet-style): the
+/// learner switches freely between them over the same due queue.
 enum StudyMode {
   swipe,
-  quiz;
+  quiz,
+  match,
+  listen;
 
-  static StudyMode fromString(String? v) => v == 'quiz' ? StudyMode.quiz : StudyMode.swipe;
+  static StudyMode fromString(String? v) => switch (v) {
+        'quiz' => StudyMode.quiz,
+        'match' => StudyMode.match,
+        'listen' => StudyMode.listen,
+        _ => StudyMode.swipe,
+      };
+
   String get wire => name;
-  String get label => this == StudyMode.quiz ? 'Quiz' : 'Swipe';
+
+  String get label => switch (this) {
+        StudyMode.swipe => 'Swipe',
+        StudyMode.quiz => 'Quiz',
+        StudyMode.match => 'Match',
+        StudyMode.listen => 'Listen',
+      };
+
+  /// One line for the game picker: what you actually do in this mode.
+  String get blurb => switch (this) {
+        StudyMode.swipe => 'Flip a card, then swipe to grade how well you knew it.',
+        StudyMode.quiz => 'Pick the meaning from four choices.',
+        StudyMode.match => 'Flip tiles two at a time to pair each character with its meaning.',
+        StudyMode.listen => 'Hear it, then rebuild the reading from the tiles.',
+      };
 }

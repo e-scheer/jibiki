@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
+import '../../core/languages.dart';
+import '../widgets/language_picker.dart';
 import '../../models/enums.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
@@ -34,8 +37,10 @@ class _Settings extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        children: [
+      body: BoundedContent(
+        maxWidth: 640,
+        child: ListView(
+          children: [
           _section(context, 'Mode'),
           RadioGroup<AppMode>(
             groupValue: app.mode,
@@ -52,18 +57,18 @@ class _Settings extends StatelessWidget {
           ),
           const Divider(),
           _section(context, 'Mnemonic language'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Wrap(
-              spacing: 8,
-              children: const {'en': 'English', 'fr': 'Français'}.entries.map((e) {
-                return ChoiceChip(
-                  label: Text(e.value),
-                  selected: profile.mnemonicLanguage == e.key,
-                  onSelected: (_) => vm.setMnemonicLanguage(e.key),
-                );
-              }).toList(),
-            ),
+          ListTile(
+            leading: const Icon(Icons.translate),
+            title: Text(mnemonicLanguageName(profile.mnemonicLanguage)),
+            subtitle: const Text(
+                'Any language works - where content is missing, English backs '
+                'you up and the community (you?) can draw the first set.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              final picked = await showMnemonicLanguagePicker(
+                  context, profile.mnemonicLanguage);
+              if (picked != null) await vm.setMnemonicLanguage(picked);
+            },
           ),
           const Divider(),
           _section(context, 'Spaced repetition'),
@@ -109,8 +114,22 @@ class _Settings extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/decks/community?tab=mine'),
           ),
+          ListTile(
+            leading: const Icon(Icons.forum_outlined),
+            title: const Text('Make jibiki better'),
+            subtitle: const Text('Ideas, bugs, love letters - we read every single one.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/feedback'),
+          ),
           const Divider(),
           _section(context, 'Data'),
+          ListTile(
+            leading: const Icon(Icons.download_for_offline_outlined),
+            title: const Text('Offline & storage'),
+            subtitle: const Text('Dictionary packs on this phone, updates, sync status.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/storage'),
+          ),
           ListTile(
             leading: const Icon(Icons.ios_share),
             title: const Text('Export to Anki'),
@@ -141,6 +160,7 @@ class _Settings extends StatelessWidget {
           ),
           const SizedBox(height: 16),
         ],
+        ),
       ),
     );
   }

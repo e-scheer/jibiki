@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 count += 1
                 if count % 2000 == 0:
                     self.stdout.write(f"  … {count} kanji")
-        self.stdout.write(self.style.SUCCESS(f"Done — {count} kanji imported."))
+        self.stdout.write(self.style.SUCCESS(f"Done - {count} kanji imported."))
 
     def _ingest(self, ch, langs: set[str]) -> None:
         literal = ch.findtext("literal")

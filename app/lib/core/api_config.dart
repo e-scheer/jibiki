@@ -40,7 +40,15 @@ class ApiConfig {
   static String dictKanaDetail(String char) => '/api/v1/dict/kana/$char';
   static const String dictRadicals = '/api/v1/dict/radicals';
 
+  // In-app feedback (ideas / bugs / love) - open, works signed-out too.
+  static const String feedback = '/api/v1/feedback';
+
+  // ── offline content packs (public, no account) ─────────────────────────────
+  static const String packsManifest = '/api/v1/content/packs/manifest';
+  static String packFile(String name) => '/api/v1/content/packs/file/$name';
+
   static const String studyQueue = '/api/v1/study/queue';
+  static const String studySync = '/api/v1/study/sync';
   static const String studyStats = '/api/v1/study/stats';
   static const String studyOptimize = '/api/v1/study/optimize';
   static const String studyExport = '/api/v1/study/export';
@@ -50,6 +58,7 @@ class ApiConfig {
   static String cardFavorite(int id) => '/api/v1/study/cards/$id/favorite';
   static const String studyAdd = '/api/v1/study/add';
   static const String studyAddBulk = '/api/v1/study/add/bulk';
+  static const String studySet = '/api/v1/study/set'; // set one item's status (toggles)
   static const String studyStates = '/api/v1/study/states'; // {item_ref: state}
   static const String studyCards = '/api/v1/study/cards';
   static String studyCardReview(int id) => '/api/v1/study/cards/$id/review';

@@ -1,3 +1,31 @@
+/// One curated sentence showing a grammatical kana at work. The particle is
+/// kept as its own segment so the UI can highlight it inside the sentence.
+class KanaUsageExample {
+  KanaUsageExample({
+    required this.before,
+    required this.particle,
+    required this.after,
+    required this.romaji,
+    required this.en,
+  });
+
+  final String before;
+  final String particle;
+  final String after;
+  final String romaji; // particle spelled as pronounced (は→wa, を→o, へ→e)
+  final String en;
+
+  String get sentence => '$before$particle$after';
+
+  factory KanaUsageExample.fromJson(Map<String, dynamic> j) => KanaUsageExample(
+        before: j['before'] as String? ?? '',
+        particle: j['particle'] as String? ?? '',
+        after: j['after'] as String? ?? '',
+        romaji: j['romaji'] as String? ?? '',
+        en: j['en'] as String? ?? '',
+      );
+}
+
 class KanaEntry {
   KanaEntry({
     required this.char,
@@ -10,6 +38,7 @@ class KanaEntry {
     this.originNote = '',
     this.usageLabel = '',
     this.usage = '',
+    this.usageExamples = const [],
   });
 
   final String char;
@@ -22,6 +51,7 @@ class KanaEntry {
   final String originNote; // one-line "how it got this shape" story
   final String usageLabel; // short grammatical role, e.g. "Topic particle"; '' if none
   final String usage; // one-line "job in a sentence" for the particle kana
+  final List<KanaUsageExample> usageExamples; // curated sentences showing that job
 
   bool get isHiragana => script == 'hiragana';
   bool get hasOrigin => origin.isNotEmpty;
@@ -40,5 +70,9 @@ class KanaEntry {
         originNote: j['origin_note'] as String? ?? '',
         usageLabel: j['usage_label'] as String? ?? '',
         usage: j['usage'] as String? ?? '',
+        usageExamples: (j['usage_examples'] as List? ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .map(KanaUsageExample.fromJson)
+            .toList(),
       );
 }

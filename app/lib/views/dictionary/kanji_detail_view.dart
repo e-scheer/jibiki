@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/kanji.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/mnemonic_repository.dart';
@@ -11,7 +12,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/kanji_detail_viewmodel.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
 import '../study/writing_practice_view.dart';
-import '../widgets/add_to_study_bar.dart';
+import '../widgets/study_status_bar.dart';
 import '../widgets/mnemonic_panel.dart';
 import '../widgets/origin_section.dart';
 import '../widgets/speech_button.dart';
@@ -70,26 +71,17 @@ class _KanjiDetail extends StatelessWidget {
     final k = vm.kanji;
     return Scaffold(
       appBar: AppBar(title: const Text('Kanji')),
-      bottomNavigationBar: k == null
-          ? null
-          : AddToStudyBar(
-              added: vm.added,
-              onAdd: () async {
-                final ok = await vm.addToStudy();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? 'Added to your study deck' : vm.error ?? 'Failed')),
-                  );
-                }
-              },
-            ),
-      body: vm.isLoading
-          ? const LoadingView()
-          : vm.hasError
-              ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-              : k == null
-                  ? const SizedBox.shrink()
-                  : _content(context, k),
+      bottomNavigationBar:
+          k == null ? null : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
+      body: BoundedContent(
+        child: vm.isLoading
+            ? const LoadingView()
+            : vm.hasError
+                ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                : k == null
+                    ? const SizedBox.shrink()
+                    : _content(context, k),
+      ),
     );
   }
 

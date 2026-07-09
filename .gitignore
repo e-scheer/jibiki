@@ -4,8 +4,6 @@ __pycache__/
 .venv/
 server/.venv/
 server/staticfiles/
-*.sqlite3
-*.sqlite3-journal
 .pytest_cache/
 .ruff_cache/
 *.egg-info/

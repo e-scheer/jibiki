@@ -17,6 +17,15 @@
 		file_server
 	}
 
+	# Prebuilt SQLite content packs (manage.py build_packs, offline dictionary):
+	# large .db.gz files off the shared volume, never through gunicorn. Caddy's
+	# file_server answers Range requests natively (download resume); encode's
+	# default matcher leaves application/gzip alone (no double compression).
+	handle_path /packs/* {
+		root * /srv/packs
+		file_server
+	}
+
 	# Everything else (API, allauth headless, admin) to Django.
 	reverse_proxy api:8000
 }

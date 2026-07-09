@@ -1,4 +1,4 @@
-"""Pure FSRS-6 scheduler tests — no DB, no network."""
+"""Pure FSRS-6 scheduler tests - no DB, no network."""
 
 from datetime import datetime, timedelta, timezone
 

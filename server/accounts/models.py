@@ -1,6 +1,6 @@
 """User + per-user product settings.
 
-The User is email-only (no username — the product never shows one), the same
+The User is email-only (no username - the product never shows one), the same
 choice tusorsou makes; allauth-headless can be layered on later without touching
 the model. The UserProfile carries the DEEP_SEARCH "configurable modes" spectrum
 (Dictionary ↔ Middle ↔ Learning) plus the SRS knobs (daily new limit, desired
@@ -38,7 +38,7 @@ class EmailUserManager(UserManager):
 
 
 class User(AbstractUser):
-    """Email-only user (no username — the product never shows one)."""
+    """Email-only user (no username - the product never shows one)."""
 
     username = None
     email = models.EmailField(unique=True)
@@ -55,17 +55,34 @@ class User(AbstractUser):
 class AppMode(models.TextChoices):
     """The onboarding-selectable spectrum (DEEP_SEARCH feature 3). Implemented as a
     single flag the client reads to lay out its home screen and default its
-    notifications — not three separate apps."""
+    notifications - not three separate apps."""
 
     DICTIONARY = "dictionary", _("Dictionary")  # search-first, no review nagging
     MIDDLE = "middle", _("Middle")  # dictionary home + a gentle "N due" badge
     LEARNING = "learning", _("Learning")  # review queue is home, goals + streaks
 
 
+class Plan(models.TextChoices):
+    """Entitlement tier. Today the app is a one-shot purchase, so every account
+    is LIFETIME and nothing is gated. The tier exists so a pivot to
+    freemium+subscription is a data change (default → FREE, an IAP webhook
+    granting PREMIUM with an expiry), not a schema/API migration. Server-side
+    checks live in accounts.entitlements - the client only mirrors them."""
+
+    FREE = "free", _("Free")
+    PREMIUM = "premium", _("Premium")  # subscription; honored until plan_expires_at
+    LIFETIME = "lifetime", _("Lifetime")  # one-shot purchase, never expires
+
+
 class UserProfile(models.Model):
     """One-to-one product settings for a user. Auto-created on first save (signals)."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+
+    # Entitlements: set exclusively server-side (admin / future IAP webhook),
+    # read-only on the wire.
+    plan = models.CharField(max_length=12, choices=Plan.choices, default=Plan.LIFETIME)
+    plan_expires_at = models.DateTimeField(null=True, blank=True)
 
     mode = models.CharField(max_length=16, choices=AppMode.choices, default=AppMode.MIDDLE)
     display_name = models.CharField(max_length=60, blank=True)

@@ -1,4 +1,4 @@
-# kana_svg — générateur de dessins mnémoniques SVG pour tous les kana
+# kana_svg - générateur de dessins mnémoniques SVG pour tous les kana
 
 Génère un **dessin simple en SVG pour chaque hiragana et katakana** (46 + 46 de
 base, + 25 + 25 dakuten/handakuten = **142 kana couverts**), en **mode overlay** :
@@ -11,12 +11,12 @@ le dessin épouse le trait réel du caractère.
 Chaque carte superpose trois couches, comme l'atelier de dessin de l'app
 (`app/lib/views/learn/draw_mascot_view.dart`) :
 
-1. **le glyphe en filigrane** — le vrai contour du kana, très pâle, sert de guide ;
-2. **l'illustration** — le glyphe est **teinté dans la couleur de l'objet** puis
+1. **le glyphe en filigrane** - le vrai contour du kana, très pâle, sert de guide ;
+2. **l'illustration** - le glyphe est **teinté dans la couleur de l'objet** puis
    habillé de quelques formes simples. Comme on réutilise le contour réel de la
    police, *le caractère reste toujours exact et lisible* et devient l'objet
    (き = une clé dorée, ぬ = un escargot vert, は = une hache…) ;
-3. **la légende** — le romaji + le mot-image dans la langue choisie.
+3. **la légende** - le romaji + le mot-image dans la langue choisie.
 
 Les associations son↔image viennent d'une **recherche en ligne** (guides *Learn
 Hiragana* / *Learn Katakana* de Tofugu), stockées dans `research_*.json` avec, pour
@@ -70,7 +70,7 @@ Une recette est volontairement courte. Le repère : carré **0–100**, y vers l
 le glyphe occupe ~[18–82]. Pour voir où tombe chaque trait : `python -m kana_svg ref`.
 
 ```python
-def ki(a, g):                      # き — une clé
+def ki(a, g):                      # き - une clé
     body(a, g, "#d09a3e")          # teinte le glyphe = corps de la clé (laiton)
     a.circle(45, 66, 6, fill=WHITE, color="#8a5a1e", w=1.8)  # l'anneau, dans la boucle
     a.sparkle(72, 22, 3)           # un éclat

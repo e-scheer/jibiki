@@ -1,3 +1,4 @@
+import '../core/languages.dart';
 import '../models/enums.dart';
 import '../models/mnemonic.dart';
 import '../repositories/mnemonic_repository.dart';
@@ -27,11 +28,30 @@ class MnemonicViewModel extends BaseViewModel {
   bool _added = false;
   bool get added => _added;
 
+  /// True when the user's language has no content for this character and the
+  /// feed below is the English backup - the UI invites them to draw the first.
+  bool _englishFallback = false;
+  bool get englishFallback => _englishFallback;
+
   Future<void> load() async {
     final r = await runGuarded(
       () => _mnemonics.list(character: character, language: language, kind: kind),
     );
-    if (r != null) _items = r;
+    if (r == null) return;
+    _englishFallback = false;
+    _items = r;
+    if (r.isEmpty && language != fallbackLanguage) {
+      final en = await runGuarded(
+        () => _mnemonics.list(
+            character: character, language: fallbackLanguage, kind: kind),
+        silent: true,
+      );
+      if (en != null && en.isNotEmpty) {
+        _items = en;
+        _englishFallback = true;
+      }
+    }
+    notifyListeners();
   }
 
   void _replace(Mnemonic updated) {

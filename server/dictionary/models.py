@@ -1,15 +1,15 @@
-"""The dictionary — read-mostly reference data ingested from the free EDRDG family
+"""The dictionary - read-mostly reference data ingested from the free EDRDG family
 (JMdict, KANJIDIC2, KRADFILE) plus a bundled kana table.
 
 Design (DEEP_SEARCH feature 4): the JMdict entry shape is normalized into
 Word → WordForm (searchable kanji/kana surface forms) and Word → Sense → Gloss
 (multi-language glosses). Kanji and Kana are their own tables so a study Card can
 point at any of the three item kinds. Everything here is imported (management
-commands) — the API only reads it.
+commands) - the API only reads it.
 
 Glosses and meanings are normalized into their own rows (not JSON) so search can
-filter by language with a plain indexed ``text__icontains`` that works identically
-on Postgres (prod) and SQLite (offline tests).
+filter by language with a plain ``text__icontains``, trigram-accelerated on
+Postgres (see the ``*_trgm`` migrations).
 """
 
 from __future__ import annotations
@@ -57,7 +57,7 @@ class Word(models.Model):
 
 
 class WordForm(models.Model):
-    """One written form of a word — a kanji surface form (k_ele) or a kana reading
+    """One written form of a word - a kanji surface form (k_ele) or a kana reading
     (r_ele). This is the Japanese-input search index: exact / prefix / contains
     lookups hit ``text`` here, ranked by ``is_common``."""
 
@@ -133,7 +133,7 @@ class Gloss(models.Model):
 
 
 class Radical(models.Model):
-    """A radical / component from RADKFILE — used for the radical-grid lookup
+    """A radical / component from RADKFILE - used for the radical-grid lookup
     (find kanji by the parts they contain, DEEP_SEARCH feature 7) and as the label
     set for kanji decomposition."""
 
@@ -173,7 +173,7 @@ class Kanji(models.Model):
     # Glyph origin / etymology (Wiktionary "Glyph origin", CC BY-SA). Empty until
     # import_wiktionary runs. ``formation`` is the classification the text opens
     # with ("phono-semantic", "ideogrammic", "pictogram", …); ``phonetic`` is the
-    # 音符 (sound-carrying) component when the text names one — the keisei clue that
+    # 音符 (sound-carrying) component when the text names one - the keisei clue that
     # explains why a part is present even when it carries no meaning.
     origin = models.TextField(blank=True)
     formation = models.CharField(max_length=32, blank=True)
@@ -218,7 +218,7 @@ class KanjiMeaning(models.Model):
 
 
 class Kana(models.Model):
-    """A single kana character. The mnemonic content (image + story) is NOT here —
+    """A single kana character. The mnemonic content (image + story) is NOT here -
     it lives in the community `mnemonics` app keyed by (character, language), so a
     kana can carry per-language mnemonics without touching this reference row."""
 
@@ -240,7 +240,7 @@ class Kana(models.Model):
     row = models.CharField(max_length=4, blank=True)  # gojūon row key: a,k,s,t,n,h,m,y,r,w
     order = models.PositiveSmallIntegerField(default=0)  # chart order
 
-    # Writing origin: the character this glyph was derived from — a man'yōgana kanji
+    # Writing origin: the character this glyph was derived from - a man'yōgana kanji
     # for the base gojūon set (hiragana = its cursive whole, katakana = a fragment
     # of it), or the base kana for dakuten/handakuten rows. ``origin_note`` is the
     # short "how it got this shape" story shown on the kana detail screen.
@@ -254,6 +254,12 @@ class Kana(models.Model):
     # one-line explanation.
     usage_label = models.CharField(max_length=48, blank=True)
     usage = models.CharField(max_length=255, blank=True)
+
+    # Curated example sentences showing the particle at work. Each item keeps the
+    # particle as its own segment so the app can highlight it in place:
+    # {"before": …, "particle": …, "after": …, "romaji": …, "en": …}. Empty for
+    # kana with no grammatical role.
+    usage_examples = models.JSONField(default=list, blank=True)
 
     class Meta:
         db_table = "dict_kana"

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/word.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../theme/app_theme.dart';
@@ -55,9 +56,10 @@ class _SearchScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            child: TextField(
+          BoundedContent(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: TextField(
               autofocus: false,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
@@ -73,8 +75,9 @@ class _SearchScreen extends StatelessWidget {
               onChanged: vm.onQueryChanged,
               onSubmitted: vm.submit,
             ),
+            ),
           ),
-          Expanded(child: _results(context, vm)),
+          Expanded(child: BoundedContent(child: _results(context, vm))),
         ],
       ),
     );

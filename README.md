@@ -2,7 +2,7 @@
 
 A **dictionary-first Japanese memorization tool**. Search any word, break it into
 its kanji and components, and turn any entry into a spaced-repetition card
-scheduled by **FSRS-6** — with **community, per-language visual mnemonics** as the
+scheduled by **FSRS-6** - with **community, per-language visual mnemonics** as the
 differentiating feature (the market gap identified in [`DEEP_SEARCH.md`](DEEP_SEARCH.md)).
 
 This monorepo holds a **Flutter MVVM app** (`app/`) and a **Django + DRF API**
@@ -43,7 +43,7 @@ Flutter app (MVVM)                         Django API (DRF)
 **Auth is unified through allauth.** The app signs up / logs in against allauth
 **headless** (`/_allauth/app/v1/…`), receives a `session_token`, and sends it back
 as `X-Session-Token` on every call. DRF authenticates the domain API with allauth's
-own `XSessionTokenAuthentication` — so the *same* token allauth issued authorizes
+own `XSessionTokenAuthentication` - so the *same* token allauth issued authorizes
 `/api/v1/*`. Email verification, password reset, social login (Google/Apple) and
 MFA come from allauth for free.
 
@@ -56,14 +56,19 @@ MFA come from allauth for free.
 Requirements: [uv](https://docs.astral.sh/uv/), Docker (for Postgres).
 
 ```bash
-docker compose up -d db          # Postgres on localhost:5432
+docker compose up -d db          # Postgres on localhost:5432 (the one and only DB)
 make sync                        # uv sync (installs deps)
 make migrate                     # apply migrations
 make seed                        # load the curated demo dictionary + kana mnemonics
 make run                         # dev server on http://localhost:8000
-make test                        # 34 offline tests (sqlite in-memory)
+make test                        # backend test suite (against Postgres - needs `make db`)
 make lint                        # ruff check + format check
 ```
+
+**Postgres everywhere.** Dev, tests and prod all run on Postgres - there is no
+SQLite fallback. Tests create a throwaway `test_jibiki` on the same server, so
+migrations, trigram search indexes and SQL behaviour are exercised exactly as in
+production. Start the DB (`make db`) before `make run` / `make test`.
 
 Or the whole stack in containers (what runs on the server):
 
@@ -118,16 +123,16 @@ principle). Study and mnemonic writes require the session token.
 
 | Feature | Where |
 |---|---|
-| **SRS = FSRS-6** (not SM-2) | `server/srs/fsrs.py` — self-contained 21-param FSRS-6; full `ReviewLog` from day one for later per-user training |
-| **Excellent dictionary** (JMdict/KANJIDIC/kana) | `server/dictionary/` — normalized Word→Form/Sense→Gloss + real EDRDG importers + curated seed |
-| **Configurable modes** (Dictionary ↔ Learning) | one `AppMode` flag on the profile drives home layout, the due badge and notification defaults — not three code paths |
+| **SRS = FSRS-6** (not SM-2) | `server/srs/fsrs.py` - self-contained 21-param FSRS-6; full `ReviewLog` from day one for later per-user training |
+| **Excellent dictionary** (JMdict/KANJIDIC/kana) | `server/dictionary/` - normalized Word→Form/Sense→Gloss + real EDRDG importers + curated seed |
+| **Configurable modes** (Dictionary ↔ Learning) | one `AppMode` flag on the profile drives home layout, the due badge and notification defaults - not three code paths |
 | **Kanji decomposition + stroke order** | `KRADFILE` components + `component_details` (tappable, jpdb-style) + **KanjiVG stroke-order animation** (`server/dictionary/management/commands/import_kanjivg.py`, `app/.../stroke_order_view.dart`) |
-| **Community, language-dependent mnemonics** (the moat) | `server/mnemonics/` — `(character, language, kind)` first-class entity, votes, trust tiers, auto-hide moderation, never hard-deleted; app: `MnemonicPanel` |
+| **Community, language-dependent mnemonics** (the moat) | `server/mnemonics/` - `(character, language, kind)` first-class entity, votes, trust tiers, auto-hide moderation, never hard-deleted; app: `MnemonicPanel` |
 | **Free image hosting** | `django-storages` → **Cloudflare R2** (zero egress), EXIF/GPS stripped + WebP re-encode on ingest (`mnemonics/imaging.py`) |
 
-**Implemented now:** the full core loop — auth, dictionary search + detail, kanji
+**Implemented now:** the full core loop - auth, dictionary search + detail, kanji
 breakdown, kana chart, FSRS review, community mnemonics with voting + moderation
-+ **image upload** (WebP re-encode, EXIF-stripped), the mode spectrum, settings —
++ **image upload** (WebP re-encode, EXIF-stripped), the mode spectrum, settings -
 plus **per-user FSRS weight training** (`/study/optimize`, guarded to only adopt a
 fit that beats the defaults on your own data), **Anki-compatible export**
 (`/study/export`, TSV), and **KanjiVG stroke-order animation** on the kanji detail
@@ -139,7 +144,7 @@ stage 3): push notifications (needs FCM/native config) and handwriting search
 
 ## License & attribution (mandatory)
 
-jibiki bundles/ingests free data whose licenses require acknowledgement — see
+jibiki bundles/ingests free data whose licenses require acknowledgement - see
 [`NOTICE.md`](NOTICE.md): **JMdict / KANJIDIC2 / KRADFILE © EDRDG** (used under the
 EDRDG licence), **KanjiVG** (CC BY-SA 3.0) and **Tatoeba** (CC-BY) when their
 importers are used. The app surfaces the EDRDG credit in Settings.

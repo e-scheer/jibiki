@@ -4,6 +4,7 @@ import 'package:jibiki/models/kana.dart';
 import 'package:jibiki/models/kanji.dart';
 import 'package:jibiki/theme/app_theme.dart';
 import 'package:jibiki/views/widgets/origin_section.dart';
+import 'package:jibiki/views/widgets/speech_button.dart';
 
 KanjiEntry _kanji({String origin = '', String formation = '', String phonetic = ''}) =>
     KanjiEntry.fromJson({
@@ -78,12 +79,47 @@ void main() {
         'script': 'hiragana',
         'kind': 'gojuon',
         'usage_label': 'Topic particle',
-        'usage': 'Marks the topic — read wa when it is the particle.',
+        'usage': 'Marks the topic - read wa when it is the particle.',
       });
       await tester.pumpWidget(_host(KanaGrammarSection(kana: ha)));
       expect(find.text('In a sentence'), findsOneWidget);
       expect(find.text('Topic particle'), findsOneWidget);
       expect(find.textContaining('Marks the topic'), findsOneWidget);
+    });
+
+    testWidgets('renders example sentences with romaji, translation and audio',
+        (tester) async {
+      final ha = KanaEntry.fromJson({
+        'char': 'は',
+        'romaji': 'ha',
+        'script': 'hiragana',
+        'kind': 'gojuon',
+        'usage_label': 'Topic particle',
+        'usage': 'Marks the topic.',
+        'usage_examples': [
+          {
+            'before': '私',
+            'particle': 'は',
+            'after': '学生です。',
+            'romaji': 'Watashi wa gakusei desu.',
+            'en': 'I am a student.',
+          },
+          {
+            'before': '今日',
+            'particle': 'は',
+            'after': '暑いです。',
+            'romaji': 'Kyō wa atsui desu.',
+            'en': "It's hot today.",
+          },
+        ],
+      });
+      await tester.pumpWidget(_host(KanaGrammarSection(kana: ha)));
+      expect(find.textContaining('学生です', findRichText: true), findsOneWidget);
+      expect(find.text('Watashi wa gakusei desu.'), findsOneWidget);
+      expect(find.text('I am a student.'), findsOneWidget);
+      expect(find.text("It's hot today."), findsOneWidget);
+      // one speaker per example sentence
+      expect(find.byType(SpeechButton), findsNWidgets(2));
     });
 
     testWidgets('collapses for a purely phonetic kana', (tester) async {

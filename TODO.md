@@ -1,0 +1,3 @@
+- mobile and tablet friendly, but also watch friendly
+- sync automatique avec ton compte si tu es en ligne (affiche la dernière synchronisation et l'écart)
+	-> gestion si conflit entre deux (choisir version cloud ou local)

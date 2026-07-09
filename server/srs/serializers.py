@@ -63,6 +63,13 @@ class AddCardSerializer(serializers.Serializer):
     ref = serializers.CharField()
 
 
+class SetStatusSerializer(AddCardSerializer):
+    """Set one item's study status to exactly `status` - the detail-screen
+    Study / I-know-it toggles."""
+
+    status = serializers.ChoiceField(choices=["none", "learning", "known"])
+
+
 class BulkAddSerializer(serializers.Serializer):
     """Add many items at once, optionally as already-known (mature) cards."""
 
@@ -73,3 +80,58 @@ class BulkAddSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.Serializer):
     rating = serializers.IntegerField(min_value=1, max_value=4)
     duration_ms = serializers.IntegerField(min_value=0, default=0, required=False)
+
+
+class SyncCardSerializer(serializers.ModelSerializer):
+    """Card state for /study/sync - no embedded dictionary item (offline
+    clients read content from their local packs), but everything the local
+    scheduler needs, including `step`."""
+
+    item_ref = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Card
+        fields = [
+            "id",
+            "item_type",
+            "item_ref",
+            "state",
+            "step",
+            "stability",
+            "difficulty",
+            "due",
+            "last_review",
+            "reps",
+            "lapses",
+            "favorite",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SyncReviewSerializer(serializers.Serializer):
+    client_review_id = serializers.UUIDField()
+    item_type = serializers.ChoiceField(choices=ItemType.choices)
+    ref = serializers.CharField(max_length=64)
+    rating = serializers.IntegerField(min_value=1, max_value=4)
+    duration_ms = serializers.IntegerField(min_value=0, default=0, required=False)
+    # Informational - the server recomputes state; kept as the log placeholder
+    # for out-of-order inserts until the fold rewrites it.
+    state_before = serializers.IntegerField(min_value=0, max_value=3, required=False)
+    reviewed_at = serializers.DateTimeField()
+
+
+class SyncOpSerializer(serializers.Serializer):
+    client_op_id = serializers.UUIDField()
+    kind = serializers.CharField(max_length=32)
+    payload = serializers.JSONField(required=False, default=dict)
+    performed_at = serializers.DateTimeField()
+
+
+class SyncSerializer(serializers.Serializer):
+    """One /study/sync request: the client outbox (capped - the client pages
+    until drained) plus its delta watermark."""
+
+    last_synced_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    reviews = SyncReviewSerializer(many=True, required=False, default=list, max_length=500)
+    ops = SyncOpSerializer(many=True, required=False, default=list, max_length=200)

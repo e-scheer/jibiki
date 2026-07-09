@@ -1,4 +1,4 @@
-"""Dictionary search — the query planner behind GET /dict/search.
+"""Dictionary search - the query planner behind GET /dict/search.
 
 Kept request-free and unit-testable. It decides, from the shape of the query,
 whether the user typed Japanese (match surface forms) or a Latin gloss (match
@@ -96,7 +96,7 @@ def search_words(q: str, *, lang: str = "en", limit: int = 25) -> list[Word]:
 
 
 def kanji_in(text: str) -> list[str]:
-    """The distinct CJK characters in a string, in order — used to break a word
+    """The distinct CJK characters in a string, in order - used to break a word
     into its constituent kanji for the entry detail's kanji breakdown."""
     out: list[str] = []
     seen: set[str] = set()

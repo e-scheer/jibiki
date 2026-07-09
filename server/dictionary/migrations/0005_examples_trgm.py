@@ -1,5 +1,5 @@
 """Trigram GIN indexes for example-sentence and name lookup (both use
-``__icontains``). Postgres-only; a no-op on SQLite (dev/tests)."""
+``__icontains``). Postgres-only."""
 
 from django.db import migrations
 

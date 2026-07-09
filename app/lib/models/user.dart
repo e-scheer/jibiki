@@ -11,6 +11,8 @@ class UserProfile {
     required this.timezone,
     required this.notificationsEnabled,
     required this.notifyThreshold,
+    this.plan = 'lifetime',
+    this.planExpiresAt,
   });
 
   final AppMode mode;
@@ -22,6 +24,10 @@ class UserProfile {
   final bool notificationsEnabled;
   final int notifyThreshold;
 
+  /// Entitlement tier, set server-side only (see core/entitlements.dart).
+  final String plan; // free | premium | lifetime
+  final DateTime? planExpiresAt;
+
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
         mode: AppMode.fromString(json['mode'] as String?),
         displayName: (json['display_name'] as String?) ?? '',
@@ -31,7 +37,26 @@ class UserProfile {
         timezone: (json['timezone'] as String?) ?? 'UTC',
         notificationsEnabled: (json['notifications_enabled'] as bool?) ?? false,
         notifyThreshold: (json['notify_threshold'] as num?)?.toInt() ?? 15,
+        plan: (json['plan'] as String?) ?? 'lifetime',
+        planExpiresAt: json['plan_expires_at'] == null
+            ? null
+            : DateTime.tryParse(json['plan_expires_at'] as String),
       );
+
+  /// Wire-shaped, so a cached copy round-trips through fromJson (offline
+  /// bootstrap keeps the last known profile when the server is unreachable).
+  Map<String, dynamic> toJson() => {
+        'mode': mode.wire,
+        'display_name': displayName,
+        'mnemonic_language': mnemonicLanguage,
+        'desired_retention': desiredRetention,
+        'new_cards_per_day': newCardsPerDay,
+        'timezone': timezone,
+        'notifications_enabled': notificationsEnabled,
+        'notify_threshold': notifyThreshold,
+        'plan': plan,
+        'plan_expires_at': planExpiresAt?.toUtc().toIso8601String(),
+      };
 
   UserProfile copyWith({AppMode? mode, String? mnemonicLanguage}) => UserProfile(
         mode: mode ?? this.mode,
@@ -42,6 +67,8 @@ class UserProfile {
         timezone: timezone,
         notificationsEnabled: notificationsEnabled,
         notifyThreshold: notifyThreshold,
+        plan: plan,
+        planExpiresAt: planExpiresAt,
       );
 }
 
@@ -59,4 +86,7 @@ class AppUser {
           (json['profile'] as Map?)?.cast<String, dynamic>() ?? const {},
         ),
       );
+
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'email': email, 'profile': profile.toJson()};
 }

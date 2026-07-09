@@ -1,4 +1,4 @@
-# jibiki — store metadata
+# jibiki - store metadata
 
 Everything needed to publish jibiki on Google Play and the App Store, in English
 and French (the app ships both). Character limits are noted per field.
@@ -6,7 +6,7 @@ and French (the app ships both). Character limits are noted per field.
 - **App name:** jibiki
 - **Bundle / application id:** `app.jibiki.jibiki`
 - **Category:** Education
-- **Content rating:** Everyone / 4+ — note **user-generated content** (community
+- **Content rating:** Everyone / 4+ - note **user-generated content** (community
   mnemonics are moderated: voting, reporting, auto-hide, never hard-deleted).
 - **Website / support:** e.scheer@deuse.be
 - **Brand:** vermilion 朱 (`#D4402A`), the wordmark glyph is 字. Icon = white 字 on
@@ -21,30 +21,30 @@ and French (the app ships both). Character limits are noted per field.
 **Title** (≤30): `jibiki: Japanese dictionary`
 
 **Short description** (≤80):
-`Look up Japanese, then remember it — with community visual mnemonics and FSRS.`
+`Look up Japanese, then remember it - with community visual mnemonics and FSRS.`
 
 **Full description** (≤4000):
 ```
 jibiki is a dictionary-first way to learn Japanese: look a word up, break it into
-its kanji and kana, and turn any entry into a spaced-repetition card — without
+its kanji and kana, and turn any entry into a spaced-repetition card - without
 ever leaving the app.
 
 What makes jibiki different is its community, per-language visual mnemonics: real
 drawings that make a character stick, voted on and localized to your language
 (English and French today). It's the feature the big apps dropped or never had.
 
-• Dictionary-first — search any word by kanji, kana, romaji or meaning. Full
+• Dictionary-first - search any word by kanji, kana, romaji or meaning. Full
   hiragana and katakana charts, JLPT kanji, radicals, example sentences and
   animated stroke order.
-• Remember it with FSRS-6 — the modern spaced-repetition scheduler (fewer reviews
+• Remember it with FSRS-6 - the modern spaced-repetition scheduler (fewer reviews
   for the same retention), studied by swipe cards or multiple-choice quiz.
-• Community visual mnemonics — browse image mnemonics per character in your
+• Community visual mnemonics - browse image mnemonics per character in your
   language, upvote the best, or draw your own and share a pack.
-• Learn your way — a Dictionary ↔ Learning spectrum: use it as a pure dictionary,
+• Learn your way - a Dictionary ↔ Learning spectrum: use it as a pure dictionary,
   or put the review queue front and centre. No "done for today" walls.
-• Bootstrap your level — mark the kana and kanji you already know in one tap, so
+• Bootstrap your level - mark the kana and kanji you already know in one tap, so
   study starts where you are.
-• Yours to keep — Anki-compatible export of your whole deck.
+• Yours to keep - Anki-compatible export of your whole deck.
 
 The dictionary works with no account. Study, mnemonics and sync need a free login.
 
@@ -71,19 +71,19 @@ langue : de vrais dessins qui font retenir un caractère, votés et localisés d
 votre langue (français et anglais aujourd'hui). La fonctionnalité que les grandes
 apps ont retirée ou n'ont jamais eue.
 
-• Le dictionnaire d'abord — cherchez par kanji, kana, romaji ou sens. Tables
+• Le dictionnaire d'abord - cherchez par kanji, kana, romaji ou sens. Tables
   complètes des hiragana et katakana, kanji JLPT, radicaux, phrases d'exemple et
   ordre des traits animé.
-• Retenez avec FSRS-6 — le planificateur de répétition espacée moderne (moins de
+• Retenez avec FSRS-6 - le planificateur de répétition espacée moderne (moins de
   révisions à mémorisation égale), en cartes à swiper ou en quiz à choix.
-• Mnémoniques visuelles communautaires — parcourez les mnémoniques par caractère
+• Mnémoniques visuelles communautaires - parcourez les mnémoniques par caractère
   dans votre langue, votez pour les meilleures, ou dessinez les vôtres et
   partagez un pack.
-• À votre rythme — un spectre Dictionnaire ↔ Apprentissage : dictionnaire pur, ou
+• À votre rythme - un spectre Dictionnaire ↔ Apprentissage : dictionnaire pur, ou
   file de révision au premier plan. Pas de mur « terminé pour aujourd'hui ».
-• Démarrez à votre niveau — marquez d'un geste les kana et kanji que vous
+• Démarrez à votre niveau - marquez d'un geste les kana et kanji que vous
   connaissez déjà.
-• Vos données — export de tout votre paquet, compatible Anki.
+• Vos données - export de tout votre paquet, compatible Anki.
 
 Le dictionnaire fonctionne sans compte. Étude, mnémoniques et synchro demandent
 une connexion gratuite.
@@ -120,10 +120,10 @@ Ordre des traits : KanjiVG (CC BY-SA 3.0). Phrases d'exemple : Tatoeba (CC-BY).
 
 ## Asset checklist (to produce before submission)
 
-- **App icon:** generated — `assets/icon/icon.png` (1024², white 字 on vermilion),
+- **App icon:** generated - `assets/icon/icon.png` (1024², white 字 on vermilion),
   declined to all densities + Android adaptive/monochrome + iOS + web via
   `flutter_launcher_icons`.
-- **Feature graphic** (Play, 1024×500): not yet — vermilion field, 字 wordmark left,
+- **Feature graphic** (Play, 1024×500): not yet - vermilion field, 字 wordmark left,
   a review card + mnemonic drawing right.
 - **Screenshots** (phone, 2–8): Explore/search, kana chart (with "I know these"),
   a swipe review card, a kanji breakdown with stroke order, a community mnemonic

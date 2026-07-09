@@ -114,7 +114,7 @@ class KanjiSerializer(serializers.ModelSerializer):
 
 class KanjiDetailSerializer(KanjiSerializer):
     """Adds the decomposition tree (component labels), a sample of words that
-    contain this kanji, and the KanjiVG stroke-order paths — the cross-links +
+    contain this kanji, and the KanjiVG stroke-order paths - the cross-links +
     stroke animation of DEEP_SEARCH features 4 & 7."""
 
     component_details = serializers.SerializerMethodField()
@@ -180,5 +180,5 @@ class KanaSerializer(serializers.ModelSerializer):
         model = Kana
         fields = [
             "char", "romaji", "script", "kind", "row", "order",
-            "origin", "origin_note", "usage_label", "usage",
+            "origin", "origin_note", "usage_label", "usage", "usage_examples",
         ]

@@ -1,6 +1,6 @@
 """Load a jibiki content pack (docs/CONTENT_PACK.md) into the DB.
 
-This is the PRIMARY hydration path — the DB is populated from jibiki's own JSON
+This is the PRIMARY hydration path - the DB is populated from jibiki's own JSON
 model, never from upstream XML (that is the build step, done once). Idempotent:
 keyed by natural keys (kana char, kanji literal, word seq) so reloading an
 enriched pack updates in place and never deletes a Word a study Card points at.

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/word.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/word_detail_viewmodel.dart';
-import '../widgets/add_to_study_bar.dart';
+import '../widgets/study_status_bar.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
 import '../widgets/tappable_japanese.dart';
@@ -37,26 +38,17 @@ class _WordDetail extends StatelessWidget {
     final word = vm.word;
     return Scaffold(
       appBar: AppBar(title: const Text('Word')),
-      bottomNavigationBar: word == null
-          ? null
-          : AddToStudyBar(
-              added: vm.added,
-              onAdd: () async {
-                final ok = await vm.addToStudy();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? 'Added to your study deck' : vm.error ?? 'Failed')),
-                  );
-                }
-              },
-            ),
-      body: vm.isLoading
-          ? const LoadingView()
-          : vm.hasError
-              ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-              : word == null
-                  ? const SizedBox.shrink()
-                  : _content(context, word, lang),
+      bottomNavigationBar:
+          word == null ? null : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
+      body: BoundedContent(
+        child: vm.isLoading
+            ? const LoadingView()
+            : vm.hasError
+                ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                : word == null
+                    ? const SizedBox.shrink()
+                    : _content(context, word, lang),
+      ),
     );
   }
 

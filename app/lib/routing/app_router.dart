@@ -11,7 +11,9 @@ import '../views/community/my_submissions_view.dart';
 import '../views/dictionary/kanji_detail_view.dart';
 import '../views/dictionary/word_detail_view.dart';
 import '../views/kana/kana_detail_view.dart';
+import '../views/feedback/feedback_view.dart';
 import '../views/onboarding/onboarding_view.dart';
+import '../views/settings/offline_storage_view.dart';
 import '../views/settings/settings_view.dart';
 import '../views/shell/home_shell.dart';
 import '../views/shell/splash_view.dart';
@@ -29,7 +31,9 @@ GoRouter buildRouter(AppState app) {
       final atAuth = loc == '/login' || loc == '/register';
 
       if (app.status == AuthStatus.unknown) return loc == '/splash' ? null : '/splash';
-      if (!app.isAuthenticated) return atAuth ? null : '/login';
+      // Local-only (no account) counts as signed in: the paid app is fully
+      // usable offline; login stays reachable to link an account later.
+      if (!app.canEnter) return atAuth ? null : '/login';
       if (!app.onboarded) return loc == '/onboarding' ? null : '/onboarding';
       if (atAuth || loc == '/onboarding' || loc == '/splash') return '/';
       return null;
@@ -61,6 +65,8 @@ GoRouter buildRouter(AppState app) {
         builder: (_, s) => KanaDetailView(char: s.pathParameters['char']!),
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsView()),
+      GoRoute(path: '/settings/storage', builder: (_, __) => const OfflineStorageView()),
+      GoRoute(path: '/feedback', builder: (_, __) => const FeedbackView()),
       GoRoute(path: '/submissions', builder: (_, __) => const MySubmissionsView()),
       GoRoute(path: '/decks/new', builder: (_, __) => const DeckBuilderView()),
       GoRoute(

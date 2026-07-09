@@ -19,9 +19,9 @@ StudyCard _card(int id) => StudyCard(
     );
 
 /// A repository whose queue serves a per-session batch of new cards and, when
-/// asked for more (`newLimit`), the rest of the pool — mirroring the server.
+/// asked for more (`newLimit`), the rest of the pool - mirroring the server.
 class _FakeStudyRepo extends StudyRepository {
-  _FakeStudyRepo(super.service, {required this.pool, required this.batch});
+  _FakeStudyRepo(StudyService service, {required this.pool, required this.batch}) : super(service, service);
   final List<StudyCard> pool;
   final int batch;
   final Set<int> reviewed = {};
@@ -65,7 +65,7 @@ void main() {
     expect(vm.current!.id, 1);
   });
 
-  test('studyMore appends the rest of the pool and resumes in place — no wall', () async {
+  test('studyMore appends the rest of the pool and resumes in place - no wall', () async {
     final vm = ReviewViewModel(await _repo(poolSize: 4, batch: 2));
     await vm.load();
 
@@ -93,5 +93,19 @@ void main() {
 
     expect(vm.total, 2);
     expect(vm.hasMoreNew, isFalse);
+  });
+
+  test('rateMany grades a whole batch and advances past it at once (Match)', () async {
+    final vm = ReviewViewModel(await _repo(poolSize: 4, batch: 4));
+    await vm.load();
+    expect(vm.total, 4);
+
+    final firstThree = vm.sessionCards.take(3).toList();
+    await vm.rateMany(firstThree, Rating.good);
+
+    expect(vm.reviewed, 3);
+    expect(vm.index, 3);
+    expect(vm.current!.id, 4); // resumes at the fourth card
+    expect(vm.finished, isFalse);
   });
 }

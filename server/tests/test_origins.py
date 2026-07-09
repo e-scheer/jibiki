@@ -2,7 +2,7 @@
 
 The Wiktionary importer itself is network-bound, so we exercise only its pure
 parser (`_extract`) against fixed HTML, plus the static kana-origin table and the
-serializer surfaces — all offline.
+serializer surfaces - all offline.
 """
 
 import pytest
@@ -51,7 +51,7 @@ def test_kana_usage_particle_hiragana_only():
     label, desc = kana_usage("ha", "hiragana")
     assert label == "Topic particle"
     assert "topic" in desc.lower()
-    # The katakana twin is purely phonetic — no grammatical role.
+    # The katakana twin is purely phonetic - no grammatical role.
     assert kana_usage("ha", "katakana") == ("", "")
 
 
@@ -61,18 +61,40 @@ def test_kana_usage_absent_for_plain_syllable():
     assert kana_usage("ki", "hiragana") == ("", "")
 
 
+def test_kana_usage_examples_cover_every_role():
+    from dictionary.seed_data import KANA_USAGE, KANA_USAGE_EXAMPLES, kana_usage_examples
+
+    # every kana with a grammatical role gets example sentences, and only those
+    assert set(KANA_USAGE_EXAMPLES) == set(KANA_USAGE)
+    for examples in KANA_USAGE_EXAMPLES.values():
+        assert examples
+        for e in examples:
+            assert set(e) == {"before", "particle", "after", "romaji", "en"}
+            assert e["particle"] and e["romaji"] and e["en"]
+
+    ex = kana_usage_examples("ha", "hiragana")
+    assert ex[0]["particle"] == "は"
+    assert " wa " in ex[0]["romaji"]  # は as a particle romanizes to its spoken form
+    # hiragana-only, like the role itself; phonetic kana have none
+    assert kana_usage_examples("ha", "katakana") == []
+    assert kana_usage_examples("ki", "hiragana") == []
+
+
 def test_seed_and_serializer_expose_kana_usage(seeded, client):
     from dictionary.models import Kana
 
     ha = Kana.objects.get(char="は")
     assert ha.usage_label == "Topic particle"
     assert ha.usage
+    assert ha.usage_examples and ha.usage_examples[0]["particle"] == "は"
     # purely phonetic kana carry nothing
     assert Kana.objects.get(char="き").usage == ""
+    assert Kana.objects.get(char="き").usage_examples == []
 
     data = client.get("/api/v1/dict/kana/は").json()
     assert data["usage_label"] == "Topic particle"
     assert data["usage"]
+    assert data["usage_examples"][0]["particle"] == "は"
 
 
 def test_seed_populates_kana_origin_and_serializer(seeded, client):

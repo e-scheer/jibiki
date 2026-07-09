@@ -1,10 +1,10 @@
-"""Django settings — 12-factor (mirrors the tusorsou stack): everything configurable
+"""Django settings - 12-factor (mirrors the tusorsou stack): everything configurable
 lives in env vars, read once here.
 
 jibiki is an API server for a Flutter client, so this is DRF-first: no server-rendered
 templates, token auth, JSON everywhere. The dictionary data (JMdict/KANJIDIC/kana) and
 the community mnemonics live in Postgres; user mnemonic images go to Cloudflare R2 (or
-any S3-compatible store) in prod, or the local media volume in dev — the same swappable
+any S3-compatible store) in prod, or the local media volume in dev - the same swappable
 storage pattern tusorsou uses for Hetzner Object Storage.
 """
 
@@ -27,7 +27,7 @@ CSRF_TRUSTED_ORIGINS = [
     o for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o
 ]
 
-# Transport security — production only (DEBUG=0), where Caddy terminates TLS and
+# Transport security - production only (DEBUG=0), where Caddy terminates TLS and
 # forwards X-Forwarded-Proto (identical posture to tusorsou).
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",  # allauth requires the sites framework
     "rest_framework",
     "corsheaders",
-    # allauth — headless mode exposes the auth REST API the Flutter client uses.
+    # allauth - headless mode exposes the auth REST API the Flutter client uses.
     "allauth",
     "allauth.account",
     "allauth.headless",
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "dictionary",
     "srs",
     "mnemonics",
+    "feedback",
 ]
 
 MIDDLEWARE = [
@@ -71,7 +72,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # After AuthenticationMiddleware — resolves the allauth session for every
+    # After AuthenticationMiddleware - resolves the allauth session for every
     # request (including the headless app-client X-Session-Token path).
     "allauth.account.middleware.AccountMiddleware",
 ]
@@ -135,7 +136,7 @@ REST_FRAMEWORK = {
     },
 }
 
-# CORS — the Flutter web build (dev) is a different origin than the API. Native
+# CORS - the Flutter web build (dev) is a different origin than the API. Native
 # builds are unaffected. In prod, lock this down to the app's web origin(s).
 CORS_ALLOWED_ORIGINS = [o for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o]
 CORS_ALLOW_ALL_ORIGINS = DEBUG and not CORS_ALLOWED_ORIGINS
@@ -145,7 +146,7 @@ from corsheaders.defaults import default_headers  # noqa: E402
 CORS_ALLOW_HEADERS = (*default_headers, "x-session-token")
 
 # ── allauth (headless) ─────────────────────────────────────────────────────────
-# Email-only accounts (no username — the product never shows one), same as the
+# Email-only accounts (no username - the product never shows one), same as the
 # tusorsou stack. HEADLESS_ONLY: this server has no server-rendered account pages;
 # the Flutter app is the only frontend, reached via deep links for the email flows.
 ACCOUNT_LOGIN_METHODS = {"email"}
@@ -166,7 +167,7 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": f"{_APP_URL}/social-error",
 }
 
-# MFA — TOTP + recovery codes (no WebAuthn → no fido2 dependency), mirrors tusorsou.
+# MFA - TOTP + recovery codes (no WebAuthn → no fido2 dependency), mirrors tusorsou.
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp"]
 MFA_TOTP_ISSUER = "jibiki"
 
@@ -211,7 +212,7 @@ if not DEBUG:
     if bool(_g["client_id"]) != bool(_g["secret"]):
         raise RuntimeError("social provider 'google': set BOTH client_id and secret, or neither")
 
-# Email — allauth sends verification / password-reset / notification mail here.
+# Email - allauth sends verification / password-reset / notification mail here.
 # Dev prints to stdout (console backend); set EMAIL_HOST in prod and it switches
 # to SMTP automatically (same pattern as tusorsou).
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
@@ -243,13 +244,13 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", str(BASE_DIR / "staticfiles")
 
 # Community mnemonic images. Dev → local /media volume (served by Caddy in the
 # container stack, by Django's static() in DEBUG). Prod → set MEDIA_S3_* to push
-# to Cloudflare R2 (zero egress — the DEEP_SEARCH recommendation) or any
+# to Cloudflare R2 (zero egress - the DEEP_SEARCH recommendation) or any
 # S3-compatible store. Same swappable pattern as tusorsou's Hetzner offload.
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.environ.get("MEDIA_STORE", str(BASE_DIR.parent / "data" / "media"))
 
 # Ingest guardrails for uploaded mnemonic images (community.imaging re-encodes to
-# WebP, strips EXIF/GPS, caps dimensions — the DEEP_SEARCH moderation-pipeline rule).
+# WebP, strips EXIF/GPS, caps dimensions - the DEEP_SEARCH moderation-pipeline rule).
 MNEMONIC_IMAGE_MAX_BYTES = int(os.environ.get("MNEMONIC_IMAGE_MAX_BYTES", str(6 * 1024 * 1024)))
 MNEMONIC_IMAGE_MAX_DIM = int(os.environ.get("MNEMONIC_IMAGE_MAX_DIM", "1200"))
 

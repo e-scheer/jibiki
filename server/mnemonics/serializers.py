@@ -3,6 +3,8 @@ from __future__ import annotations
 from django.conf import settings
 from rest_framework import serializers
 
+from accounts.languages import DEFAULT_LANGUAGE, validate_language_code
+
 from .models import Mnemonic, MnemonicDeck, ReportReason
 
 
@@ -53,7 +55,7 @@ class MnemonicSerializer(serializers.ModelSerializer):
 
 
 class MnemonicDeckSerializer(serializers.ModelSerializer):
-    """List/card view of a community deck — no items, just the cover + counts."""
+    """List/card view of a community deck - no items, just the cover + counts."""
 
     author_name = serializers.SerializerMethodField()
     item_count = serializers.SerializerMethodField()
@@ -95,7 +97,7 @@ class MnemonicDeckSerializer(serializers.ModelSerializer):
 
 
 class MnemonicDeckDetailSerializer(MnemonicDeckSerializer):
-    """Full deck view — includes the ordered mnemonics."""
+    """Full deck view - includes the ordered mnemonics."""
 
     items = serializers.SerializerMethodField()
 
@@ -109,10 +111,14 @@ class MnemonicDeckDetailSerializer(MnemonicDeckSerializer):
 
 class CreateDeckSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=120)
+
+    def validate_language(self, value: str) -> str:
+        return validate_language_code(value)
+
     description = serializers.CharField(
         max_length=2000, required=False, allow_blank=True, default=""
     )
-    language = serializers.CharField(max_length=8, default="en")
+    language = serializers.CharField(max_length=8, default=DEFAULT_LANGUAGE)
     kind = serializers.ChoiceField(choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA)
     mnemonic_ids = serializers.ListField(
         child=serializers.IntegerField(), required=False, default=list
@@ -122,8 +128,12 @@ class CreateDeckSerializer(serializers.Serializer):
 
 class CreateMnemonicSerializer(serializers.Serializer):
     character = serializers.CharField(max_length=4)
+
+    def validate_language(self, value: str) -> str:
+        return validate_language_code(value)
+
     kind = serializers.ChoiceField(choices=Mnemonic.Kind.choices)
-    language = serializers.CharField(max_length=8, default="en")
+    language = serializers.CharField(max_length=8, default=DEFAULT_LANGUAGE)
     story = serializers.CharField(max_length=2000)
     image = serializers.FileField(required=False)
 

@@ -1,4 +1,4 @@
-"""Mnemonic domain operations — request-free and unit-testable.
+"""Mnemonic domain operations - request-free and unit-testable.
 
 Owns the trust/moderation policy: where a new mnemonic lands (visible vs pending),
 how a vote mutates the denormalized score, and when accumulated reports auto-hide
@@ -124,7 +124,14 @@ def visible_or_own_for(user, character: str, language: str, kind: str):
     """The public feed for a character PLUS the signed-in user's own PENDING
     submissions, surfaced on top so authors always see their own work (badged
     "in review" client-side) instead of wondering where it went. Removed/hidden
-    content stays out. Their VISIBLE mnemonics are already in the public set."""
+    content stays out. Their VISIBLE mnemonics are already in the public set.
+
+    Deliberately STRICT on language (no English fallback here, unlike
+    `active_for_many`): the browse feed must return empty for an uncurated
+    language so the client can detect it and show its own badged English
+    backup + "draw the first one" prompt. `active_for_many` falls back
+    server-side because the everywhere-visual layer has no per-character UI to
+    badge the fallback."""
     base = list(visible_for(character, language, kind).select_related("author__profile"))
     if not (user and getattr(user, "is_authenticated", False)):
         return base
@@ -163,6 +170,21 @@ def active_for_many(user, characters, kind, language) -> dict:
         )
         for m in qs:
             result.setdefault(m.character, m)  # ordering → first per char is best
+    # English backup: mnemonic languages are open (community can start any
+    # language), so a fresh language must degrade to the English set instead
+    # of a blank visual layer. The serializer carries `language`, letting the
+    # client badge the fallback.
+    still_missing = [c for c in chars if c not in result]
+    if still_missing and language != "en":
+        qs = (
+            Mnemonic.objects.filter(
+                status=MnemonicStatus.VISIBLE, kind=kind, language="en", character__in=still_missing
+            )
+            .select_related("author__profile")
+            .order_by("character", "-score", "-created_at")
+        )
+        for m in qs:
+            result.setdefault(m.character, m)
     return result
 
 
@@ -227,17 +249,27 @@ def toggle_save(user, mnemonic: Mnemonic) -> bool:
     return True
 
 
+def set_save(user, mnemonic: Mnemonic, value: bool) -> bool:
+    """Explicit-value bookmark. Unlike toggle_save this is replay-safe, so the
+    offline sync can redeliver it without flipping the state back."""
+    if value:
+        MnemonicSave.objects.get_or_create(mnemonic=mnemonic, user=user)
+        return True
+    MnemonicSave.objects.filter(mnemonic=mnemonic, user=user).delete()
+    return False
+
+
 def saved_for(user):
     """The user's saved mnemonics, most-recently-saved first."""
     return Mnemonic.objects.filter(saves__user=user).order_by("-saves__created_at")
 
 
-# ── Community decks — the drawing → pack → propose flow ──────────────────────
+# ── Community decks - the drawing → pack → propose flow ──────────────────────
 
 
 def deck_initial_status(user, *, publish: bool) -> str:
     """A draft stays private until published; on publish it lands VISIBLE for
-    staff / trusted authors, else PENDING — mirroring `initial_status`."""
+    staff / trusted authors, else PENDING - mirroring `initial_status`."""
     if not publish:
         return DeckStatus.DRAFT
     if getattr(user, "is_staff", False):
@@ -327,7 +359,7 @@ def visible_decks(language: str | None = None, kind: str | None = None):
 @transaction.atomic
 def enroll_deck(user, deck: MnemonicDeck) -> int:
     """Study a community deck: create SRS cards for every distinct character it
-    covers (idempotent — the unique (user,item) constraint skips duplicates)."""
+    covers (idempotent - the unique (user,item) constraint skips duplicates)."""
     from dictionary.models import Kana, Kanji
     from srs.models import Card, ItemType, State
 
@@ -366,6 +398,7 @@ __all__ = [
     "saved_for",
     "set_choice",
     "set_deck_items",
+    "set_save",
     "toggle_save",
     "user_trust",
     "visible_decks",

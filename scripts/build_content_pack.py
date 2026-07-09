@@ -3,7 +3,7 @@
 
 This is the ONLY place upstream formats are parsed. It emits jibiki's own versioned
 JSON model (see docs/CONTENT_PACK.md). After running it once, the backend loads the
-pack (manage.py load_pack) and the app downloads it — neither ever touches JMdict
+pack (manage.py load_pack) and the app downloads it - neither ever touches JMdict
 XML again. Enrichment = add a language key to the JSON, no re-scrape.
 
 Standalone: stdlib only, no Django import required.
@@ -62,7 +62,7 @@ def kanji_entry(literal, *, grade=None, strokes_count=0, jlpt=None, freq=None, r
         "on": on or [],
         "kun": kun or [],
         "nanori": nanori or [],
-        "meanings": meanings or {},          # {"en": [...], "fr": [...]} — enrichment-friendly
+        "meanings": meanings or {},          # {"en": [...], "fr": [...]} - enrichment-friendly
         "components": components or [],
         "strokes": {"viewbox": viewbox, "paths": stroke_paths or []},
     }

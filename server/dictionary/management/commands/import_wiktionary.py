@@ -2,7 +2,7 @@
 
 Wiktionary's rendered "Glyph origin" section is the cleanest free source of the
 "why does this character look like this" story: whether it is a **pictogram**
-(象形), an **ideogrammic compound** (会意), or — most usefully for learners — a
+(象形), an **ideogrammic compound** (会意), or - most usefully for learners - a
 **phono-semantic compound** (形声/keisei), where one component carries the meaning
 and another is present only for its *sound* (the 音符 / phonetic). We fetch the
 parsed HTML, isolate that section, strip it to readable prose, and store it on
@@ -12,7 +12,7 @@ component when the text names one.
 Scope defaults to the JLPT ∪ Jōyō set (~2.2k kanji) to stay polite; ``--all``
 covers every kanji. Idempotent: skips kanji that already have an origin unless
 ``--force``. A ~1s delay + 429 backoff keeps us within Wiktionary's etiquette.
-Content is CC BY-SA 4.0 — the app attributes Wiktionary in the origin section.
+Content is CC BY-SA 4.0 - the app attributes Wiktionary in the origin section.
 
     python manage.py import_wiktionary                 # JLPT ∪ grade<=8
     python manage.py import_wiktionary --limit 20      # smoke test
@@ -45,12 +45,28 @@ _SECTION_RE = re.compile(
 )
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
-# CJK ranges — used to pull the single phonetic component character out of the
+# CJK ranges - used to pull the single phonetic component character out of the
 # "... + phonetic 寺 ..." clause (and to avoid matching "phonetic series").
 _CJK = r"一-鿿㐀-䶿豈-﫿"
 _PHONETIC_RE = re.compile(rf"phonetic\s+([{_CJK}])")
 
-# Readable prose starts at one of these formation keywords — everything before it
+# Old Chinese phonological reconstructions (Baxter–Sagart / Zhengzhang) are always
+# marked with a leading "*" and litter Wiktionary's glyph-origin prose - e.g.
+# "(OC *ɢʷɯs)", "(形聲 / 形声, *ŋaʔ; *ŋah)", "a *ŋa- word family". They are cryptic
+# IPA noise for a Japanese learner, so strip them: any parenthetical carrying a
+# "*", then any bare "*token" left behind. Pinyin/label parens like "(象形)" or
+# "(lì)" carry no "*" and are kept.
+_RECON_PAREN_RE = re.compile(r"\s*\([^()]*\*[^()]*\)")
+# A bare reconstruction token like "*ŋa-" (or "* ŋa -" once tag-stripping spaced it
+# out), with any trailing hyphen it carried.
+_RECON_TOKEN_RE = re.compile(r"(?<=\s)\*\s*[^\s()]+(?:\s*[-–])?")
+
+
+def _strip_reconstructions(text: str) -> str:
+    return _RECON_TOKEN_RE.sub("", _RECON_PAREN_RE.sub("", text))
+
+
+# Readable prose starts at one of these formation keywords - everything before it
 # is the "historical forms" / "phonetic series" reconstruction tables, which we
 # drop. (keyword substring, formation tag). Order doesn't matter; we take the
 # earliest match in the text.
@@ -61,7 +77,7 @@ _MARKERS: list[tuple[str, str]] = [
     ("pictogram", "pictogram"),
     ("phonetic loan", "phonetic-loan"),
     ("simplified from", "simplified"),
-    # Modern glyphs that are a reshaped/abbreviated form of an older character —
+    # Modern glyphs that are a reshaped/abbreviated form of an older character -
     # e.g. 会 ← 會, 来 ← 來. Common in the Jōyō set and genuinely useful context.
     ("unorthodox variant", "variant"),
     ("vulgar variant", "variant"),
@@ -113,7 +129,7 @@ class Command(BaseCommand):
             done += 1
             try:
                 page_html = self._fetch(literal, opts["delay"])
-            except Exception as exc:  # network hiccup — log and keep going
+            except Exception as exc:  # network hiccup - log and keep going
                 self.stderr.write(f"  {literal}: fetch failed ({exc})")
                 continue
             parsed = _extract(page_html)
@@ -127,7 +143,7 @@ class Command(BaseCommand):
             if done % 100 == 0 or done == total:
                 self.stdout.write(f"  … {done}/{total} processed, {filled} with an origin")
 
-        self.stdout.write(self.style.SUCCESS(f"Done — {filled}/{total} kanji got a glyph origin."))
+        self.stdout.write(self.style.SUCCESS(f"Done - {filled}/{total} kanji got a glyph origin."))
 
     def _fetch(self, char: str, delay: float) -> str:
         params = urllib.parse.urlencode(
@@ -153,7 +169,7 @@ class Command(BaseCommand):
                     return ""  # no Wiktionary page for this character
                 if exc.code == 429:
                     wait = _retry_after(exc, attempt)
-                    self.stderr.write(f"  429 rate-limited — backing off {wait:.0f}s")
+                    self.stderr.write(f"  429 rate-limited - backing off {wait:.0f}s")
                     time.sleep(wait)
                     continue
                 raise
@@ -201,7 +217,7 @@ def _extract(page_html: str) -> tuple[str, str, str] | None:
     if start is None:
         return None
 
-    prose = _tidy(text[start:])
+    prose = _tidy(_strip_reconstructions(text[start:]))
     # Drop trailing sister-project boilerplate that lives inside the section.
     for noise in _TRAILING_NOISE:
         idx = prose.find(noise)

@@ -87,4 +87,4 @@ class Command(BaseCommand):
         if batch:
             Name.objects.bulk_create(batch)
             total += len(batch)
-        self.stdout.write(self.style.SUCCESS(f"Done — {total} names imported."))
+        self.stdout.write(self.style.SUCCESS(f"Done - {total} names imported."))

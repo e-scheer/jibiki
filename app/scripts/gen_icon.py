@@ -12,14 +12,14 @@ OUT = os.path.join(HERE, "assets", "icon")
 os.makedirs(OUT, exist_ok=True)
 
 SIZE = 1024
-VERMILION = (212, 64, 42, 255)  # #D4402A — the brand seal red
+VERMILION = (212, 64, 42, 255)  # #D4402A - the brand seal red
 WHITE = (255, 255, 255, 255)
 GLYPH = "字"
 
 
 def _font(px: int) -> ImageFont.FreeTypeFont:
     f = ImageFont.truetype(FONT, px)
-    # NotoSansJP is a variable font — pin a heavy weight so the seal reads bold.
+    # NotoSansJP is a variable font - pin a heavy weight so the seal reads bold.
     try:
         f.set_variation_by_axes([800])
     except Exception:
@@ -59,7 +59,7 @@ def master() -> None:
 def foreground() -> None:
     """Android adaptive foreground: transparent, 字 kept inside the safe zone."""
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    _draw_glyph(img, WHITE, 0.42)  # smaller — adaptive masks crop the outer ~1/3
+    _draw_glyph(img, WHITE, 0.42)  # smaller - adaptive masks crop the outer ~1/3
     img.save(os.path.join(OUT, "icon_foreground.png"))
 
 

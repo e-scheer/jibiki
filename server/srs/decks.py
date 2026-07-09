@@ -1,4 +1,4 @@
-"""Smart decks — study a whole set at once instead of adding items one by one.
+"""Smart decks - study a whole set at once instead of adding items one by one.
 
 A deck is either a *content* set (all hiragana, all katakana, all kana, JLPT-N5
 kanji, all kanji, common words, all words) whose items are enrolled as cards on

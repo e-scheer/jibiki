@@ -32,7 +32,8 @@ class LearnCarouselView extends StatefulWidget {
 }
 
 class _LearnCarouselViewState extends State<LearnCarouselView> {
-  late final PageController _pager = PageController(initialPage: widget.initialIndex);
+  late final PageController _pager =
+      PageController(initialPage: widget.initialIndex);
   late int _index = widget.initialIndex;
 
   @override
@@ -42,7 +43,8 @@ class _LearnCarouselViewState extends State<LearnCarouselView> {
   }
 
   void _goto(int i) {
-    _pager.animateToPage(i, duration: Motion.timed(context, Motion.base), curve: Motion.out);
+    _pager.animateToPage(i,
+        duration: Motion.timed(context, Motion.base), curve: Motion.out);
   }
 
   @override
@@ -75,47 +77,115 @@ class _LearnCarouselViewState extends State<LearnCarouselView> {
   }
 }
 
-class _Strip extends StatelessWidget {
+/// The kana quick-jump bar. One vermilion pill marks the current character and
+/// *slides* between items as the selection moves (tap or page swipe), like a
+/// toggle, instead of blinking on in place. Fixed-width cells make the slide exact
+/// and let the bar keep the active kana centred as it scrolls.
+class _Strip extends StatefulWidget {
   const _Strip({required this.items, required this.index, required this.onTap});
   final List<KanaEntry> items;
   final int index;
   final ValueChanged<int> onTap;
 
   @override
+  State<_Strip> createState() => _StripState();
+}
+
+class _StripState extends State<_Strip> {
+  static const double _cell = 50; // per-item width
+  static const double _pad = 12; // ListView-style horizontal padding
+  static const double _inset = 4; // gap between the pill and its cell edges
+  final _scroll = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _center(jump: true));
+  }
+
+  @override
+  void didUpdateWidget(covariant _Strip old) {
+    super.didUpdateWidget(old);
+    if (widget.index != old.index) _center();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Scroll so the active cell sits centred, matching where the pill slides to.
+  void _center({bool jump = false}) {
+    if (!_scroll.hasClients) return;
+    final target = (_pad + widget.index * _cell + _cell / 2) -
+        _scroll.position.viewportDimension / 2;
+    final to = target.clamp(0.0, _scroll.position.maxScrollExtent);
+    if (jump || !Motion.enabled(context)) {
+      _scroll.jumpTo(to);
+    } else {
+      _scroll.animateTo(to, duration: Motion.base, curve: Motion.out);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final jc = context.jc;
     return SizedBox(
       height: 44,
-      child: ListView.builder(
+      child: SingleChildScrollView(
+        controller: _scroll,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: items.length,
-        itemBuilder: (_, i) {
-          final on = i == index;
-          return Pressable(
-            label: items[i].romaji,
-            selected: on,
-            onTap: () => onTap(i),
-            child: AnimatedContainer(
-              duration: Motion.timed(context, Motion.fast),
-              alignment: Alignment.center,
-              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: on ? jc.brand : Colors.transparent,
-                borderRadius: BorderRadius.circular(Radii.pill),
-              ),
-              child: Text(
-                items[i].romaji.toUpperCase(),
-                style: TextStyle(
-                  color: on ? Colors.white : jc.muted,
-                  fontWeight: on ? FontWeight.w800 : FontWeight.w600,
-                  fontSize: on ? 14 : 12.5,
+        padding: const EdgeInsets.symmetric(horizontal: _pad),
+        child: SizedBox(
+          width: widget.items.length * _cell,
+          child: Stack(
+            children: [
+              // The sliding highlight, behind the labels.
+              AnimatedPositioned(
+                duration: Motion.timed(context, Motion.base),
+                curve: Motion.out,
+                top: 8,
+                bottom: 8,
+                left: widget.index * _cell + _inset,
+                width: _cell - _inset * 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: jc.brand,
+                      borderRadius: BorderRadius.circular(Radii.pill)),
                 ),
               ),
-            ),
-          );
-        },
+              Row(
+                children: [
+                  for (var i = 0; i < widget.items.length; i++)
+                    SizedBox(
+                      width: _cell,
+                      child: Pressable(
+                        label: widget.items[i].romaji,
+                        selected: i == widget.index,
+                        onTap: () => widget.onTap(i),
+                        child: Center(
+                          child: AnimatedDefaultTextStyle(
+                            duration: Motion.timed(context, Motion.base),
+                            curve: Motion.out,
+                            style: TextStyle(
+                              color:
+                                  i == widget.index ? Colors.white : jc.muted,
+                              fontWeight: i == widget.index
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              fontSize: i == widget.index ? 14 : 12.5,
+                            ),
+                            child: Text(widget.items[i].romaji.toUpperCase()),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -142,9 +212,8 @@ class _LearnPageState extends State<LearnPage> {
 
   Future<void> _load() async {
     try {
-      final list = await context
-          .read<MnemonicRepository>()
-          .list(character: widget.item.char, language: widget.language, kind: 'kana');
+      final list = await context.read<MnemonicRepository>().list(
+          character: widget.item.char, language: widget.language, kind: 'kana');
       Mnemonic? pick;
       for (final m in list) {
         if (m.hasImage) {
@@ -162,7 +231,9 @@ class _LearnPageState extends State<LearnPage> {
   Future<void> _draw() async {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => DrawMascotView(character: widget.item.char, language: widget.language)),
+      MaterialPageRoute(
+          builder: (_) => DrawMascotView(
+              character: widget.item.char, language: widget.language)),
     );
     if (saved == true) {
       setState(() => _loading = true);
@@ -202,15 +273,22 @@ class _LearnPageState extends State<LearnPage> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(item.romaji, style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: jc.ink)),
+          Text(item.romaji,
+              style: TextStyle(
+                  fontSize: 30, fontWeight: FontWeight.w800, color: jc.ink)),
           if (word.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(word,
-                  textAlign: TextAlign.center, style: TextStyle(color: jc.body, fontSize: 14.5, height: 1.35)),
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(color: jc.body, fontSize: 14.5, height: 1.35)),
             ),
           const SizedBox(height: 16),
-          _BottomBar(char: item.char, onSay: () => Speech.instance.say(item.char), onDraw: _draw),
+          _BottomBar(
+              char: item.char,
+              onSay: () => Speech.instance.say(item.char),
+              onDraw: _draw),
         ],
       ),
     );
@@ -227,14 +305,19 @@ class _Glyph extends StatelessWidget {
       fit: BoxFit.scaleDown,
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Text(char, style: TextStyle(fontSize: 200, fontWeight: FontWeight.w700, color: context.jc.brand)),
+        child: Text(char,
+            style: TextStyle(
+                fontSize: 200,
+                fontWeight: FontWeight.w700,
+                color: context.jc.brand)),
       ),
     );
   }
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.char, required this.onSay, required this.onDraw});
+  const _BottomBar(
+      {required this.char, required this.onSay, required this.onDraw});
   final String char;
   final VoidCallback onSay;
   final VoidCallback onDraw;
@@ -252,7 +335,9 @@ class _BottomBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(char, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: jc.ink)),
+          Text(char,
+              style: TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.w700, color: jc.ink)),
           const Spacer(),
           IconButton(
             onPressed: () {

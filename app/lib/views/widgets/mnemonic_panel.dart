@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/languages.dart';
 import '../../models/mnemonic.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
@@ -26,7 +27,7 @@ class MnemonicPanel extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text('Mnemonics · ${vm.language.toUpperCase()}',
+              child: Text('Mnemonics · ${mnemonicLanguageName(vm.language)}',
                   style: context.text.titleMedium),
             ),
             TextButton.icon(
@@ -37,6 +38,36 @@ class MnemonicPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
+        if (vm.englishFallback)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+              decoration: BoxDecoration(
+                color: context.jc.surfaceAlt,
+                borderRadius: BorderRadius.circular(Radii.md),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.translate, size: 18, color: context.jc.muted),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Nothing in ${mnemonicLanguageName(vm.language)} for '
+                      '${vm.character} yet - yours could be the first! '
+                      'English shown meanwhile.',
+                      style: TextStyle(
+                          fontSize: 12.5, color: context.jc.muted, height: 1.35),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => _draw(context, vm),
+                    child: const Text('Draw it'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         if (vm.isLoading && vm.items.isEmpty)
           const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
         else if (vm.items.isEmpty)
@@ -192,7 +223,7 @@ class _EmptyFeed extends StatelessWidget {
         children: [
           Icon(Icons.brush_outlined, color: jc.muted, size: 30),
           const SizedBox(height: 10),
-          Text('No mnemonics here yet in ${language.toUpperCase()}',
+          Text('No mnemonics here yet in ${mnemonicLanguageName(language)}',
               textAlign: TextAlign.center, style: TextStyle(color: jc.body, fontWeight: FontWeight.w600)),
           const SizedBox(height: 2),
           Text('Be the first, draw a mascot for $character.',
@@ -236,6 +267,7 @@ class _MnemonicPost extends StatelessWidget {
               aspectRatio: 1,
               child: NetImage(
                 url: m.imageUrl,
+                bytes: m.imageBytes,
                 cacheWidth: 900,
                 semanticLabel: 'Mnemonic drawing for ${m.character}',
                 errorBuilder: (_) => _GlyphFallback(char: m.character),
@@ -246,35 +278,41 @@ class _MnemonicPost extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    _IconAction(
-                      icon: m.liked ? Icons.favorite : Icons.favorite_border,
-                      color: m.liked ? jc.ratingAgain : jc.ink,
-                      tooltip: 'Like',
-                      onTap: () {
-                        Haptics.light();
-                        vm.vote(m, 1);
-                      },
-                    ),
-                    const Spacer(),
-                    _IconAction(
-                      icon: m.saved ? Icons.bookmark : Icons.bookmark_border,
-                      color: jc.ink,
-                      tooltip: 'Save',
-                      onTap: () {
-                        Haptics.tick();
-                        vm.toggleSave(m);
-                      },
-                    ),
-                  ],
-                ),
-                if (m.score > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2, bottom: 2),
-                    child: Text('${m.score} ${m.score == 1 ? 'like' : 'likes'}',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                // Like/save only exist for published mnemonics - the server
+                // rejects votes/saves on an "in review" one, so showing the
+                // controls there just made them flip back on tap.
+                if (m.isVisible) ...[
+                  Row(
+                    children: [
+                      _IconAction(
+                        icon: m.liked ? Icons.favorite : Icons.favorite_border,
+                        color: m.liked ? jc.ratingAgain : jc.ink,
+                        tooltip: 'Like',
+                        onTap: () {
+                          Haptics.light();
+                          vm.vote(m, 1);
+                        },
+                      ),
+                      const Spacer(),
+                      _IconAction(
+                        icon: m.saved ? Icons.bookmark : Icons.bookmark_border,
+                        color: jc.ink,
+                        tooltip: 'Save',
+                        onTap: () {
+                          Haptics.tick();
+                          vm.toggleSave(m);
+                        },
+                      ),
+                    ],
                   ),
+                  if (m.score > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 2),
+                      child: Text('${m.score} ${m.score == 1 ? 'like' : 'likes'}',
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                    ),
+                ] else
+                  const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: RichText(
@@ -346,7 +384,7 @@ class _Header extends StatelessWidget {
                 Text(m.authorName,
                     style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text('${m.character} · ${m.language.toUpperCase()}',
+                Text('${m.character} · ${mnemonicLanguageName(m.language)}',
                     style: TextStyle(color: jc.muted, fontSize: 11.5)),
               ],
             ),

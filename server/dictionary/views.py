@@ -18,7 +18,7 @@ from .serializers import (
     WordSerializer,
 )
 
-# The dictionary is public reference data — immediately useful with no account
+# The dictionary is public reference data - immediately useful with no account
 # (DEEP_SEARCH stage-1 rule). Auth only gates the study/mnemonic write surfaces.
 
 
@@ -27,8 +27,12 @@ class SearchView(APIView):
     throttle_scope = "search"
 
     def get(self, request):
+        from accounts.languages import normalize_language_code
+
         q = request.query_params.get("q", "")
-        lang = request.query_params.get("lang", "en")
+        # Lenient: gloss search filters by language, so case must match and a
+        # stray value should fall back to English rather than return nothing.
+        lang = normalize_language_code(request.query_params.get("lang"))
         try:
             limit = min(int(request.query_params.get("limit", 25)), 50)
         except ValueError:
@@ -82,7 +86,7 @@ class KanjiDetailView(APIView):
 
 
 class WordListView(generics.ListAPIView):
-    """Browse (not search) the dictionary by category — common words, JLPT level —
+    """Browse (not search) the dictionary by category - common words, JLPT level -
     so a user can read entries without typing a query first. Paginated."""
 
     permission_classes = [AllowAny]

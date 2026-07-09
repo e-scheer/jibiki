@@ -1,7 +1,7 @@
 # Production topology. Local dev uses compose.override.yaml (auto-loaded, exposes
 # the DB port). On the server the override is absent and this file IS what runs.
 #
-#   db      Postgres — the store for dictionary + SRS + community mnemonics
+#   db      Postgres - the store for dictionary + SRS + community mnemonics
 #   api     Django + gunicorn (DRF + allauth headless)
 #   caddy   reverse proxy + TLS, serves /media + /static   (profile "web")
 #
@@ -50,10 +50,14 @@ services:
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-jibiki <noreply@jibiki.app>}
       SOCIALACCOUNT_GOOGLE_CLIENT_ID: ${SOCIALACCOUNT_GOOGLE_CLIENT_ID:-}
       SOCIALACCOUNT_GOOGLE_CLIENT_SECRET: ${SOCIALACCOUNT_GOOGLE_CLIENT_SECRET:-}
+      CONTENT_PACK_DIR: /data/content
       TZ: UTC
     volumes:
       - mediadata:/data/media
       - staticfiles:/app/staticfiles
+      # SQLite content packs: built in the api container (manage.py build_packs
+      # --out /data/content/packs), served by Caddy from the same volume.
+      - packdata:/data/content/packs
     depends_on:
       db:
         condition: service_healthy
@@ -71,6 +75,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - mediadata:/srv/media:ro
       - staticfiles:/srv/static:ro
+      - packdata:/srv/packs:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -81,5 +86,6 @@ volumes:
   pgdata:
   mediadata:
   staticfiles:
+  packdata:
   caddy_data:
   caddy_config:

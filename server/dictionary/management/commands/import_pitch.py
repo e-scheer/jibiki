@@ -62,4 +62,4 @@ class Command(BaseCommand):
         if to_update:
             WordForm.objects.bulk_update(to_update, ["pitch"])
             total += len(to_update)
-        self.stdout.write(self.style.SUCCESS(f"Done — pitch set on {total} readings."))
+        self.stdout.write(self.style.SUCCESS(f"Done - pitch set on {total} readings."))

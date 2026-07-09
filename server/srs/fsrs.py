@@ -3,7 +3,7 @@
 FSRS (Free Spaced Repetition Scheduler) is the modern, benchmarked SRS the
 DEEP_SEARCH blueprint selects over SM-2/Leitner. This is a faithful, dependency-
 free implementation of FSRS-6 (21 parameters, w0..w20) with the standard learning
-/ relearning step machine — the same behaviour as py-fsrs, kept in-repo so the
+/ relearning step machine - the same behaviour as py-fsrs, kept in-repo so the
 scheduling logic is inspectable and version-stable.
 
 The scheduler is pure: it takes a card's memory state + a rating + a timestamp and

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/deck.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
@@ -41,7 +42,8 @@ class _Decks extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Study')),
-      body: RefreshIndicator(
+      body: BoundedContent(
+        child: RefreshIndicator(
         color: jc.brand,
         onRefresh: vm.load,
         child: vm.hasError
@@ -84,6 +86,7 @@ class _Decks extends StatelessWidget {
                   const _CommunityPacksCard(),
                 ],
               ),
+        ),
       ),
     );
   }
@@ -280,7 +283,7 @@ class _Progress extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final label = deck.total == 0
-        ? (deck.isFilter ? '—' : 'empty')
+        ? (deck.isFilter ? '-' : 'empty')
         : '${deck.studied}/${deck.total}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

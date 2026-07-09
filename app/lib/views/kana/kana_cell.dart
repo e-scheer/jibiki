@@ -6,7 +6,7 @@ import '../widgets/pressable.dart';
 import '../widgets/study_mark.dart';
 
 /// One cell in the kana matrix: the glyph(s) over their romaji, carrying study +
-/// selection state. Purely presentational — the matrix decides `selected`,
+/// selection state. Purely presentational - the matrix decides `selected`,
 /// `mark`, and what a tap does. In "Both" mode it shows hiragana then katakana
 /// (muted) side by side. Soft filled tiles (no per-cell borders) keep the grid
 /// calm; the selected tile lifts with the vermilion wash + ring, and a press

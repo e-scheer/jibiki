@@ -1,4 +1,4 @@
-# jibiki — Flutter app (MVVM)
+# jibiki - Flutter app (MVVM)
 
 The client for the jibiki API. Strict **MVVM**: Views never touch the network;
 they observe ViewModels, which call Repositories, which call Services, which call
@@ -12,20 +12,20 @@ lib/
 ├── repositories/  thin domain layer over services (+ caching for reference data)
 ├── viewmodels/    ChangeNotifier per screen + global AppState (session/mode)
 ├── routing/       go_router with an auth/onboarding redirect guard
-├── theme/         Material 3 — ink-on-paper, vermilion (朱) accent
+├── theme/         Material 3 - ink-on-paper, vermilion (朱) accent
 └── views/         auth · onboarding · shell · dictionary · kana · study · settings
 ```
 
 ### Layer rules
 
-- **View** — widgets only. Reads a ViewModel via `context.watch`, dispatches
+- **View** - widgets only. Reads a ViewModel via `context.watch`, dispatches
   intents via `context.read`. No repositories/services here.
-- **ViewModel** — `extends BaseViewModel` (loading + error + `runGuarded`).
+- **ViewModel** - `extends BaseViewModel` (loading + error + `runGuarded`).
   Holds screen state; depends on repositories, never on Dio.
-- **Repository** — the ViewModel-facing domain API; owns caching (e.g. the kana
+- **Repository** - the ViewModel-facing domain API; owns caching (e.g. the kana
   chart and per-kanji detail are memoized).
-- **Service** — maps one API endpoint group to models.
-- **AppState** — the single global ViewModel: who's signed in, their profile/mode,
+- **Service** - maps one API endpoint group to models.
+- **AppState** - the single global ViewModel: who's signed in, their profile/mode,
   and the bootstrap status the router redirects on.
 
 ### Auth
@@ -36,11 +36,11 @@ gets a `session_token`, and `AuthRepository` persists it via `SessionStore`. The
 the domain API is authenticated by the same token allauth issued.
 
 > `SessionStore` uses `shared_preferences` for simplicity. For production, swap in
-> `flutter_secure_storage` for the token (Keychain/Keystore) — it's a one-file change.
+> `flutter_secure_storage` for the token (Keychain/Keystore) - it's a one-file change.
 
 ### Run
 
-This repo tracks `lib/`, `pubspec.yaml`, `test/` and `analysis_options.yaml` — the
+This repo tracks `lib/`, `pubspec.yaml`, `test/` and `analysis_options.yaml` - the
 hand-written app. The **platform scaffolding** (`android/`, `ios/`, `web/`,
 `linux/`, …) is generated, so create it once before the first run:
 
@@ -56,7 +56,7 @@ flutter run --dart-define=JIBIKI_API_BASE=http://localhost:8000
 The base URL defaults to `http://10.0.2.2:8000` on the Android emulator and
 `http://localhost:8000` elsewhere; override with `--dart-define=JIBIKI_API_BASE=…`.
 
-### ⚠️ Running on a physical Android device — read this
+### ⚠️ Running on a physical Android device - read this
 
 `10.0.2.2` is the **emulator-only** alias for the host. A **physical device cannot
 reach it**, so any build without `--dart-define=JIBIKI_API_BASE` will sit on the
@@ -64,7 +64,7 @@ splash showing *"Can't reach the server"*. On a real device you MUST point the a
 at the dev machine's LAN IP (or tunnel to it):
 
 ```bash
-# Build / run for the physical device — ALWAYS pass the LAN IP:
+# Build / run for the physical device - ALWAYS pass the LAN IP:
 flutter run   --dart-define=JIBIKI_API_BASE=http://192.168.1.6:8000
 flutter build apk --release --target-platform android-arm64 \
   --dart-define=JIBIKI_API_BASE=http://192.168.1.6:8000
@@ -72,7 +72,7 @@ flutter build apk --release --target-platform android-arm64 \
 
 Gotcha that already bit us once: a bare `flutter run` (no `--dart-define`) installs
 a **debug** build that targets `10.0.2.2` and **silently overwrites** a correctly
-built release APK on the device — the app then can't reach the server. If you see
+built release APK on the device - the app then can't reach the server. If you see
 *"Can't reach the server"*, first check the target URL printed under the message,
 then reinstall with the define. Confirm which build is actually installed with:
 
@@ -88,5 +88,5 @@ flutter run --dart-define=JIBIKI_API_BASE=http://localhost:8000
 ```
 
 The splash's *"Sign in instead"* button is an escape hatch: even when the server is
-unreachable, a user is never trapped — they can always drop the session and reach
+unreachable, a user is never trapped - they can always drop the session and reach
 the login screen (see `SplashView` / `AppState.logout`).

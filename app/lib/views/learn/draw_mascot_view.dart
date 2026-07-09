@@ -293,7 +293,7 @@ class _Toolbar extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   // Row 2, the fixed house palette. A soft fade at both ends signals
-                  // the strip scrolls — a quiet "there's more" cue.
+                  // the strip scrolls - a quiet "there's more" cue.
                   SizedBox(
                     height: 36,
                     child: ShaderMask(
@@ -420,7 +420,7 @@ class _Swatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    // Selection reads as a ring around the dot (with a gap), not a stamped check —
+    // Selection reads as a ring around the dot (with a gap), not a stamped check -
     // cleaner, and it never fights the swatch colour.
     return Pressable(
       label: 'Pen colour',

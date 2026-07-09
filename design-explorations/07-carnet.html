@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki — exploration 07 · Carnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papier: #FAFAF8;          /* blanc froid, chroma quasi nul */
+    --encre: #22242E;           /* graphite bleu-noir */
+    --encre-2: #464B59;         /* texte secondaire, ~7:1 */
+    --encre-3: #565B6B;         /* placeholders, ~5.6:1 */
+    --stylo: #C23B2E;           /* stylo rouge du prof, ~5.1:1 */
+    --surligneur: #F4E36A;      /* LE surligneur (jaune pâle) */
+    --carreau: rgba(96, 118, 158, .075);  /* quadrillage cahier */
+    --pupitre: #2B2D36;         /* backdrop galerie */
+    --postit: #FBF2B7;
+    --main: "Klee One", "IBM Plex Sans", "Hiragino Maru Gothic ProN", sans-serif;
+    --ui: "IBM Plex Sans", sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--pupitre);
+    color: var(--encre);
+    font-family: var(--main);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.55;
+    padding: 52px 40px 84px;
+  }
+
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  :focus-visible { outline: 2px dashed var(--stylo); outline-offset: 3px; border-radius: 4px; }
+
+  /* ---------- En-tête de la galerie ---------- */
+  .galerie-tete {
+    max-width: 1290px;
+    margin: 0 auto 54px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .galerie-tete .mini-hanamaru { flex: none; width: 64px; height: 64px; transform: rotate(-6deg); }
+  .galerie-tete h1 {
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.1;
+    color: #F3F3F1;
+    position: relative;
+  }
+  .galerie-tete h1 svg { display: block; margin-top: 2px; }
+  .galerie-tete p {
+    font-size: 15px;
+    color: #C6C9D2;
+    max-width: 58ch;
+    text-wrap: pretty;
+    margin-left: 12px;
+  }
+
+  /* ---------- Rangée d'écrans ---------- */
+  .rangee {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 56px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .poste { display: flex; flex-direction: column; gap: 14px; }
+  .legende { color: #C6C9D2; font-size: 15px; padding-left: 6px; }
+
+  .screen {
+    width: 390px;
+    height: 844px;
+    background: var(--papier);
+    border-radius: 34px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.42), 0 2px 0 rgba(255,255,255,.06) inset;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* page de cahier : quadrillage + marge rouge */
+  .page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    background-color: var(--papier);
+    background-image:
+      linear-gradient(to right, rgba(194,59,46,.16) 0 1px, transparent 1px),
+      linear-gradient(to right, var(--carreau) 0 1px, transparent 1px),
+      linear-gradient(to bottom, var(--carreau) 0 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px, 24px 24px;
+    background-position: 25px 0, 0 0, 0 0;
+    background-repeat: no-repeat, repeat, repeat;
+    padding: 12px 20px 20px 36px;
+    display: flex;
+    flex-direction: column;
+  }
+  .page.avec-nav { padding-bottom: 100px; }
+
+  /* ---------- Barre de statut ---------- */
+  .statut {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--ui);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--encre-2);
+    padding: 4px 2px 0;
+    margin-bottom: 10px;
+  }
+  .statut svg { display: block; }
+
+  /* ---------- Encadrés à main levée ---------- */
+  .boite { position: relative; }
+  .boite > .trait {
+    position: absolute;
+    inset: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    pointer-events: none;
+    overflow: visible;
+  }
+  .trait path {
+    fill: none;
+    stroke: var(--encre);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .trait.rouge path { stroke: var(--stylo); }
+  .trait.pale path { stroke: rgba(34,36,46,.55); }
+
+  /* ---------- Soulignés tremblés ---------- */
+  .titre-section {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    display: inline-block;
+  }
+  .titre-section svg { display: block; margin-top: 1px; }
+  .souligne { fill: none; stroke: var(--stylo); stroke-width: 1.8; stroke-linecap: round; }
+
+  /* ---------- Coup de surligneur ---------- */
+  .hl, .note, .onglet { position: relative; z-index: 0; }
+  .hl { display: inline-block; }
+  .hl::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: -5px; right: -8px; top: 14%; bottom: -2%;
+    background: var(--surligneur);
+    opacity: .52;
+    transform: rotate(-.7deg);
+    border-radius: 7px 12px 5px 14px / 14px 5px 12px 7px;
+  }
+
+  /* ---------- Boutons encre ---------- */
+  .btn-encre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    background: var(--encre);
+    color: #FDFDFC;
+    font-family: var(--main);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 13px 17px 14px 18px / 18px 13px 17px 14px;
+  }
+  .btn-encre:hover { background: #303342; }
+
+  /* ---------- Annotations en marge ---------- */
+  .note-marge {
+    position: absolute;
+    color: var(--stylo);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ---------- Navigation basse : onglets d'index ---------- */
+  .onglets {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 82px;
+    background: var(--papier);
+    display: flex;
+    align-items: stretch;
+    padding: 0 10px 6px;
+  }
+  .onglets .bord {
+    position: absolute;
+    top: -6px; left: 0;
+    width: 100%; height: 8px;
+    overflow: visible;
+  }
+  .onglets .bord path { fill: none; stroke: rgba(34,36,46,.5); stroke-width: 1.3; stroke-linecap: round; }
+  .onglet {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1px;
+    padding-top: 9px;
+    margin: -11px 3px 6px;          /* la patte dépasse du bord */
+    color: var(--encre-2);
+    background: var(--papier);
+    border: 1.2px solid rgba(34,36,46,.32);
+    border-bottom: none;
+    border-radius: 9px 11px 0 0;
+  }
+  .onglet .kanji-ic { font-size: 17px; line-height: 1.2; font-weight: 600; }
+  .onglet .lib { font-family: var(--ui); font-size: 10px; font-weight: 500; letter-spacing: .01em; }
+  .onglet:nth-child(3) { transform: rotate(.5deg); margin-top: -8px; }
+  .onglet:nth-child(5) { transform: rotate(-.4deg); margin-top: -9px; }
+  .onglet:nth-child(6) { transform: rotate(.4deg); }
+  .onglet.actif {
+    color: var(--encre);
+    margin-top: -17px;
+    padding-top: 12px;
+    border-color: rgba(34,36,46,.55);
+    transform: rotate(-.6deg);
+  }
+  .onglet.actif::before {
+    content: "";
+    position: absolute;
+    inset: 3px 4px 0;
+    background: var(--surligneur);
+    opacity: .5;
+    border-radius: 7px 9px 2px 3px / 9px 7px 3px 2px;
+    z-index: -1;
+  }
+
+  /* ---------- Accueil ---------- */
+  .entete-accueil {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 2px 0 18px;
+  }
+  .marque { font-size: 23px; font-weight: 600; line-height: 1.15; }
+  .marque svg { display: block; margin-top: 0; }
+  .date-page { font-size: 13px; font-weight: 400; color: var(--encre-2); padding-bottom: 6px; }
+
+  .recherche {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 50px;
+    padding: 6px 14px;
+    margin-bottom: 26px;
+  }
+  .recherche input {
+    border: none;
+    background: transparent;
+    font-family: var(--main);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--encre);
+    width: 100%;
+  }
+  .faux-placeholder {
+    position: absolute;
+    left: 43px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--encre-3);
+    font-size: 15px;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .faux-placeholder .o-macron { font-family: var(--ui); font-weight: 600; }
+
+  .bloc-revisions { padding: 16px 16px 14px; margin-bottom: 34px; }
+  .compte-revisions { font-size: 18px; margin-bottom: 12px; }
+  .compte-revisions .n { font-size: 26px; }
+  .compte-revisions .sep { color: var(--encre-3); font-weight: 400; padding: 0 4px; }
+  .compte-revisions small { font-size: 14px; font-weight: 400; color: var(--encre-2); }
+
+  .mot-du-jour { margin-bottom: 30px; }
+  .mdj-corps { display: flex; align-items: flex-start; gap: 18px; margin-top: 14px; }
+  .mdj-mot { font-size: 44px; line-height: 1.15; font-weight: 600; flex: none; }
+  .mdj-mot rt { font-size: 12px; font-weight: 400; color: var(--encre-2); }
+  .mdj-def { padding-top: 14px; }
+  .mdj-def .romaji { font-family: var(--ui); font-size: 12.5px; color: var(--encre-2); margin-bottom: 2px; }
+  .mdj-def .gloss { font-size: 15px; }
+  .lien-fiche {
+    display: inline-flex;
+    align-items: center;
+    margin: -8px 0 -14px;
+    padding-top: 16px;
+    font-size: 13.5px;
+    color: var(--encre);
+    text-decoration: underline wavy rgba(194,59,46,.75) 1.2px;
+    text-underline-offset: 5px;
+    min-height: 44px;
+  }
+
+  .recentes .ligne {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 9px 0 3px;
+  }
+  .recentes .jp {
+    font-size: 17px;
+    text-decoration: underline wavy rgba(96,118,158,.55) 1.2px;
+    text-underline-offset: 5px;
+  }
+  .recentes .fr { font-size: 13px; font-weight: 400; color: var(--encre-2); flex: 1; }
+  .recentes .quand { font-family: var(--ui); font-size: 11px; color: var(--encre-3); }
+
+  /* ---------- Fiche mot ---------- */
+  .entete-fiche {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .retour { font-size: 14.5px; font-weight: 600; min-height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 4px 0 0; }
+  .fil { font-family: var(--ui); font-size: 11.5px; color: var(--encre-3); }
+
+  .genko {
+    position: absolute;
+    top: -14px; right: -16px;
+    pointer-events: none;
+  }
+
+  .heros { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 10px; position: relative; }
+  .case-kanji {
+    flex: none;
+    width: 118px; height: 118px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .case-kanji .guides { position: absolute; inset: 6px; pointer-events: none; }
+  .case-kanji .guides path { stroke: rgba(96,118,158,.28); stroke-width: 1; stroke-dasharray: 4 5; fill: none; }
+  .kanji-heros { font-size: 76px; line-height: 1; font-weight: 600; }
+  .heros-infos { padding-top: 2px; }
+  .heros-infos .furigana { font-size: 19px; font-weight: 600; }
+  .heros-infos .romaji { font-family: var(--ui); font-size: 13px; color: var(--encre-2); margin: 1px 0 8px; }
+  .btn-audio {
+    width: 46px; height: 46px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-audio svg.ic { position: relative; }
+  .btn-audio .cercle { position: absolute; inset: 0; }
+  .btn-audio .cercle path { fill: none; stroke: var(--encre); stroke-width: 1.5; stroke-linecap: round; }
+
+  .tags { font-family: var(--ui); font-size: 12px; font-weight: 500; color: var(--encre-2); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+  .tag-cercle { position: relative; padding: 2px 5px; }
+  .tag-cercle svg { position: absolute; inset: -5px -7px; width: calc(100% + 14px); height: calc(100% + 10px); overflow: visible; pointer-events: none; }
+  .tag-cercle path { fill: none; stroke: var(--stylo); stroke-width: 1.4; stroke-linecap: round; }
+
+  .sens { margin-bottom: 14px; }
+  .sens ol { list-style: none; margin-top: 5px; }
+  .sens li { display: flex; gap: 9px; font-size: 15px; padding: 2px 0; }
+  .sens li .no { color: var(--stylo); font-weight: 600; flex: none; }
+
+  .compo { margin-bottom: 16px; }
+  .compo-rangee { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+  .compo-el { text-align: center; }
+  .compo-case {
+    width: 50px; height: 50px;
+    margin: 0 auto 4px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 600;
+  }
+  .compo-el .lib { font-family: var(--ui); font-size: 11px; color: var(--encre-2); }
+  .compo .plus { color: var(--stylo); font-size: 19px; font-weight: 600; padding: 0 2px 20px; }
+
+  .mnemo { margin-bottom: 14px; }
+  .postit {
+    background: var(--postit);
+    border-radius: 3px 6px 4px 7px;
+    box-shadow: 0 7px 16px rgba(34,36,46,.16);
+    transform: rotate(-1.4deg);
+    padding: 18px 14px 10px;
+    margin: 14px 6px 2px 2px;
+    position: relative;
+  }
+  .postit .washi {
+    position: absolute;
+    top: -11px; left: 50%;
+    width: 88px; height: 24px;
+    transform: translateX(-50%) rotate(-3.5deg);
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.32) 0 5px, transparent 5px 11px),
+      rgba(139, 168, 205, .42);
+    clip-path: polygon(0 10%, 3% 0, 97% 5%, 100% 0, 99.4% 88%, 96% 100%, 4% 95%, .6% 100%);
+  }
+  .postit p { font-size: 14.5px; line-height: 1.55; }
+  .postit .pied { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+  .vote { display: flex; align-items: center; gap: 5px; font-family: var(--ui); font-size: 13px; font-weight: 600; min-height: 44px; margin: -10px 0; padding: 0 6px 0 2px; }
+  .vote svg { display: block; }
+  .auteur { font-family: var(--ui); font-size: 11.5px; color: var(--encre-2); font-weight: 400; }
+
+  .exemple { margin-bottom: 12px; }
+  .phrase { font-size: 18px; line-height: 1.8; margin-top: 4px; }
+  .seg {
+    padding: 1px 1px;
+    margin-right: 7px;
+    text-decoration: underline wavy rgba(96,118,158,.6) 1.2px;
+    text-underline-offset: 6px;
+    cursor: pointer;
+  }
+  .seg:hover { text-decoration-color: var(--stylo); }
+  .traduction { font-size: 13px; font-weight: 400; color: var(--encre-2); margin-top: 3px; }
+
+  /* ---------- Révision ---------- */
+  .entete-revision {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .quitter { font-size: 14.5px; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+  .score { font-size: 16px; }
+  .score .total { color: var(--encre-2); font-weight: 400; font-size: 13px; }
+
+  .progression { position: relative; height: 16px; margin: 4px 2px 40px; }
+  .progression .rempli {
+    position: absolute;
+    left: 2px; top: 3px; bottom: 3px;
+    width: 35%;
+    background: var(--surligneur);
+    opacity: .62;
+    border-radius: 5px 8px 4px 9px / 9px 4px 8px 5px;
+    transform: rotate(-.35deg);
+  }
+
+  .carte-zone { flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; }
+  .carte {
+    padding: 34px 22px 26px;
+    text-align: center;
+    position: relative;
+    margin: 0 6px;
+  }
+  .carte .mot { font-size: 78px; line-height: 1.15; font-weight: 600; }
+  .carte .separation { margin: 10px auto 12px; display: block; }
+  .carte .lecture { font-size: 22px; margin-bottom: 2px; }
+  .carte .sens-carte { font-size: 15.5px; font-weight: 400; color: var(--encre-2); }
+  .hanamaru-pose {
+    position: absolute;
+    top: -34px; right: -16px;
+    width: 126px; height: 126px;
+    transform: rotate(8deg);
+    pointer-events: none;
+  }
+  .felicitation {
+    text-align: right;
+    color: var(--stylo);
+    font-size: 13.5px;
+    font-weight: 600;
+    margin: 10px 14px 0 0;
+    transform: rotate(-1.6deg);
+  }
+
+  .notes { display: flex; gap: 8px; margin-top: 26px; }
+  .note {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 2px 8px;
+    min-height: 84px;
+    position: relative;
+    border-radius: 8px;
+  }
+  .note svg.coche { display: block; }
+  .note .lib { font-size: 13px; font-weight: 600; line-height: 1.2; }
+  .note .delai { font-family: var(--ui); font-size: 10.5px; color: var(--encre-2); }
+  .note.choisi::before {
+    content: "";
+    position: absolute;
+    inset: 2px 0;
+    background: var(--surligneur);
+    opacity: .5;
+    border-radius: 8px 12px 7px 13px / 13px 7px 12px 8px;
+    transform: rotate(-.8deg);
+    z-index: -1;
+  }
+  .indice-suite { text-align: center; font-family: var(--ui); font-size: 11.5px; color: var(--encre-3); margin-top: 14px; }
+
+  /* ---------- Hanamaru ---------- */
+  .hanamaru path {
+    fill: none;
+    stroke: var(--stylo);
+    stroke-width: 2.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .hanamaru.anime .spirale,
+  .hanamaru.anime .petales {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .hanamaru.anime .spirale { animation: tracer .55s cubic-bezier(.3,0,.4,1) forwards .35s; }
+  .hanamaru.anime .petales { animation: tracer .8s cubic-bezier(.3,0,.4,1) forwards .85s; }
+  @keyframes tracer { to { stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .hanamaru.anime .spirale, .hanamaru.anime .petales {
+      animation: none;
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= En-tête galerie ======================= -->
+<header class="galerie-tete">
+  <svg class="mini-hanamaru hanamaru" viewBox="0 0 140 140" aria-hidden="true">
+    <path class="spirale" d="M76.8 69.5 C 77.3 76.0, 74.0 80.3, 69.5 80.3 C 62.8 80.5, 55.3 76.5, 55.8 69.5 C 56.3 61.8, 62.5 52.3, 70.5 52.0 C 81.0 51.5, 91.8 59.5, 92.3 70.5 C 92.8 83.3, 83.0 96.0, 69.5 96.3 C 54.0 96.5, 39.3 85.5, 39.8 69.5 C 40.3 51.5, 53.5 36.3, 70.5 36.0 C 89.5 35.8, 107.8 51.0, 108.3 70.3"/>
+    <path class="petales" d="M110 70.6 C 134.2 87.4, 126.8 103.4, 98.6 98 C 103.4 127, 86.8 134.2, 70.2 110.2 C 53.2 134.4, 36.6 127, 41.4 98.4 C 12.6 103.6, 6 87, 29.6 70.4 C 5.8 53.2, 12.4 36.8, 41.8 41.4 C 36.8 12.4, 53.2 5.8, 70.4 30 C 87.4 5.6, 103.6 12.6, 98.6 41.8 C 127.4 37.2, 134.2 53.4, 110.4 70.4"/>
+  </svg>
+  <h1>Carnet
+    <svg width="132" height="9" viewBox="0 0 132 9" aria-hidden="true">
+      <path class="souligne" d="M2 6 C 22 3.4, 44 7.2, 66 5 C 88 3, 110 7, 130 4.4"/>
+    </svg>
+  </h1>
+  <p>Le cahier d'étude d'un apprenant sérieux : papier quadrillé, encre graphite, annotations au stylo rouge du prof, un seul surligneur. Rien n'est parfait au pixel, tout est tenu à l'œil.</p>
+</header>
+
+<main class="rangee">
+
+  <!-- ======================= ACCUEIL ======================= -->
+  <section class="poste">
+    <div class="legende">Accueil</div>
+    <article class="screen">
+      <div class="page avec-nav">
+
+        <div class="statut">
+          <span>9:41</span>
+          <svg width="46" height="12" viewBox="0 0 46 12" aria-hidden="true">
+            <g fill="#464B59">
+              <rect x="0" y="7" width="2.5" height="5" rx="1"/>
+              <rect x="4" y="5" width="2.5" height="7" rx="1"/>
+              <rect x="8" y="3" width="2.5" height="9" rx="1"/>
+              <rect x="12" y="1" width="2.5" height="11" rx="1"/>
+            </g>
+            <rect x="22" y="2" width="19" height="9" rx="2.5" fill="none" stroke="#464B59" stroke-width="1.2"/>
+            <rect x="24" y="4" width="12" height="5" rx="1" fill="#464B59"/>
+            <rect x="42.5" y="4.5" width="2.5" height="4" rx="1" fill="#464B59"/>
+          </svg>
+        </div>
+
+        <div class="entete-accueil">
+          <div class="marque">jibiki
+            <svg width="62" height="8" viewBox="0 0 62 8" aria-hidden="true">
+              <path class="souligne" d="M2 5.2 C 12 3, 24 6.6, 36 4.4 C 46 2.8, 54 6.2, 60 4"/>
+            </svg>
+          </div>
+          <div class="date-page">lundi 7 juillet</div>
+        </div>
+
+        <div class="recherche boite" role="search">
+          <svg class="trait" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M 2.2 7.8 C 40 5.6, 120 8.4, 198 6.4 M 194.8 2.6 C 196 30, 193.8 62, 195.4 97.6 M 198.2 93.2 C 150 95.4, 60 92.6, 1.8 94.4 M 5.6 98 C 4.4 66, 6.6 30, 4.8 2.2"/>
+          </svg>
+          <svg width="19" height="19" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M9 3.6 a5.4 5.4 0 1 0 .3 0 M13.6 13.4 c1.4 1.3, 2.7 2.7, 3.9 4.1" fill="none" stroke="#464B59" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          <input type="search" aria-label="Rechercher un mot, un kanji ou du rōmaji dans le dictionnaire">
+          <span class="faux-placeholder" aria-hidden="true">Un mot, un kanji, du r<span class="o-macron">ō</span>maji…</span>
+        </div>
+
+        <div style="position: relative;">
+          <span class="note-marge" style="top: -24px; right: 4px; transform: rotate(2deg);">à revoir&nbsp;!
+            <svg width="30" height="26" viewBox="0 0 30 26" style="position:absolute; left:-32px; top:6px;" aria-hidden="true">
+              <path d="M26 4 C 18 8, 10 14, 4 21 M4 21 l1.4 -5.6 M4 21 l5.8 -.8" fill="none" stroke="#C23B2E" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="bloc-revisions boite">
+            <svg class="trait rouge" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 1.6 6.6 C 50 8.6, 130 5.2, 198.4 7.4 M 195.2 3 C 194 34, 196.2 66, 194.6 97.2 M 198 94.6 C 140 92.4, 70 95.8, 1.8 93.6 M 4.6 97.8 C 5.8 62, 3.6 34, 5.4 2.4"/>
+            </svg>
+            <p class="compte-revisions">
+              <span class="n">12</span> à réviser
+              <span class="sep">·</span>
+              <small><span style="font-size:19px; color: var(--encre);">5</span> nouvelles</small>
+            </p>
+            <button class="btn-encre" type="button">Lancer la session</button>
+          </div>
+        </div>
+
+        <section class="mot-du-jour">
+          <h2 class="titre-section">Mot du jour
+            <svg width="96" height="8" viewBox="0 0 96 8" aria-hidden="true">
+              <path class="souligne" d="M2 5 C 18 2.8, 36 6.8, 54 4.6 C 70 2.8, 84 6.4, 94 4.2"/>
+            </svg>
+          </h2>
+          <div class="mdj-corps">
+            <span class="mdj-mot hl" lang="ja"><ruby>花見<rt>はなみ</rt></ruby></span>
+            <div class="mdj-def">
+              <p class="romaji">hanami</p>
+              <p class="gloss">pique-nique sous les cerisiers</p>
+              <a class="lien-fiche" href="#">Voir la fiche</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="recentes">
+          <h2 class="titre-section">Recherches récentes
+            <svg width="150" height="8" viewBox="0 0 150 8" aria-hidden="true">
+              <path class="souligne" d="M2 4.6 C 26 6.8, 52 2.8, 78 5 C 104 7, 128 3.2, 148 5.2"/>
+            </svg>
+          </h2>
+          <div class="ligne"><span class="jp" lang="ja">勉強</span><span class="fr">étude, travail</span><span class="quand">hier</span></div>
+          <div class="ligne"><span class="jp" lang="ja">咲く</span><span class="fr">fleurir, éclore</span><span class="quand">hier</span></div>
+          <div class="ligne"><span class="jp" lang="ja">木漏れ日</span><span class="fr">lumière entre les feuilles</span><span class="quand">2 j</span></div>
+        </section>
+
+        <nav class="onglets" aria-label="Navigation principale">
+          <svg class="bord" viewBox="0 0 390 8" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 5 C 60 3.2, 130 6.4, 200 4.4 C 260 2.8, 330 6, 390 4.2"/>
+          </svg>
+          <button class="onglet actif" type="button" aria-current="page">
+            <span class="kanji-ic" lang="ja">辞</span>
+            <span class="lib">Dico</span>
+          </button>
+          <button class="onglet" type="button">
+            <span class="kanji-ic" lang="ja">あ</span>
+            <span class="lib">Kana</span>
+          </button>
+          <button class="onglet" type="button">
+            <span class="kanji-ic" lang="ja">復</span>
+            <span class="lib">Réviser</span>
+          </button>
+          <button class="onglet" type="button">
+            <span class="kanji-ic" lang="ja">皆</span>
+            <span class="lib">Communauté</span>
+          </button>
+          <button class="onglet" type="button">
+            <span class="kanji-ic" lang="ja">私</span>
+            <span class="lib">Profil</span>
+          </button>
+        </nav>
+
+      </div>
+    </article>
+  </section>
+
+  <!-- ======================= FICHE MOT ======================= -->
+  <section class="poste">
+    <div class="legende">Fiche mot</div>
+    <article class="screen">
+      <div class="page">
+
+        <div class="statut">
+          <span>9:41</span>
+          <svg width="46" height="12" viewBox="0 0 46 12" aria-hidden="true">
+            <g fill="#464B59">
+              <rect x="0" y="7" width="2.5" height="5" rx="1"/>
+              <rect x="4" y="5" width="2.5" height="7" rx="1"/>
+              <rect x="8" y="3" width="2.5" height="9" rx="1"/>
+              <rect x="12" y="1" width="2.5" height="11" rx="1"/>
+            </g>
+            <rect x="22" y="2" width="19" height="9" rx="2.5" fill="none" stroke="#464B59" stroke-width="1.2"/>
+            <rect x="24" y="4" width="12" height="5" rx="1" fill="#464B59"/>
+            <rect x="42.5" y="4.5" width="2.5" height="4" rx="1" fill="#464B59"/>
+          </svg>
+        </div>
+
+        <!-- filigrane genkō yōshi -->
+        <svg class="genko" width="118" height="152" viewBox="0 0 118 152" aria-hidden="true">
+          <g fill="none" stroke="rgba(96,118,158,.12)" stroke-width="1">
+            <rect x="14" y="2" width="44" height="44"/><rect x="14" y="46" width="44" height="44"/>
+            <rect x="14" y="90" width="44" height="44"/>
+            <line x1="62" y1="2" x2="62" y2="134"/>
+            <rect x="72" y="2" width="44" height="44"/><rect x="72" y="46" width="44" height="44"/>
+            <rect x="72" y="90" width="44" height="44"/>
+          </g>
+        </svg>
+
+        <div class="entete-fiche">
+          <button class="retour" type="button">
+            <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true">
+              <path d="M15.5 6.2 C 11 5.6, 6.5 6.4, 2 6 M2 6 l4.4 -3.8 M2 6 l4.6 3.9" fill="none" stroke="#22242E" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Retour
+          </button>
+          <span class="fil">résultat 1 / 4</span>
+        </div>
+
+        <div class="heros">
+          <div class="case-kanji boite">
+            <svg class="trait" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 2 7 C 55 5, 135 8.2, 198 6 M 195.4 2.4 C 194.2 32, 196.4 64, 194.8 97.8 M 198.4 93.6 C 145 95.6, 55 92.8, 1.6 94.8 M 5 98.2 C 3.8 64, 6 34, 4.4 2"/>
+            </svg>
+            <svg class="guides" viewBox="0 0 124 124" aria-hidden="true">
+              <path d="M62 4 V120 M4 62 H120"/>
+            </svg>
+            <span class="kanji-heros" lang="ja">桜</span>
+          </div>
+          <div class="heros-infos">
+            <p class="furigana" lang="ja">さくら</p>
+            <p class="romaji">sakura</p>
+            <button class="btn-audio" type="button" aria-label="Écouter la prononciation">
+              <svg class="cercle" viewBox="0 0 46 46" aria-hidden="true">
+                <path d="M23 2.6 C 11.4 3.2, 2.2 11.6, 3.4 24 C 4.5 35.8, 14.6 44, 25.4 43 C 36.6 42, 44.4 32.4, 43.2 21.4 C 42.2 11, 33.8 3, 24.6 3.1"/>
+              </svg>
+              <svg class="ic" width="22" height="20" viewBox="0 0 22 20" aria-hidden="true">
+                <path d="M2.6 7.4 l4.2 -.3 4.4 -4.2 c.3 4.6, .2 9.4, 0 14 L6.7 12.7 l-4 -.2 c-.3 -1.7, -.2 -3.4, -.1 -5.1 z" fill="#22242E"/>
+                <path d="M14.4 6.6 c1.8 1.6, 1.9 4.8, .2 6.6 M17.4 4.2 c3.2 3, 3.3 8.4, .3 11.6" fill="none" stroke="#22242E" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="tags">
+          <span>Nom</span><span>·</span>
+          <span class="tag-cercle">JLPT N5
+            <svg viewBox="0 0 70 26" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M35 2.4 C 14 1.6, 2.6 5.4, 3.2 13 C 3.8 21, 18 24.6, 36 23.8 C 54 23, 67 19.4, 66.4 12.2 C 65.8 5.6, 52 2, 39 2.6"/>
+            </svg>
+          </span>
+          <span>·</span><span>Fréquent</span>
+        </p>
+
+        <section class="sens">
+          <h2 class="titre-section">Sens
+            <svg width="42" height="8" viewBox="0 0 42 8" aria-hidden="true">
+              <path class="souligne" d="M2 4.8 C 10 2.8, 20 6.6, 30 4.6 C 35 3.6, 39 5.4, 40 4.6"/>
+            </svg>
+          </h2>
+          <ol>
+            <li><span class="no">1.</span> cerisier (arbre)</li>
+            <li><span class="no">2.</span> fleur de cerisier</li>
+          </ol>
+        </section>
+
+        <section class="compo">
+          <h2 class="titre-section">Composition
+            <svg width="98" height="8" viewBox="0 0 98 8" aria-hidden="true">
+              <path class="souligne" d="M2 5.2 C 20 3, 40 6.8, 60 4.6 C 76 3, 88 6, 96 4.4"/>
+            </svg>
+          </h2>
+          <div class="compo-rangee">
+            <div class="compo-el">
+              <div class="compo-case boite">
+                <svg class="trait pale" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M 2.4 8 C 60 5.8, 140 8.6, 197.6 6.2 M 194.6 2.8 C 196 34, 193.6 66, 195.6 97.2 M 197.8 93 C 140 95.6, 60 92.4, 2.2 94.6 M 5.2 97.6 C 4 64, 6.4 32, 4.6 2.6"/>
+                </svg><span lang="ja">木</span>
+              </div>
+              <p class="lib">arbre</p>
+            </div>
+            <span class="plus">+</span>
+            <div class="compo-el">
+              <div class="compo-case boite">
+                <svg class="trait pale" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M 1.8 6.4 C 55 8.8, 145 5.4, 198.2 7.6 M 195.6 2.2 C 193.8 30, 196.6 68, 194.4 97.8 M 198.4 94.8 C 145 92.6, 55 95.8, 1.6 93.4 M 4.4 98.2 C 6 66, 3.6 30, 5.6 2.4"/>
+                </svg><span lang="ja">⺍</span>
+              </div>
+              <p class="lib">radical</p>
+            </div>
+            <span class="plus">+</span>
+            <div class="compo-el">
+              <div class="compo-case boite">
+                <svg class="trait pale" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M 2.6 7.2 C 50 4.8, 150 8.8, 197.4 5.8 M 194.4 3.4 C 196.4 36, 193.4 62, 195.8 96.6 M 197.6 94.2 C 150 96.4, 50 93, 2.4 95.4 M 5.8 96.8 C 3.4 62, 6.8 36, 4.2 3.2"/>
+                </svg><span lang="ja">女</span>
+              </div>
+              <p class="lib">femme</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="mnemo">
+          <h2 class="titre-section">Mnémonique de la communauté
+            <svg width="216" height="8" viewBox="0 0 216 8" aria-hidden="true">
+              <path class="souligne" d="M2 5 C 34 2.6, 70 7, 106 4.6 C 142 2.4, 180 6.6, 214 4.2"/>
+            </svg>
+          </h2>
+          <figure class="postit">
+            <span class="washi" aria-hidden="true"></span>
+            <p>« Une femme (<span lang="ja">女</span>) coiffée de pétales (<span lang="ja">⺍</span>) danse sous un arbre (<span lang="ja">木</span>) : le cerisier en fleurs. »</p>
+            <figcaption class="pied">
+              <button class="vote" type="button" aria-label="Voter pour cette mnémonique, 128 votes">
+                <svg width="15" height="14" viewBox="0 0 20 18" aria-hidden="true">
+                  <path d="M10 2.6 C 7.6 6.6, 5.4 10.8, 3.4 15.2 C 8 14.8, 12.6 15.2, 17 15 C 14.6 10.8, 12.4 6.6, 10.2 2.4" fill="none" stroke="#C23B2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                128
+              </button>
+              <span class="auteur">par Hanafubuki</span>
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="exemple">
+          <h2 class="titre-section">Exemple
+            <svg width="70" height="8" viewBox="0 0 70 8" aria-hidden="true">
+              <path class="souligne" d="M2 4.6 C 14 6.8, 30 2.8, 46 5 C 56 6.2, 64 3.6, 68 4.8"/>
+            </svg>
+          </h2>
+          <p class="phrase" lang="ja"><span class="seg">桜</span><span class="seg">の</span><span class="seg">花</span><span class="seg">が</span><span class="seg">咲いています</span></p>
+          <p class="traduction">Les cerisiers sont en fleurs.</p>
+        </section>
+
+        <button class="btn-encre" type="button" style="margin-top: auto;">Ajouter au paquet</button>
+
+      </div>
+    </article>
+  </section>
+
+  <!-- ======================= RÉVISION ======================= -->
+  <section class="poste">
+    <div class="legende">Révision</div>
+    <article class="screen">
+      <div class="page">
+
+        <div class="statut">
+          <span>9:41</span>
+          <svg width="46" height="12" viewBox="0 0 46 12" aria-hidden="true">
+            <g fill="#464B59">
+              <rect x="0" y="7" width="2.5" height="5" rx="1"/>
+              <rect x="4" y="5" width="2.5" height="7" rx="1"/>
+              <rect x="8" y="3" width="2.5" height="9" rx="1"/>
+              <rect x="12" y="1" width="2.5" height="11" rx="1"/>
+            </g>
+            <rect x="22" y="2" width="19" height="9" rx="2.5" fill="none" stroke="#464B59" stroke-width="1.2"/>
+            <rect x="24" y="4" width="12" height="5" rx="1" fill="#464B59"/>
+            <rect x="42.5" y="4.5" width="2.5" height="4" rx="1" fill="#464B59"/>
+          </svg>
+        </div>
+
+        <div class="entete-revision">
+          <button class="quitter" type="button">Quitter</button>
+          <span class="score">7 <span class="total">/ 20</span></span>
+        </div>
+
+        <div style="position: relative;">
+          <div class="progression boite" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="Progression de la session : 7 cartes sur 20">
+            <svg class="trait" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 1.8 12 C 55 6, 140 16, 198.2 9 M 196.4 4 C 197.4 34, 195.6 68, 196.8 96 M 198.6 90 C 140 97, 60 87, 1.4 93 M 3.6 97 C 2.6 64, 4.4 34, 3.2 3"/>
+            </svg>
+            <span class="rempli"></span>
+          </div>
+          <span class="note-marge" style="top: 20px; right: 6px; transform: rotate(-2deg);">presque la moitié&nbsp;!</span>
+        </div>
+
+        <div class="carte-zone">
+          <div class="carte boite">
+            <svg class="trait" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 2 4.2 C 50 2.8, 145 5, 198 3.4 M 196.6 1.4 C 195.4 30, 197.6 68, 195.8 98.6 M 198.2 96.4 C 145 98.2, 55 95.6, 1.8 97.4 M 3.2 99 C 2.2 66, 4.2 32, 3 1.2"/>
+            </svg>
+            <svg class="hanamaru hanamaru-pose anime" viewBox="0 0 140 140" aria-hidden="true">
+              <path class="spirale" pathLength="1" d="M76.8 69.5 C 77.3 76.0, 74.0 80.3, 69.5 80.3 C 62.8 80.5, 55.3 76.5, 55.8 69.5 C 56.3 61.8, 62.5 52.3, 70.5 52.0 C 81.0 51.5, 91.8 59.5, 92.3 70.5 C 92.8 83.3, 83.0 96.0, 69.5 96.3 C 54.0 96.5, 39.3 85.5, 39.8 69.5 C 40.3 51.5, 53.5 36.3, 70.5 36.0 C 89.5 35.8, 107.8 51.0, 108.3 70.3"/>
+              <path class="petales" pathLength="1" d="M110 70.6 C 134.2 87.4, 126.8 103.4, 98.6 98 C 103.4 127, 86.8 134.2, 70.2 110.2 C 53.2 134.4, 36.6 127, 41.4 98.4 C 12.6 103.6, 6 87, 29.6 70.4 C 5.8 53.2, 12.4 36.8, 41.8 41.4 C 36.8 12.4, 53.2 5.8, 70.4 30 C 87.4 5.6, 103.6 12.6, 98.6 41.8 C 127.4 37.2, 134.2 53.4, 110.4 70.4"/>
+            </svg>
+            <p class="mot" lang="ja">勉強</p>
+            <svg class="separation" width="64" height="7" viewBox="0 0 64 7" aria-hidden="true">
+              <path d="M2 4 C 14 2.4, 30 5.6, 44 3.8 C 52 2.8, 58 4.6, 62 3.6" fill="none" stroke="rgba(34,36,46,.45)" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <p class="lecture" lang="ja">べんきょう</p>
+            <p class="sens-carte">« étude, travail »</p>
+          </div>
+          <p class="felicitation" lang="ja">よくできました</p>
+        </div>
+
+        <div class="notes" role="group" aria-label="Noter la carte">
+          <button class="note" type="button">
+            <svg class="coche" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2.6 3.4 C 7.4 2.6, 13 3.8, 17.4 2.8 M 16.6 1.6 C 17.6 7, 16.4 12.6, 17.2 18.2 M 18 17 C 12.6 18, 6.8 16.8, 1.8 17.8 M 3.2 18.8 C 2.4 13.4, 3.6 8, 2.8 1.4" fill="none" stroke="rgba(34,36,46,.6)" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M6 6.2 C 8.6 8.8, 11.2 11.4, 13.8 14.2 M 14 6 C 11.2 8.8, 8.6 11.6, 6.2 14.4" fill="none" stroke="#C23B2E" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="lib">Encore</span>
+            <span class="delai">10 min</span>
+          </button>
+          <button class="note" type="button">
+            <svg class="coche" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2.4 3.2 C 7.6 4, 13.2 2.4, 17.6 3.4 M 16.8 1.8 C 16.2 7.2, 17.4 12.8, 16.6 18 M 17.8 17.2 C 12.4 16.4, 6.6 17.6, 2 16.8 M 3 18.6 C 3.8 13, 2.6 7.6, 3.4 1.6" fill="none" stroke="rgba(34,36,46,.6)" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M10 4.6 C 8.2 7.6, 6.6 10.8, 5.2 14.2 C 8.4 13.9, 11.8 14.2, 14.8 14 C 13.2 10.8, 11.8 7.6, 10.3 4.4" fill="none" stroke="#C23B2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="lib">Difficile</span>
+            <span class="delai">1 j</span>
+          </button>
+          <button class="note choisi" type="button" aria-pressed="true">
+            <svg class="coche" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2.8 2.6 C 8 3.6, 13.6 2.2, 17.2 3.2 M 17 1.4 C 17.8 6.8, 16.6 12.4, 17.4 18.4 M 17.6 17.6 C 12.2 16.6, 6.4 17.8, 2.2 17 M 2.6 18.4 C 2 12.8, 3.2 7.4, 2.4 1.8" fill="none" stroke="rgba(34,36,46,.6)" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M10 3.8 C 5.8 4.2, 3.4 7.4, 4.6 10.8 C 5.8 14.4, 10.8 15.6, 13.6 13.2 C 16.4 10.8, 15.8 6, 12.2 4.2" fill="none" stroke="#C23B2E" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <span class="lib">Bien</span>
+            <span class="delai">3 j</span>
+          </button>
+          <button class="note" type="button">
+            <svg class="coche" width="26" height="26" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M2.2 3.6 C 7.8 2.8, 13 4, 17.8 2.6 M 17.2 1.2 C 16.6 7, 17.8 12.4, 17 18.6 M 18.2 17.4 C 12.8 18.2, 7 16.6, 1.6 17.6 M 2.8 19 C 3.6 13.2, 2.4 7.8, 3.2 1.2" fill="none" stroke="rgba(34,36,46,.6)" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M10 3.4 C 6 3.8, 3.2 7, 4.4 10.6 C 5.6 14.4, 10.6 15.8, 13.4 13.4 C 16.2 11, 15.8 5.8, 12 4 M 10 7 C 8.2 7.2, 7.2 8.6, 7.8 10.2 C 8.4 11.8, 11 12.2, 12 10.8 C 13 9.4, 12.2 7.4, 10.4 7.1" fill="none" stroke="#C23B2E" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="lib">Facile</span>
+            <span class="delai">7 j</span>
+          </button>
+        </div>
+        <p class="indice-suite">Choisissez une note pour passer à la carte suivante</p>
+
+      </div>
+    </article>
+  </section>
+
+</main>
+
+</body>
+</html>

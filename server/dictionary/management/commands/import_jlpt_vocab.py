@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
         updated = 0
         with transaction.atomic():
-            for level in (5, 4, 3, 2, 1):  # easiest first — N5 wins ties
+            for level in (5, 4, 3, 2, 1):  # easiest first - N5 wins ties
                 path = directory / f"n{level}.csv"
                 if not path.exists():
                     continue
@@ -57,4 +57,4 @@ class Command(BaseCommand):
                         updated += Word.objects.filter(id__in=ids, jlpt__isnull=True).update(
                             jlpt=level
                         )
-        self.stdout.write(self.style.SUCCESS(f"Done — JLPT set on {updated} words."))
+        self.stdout.write(self.style.SUCCESS(f"Done - JLPT set on {updated} words."))

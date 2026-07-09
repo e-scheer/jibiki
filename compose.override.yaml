@@ -1,4 +1,4 @@
-# Local-dev overrides — auto-loaded by `docker compose` on the dev machine.
+# Local-dev overrides - auto-loaded by `docker compose` on the dev machine.
 # Do NOT copy this to the server (it exposes the DB port). Run `docker compose
 # up -d db` and develop the API natively (make sync / make run), or bring the
 # whole stack up with `docker compose --profile web up --build`.

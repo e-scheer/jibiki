@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../core/api_config.dart';
 
 class Mnemonic {
@@ -16,6 +18,7 @@ class Mnemonic {
     required this.score,
     required this.myVote,
     required this.saved,
+    this.imageBytes,
   });
 
   final int id;
@@ -33,8 +36,16 @@ class Mnemonic {
   final int myVote; // -1, 0, +1
   final bool saved; // the Instagram 🔖 bookmark
 
-  bool get hasImage => imageSrc.isNotEmpty;
+  /// Set when the mnemonic was read from an offline pack (the WebP travels as
+  /// a BLOB in the pack instead of a media URL).
+  final Uint8List? imageBytes;
+
+  bool get hasImage => imageSrc.isNotEmpty || imageBytes != null;
   bool get liked => myVote > 0;
+
+  /// Only published mnemonics can be liked/saved; a still-"in review" one is
+  /// visible to its author but the server rejects votes/saves on it.
+  bool get isVisible => status == 'visible';
 
   /// Absolute image URL (the API returns a relative /media/… path for locally
   /// stored uploads; R2/CDN URLs come back absolute).
@@ -76,5 +87,6 @@ class Mnemonic {
         score: score ?? this.score,
         myVote: myVote ?? this.myVote,
         saved: saved ?? this.saved,
+        imageBytes: imageBytes,
       );
 }

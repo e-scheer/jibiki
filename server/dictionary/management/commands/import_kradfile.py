@@ -48,4 +48,4 @@ class Command(BaseCommand):
             kanji.components = [c for c in comps.split() if c]
             kanji.save(update_fields=["components"])
             updated += 1
-        self.stdout.write(self.style.SUCCESS(f"Done — components set on {updated} kanji."))
+        self.stdout.write(self.style.SUCCESS(f"Done - components set on {updated} kanji."))

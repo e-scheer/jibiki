@@ -17,7 +17,16 @@ from dictionary.models import (
     Word,
     WordForm,
 )
-from dictionary.seed_data import KANA, KANA_STORIES, KANJI, RADICALS, WORDS, kana_origin, kana_usage
+from dictionary.seed_data import (
+    KANA,
+    KANA_STORIES,
+    KANJI,
+    RADICALS,
+    WORDS,
+    kana_origin,
+    kana_usage,
+    kana_usage_examples,
+)
 from dictionary.seed_strokes import STROKES
 
 
@@ -34,7 +43,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **opts):
         if opts["if_empty"] and (Word.objects.exists() or Kana.objects.exists()):
-            self.stdout.write("Dictionary already populated — skipping seed.")
+            self.stdout.write("Dictionary already populated - skipping seed.")
             return
 
         self._seed_kana()
@@ -49,11 +58,13 @@ class Command(BaseCommand):
             o_h, n_h = kana_origin(romaji, Kana.Script.HIRAGANA, kind)
             o_k, n_k = kana_origin(romaji, Kana.Script.KATAKANA, kind)
             u_label, u_text = kana_usage(romaji, Kana.Script.HIRAGANA)  # particles are hiragana
+            u_examples = kana_usage_examples(romaji, Kana.Script.HIRAGANA)
             Kana.objects.update_or_create(
                 char=hira,
                 defaults=dict(
                     romaji=romaji, script=Kana.Script.HIRAGANA, kind=kind, row=row, order=order,
                     origin=o_h, origin_note=n_h, usage_label=u_label, usage=u_text,
+                    usage_examples=u_examples,
                 ),
             )
             Kana.objects.update_or_create(
@@ -160,7 +171,7 @@ class Command(BaseCommand):
                         defaults=dict(status=MnemonicStatus.VISIBLE, is_seed=True),
                     )
                     # Give the seed mnemonic its generated picture, through the
-                    # same ingest as a user upload (idempotent — skips if set).
+                    # same ingest as a user upload (idempotent - skips if set).
                     imaged += attach_art(m)
                     by_lang.setdefault(lang, []).append(m)
 

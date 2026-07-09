@@ -14,16 +14,20 @@ from .views import (
     OptimizeView,
     QueueView,
     ReviewView,
+    SetStatusView,
     StatsView,
+    SyncView,
 )
 
 urlpatterns = [
     path("queue", QueueView.as_view(), name="srs_queue"),
+    path("sync", SyncView.as_view(), name="srs_sync"),
     path("stats", StatsView.as_view(), name="srs_stats"),
     path("optimize", OptimizeView.as_view(), name="srs_optimize"),
     path("export", ExportView.as_view(), name="srs_export"),
     path("add", AddCardView.as_view(), name="srs_add"),
     path("add/bulk", BulkAddView.as_view(), name="srs_add_bulk"),
+    path("set", SetStatusView.as_view(), name="srs_set"),
     path("states", CardStatesView.as_view(), name="srs_card_states"),
     path("decks", DecksView.as_view(), name="srs_decks"),
     path("decks/<str:deck_id>/enroll", DeckEnrollView.as_view(), name="srs_deck_enroll"),

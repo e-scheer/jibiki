@@ -3,7 +3,7 @@
 `cell()` returns a self-contained `<g>` (a 100×118 tile) so it can be dropped into
 a contact-sheet grid; `standalone()` wraps one cell in an `<svg>` document. In
 *overlay* mode the guide glyph is drawn faintly and the illustration sits on top
-of it — the learner sees the drawing trace the stroke. `guide=False` (fine for
+of it - the learner sees the drawing trace the stroke. `guide=False` (fine for
 kanji, per the brief) hides the glyph and just keeps the picture + caption.
 """
 
@@ -98,7 +98,7 @@ def standalone(rec: Recipe, bank: GlyphBank, **kw) -> str:
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {CANVAS:.0f} {TILE_H:.0f}" '
         f'width="{CANVAS:.0f}" height="{TILE_H:.0f}" role="img" '
-        f'aria-label="{_esc(rec.romaji)} — {_esc(rec.label(kw.get("lang", "fr")))}">'
+        f'aria-label="{_esc(rec.romaji)} - {_esc(rec.label(kw.get("lang", "fr")))}">'
         f'{inner}</svg>'
     )
 

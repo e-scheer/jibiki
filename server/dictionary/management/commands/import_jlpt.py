@@ -1,7 +1,7 @@
 """Set modern JLPT (N5–N1) levels on kanji from a community mapping.
 
 KANJIDIC2 only carries the *old* 4-level JLPT (now largely absent), and there is
-no official modern N5–N1 kanji list — so we import a community-standard mapping
+no official modern N5–N1 kanji list - so we import a community-standard mapping
 (davidluzgouveia/kanji-data, field ``jlpt_new``). Only updates kanji already in
 the DB; run AFTER import_kanjidic.
 
@@ -42,4 +42,4 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             Kanji.objects.bulk_update(to_update, ["jlpt"], batch_size=500)
-        self.stdout.write(self.style.SUCCESS(f"Done — JLPT (new) set on {len(to_update)} kanji."))
+        self.stdout.write(self.style.SUCCESS(f"Done - JLPT (new) set on {len(to_update)} kanji."))

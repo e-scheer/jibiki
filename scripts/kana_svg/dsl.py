@@ -82,7 +82,7 @@ class Art:
         self._frags.append(svg)
 
     def glyph(self, g, fill=None, stroke=None, w=None, opacity=1.0):
-        """Paint the real kana outline itself — so a recipe can turn *the
+        """Paint the real kana outline itself - so a recipe can turn *the
         character* into the object's body (a green ぬ-snail, a brown き-key…).
         Uses the glyph's own transform, guaranteeing the letter stays accurate."""
         style = ""

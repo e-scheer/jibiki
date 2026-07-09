@@ -1,8 +1,8 @@
 """SRS persistence: one Card per (user, study item) carrying its FSRS memory
-state, plus a full ReviewLog (needed later to train per-user FSRS parameters — the
+state, plus a full ReviewLog (needed later to train per-user FSRS parameters - the
 DEEP_SEARCH "store full review logs from day one" rule).
 
-A study item is one of three dictionary rows — a Word, a Kanji, or a Kana — held
+A study item is one of three dictionary rows - a Word, a Kanji, or a Kana - held
 as three nullable FKs with a DB check that exactly one is set. That keeps the
 linked object directly serializable (no generic-relation joins) while a single
 Card table spans all item kinds.
@@ -62,6 +62,10 @@ class Card(models.Model):
     favorite = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    # Sync cursor: /study/sync sends every card with updated_at past the
+    # client's watermark. Any save() bumps it; update_fields callers must
+    # include it explicitly.
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = CardQuerySet.as_manager()
 
@@ -96,6 +100,7 @@ class Card(models.Model):
         indexes = [
             models.Index(fields=["user", "due"]),
             models.Index(fields=["user", "state"]),
+            models.Index(fields=["user", "updated_at"]),
         ]
 
     def __str__(self) -> str:
@@ -143,6 +148,11 @@ class ReviewLog(models.Model):
     )
     rating = models.PositiveSmallIntegerField()  # 1..4
 
+    # Idempotency key for offline replay: the client stamps every review with a
+    # UUID so redelivered sync batches are acked without duplicating the log.
+    # Null for reviews born through the online endpoint.
+    client_review_id = models.UUIDField(null=True, blank=True, unique=True)
+
     # Snapshot of the state the scheduler saw / produced (for offline retraining).
     state_before = models.PositiveSmallIntegerField()
     stability = models.FloatField(null=True, blank=True)
@@ -165,5 +175,62 @@ class ReviewLog(models.Model):
         return f"log#{self.pk} card#{self.card_id} rating={self.rating}"
 
 
+class CardTombstone(models.Model):
+    """Remembers card deletions so /study/sync can propagate them to other
+    devices and refuse late reviews of a deleted card (delete wins). Keyed by
+    the natural item key - the card row itself is gone. Prunable after ~90
+    days; a tombstone whose item has a live card again is simply not sent."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="card_tombstones"
+    )
+    item_type = models.CharField(max_length=8, choices=ItemType.choices)
+    item_ref = models.CharField(max_length=64)
+    deleted_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "srs_card_tombstones"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "item_type", "item_ref"], name="uq_tombstone_user_item"
+            ),
+        ]
+        indexes = [models.Index(fields=["user", "deleted_at"])]
+
+    def __str__(self) -> str:
+        return f"tombstone({self.user_id}, {self.item_type}:{self.item_ref})"
+
+
+class SyncedOp(models.Model):
+    """Ack ledger for non-review sync ops (set_status, favorite, votes…): a
+    redelivered op is acked from here without being re-applied, which makes the
+    whole op stream idempotent even for non-idempotent payloads."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="synced_ops"
+    )
+    client_op_id = models.UUIDField()
+    applied_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "srs_synced_ops"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client_op_id"], name="uq_synced_op_user"),
+        ]
+
+    def __str__(self) -> str:
+        return f"synced-op({self.user_id}, {self.client_op_id})"
+
+
 # Re-export the FSRS state ints so callers can `from srs.models import REVIEW`.
-__all__ = ["LEARNING", "NEW", "REVIEW", "Card", "ItemType", "ReviewLog", "State"]
+__all__ = [
+    "LEARNING",
+    "NEW",
+    "REVIEW",
+    "Card",
+    "CardTombstone",
+    "ItemType",
+    "ReviewLog",
+    "State",
+    "SyncedOp",
+]

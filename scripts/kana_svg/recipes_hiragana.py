@@ -20,7 +20,7 @@ def body(a: Art, g: Glyph, fill: str, line: str = INK, w: float = 0.7) -> None:
 
 
 # --- あ行 -------------------------------------------------------------------
-def a(a_, g):  # âne — un A majuscule / une tête d'âne
+def a(a_, g):  # âne - un A majuscule / une tête d'âne
     body(a_, g, "#b9b0a4")
     a_.ellipse(41, 15, 3, 7, fill="#b9b0a4", color=INK, w=0.7, rotate=-14)  # ears
     a_.ellipse(60, 15, 3, 7, fill="#b9b0a4", color=INK, w=0.7, rotate=14)

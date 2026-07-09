@@ -1,4 +1,4 @@
-"""SRS domain operations — request-free and unit-testable.
+"""SRS domain operations - request-free and unit-testable.
 
 Wraps the pure FSRS scheduler (fsrs.py) with persistence: resolving a study item,
 creating a Card, applying a review (updating the Card + appending a ReviewLog),
@@ -15,7 +15,7 @@ from django.utils import timezone
 from dictionary.models import Kana, Kanji, Word
 
 from .fsrs import EASY, FSRS, NEW
-from .models import Card, ItemType, ReviewLog, State
+from .models import Card, CardTombstone, ItemType, ReviewLog, State
 
 
 def scheduler_for(user) -> FSRS:
@@ -74,10 +74,13 @@ def mark_known(user, item_type: str, ref: str, now=None) -> tuple[Card | None, b
         **{field: item},
         defaults={"due": now, "state": State.NEW},
     )
-    # Promote only a still-new card. We deliberately record NO ReviewLog: the user
-    # is asserting prior knowledge, not doing a review, so the optimizer shouldn't
-    # be fed a synthetic rating.
-    if card.state == State.NEW:
+    # Promote a card that hasn't graduated yet - new OR still learning (both read as
+    # not-yet-known). Marking "I know these" over kana you'd already tapped into
+    # study must flip them to known, not leave them stuck as "seen". An established
+    # REVIEW/RELEARNING card is left alone (already known + scheduled; don't reset
+    # its history). We deliberately record NO ReviewLog: the user is asserting prior
+    # knowledge, not doing a review, so the optimizer isn't fed a synthetic rating.
+    if card.state in (State.NEW, State.LEARNING):
         after = scheduler_for(user).review(card.to_memory_state(), EASY, now)
         card.apply_memory_state(after)
         card.save()
@@ -103,6 +106,51 @@ def bulk_add(user, items: list[dict], known: bool = False, now=None) -> dict:
     return {"requested": len(items), "resolved": resolved, "created": created, "known": known}
 
 
+def set_status(user, item_type: str, ref: str, target: str, now=None) -> str:
+    """Set the user's status for one item to exactly `target` - "none" (not in the
+    deck), "learning" (queued to study) or "known" (marked mature). Creates,
+    promotes, resets or deletes the card as needed; idempotent. Powers the
+    detail-screen Study / I-know-it toggles. Returns the resulting status."""
+    item = resolve_item(item_type, ref)
+    if item is None:
+        return "none"
+    field = {ItemType.WORD: "word", ItemType.KANJI: "kanji", ItemType.KANA: "kana"}[item_type]
+    if target == "none":
+        deleted, _ = Card.objects.filter(user=user, item_type=item_type, **{field: item}).delete()
+        if deleted:
+            write_tombstone(user, item_type, str(ref), now=now)
+        return "none"
+    if target == "known":
+        mark_known(user, item_type, ref, now=now)
+        return "known"
+    # learning: make sure the card exists in the new/learning queue. Demote a
+    # previously "known" card back to new so toggling Study on is honest.
+    now = now or timezone.now()
+    card, _ = Card.objects.get_or_create(
+        user=user,
+        item_type=item_type,
+        **{field: item},
+        defaults={"due": now, "state": State.NEW},
+    )
+    if card.state in (State.REVIEW, State.RELEARNING):
+        card.state = State.NEW
+        card.due = now
+        card.save(update_fields=["state", "due", "updated_at"])
+    return "learning"
+
+
+def write_tombstone(user, item_type: str, ref: str, now=None) -> None:
+    """Record a card deletion so /study/sync propagates it to other devices
+    (delete wins over late reviews). Idempotent; re-deleting refreshes the
+    timestamp so newer clients past the old watermark still hear about it."""
+    CardTombstone.objects.update_or_create(
+        user=user,
+        item_type=item_type,
+        item_ref=str(ref),
+        defaults={"deleted_at": now or timezone.now()},
+    )
+
+
 def card_states(user, item_type: str | None = None) -> dict[str, int]:
     """Compact ``{item_ref: state}`` for the user's cards, so the dictionary can
     mark which items are already seen (learning) or known (review) without
@@ -116,7 +164,9 @@ def card_states(user, item_type: str | None = None) -> dict[str, int]:
 
 
 @transaction.atomic
-def review_card(card: Card, rating: int, duration_ms: int = 0, now=None) -> ReviewLog:
+def review_card(
+    card: Card, rating: int, duration_ms: int = 0, now=None, client_review_id=None
+) -> ReviewLog:
     """Apply a rating to a card: advance its FSRS state, persist it, and append a
     ReviewLog. Returns the created log."""
     now = now or timezone.now()
@@ -142,6 +192,7 @@ def review_card(card: Card, rating: int, duration_ms: int = 0, now=None) -> Revi
         card=card,
         user=card.user,
         rating=rating,
+        client_review_id=client_review_id,
         state_before=before.state,
         stability=after.stability,
         difficulty=after.difficulty,
@@ -167,7 +218,7 @@ _DUE_LIMIT = 500
 
 
 def queue_counts(user, now=None) -> dict:
-    """The queue's headline numbers WITHOUT materializing/serializing any card —
+    """The queue's headline numbers WITHOUT materializing/serializing any card -
     for StatsView and the due badge, which only need the counts."""
     now = now or timezone.now()
     profile = getattr(user, "profile", None)
@@ -183,9 +234,9 @@ def build_queue(user, now=None, new_limit=None) -> dict:
     """Assemble the review session: everything due now, plus a batch of new cards.
 
     The new-card count is a *per-session* batch (``new_cards_per_day`` on the
-    profile — the historical field name), NOT a hard daily ceiling: opening a
+    profile - the historical field name), NOT a hard daily ceiling: opening a
     session always offers a fresh batch, and the client can pull the rest on
-    demand via ``new_limit`` (the "Study more" action — see ``QueueView``). This
+    demand via ``new_limit`` (the "Study more" action - see ``QueueView``). This
     is deliberate: the app lets people keep studying rather than walling them off
     with "that's it for today". ``counts.new_available`` is the total pool of
     new cards, so the client knows whether more remain."""
@@ -220,7 +271,7 @@ def build_queue(user, now=None, new_limit=None) -> dict:
 
 
 def review_sessions(user) -> list[list[tuple[int, object]]]:
-    """Each card's reviews, chronologically, as (rating, reviewed_at) — the input
+    """Each card's reviews, chronologically, as (rating, reviewed_at) - the input
     the FSRS optimizer replays."""
     logs = (
         ReviewLog.objects.filter(user=user)
@@ -309,13 +360,13 @@ def _back(card, lang: str) -> str:
                 g.text for g in meaning.glosses.all()
             ]
             gloss = "; ".join(glosses[:3])
-        return f"{reading} — {gloss}" if reading and reading != card.word.headword else gloss
+        return f"{reading} - {gloss}" if reading and reading != card.word.headword else gloss
     if card.kanji_id:
         readings = " ".join([*card.kanji.kun_readings, *card.kanji.on_readings][:4])
         meanings = "; ".join(
             m.text for m in card.kanji.meanings.all() if m.lang == lang
         ) or "; ".join(m.text for m in card.kanji.meanings.all()[:3])
-        return f"{readings} — {meanings}"
+        return f"{readings} - {meanings}"
     return card.kana.romaji if card.kana_id else ""
 
 

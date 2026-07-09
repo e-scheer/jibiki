@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../models/enums.dart';
 import '../models/study.dart';
 import '../repositories/study_repository.dart';
@@ -26,7 +28,8 @@ class ReviewViewModel extends BaseViewModel {
   bool get answerShown => _answerShown;
   bool get finished => _queue.isEmpty || _index >= _queue.length;
   StudyCard? get current => finished ? null : _queue[_index];
-  StudyCard? get next => (_index + 1 < _queue.length) ? _queue[_index + 1] : null;
+  StudyCard? get next =>
+      (_index + 1 < _queue.length) ? _queue[_index + 1] : null;
   double get progress => _queue.isEmpty ? 0 : _index / _queue.length;
 
   /// Whether "Study more" can pull additional new cards, so the end-of-session
@@ -65,7 +68,9 @@ class ReviewViewModel extends BaseViewModel {
     notifyListeners();
     const all = 100000; // server clamps to its payload cap
     final q = await runGuarded(
-      () => deckId == null ? _study.queue(newLimit: all) : _study.deckQueue(deckId!, newLimit: all),
+      () => deckId == null
+          ? _study.queue(newLimit: all)
+          : _study.deckQueue(deckId!, newLimit: all),
       silent: true,
     );
     if (q != null) {
@@ -95,12 +100,36 @@ class ReviewViewModel extends BaseViewModel {
     final card = current;
     if (card == null) return;
     final elapsed = _nowMs() - _startedMs;
-    await runGuarded(() => _study.review(card.id, rating, durationMs: elapsed), silent: true);
+    // Advance the session immediately and submit the rating in the background.
+    // Blocking the next card on the network round-trip made a slow connection
+    // look frozen ("did it hang?") between cards; scheduling is server-side and
+    // fire-and-forget, so the UI never waits on it.
     _reviewed += 1;
     _index += 1;
     _answerShown = false;
     _startCard();
     notifyListeners();
+    unawaited(runGuarded(
+        () => _study.review(card.id, rating, durationMs: elapsed),
+        silent: true));
+  }
+
+  /// Grade a whole batch at once and advance past it in a single step. The Match
+  /// game plays a round over several cards, then reports them all together; done
+  /// card-by-card it would move [current] mid-round and rebuild the board.
+  Future<void> rateMany(List<StudyCard> cards, Rating rating) async {
+    if (cards.isEmpty) return;
+    // Advance past the whole batch at once, then submit each rating in the
+    // background so the board never sits waiting on the network (see [rate]).
+    _reviewed += cards.length;
+    _index += cards.length;
+    _answerShown = false;
+    _startCard();
+    notifyListeners();
+    for (final c in cards) {
+      unawaited(runGuarded(() => _study.review(c.id, rating, durationMs: 0),
+          silent: true));
+    }
   }
 
   void _startCard() => _startedMs = _nowMs();

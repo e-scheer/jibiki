@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../models/kana.dart';
 import '../../models/kanji.dart';
 import '../../theme/app_theme.dart';
+import 'speech_button.dart';
 
 /// The "Origin" block on the kanji detail screen: the glyph-origin story
 /// (Wiktionary, CC BY-SA), a formation badge (pictogram / ideogrammic /
-/// phono-semantic), and — the learner's-eye detail — a callout naming the
+/// phono-semantic), and - the learner's-eye detail - a callout naming the
 /// phonetic (音符) component: the part that is present for its *sound*, not its
 /// meaning. That keisei insight is exactly what makes a busy character legible.
 class KanjiOriginSection extends StatelessWidget {
@@ -94,7 +95,7 @@ class _FormationBadge extends StatelessWidget {
   }
 }
 
-/// Highlights the 音符 (phonetic) component of a phono-semantic compound — the
+/// Highlights the 音符 (phonetic) component of a phono-semantic compound - the
 /// single most useful thing to know about a busy kanji. Tappable through to that
 /// component's own detail page when it isn't the character itself.
 class _PhoneticCallout extends StatelessWidget {
@@ -136,7 +137,7 @@ class _PhoneticCallout extends StatelessWidget {
                   Text('音符 · sound component',
                       style: TextStyle(color: jc.brand, fontWeight: FontWeight.w800, fontSize: 12.5)),
                   const SizedBox(height: 2),
-                  Text('$phonetic is here to hint the reading — not the meaning.',
+                  Text('$phonetic is here to hint the reading - not the meaning.',
                       style: TextStyle(color: jc.body, fontSize: 13, height: 1.35)),
                 ],
               ),
@@ -151,7 +152,7 @@ class _PhoneticCallout extends StatelessWidget {
 
 /// The "Origin" block on the kana detail screen: the man'yōgana kanji (or, for
 /// dakuten/handakuten, the base kana) this glyph grew out of, shown as a small
-/// derivation diagram — source → kana — with the one-line story beneath.
+/// derivation diagram - source → kana - with the one-line story beneath.
 class KanaOriginSection extends StatelessWidget {
   const KanaOriginSection({super.key, required this.kana});
   final KanaEntry kana;
@@ -199,8 +200,8 @@ class KanaOriginSection extends StatelessWidget {
 }
 
 /// The "In a sentence" block on the kana detail screen: for the kana that pull
-/// double duty as grammar — the particles (は topic, を object, の possessive, か
-/// question …) and the special ん — a role badge and a one-line "what it does in a
+/// double duty as grammar - the particles (は topic, を object, の possessive, か
+/// question …) and the special ん - a role badge and a one-line "what it does in a
 /// sentence". Purely phonetic kana have no usage and this collapses away.
 class KanaGrammarSection extends StatelessWidget {
   const KanaGrammarSection({super.key, required this.kana});
@@ -239,10 +240,67 @@ class KanaGrammarSection extends StatelessWidget {
                 const SizedBox(height: 10),
               ],
               Text(kana.usage, style: context.text.bodyMedium),
+              for (final e in kana.usageExamples) ...[
+                const SizedBox(height: 12),
+                _UsageExampleRow(example: e),
+              ],
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One particle example: the Japanese sentence with the particle lit up in
+/// brand colour, a speaker to hear it, then romaji and the English underneath.
+class _UsageExampleRow extends StatelessWidget {
+  const _UsageExampleRow({required this.example});
+  final KanaUsageExample example;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+      decoration: BoxDecoration(
+        color: jc.surfaceAlt,
+        borderRadius: BorderRadius.circular(Radii.sm),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 16, height: 1.4, color: jc.ink),
+                    children: [
+                      TextSpan(text: example.before),
+                      TextSpan(
+                        text: example.particle,
+                        style: TextStyle(color: jc.brand, fontWeight: FontWeight.w800),
+                      ),
+                      TextSpan(text: example.after),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(example.romaji,
+                    style: TextStyle(
+                        color: jc.muted, fontSize: 12.5, fontStyle: FontStyle.italic, height: 1.3)),
+                const SizedBox(height: 2),
+                Text(example.en, style: TextStyle(color: jc.body, fontSize: 13.5, height: 1.35)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 4),
+          SpeechButton(text: example.sentence, size: 18),
+        ],
+      ),
     );
   }
 }

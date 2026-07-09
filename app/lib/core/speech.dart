@@ -4,7 +4,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 /// Reads Japanese aloud through the on-device TTS engine. Best-effort: with no
 /// Japanese voice it simply stays silent rather than throwing.
 ///
-/// One shared, **pre-warmed** instance. The slow part of TTS is the first call —
+/// One shared, **pre-warmed** instance. The slow part of TTS is the first call -
 /// binding the platform engine and loading the ja-JP voice can take up to a
 /// second the very first time. [warmUp] pays that cost once at app start, in the
 /// background, so the user's first "play" tap plays instantly.
@@ -14,7 +14,7 @@ class Speech {
 
   final FlutterTts _tts = FlutterTts();
 
-  /// True while an utterance is playing — lets buttons show an active state.
+  /// True while an utterance is playing - lets buttons show an active state.
   final ValueNotifier<bool> speaking = ValueNotifier(false);
 
   Future<void>? _warming;
@@ -27,7 +27,7 @@ class Speech {
     try {
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
         // Google TTS ships a real Japanese voice; prefer it over any OEM engine
-        // that may only speak the phone's UI language — otherwise 日本語 comes out
+        // that may only speak the phone's UI language - otherwise 日本語 comes out
         // read with the device's default (e.g. French) accent.
         try {
           final engines = (await _tts.getEngines as List?)?.cast<String>() ?? const [];
@@ -58,7 +58,7 @@ class Speech {
       _tts.setCancelHandler(() => speaking.value = false);
       _tts.setErrorHandler((_) => speaking.value = false);
     } catch (_) {
-      // A platform without JA TTS — say() will simply no-op.
+      // A platform without JA TTS - say() will simply no-op.
     }
   }
 
@@ -85,7 +85,7 @@ class Speech {
         await _tts.setVoice({'name': '${v['name']}', 'locale': '${v['locale']}'});
         debugPrint('[Speech] using voice ${v['name']} (${v['locale']})');
       } else {
-        debugPrint('[Speech] no Japanese voice installed — pronunciation will be wrong');
+        debugPrint('[Speech] no Japanese voice installed - pronunciation will be wrong');
       }
     } catch (e) {
       debugPrint('[Speech] voice selection failed: $e');

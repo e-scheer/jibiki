@@ -23,8 +23,9 @@ class KanjiDetailViewModel extends BaseViewModel {
     return _words ??= k.words.map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>())).toList();
   }
 
-  bool _added = false;
-  bool get added => _added;
+  // none | learning | known - drives the detail Study / I-know-it toggles.
+  String _status = 'none';
+  String get status => _status;
 
   Future<void> load() async {
     final k = await runGuarded(() => _dict.kanji(literal));
@@ -32,11 +33,22 @@ class KanjiDetailViewModel extends BaseViewModel {
       _kanji = k;
       _words = null; // invalidate cache for the new kanji
     }
+    final states = await runGuarded(() => _study.studyStates(type: ItemType.kanji), silent: true);
+    if (states != null) {
+      final s = states[literal];
+      _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
+      notifyListeners();
+    }
   }
 
-  Future<bool> addToStudy() async {
-    await runGuarded(() => _study.addCard(ItemType.kanji, literal));
-    if (!hasError) _added = true;
-    return !hasError;
+  /// Toggle this kanji to [target] (none | learning | known); optimistic, then
+  /// reconciles with the server (or reverts on failure).
+  Future<void> setStatus(String target) async {
+    final prev = _status;
+    _status = target;
+    notifyListeners();
+    final res = await runGuarded(() => _study.setStatus(ItemType.kanji, literal, target), silent: true);
+    _status = res ?? prev;
+    notifyListeners();
   }
 }

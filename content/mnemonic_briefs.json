@@ -1,0 +1,261 @@
+{
+  "schema": "jibiki-mnemonic-briefs/1",
+  "generated": "2026-07-09",
+  "purpose": "Fill the seed-content gaps of DEEP_SEARCH Feature 5: the 50 voiced kana (dakuten/handakuten) have no mnemonics yet, and kanji needs named components for chained stories. Stories below are ORIGINAL jibiki text (en + fr written independently, each anchored in its own language's sounds); drawing_brief describes the image to draw in-house, always derived from the EXISTING jibiki base-kana drawing so the set stays visually coherent.",
+  "legal": "Inspired at idea level by public material (see docs/research/mnemonic-sources.md). No source text or imagery is reproduced. Component names are jibiki's own; where they match other systems it is because the name is the plain pictographic/dictionary reading.",
+  "method": {
+    "dakuten": "The two marks ゛ are drawn as a buzz - the throat switching on. Every dakuten story = the base drawing + one concrete 'voiced' twist. EN and FR share the drawing whenever the sound anchor works in both languages; the texts are never translations of each other.",
+    "handakuten": "The circle ゜ is a little bubble that pops - the puff of p. Same derivation rule.",
+    "katakana": "Katakana voiced kana reuse the hiragana twin's story and drawing (same convention as the existing seed set).",
+    "kanji_components": "One short, concrete name per component, en + fr, ordered by frequency in JLPT N5/N4 kanji. These become the recurring cast of future chained kanji stories."
+  },
+  "voiced_kana": [
+    {
+      "char": "が", "script": "hiragana", "base": "か", "romaji": "ga", "twist": "dakuten",
+      "base_image": "karate chop",
+      "en": {"anchor": "gong", "story": "が is the karate chop landing on a gong - the buzz turns ka into GA."},
+      "fr": {"anchor": "gong", "story": "が, le coup de karaté frappe un gong - la vibration change « ka » en GA."},
+      "drawing_brief": "Reprendre le coup de karaté de か ; la main frappe un gong, les deux traits ゛ = ondes de vibration."
+    },
+    {
+      "char": "ぎ", "script": "hiragana", "base": "き", "romaji": "gi", "twist": "dakuten",
+      "base_image": "key on a ring",
+      "en": {"anchor": "guitar", "story": "ぎ is the key strumming a guitar string - GEE."},
+      "fr": {"anchor": "guitare", "story": "ぎ, la clé gratte une corde de guitare - GUI."},
+      "drawing_brief": "La clé de き utilisée comme médiator sur une corde de guitare ; ゛ = la corde qui vibre."
+    },
+    {
+      "char": "ぐ", "script": "hiragana", "base": "く", "romaji": "gu", "twist": "dakuten",
+      "base_image": "bird's beak",
+      "en": {"anchor": "gulp", "story": "ぐ is the beak gulping a worm whole - GOO-lp."},
+      "fr": {"anchor": "gober", "story": "ぐ, le bec gobe un ver tout rond - GOU."},
+      "drawing_brief": "Le bec de く avale un ver ; ゛ = deux gouttes qui giclent."
+    },
+    {
+      "char": "げ", "script": "hiragana", "base": "け", "romaji": "ge", "twist": "dakuten",
+      "base_image": "keg tipping over",
+      "en": {"anchor": "geyser", "story": "げ is the keg blowing its lid like a geyser - GEH!"},
+      "fr": {"anchor": "geyser", "story": "げ, le tonneau explose en geyser - GUÉ !"},
+      "drawing_brief": "Le tonneau de け qui jaillit en geyser ; ゛ = deux éclaboussures."
+    },
+    {
+      "char": "ご", "script": "hiragana", "base": "こ", "romaji": "go", "twist": "dakuten",
+      "base_image": "two short cords",
+      "en": {"anchor": "go!", "story": "ご - the two cords drop like a starting gate: GO!"},
+      "fr": {"anchor": "go !", "story": "ご, les deux cordes tombent, la course démarre - GO !"},
+      "drawing_brief": "Les deux cordelettes de こ tombent comme une ligne de départ ; ゛ = poussière du sprint."
+    },
+    {
+      "char": "ざ", "script": "hiragana", "base": "さ", "romaji": "za", "twist": "dakuten",
+      "base_image": "kite in the wind",
+      "en": {"anchor": "zap", "story": "ざ is the kite catching lightning - ZAp!"},
+      "fr": {"anchor": "zapper", "story": "ざ, le cerf-volant prend un éclair - ZA !"},
+      "drawing_brief": "Le cerf-volant de さ frappé par un petit éclair ; ゛ = étincelles statiques."
+    },
+    {
+      "char": "じ", "script": "hiragana", "base": "し", "romaji": "ji", "twist": "dakuten",
+      "base_image": "fish-hook",
+      "en": {"anchor": "jeans", "story": "じ is the hook snagging a pair of jeans instead of a fish - JEE."},
+      "fr": {"anchor": "jean", "story": "じ, l'hameçon remonte un jean au lieu d'un poisson - JI."},
+      "drawing_brief": "L'hameçon de し accroche un jean ; ゛ = deux gouttes d'eau."
+    },
+    {
+      "char": "ず", "script": "hiragana", "base": "す", "romaji": "zu", "twist": "dakuten",
+      "base_image": "swirl of noodles",
+      "en": {"anchor": "zoo", "story": "ず is the noodle swirl slurped by a panda at the zoo - ZOO."},
+      "fr": {"anchor": "zoo", "story": "ず, le tourbillon de nouilles aspiré par un panda du zoo - ZOU."},
+      "drawing_brief": "Le tourbillon de nouilles de す, avec un panda qui aspire ; ゛ = deux nouilles qui volent."
+    },
+    {
+      "char": "ぜ", "script": "hiragana", "base": "せ", "romaji": "ze", "twist": "dakuten",
+      "base_image": "mouth with tongue out",
+      "en": {"anchor": "zebra", "story": "ぜ - the tongue blows a raspberry at a zebra: ZEH."},
+      "fr": {"anchor": "zèbre", "story": "ぜ, la langue tirée nargue un zèbre - ZÈ."},
+      "drawing_brief": "La bouche de せ tire la langue, rayures de zèbre en fond ; ゛ = postillons du bruit de langue."
+    },
+    {
+      "char": "ぞ", "script": "hiragana", "base": "そ", "romaji": "zo", "twist": "dakuten",
+      "base_image": "sewing zigzag",
+      "en": {"anchor": "zombie", "story": "ぞ is the zigzag stitching a zombie's scar - ZOH."},
+      "fr": {"anchor": "zombie", "story": "ぞ, le zigzag recoud la cicatrice d'un zombie - ZO."},
+      "drawing_brief": "Le zigzag de couture de そ sur un bras de zombie ; ゛ = deux points de suture."
+    },
+    {
+      "char": "だ", "script": "hiragana", "base": "た", "romaji": "da", "twist": "dakuten",
+      "base_image": "hammer nailing",
+      "en": {"anchor": "dance", "story": "だ is the hammer doing a little dance between hits - DA, DA!"},
+      "fr": {"anchor": "danse", "story": "だ, le marteau danse entre deux coups - DA, DA !"},
+      "drawing_brief": "Le marteau de た en pleine danse (petites notes) ; ゛ = deux notes de musique."
+    },
+    {
+      "char": "ぢ", "script": "hiragana", "base": "ち", "romaji": "ji (dji)", "twist": "dakuten",
+      "base_image": "cheerleader bending back",
+      "en": {"anchor": "DJ", "story": "ぢ - the cheerleader moonlights as a DJ. Rare twin of じ: you'll almost never meet it."},
+      "fr": {"anchor": "DJ", "story": "ぢ, la pom-pom girl passe aux platines - DJI. Jumeau rare de じ, on le croise très peu."},
+      "drawing_brief": "La cheerleader de ち derrière des platines de DJ ; ゛ = deux notes. Mentionner la rareté dans l'histoire, pas le dessin."
+    },
+    {
+      "char": "づ", "script": "hiragana", "base": "つ", "romaji": "zu (dzu)", "twist": "dakuten",
+      "base_image": "curling wave",
+      "en": {"anchor": "dunk", "story": "づ is the wave dunking a surfer - DZU. Rare twin of ず."},
+      "fr": {"anchor": "plongeon (dzou)", "story": "づ, la vague fait plonger le surfeur - DZOU. Jumeau rare de ず."},
+      "drawing_brief": "La vague de つ retourne un surfeur ; ゛ = deux gouttes projetées."
+    },
+    {
+      "char": "で", "script": "hiragana", "base": "て", "romaji": "de", "twist": "dakuten",
+      "base_image": "hand / table side-on",
+      "en": {"anchor": "die (dice)", "story": "で is the hand rolling a die across the table - DEH."},
+      "fr": {"anchor": "dé", "story": "で, la main lance un dé sur la table - DÉ !"},
+      "drawing_brief": "La main/table de て avec un dé qui roule ; ゛ = les deux points du dé qui rebondit."
+    },
+    {
+      "char": "ど", "script": "hiragana", "base": "と", "romaji": "do", "twist": "dakuten",
+      "base_image": "toe with a thorn",
+      "en": {"anchor": "door", "story": "ど is the sore toe kicking a door - DOH!"},
+      "fr": {"anchor": "dodo", "story": "ど, l'orteil cogné… direction le dodo - DO."},
+      "drawing_brief": "L'orteil de と qui tape une porte ; ゛ = deux étoiles de douleur. (EN : porte ; FR : le lit du dodo en arrière-plan marche aussi.)"
+    },
+    {
+      "char": "ば", "script": "hiragana", "base": "は", "romaji": "ba", "twist": "dakuten",
+      "base_image": "person laughing",
+      "en": {"anchor": "balloon", "story": "ば - the laugher pops a balloon: BAH!"},
+      "fr": {"anchor": "ballon", "story": "ば, le rieur fait éclater un ballon - BA !"},
+      "drawing_brief": "Le personnage plié de rire de は avec un ballon qui éclate ; ゛ = deux bouts de baudruche."
+    },
+    {
+      "char": "び", "script": "hiragana", "base": "ひ", "romaji": "bi", "twist": "dakuten",
+      "base_image": "wide grin",
+      "en": {"anchor": "beam", "story": "び is the grin beaming twice as wide - BEE."},
+      "fr": {"anchor": "bise", "story": "び, le sourire fait la bise - BI !"},
+      "drawing_brief": "Le grand sourire de ひ, version rayonnante, avec une petite marque de bisou ; ゛ = deux éclats."
+    },
+    {
+      "char": "ぶ", "script": "hiragana", "base": "ふ", "romaji": "bu", "twist": "dakuten",
+      "base_image": "Mount Fuji",
+      "en": {"anchor": "boom", "story": "ぶ is Mount Fuji going BOOm."},
+      "fr": {"anchor": "boum", "story": "ぶ, le mont Fuji fait BOUm."},
+      "drawing_brief": "Le Fuji de ふ en mini-éruption ; ゛ = deux pierres projetées."
+    },
+    {
+      "char": "べ", "script": "hiragana", "base": "へ", "romaji": "be", "twist": "dakuten",
+      "base_image": "mountain slope",
+      "en": {"anchor": "bleat", "story": "べ - a sheep bleats its way down the slope: BEH."},
+      "fr": {"anchor": "bêler", "story": "べ, un mouton bêle sur la pente - BÊ !"},
+      "drawing_brief": "La pente de へ avec un mouton qui bêle ; ゛ = deux touffes de laine."
+    },
+    {
+      "char": "ぼ", "script": "hiragana", "base": "ほ", "romaji": "bo", "twist": "dakuten",
+      "base_image": "sail on a mast",
+      "en": {"anchor": "boat", "story": "ぼ is the sail finally pulling a boat - BOH."},
+      "fr": {"anchor": "bateau", "story": "ぼ, la voile tire enfin son bateau - BO."},
+      "drawing_brief": "La voile de ほ posée sur une coque de bateau ; ゛ = deux vaguelettes."
+    },
+    {
+      "char": "ぱ", "script": "hiragana", "base": "は", "romaji": "pa", "twist": "handakuten",
+      "base_image": "person laughing",
+      "en": {"anchor": "popcorn", "story": "ぱ - the laugh pops like popcorn: PA!"},
+      "fr": {"anchor": "pop-corn", "story": "ぱ, le rire éclate comme du pop-corn - PA !"},
+      "drawing_brief": "Le rieur de は sous une pluie de pop-corn ; ゜ = un grain qui vient d'éclater."
+    },
+    {
+      "char": "ぴ", "script": "hiragana", "base": "ひ", "romaji": "pi", "twist": "handakuten",
+      "base_image": "wide grin",
+      "en": {"anchor": "peep", "story": "ぴ - a chick peeps right next to the grin: PEEP."},
+      "fr": {"anchor": "pie", "story": "ぴ, une pie siffle près du sourire - PI !"},
+      "drawing_brief": "Le sourire de ひ avec un petit oiseau qui siffle ; ゜ = la note ronde du sifflet."
+    },
+    {
+      "char": "ぷ", "script": "hiragana", "base": "ふ", "romaji": "pu", "twist": "handakuten",
+      "base_image": "Mount Fuji",
+      "en": {"anchor": "poof", "story": "ぷ is Fuji puffing a smoke ring - POOF."},
+      "fr": {"anchor": "pouf", "story": "ぷ, le Fuji souffle un rond de fumée - POUF."},
+      "drawing_brief": "Le Fuji de ふ souffle un rond de fumée ; ゜ = le rond de fumée lui-même."
+    },
+    {
+      "char": "ぺ", "script": "hiragana", "base": "へ", "romaji": "pe", "twist": "handakuten",
+      "base_image": "mountain slope",
+      "en": {"anchor": "pebble", "story": "ぺ - a pebble ping-pongs down the slope: PEH."},
+      "fr": {"anchor": "pente", "story": "ぺ, un caillou rebondit sur la pente - PE, pe, pe…"},
+      "drawing_brief": "La pente de へ avec un caillou qui rebondit ; ゜ = le caillou rond."
+    },
+    {
+      "char": "ぽ", "script": "hiragana", "base": "ほ", "romaji": "po", "twist": "handakuten",
+      "base_image": "sail on a mast",
+      "en": {"anchor": "pot", "story": "ぽ is the sail puffed round as a pot - POH."},
+      "fr": {"anchor": "pot", "story": "ぽ, la voile gonflée, ronde comme un pot - PO."},
+      "drawing_brief": "La voile de ほ gonflée en boule ; ゜ = la bulle de vent."
+    },
+    {"char": "ガ", "script": "katakana", "same_as": "が"},
+    {"char": "ギ", "script": "katakana", "same_as": "ぎ"},
+    {"char": "グ", "script": "katakana", "same_as": "ぐ"},
+    {"char": "ゲ", "script": "katakana", "same_as": "げ"},
+    {"char": "ゴ", "script": "katakana", "same_as": "ご"},
+    {"char": "ザ", "script": "katakana", "same_as": "ざ"},
+    {"char": "ジ", "script": "katakana", "same_as": "じ"},
+    {"char": "ズ", "script": "katakana", "same_as": "ず"},
+    {"char": "ゼ", "script": "katakana", "same_as": "ぜ"},
+    {"char": "ゾ", "script": "katakana", "same_as": "ぞ"},
+    {"char": "ダ", "script": "katakana", "same_as": "だ"},
+    {"char": "ヂ", "script": "katakana", "same_as": "ぢ"},
+    {"char": "ヅ", "script": "katakana", "same_as": "づ"},
+    {"char": "デ", "script": "katakana", "same_as": "で"},
+    {"char": "ド", "script": "katakana", "same_as": "ど"},
+    {"char": "バ", "script": "katakana", "same_as": "ば"},
+    {"char": "ビ", "script": "katakana", "same_as": "び"},
+    {"char": "ブ", "script": "katakana", "same_as": "ぶ"},
+    {"char": "ベ", "script": "katakana", "same_as": "べ"},
+    {"char": "ボ", "script": "katakana", "same_as": "ぼ"},
+    {"char": "パ", "script": "katakana", "same_as": "ぱ"},
+    {"char": "ピ", "script": "katakana", "same_as": "ぴ"},
+    {"char": "プ", "script": "katakana", "same_as": "ぷ"},
+    {"char": "ペ", "script": "katakana", "same_as": "ぺ"},
+    {"char": "ポ", "script": "katakana", "same_as": "ぽ"}
+  ],
+  "kanji_components": [
+    {"component": "一", "n5n4_kanji": 47, "en": "beam", "fr": "poutre", "idea": "A horizontal beam everything rests on."},
+    {"component": "口", "n5n4_kanji": 33, "en": "mouth", "fr": "bouche", "idea": "Pictographic - keep the dictionary reading."},
+    {"component": "ノ", "n5n4_kanji": 27, "en": "feather", "fr": "plume", "idea": "One soft curved stroke drifting down."},
+    {"component": "｜", "n5n4_kanji": 21, "en": "pole", "fr": "mât", "idea": "A straight pole planted in the ground."},
+    {"component": "日", "n5n4_kanji": 20, "en": "sun", "fr": "soleil", "idea": "Pictographic - keep."},
+    {"component": "二", "n5n4_kanji": 19, "en": "rails", "fr": "rails", "idea": "Two parallel rails - more concrete than 'two'."},
+    {"component": "土", "n5n4_kanji": 18, "en": "soil", "fr": "terre", "idea": "Dictionary reading, already concrete."},
+    {"component": "木", "n5n4_kanji": 15, "en": "tree", "fr": "arbre", "idea": "Pictographic - keep."},
+    {"component": "亠", "n5n4_kanji": 13, "en": "hat", "fr": "chapeau", "idea": "A dot-topped brim sitting on things."},
+    {"component": "儿", "n5n4_kanji": 13, "en": "legs", "fr": "jambes", "idea": "Two running legs - the classic reading."},
+    {"component": "ハ", "n5n4_kanji": 12, "en": "wings", "fr": "ailes", "idea": "Two strokes splaying like open wings."},
+    {"component": "乞", "n5n4_kanji": 12, "en": "swan", "fr": "cygne", "idea": "The curved neck-and-body silhouette."},
+    {"component": "化", "n5n4_kanji": 12, "en": "makeover", "fr": "métamorphose", "idea": "A person mid-transformation (化 = change)."},
+    {"component": "并", "n5n4_kanji": 12, "en": "twin antennas", "fr": "antennes jumelles", "idea": "Two matched uprights side by side."},
+    {"component": "丶", "n5n4_kanji": 11, "en": "drop", "fr": "goutte", "idea": "The obvious reading - a single drop."},
+    {"component": "厶", "n5n4_kanji": 11, "en": "elbow", "fr": "coude", "idea": "A bent arm folded shut."},
+    {"component": "目", "n5n4_kanji": 11, "en": "eye", "fr": "œil", "idea": "Pictographic - keep."},
+    {"component": "十", "n5n4_kanji": 10, "en": "cross", "fr": "croix", "idea": "Pictographic - keep."},
+    {"component": "冖", "n5n4_kanji": 9, "en": "tablecloth", "fr": "nappe", "idea": "A cloth draped over something."},
+    {"component": "王", "n5n4_kanji": 9, "en": "king", "fr": "roi", "idea": "Dictionary reading - keep."},
+    {"component": "田", "n5n4_kanji": 9, "en": "rice field", "fr": "rizière", "idea": "Pictographic - keep."},
+    {"component": "大", "n5n4_kanji": 8, "en": "spread-out person", "fr": "grand écart", "idea": "A person with arms and legs wide."},
+    {"component": "宀", "n5n4_kanji": 8, "en": "roof", "fr": "toit", "idea": "Classic reading - keep."},
+    {"component": "个", "n5n4_kanji": 7, "en": "tepee", "fr": "tipi", "idea": "A pitched tent with a centre pole."},
+    {"component": "冂", "n5n4_kanji": 7, "en": "doorframe", "fr": "cadre de porte", "idea": "An open frame you walk through."},
+    {"component": "勹", "n5n4_kanji": 7, "en": "hood", "fr": "capuche", "idea": "A shape wrapping over something."},
+    {"component": "月", "n5n4_kanji": 7, "en": "moon", "fr": "lune", "idea": "Pictographic - keep."},
+    {"component": "亅", "n5n4_kanji": 6, "en": "hook", "fr": "crochet", "idea": "A straight stroke with a barb."},
+    {"component": "人", "n5n4_kanji": 6, "en": "person", "fr": "personne", "idea": "Pictographic - keep."},
+    {"component": "夕", "n5n4_kanji": 6, "en": "dusk", "fr": "crépuscule", "idea": "Dictionary reading (evening), evocative."},
+    {"component": "小", "n5n4_kanji": 6, "en": "small", "fr": "petit", "idea": "Dictionary reading - keep."},
+    {"component": "言", "n5n4_kanji": 6, "en": "speech", "fr": "parole", "idea": "Lines of words leaving a mouth."},
+    {"component": "込", "n5n4_kanji": 6, "en": "path", "fr": "chemin", "idea": "The walking radical ⻌ - a winding path."},
+    {"component": "力", "n5n4_kanji": 5, "en": "muscle", "fr": "muscle", "idea": "A flexed arm (force made visible)."},
+    {"component": "匕", "n5n4_kanji": 5, "en": "spoon", "fr": "cuillère", "idea": "Dictionary reading - keep."},
+    {"component": "女", "n5n4_kanji": 5, "en": "woman", "fr": "femme", "idea": "Pictographic - keep."},
+    {"component": "心", "n5n4_kanji": 5, "en": "heart", "fr": "cœur", "idea": "Pictographic - keep."},
+    {"component": "杰", "n5n4_kanji": 5, "en": "flames", "fr": "flammes", "idea": "The four fire-dots 灬 licking below."},
+    {"component": "立", "n5n4_kanji": 5, "en": "standing", "fr": "debout", "idea": "Dictionary reading - keep."},
+    {"component": "貝", "n5n4_kanji": 5, "en": "shell", "fr": "coquillage", "idea": "Cowrie shell (old money) - keep."},
+    {"component": "里", "n5n4_kanji": 5, "en": "village", "fr": "village", "idea": "Dictionary reading - keep."},
+    {"component": "ヨ", "n5n4_kanji": 4, "en": "comb", "fr": "peigne", "idea": "Three teeth on a spine."},
+    {"component": "卜", "n5n4_kanji": 4, "en": "signpost", "fr": "panneau", "idea": "A post with one leaning sign."},
+    {"component": "又", "n5n4_kanji": 4, "en": "grabbing hand", "fr": "main qui saisit", "idea": "The old 'right hand' reading, made concrete."},
+    {"component": "囗", "n5n4_kanji": 4, "en": "enclosure", "fr": "enceinte", "idea": "Four walls seen from above."}
+  ]
+}

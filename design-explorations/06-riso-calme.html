@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jibiki · exploration 06 · Riso calme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papier:#F4F4F0;
+    --encre:#131A6E;            /* bleu outremer dense = le « noir » */
+    --encre-2:#4A519C;          /* encre atténuée (6.4:1 sur papier) */
+    --fluo:#FF4D12;             /* orange fluo : aplats, signal */
+    --fluo-trait:#E8470D;       /* orange en trait/texte large (3.5:1 sur papier) */
+    --fluo-clair:#FF6B35;       /* orange en texte sur encre dense (4.6:1) */
+    --fluo-tampon:#C93A05;      /* encre tampon, double passage (4.7:1 sur papier) */
+    --filet:rgba(19,26,110,.30);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{
+    background:var(--encre);
+    color:var(--papier);
+    font-family:"Public Sans",sans-serif;
+    min-height:100vh;
+    position:relative;
+  }
+  /* trame halftone : UN coin de la page, c'est tout */
+  body::before{
+    content:"";position:absolute;top:0;right:0;width:460px;height:380px;
+    background-image:radial-gradient(circle,rgba(255,77,18,.55) 1.5px,transparent 2px);
+    background-size:15px 15px;
+    -webkit-mask-image:radial-gradient(ellipse at top right,#000 0%,transparent 70%);
+    mask-image:radial-gradient(ellipse at top right,#000 0%,transparent 70%);
+    pointer-events:none;
+  }
+  /* grain photocopie, très léger */
+  body::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:40;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="220" height="220" filter="url(%23n)"/></svg>');
+    opacity:.05;
+    mix-blend-mode:soft-light;
+  }
+  .jp{font-family:"Zen Kaku Gothic New",sans-serif;}
+
+  /* ===== entête de la direction ===== */
+  .masthead{
+    max-width:1360px;margin:0 auto;
+    padding:56px 40px 10px;
+    display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap;
+    position:relative;z-index:1;
+  }
+  .masthead h1{
+    font-family:"Archivo Black",sans-serif;
+    font-size:4.2rem;line-height:.95;letter-spacing:-0.015em;
+    text-transform:uppercase;
+  }
+  .masthead .regmark{flex:0 0 auto;margin-bottom:14px;}
+  .masthead .desc{
+    max-width:52ch;margin-bottom:10px;
+    font-size:16px;line-height:1.55;color:rgba(244,244,240,.92);
+  }
+  .masthead .desc strong{color:var(--fluo-clair);font-weight:700;}
+
+  /* ===== galerie ===== */
+  .gallery{
+    display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+    gap:56px;
+    max-width:1440px;margin:0 auto;
+    padding:44px 40px 88px;
+    position:relative;z-index:1;
+  }
+  .phone{display:flex;flex-direction:column;gap:14px;}
+  .phone figcaption{
+    font-size:14px;font-weight:700;color:var(--papier);
+    display:flex;align-items:center;gap:12px;
+  }
+  .phone figcaption::after{content:"";flex:1;height:1px;background:rgba(244,244,240,.28);}
+
+  .screen{
+    width:390px;height:840px;
+    background:var(--papier);color:var(--encre);
+    border-radius:38px;
+    overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;
+    box-shadow:0 32px 70px rgba(5,8,45,.5);
+    font-size:15px;line-height:1.5;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+  .app{min-height:100%;display:flex;flex-direction:column;padding:26px 22px 12px;}
+
+  /* décalage d'encre : réservé au kanji héros (un par écran) */
+  .misreg{position:relative;display:inline-block;font-weight:900;isolation:isolate;}
+  .misreg::after{
+    content:attr(data-t);
+    position:absolute;left:3px;top:3px;
+    color:var(--fluo);z-index:-1;white-space:nowrap;
+  }
+
+  /* tampon (2 sur l'ensemble des 3 écrans) */
+  .stamp{
+    display:inline-block;
+    border:2px solid var(--fluo-tampon);color:var(--fluo-tampon);
+    border-radius:7px;
+    font-weight:800;font-size:13px;letter-spacing:.02em;
+    padding:4px 10px;
+    background:rgba(255,77,18,.06);
+  }
+
+  /* intitulé de section : graisse + filet, pas de capitales espacées */
+  .sec{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:700;}
+  .sec::after{content:"";flex:1;height:1px;background:var(--filet);}
+
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- écran 1 : accueil ---------- */
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .kanjimark{font-size:19px;font-weight:700;}
+  .brand .wordmark{font-family:"Archivo Black",sans-serif;font-size:21px;letter-spacing:-0.01em;}
+
+  .search{
+    margin-top:18px;
+    display:flex;align-items:center;gap:11px;
+    border:1.5px solid var(--encre);border-radius:14px;
+    min-height:52px;padding:0 16px;
+  }
+  .search .ph{color:var(--encre-2);font-size:15px;}
+
+  .due{
+    margin-top:20px;
+    background:var(--encre);color:var(--papier);
+    border-radius:18px;padding:20px 20px 18px;
+    position:relative;overflow:hidden;
+  }
+  .due::after{ /* halftone : un coin, discret */
+    content:"";position:absolute;right:-18px;top:-18px;width:120px;height:104px;
+    background-image:radial-gradient(circle,var(--fluo) 1.5px,transparent 1.9px);
+    background-size:11px 11px;
+    -webkit-mask-image:radial-gradient(circle at top right,#000 10%,transparent 72%);
+    mask-image:radial-gradient(circle at top right,#000 10%,transparent 72%);
+    opacity:.55;pointer-events:none;
+  }
+  .due-label{font-size:13px;font-weight:600;color:rgba(244,244,240,.8);}
+  .due-nums{margin-top:5px;font-size:24px;font-weight:800;line-height:1.2;white-space:nowrap;}
+  .due-nums .new{color:var(--fluo-clair);font-style:normal;}
+  .due .cta{
+    margin-top:15px;width:100%;
+    background:var(--fluo);color:var(--encre);
+    border:none;border-radius:12px;
+    min-height:54px;
+    font-size:19px;font-weight:800;
+  }
+
+  .wod{margin-top:32px;}
+  .wod .furi{margin-top:22px;font-size:15px;font-weight:500;color:var(--encre-2);}
+  .wod .hero{font-size:94px;line-height:1.08;}
+  .wod .romaji{margin-top:3px;font-size:14px;font-weight:600;color:var(--encre-2);}
+  .wod .gloss{margin-top:12px;font-size:15.5px;max-width:30ch;}
+  .wod .more{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:10px;min-height:44px;padding:0 2px;
+    background:none;border:none;
+    color:var(--encre);font-size:15px;font-weight:800;
+    border-bottom:2px solid var(--fluo);border-radius:0;
+  }
+
+  .tabs{
+    margin-top:auto;
+    display:flex;
+    border-top:1px solid var(--filet);
+    padding-top:8px;
+  }
+  .tab{
+    flex:1;min-height:56px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    background:none;border:none;
+    color:var(--encre-2);font-size:11px;font-weight:600;
+    position:relative;
+  }
+  .tab .jp{font-size:19px;line-height:22px;font-weight:500;}
+  .tab.active{color:var(--encre);font-weight:800;}
+  .tab.active::before{
+    content:"";position:absolute;top:-9px;width:26px;height:3px;border-radius:2px;
+    background:var(--fluo);
+  }
+  .tab.active svg{color:var(--fluo-trait);}
+
+  /* ---------- écran 2 : fiche mot ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;}
+  .back{
+    display:flex;align-items:center;gap:7px;
+    background:none;border:none;color:var(--encre);
+    font-size:14.5px;font-weight:700;
+    min-height:44px;padding:0 4px;margin-left:-4px;
+  }
+  .fiche-no{font-size:12.5px;font-weight:600;color:var(--encre-2);}
+
+  .word-hero{text-align:center;margin-top:2px;}
+  .word-hero .furi{font-size:15px;font-weight:500;color:var(--encre-2);}
+  .word-hero .hero{font-size:78px;line-height:1.02;}
+  .word-hero .say{
+    margin-top:2px;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+  }
+  .word-hero .romaji{font-size:18px;font-weight:600;}
+  .word-hero .audio{
+    width:44px;height:44px;border-radius:50%;
+    border:1.5px solid var(--encre);background:none;color:var(--encre);
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .tagline{
+    margin-top:8px;text-align:center;
+    font-size:14px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+  }
+  .tagline .stamp{transform:rotate(-4deg);}
+
+  .senses{margin-top:16px;}
+  .senses ol{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+  .senses li{display:flex;gap:11px;font-size:16px;}
+  .senses li b{font-weight:800;}
+
+  .compo{margin-top:14px;}
+  .compo-row{
+    margin-top:8px;
+    display:flex;align-items:flex-start;justify-content:flex-start;gap:14px;
+  }
+  .compo-part{text-align:center;min-width:56px;}
+  .compo-part .glyph{font-size:28px;line-height:1.2;font-weight:500;}
+  .compo-part .lbl{margin-top:1px;font-size:12.5px;font-weight:600;color:var(--encre-2);}
+  .compo-plus{font-size:17px;font-weight:600;color:var(--encre-2);margin-top:7px;}
+
+  .mnemo{
+    margin-top:16px;
+    background:var(--encre);color:var(--papier);
+    border-radius:18px;padding:14px 18px 11px;
+  }
+  .mnemo-label{font-size:13px;font-weight:700;color:rgba(244,244,240,.8);}
+  .mnemo-quote{margin-top:6px;font-size:15.5px;line-height:1.5;}
+  .mnemo-quote .jp{font-weight:500;}
+  .mnemo-foot{
+    margin-top:6px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .mnemo-foot .author{font-size:13px;font-weight:600;color:rgba(244,244,240,.75);}
+  .vote{
+    display:inline-flex;align-items:center;gap:7px;
+    background:none;border:1px solid rgba(244,244,240,.4);border-radius:99px;
+    color:var(--papier);font-size:14.5px;font-weight:800;
+    min-height:44px;padding:0 15px;
+  }
+  .vote .tri{color:var(--fluo-clair);font-size:12px;}
+
+  .example{margin-top:16px;margin-bottom:16px;}
+  .segs{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px;}
+  .seg{
+    border:1px solid var(--filet);border-radius:10px;
+    background:none;color:var(--encre);
+    font-size:19px;line-height:1;font-weight:500;
+    padding:11px 10px;min-height:44px;
+  }
+  .seg.hl{border-color:var(--fluo-trait);background:rgba(255,77,18,.09);font-weight:700;}
+  .trad{margin-top:8px;font-size:15px;font-style:italic;color:var(--encre-2);}
+
+  .add-cta{
+    margin-top:auto;
+    width:100%;min-height:54px;
+    background:var(--fluo);color:var(--encre);
+    border:none;border-radius:12px;
+    font-size:19px;font-weight:800;
+  }
+
+  /* ---------- écran 3 : révision ---------- */
+  .sess-head{display:flex;align-items:baseline;justify-content:space-between;}
+  .sess-head .t{font-size:14.5px;font-weight:700;}
+  .sess-count{font-size:13.5px;font-weight:600;color:var(--encre-2);}
+  .sess-count b{font-size:19px;font-weight:800;color:var(--encre);}
+  .gauge{
+    margin-top:13px;
+    height:11px;border:1px solid var(--filet);border-radius:99px;
+    background-image:radial-gradient(circle,rgba(19,26,110,.28) 1px,transparent 1.4px);
+    background-size:7px 7px; /* halftone : fond de jauge */
+    overflow:hidden;
+  }
+  .gauge .fill{width:35%;height:100%;background:var(--fluo);border-radius:99px;}
+
+  .card{
+    flex:1;
+    margin-top:26px;margin-bottom:22px;
+    border:1px solid var(--encre);border-radius:20px;
+    padding:30px 24px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;position:relative;
+  }
+  .card .hero{font-size:86px;line-height:1.1;}
+  .card .rule{width:120px;height:1px;background:var(--filet);margin:24px 0 20px;}
+  .card .reading{font-size:26px;font-weight:500;}
+  .card .meaning{margin-top:7px;font-size:17px;font-weight:600;}
+  .card .stamp{
+    position:absolute;top:16px;right:14px;
+    transform:rotate(7deg);
+    animation:stamp-in .3s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes stamp-in{
+    from{transform:rotate(7deg) scale(1.5);opacity:0;}
+    to{transform:rotate(7deg) scale(1);opacity:1;}
+  }
+
+  .grades{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grade{
+    min-height:62px;border-radius:14px;
+    border:1px solid var(--encre);background:none;color:var(--encre);
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    font-size:15px;font-weight:700;
+  }
+  .grade.hachures{
+    background-image:repeating-linear-gradient(45deg,rgba(19,26,110,.10) 0 3px,transparent 3px 9px);
+  }
+  .grade.trame{
+    background-image:radial-gradient(circle,rgba(19,26,110,.15) 1.2px,transparent 1.6px);
+    background-size:8px 8px;
+  }
+  .grade.aplat{background:var(--encre);color:var(--papier);}
+  .sess-hint{
+    margin-top:12px;text-align:center;
+    font-size:12.5px;font-weight:600;color:var(--encre-2);
+    padding-bottom:6px;
+  }
+  .sess-hint span{display:block;}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1>Riso calme</h1>
+  <svg class="regmark" width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+    <circle cx="15" cy="15" r="9" stroke="#FF4D12" stroke-width="2"/>
+    <path d="M15 0v8M15 22v8M0 15h8M22 15h8" stroke="#FF4D12" stroke-width="2"/>
+  </svg>
+  <p class="desc">Les deux encres restent, <strong>bleu outremer + orange fluo</strong> sur papier froid, mais le papier respire : décalage réservé au kanji héros, deux tampons en tout, et l'information passe devant le décor.</p>
+</header>
+
+<main class="gallery">
+
+  <!-- ================= ACCUEIL ================= -->
+  <figure class="phone">
+    <figcaption>Accueil</figcaption>
+    <article class="screen">
+      <div class="app">
+        <header class="brand">
+          <span class="kanjimark jp" lang="ja">字引</span>
+          <span class="wordmark">jibiki</span>
+        </header>
+
+        <div class="search" role="search">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <span class="ph">Un mot, un kanji, du rōmaji…</span>
+        </div>
+
+        <section class="due">
+          <p class="due-label">File d'attente du jour</p>
+          <p class="due-nums">12 à réviser · <em class="new">5 nouvelles</em></p>
+          <button class="cta">Lancer la session</button>
+        </section>
+
+        <section class="wod">
+          <h2 class="sec">Mot du jour</h2>
+          <p class="furi jp" lang="ja">はなみ</p>
+          <p class="hero jp misreg" lang="ja" data-t="花見">花見</p>
+          <p class="romaji">hanami</p>
+          <p class="gloss">Pique-nique sous les cerisiers en fleurs, au printemps.</p>
+          <button class="more">Voir la fiche
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </section>
+
+        <nav class="tabs" aria-label="Navigation principale">
+          <button class="tab active">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Dico
+          </button>
+          <button class="tab">
+            <span class="jp" lang="ja" aria-hidden="true">あ</span>
+            Kana
+          </button>
+          <button class="tab">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Réviser
+          </button>
+          <button class="tab">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Communauté
+          </button>
+          <button class="tab">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profil
+          </button>
+        </nav>
+      </div>
+    </article>
+  </figure>
+
+  <!-- ================= FICHE MOT ================= -->
+  <figure class="phone">
+    <figcaption>Fiche mot</figcaption>
+    <article class="screen">
+      <div class="app">
+        <div class="topbar" style="margin-top:-6px;">
+          <button class="back">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            Retour
+          </button>
+          <span class="fiche-no">Fiche nº 0247</span>
+        </div>
+
+        <section class="word-hero">
+          <p class="furi jp" lang="ja">さくら</p>
+          <p class="hero jp misreg" lang="ja" data-t="桜">桜</p>
+          <div class="say">
+            <span class="romaji">« sakura »</span>
+            <button class="audio" aria-label="Écouter la prononciation">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+            </button>
+          </div>
+          <p class="tagline">Nom <span aria-hidden="true">·</span> <span class="stamp">JLPT N5</span> <span aria-hidden="true">·</span> Fréquent</p>
+        </section>
+
+        <section class="senses">
+          <h2 class="sec">Sens</h2>
+          <ol>
+            <li><b>1</b> cerisier (arbre)</li>
+            <li><b>2</b> fleur de cerisier</li>
+          </ol>
+        </section>
+
+        <section class="compo">
+          <h2 class="sec">Composition</h2>
+          <div class="compo-row">
+            <div class="compo-part"><p class="glyph jp" lang="ja">木</p><p class="lbl">arbre</p></div>
+            <span class="compo-plus">+</span>
+            <div class="compo-part"><p class="glyph jp" lang="ja">⺍</p><p class="lbl">radical</p></div>
+            <span class="compo-plus">+</span>
+            <div class="compo-part"><p class="glyph jp" lang="ja">女</p><p class="lbl">femme</p></div>
+          </div>
+        </section>
+
+        <section class="mnemo">
+          <p class="mnemo-label">Mnémonique de la communauté</p>
+          <p class="mnemo-quote">« Une femme (<span class="jp" lang="ja">女</span>) coiffée de pétales (<span class="jp" lang="ja">⺍</span>) danse sous un arbre (<span class="jp" lang="ja">木</span>) : le cerisier en fleurs. »</p>
+          <div class="mnemo-foot">
+            <span class="author">par @encre_fluo</span>
+            <button class="vote" aria-label="Voter pour cette mnémonique, 128 votes"><span class="tri" aria-hidden="true">▲</span>128</button>
+          </div>
+        </section>
+
+        <section class="example">
+          <h2 class="sec">Exemple</h2>
+          <div class="segs">
+            <button class="seg hl jp" lang="ja">桜</button>
+            <button class="seg jp" lang="ja">の</button>
+            <button class="seg jp" lang="ja">花</button>
+            <button class="seg jp" lang="ja">が</button>
+            <button class="seg jp" lang="ja">咲いています</button>
+          </div>
+          <p class="trad">« Les cerisiers sont en fleurs. »</p>
+        </section>
+
+        <button class="add-cta">Ajouter au paquet</button>
+      </div>
+    </article>
+  </figure>
+
+  <!-- ================= RÉVISION ================= -->
+  <figure class="phone">
+    <figcaption>Révision</figcaption>
+    <article class="screen">
+      <div class="app">
+        <div class="sess-head">
+          <span class="t">Session en cours</span>
+          <span class="sess-count"><b>7</b> / 20</span>
+        </div>
+        <div class="gauge" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="Progression de la session">
+          <div class="fill"></div>
+        </div>
+
+        <section class="card">
+          <span class="stamp">RETENU !</span>
+          <p class="hero jp misreg" lang="ja" data-t="勉強">勉強</p>
+          <div class="rule" aria-hidden="true"></div>
+          <p class="reading jp" lang="ja">べんきょう</p>
+          <p class="meaning">« étude, travail »</p>
+        </section>
+
+        <div class="grades">
+          <button class="grade">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Encore
+          </button>
+          <button class="grade hachures">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            Difficile
+          </button>
+          <button class="grade trame">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Bien
+          </button>
+          <button class="grade aplat">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+            Facile
+          </button>
+        </div>
+        <p class="sess-hint"><span>Réussite : l'intervalle s'allonge.</span> <span>Échec : la carte revient en file.</span></p>
+      </div>
+    </article>
+  </figure>
+
+</main>
+
+</body>
+</html>

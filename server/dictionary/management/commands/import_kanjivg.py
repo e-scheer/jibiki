@@ -2,12 +2,12 @@
 
 One-shot batch command. KanjiVG ships one SVG per character, named by zero-padded
 lowercase Unicode codepoint (字 U+5B57 → ``05b57.svg``); each ``<path d="…">`` is
-one stroke, in draw order. We extract the ``d`` strings (regex — robust to the
+one stroke, in draw order. We extract the ``d`` strings (regex - robust to the
 kvg: attribute namespace) for every kanji already in the DB.
 
     python manage.py import_kanjivg /path/to/kanjivg/kanji
 
-KanjiVG © Ulrich Apel, CC BY-SA 3.0 — see NOTICE.md (share-alike applies to
+KanjiVG © Ulrich Apel, CC BY-SA 3.0 - see NOTICE.md (share-alike applies to
 derivatives of these assets).
 """
 
@@ -57,4 +57,4 @@ class Command(BaseCommand):
             kanji.stroke_paths, kanji.stroke_viewbox = result
             kanji.save(update_fields=["stroke_paths", "stroke_viewbox"])
             updated += 1
-        self.stdout.write(self.style.SUCCESS(f"Done — strokes set on {updated} kanji ({missing} not in KanjiVG)."))
+        self.stdout.write(self.style.SUCCESS(f"Done - strokes set on {updated} kanji ({missing} not in KanjiVG)."))

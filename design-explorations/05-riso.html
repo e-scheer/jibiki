@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jibiki · exploration 05 · Riso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papier:#F1F1EC;
+    --dense:#131A6E;   /* « noir » = bleu outremer dense */
+    --bleu:#1C29B0;
+    --orange:#FF4D12;  /* fluo : aplats, tampons, gros titres sur bleu */
+    --nuit:#0E1350;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{
+    background:var(--nuit);
+    color:var(--papier);
+    font-family:"Archivo",sans-serif;
+    font-weight:500;
+    min-height:100vh;
+    position:relative;
+  }
+  /* trame halftone du fond */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;
+    background-image:radial-gradient(circle,var(--orange) 1.6px,transparent 2px);
+    background-size:26px 26px;
+    opacity:.10;
+  }
+  /* grain papier / photocopie */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="220" height="220" filter="url(%23n)"/></svg>');
+    opacity:.07;
+    mix-blend-mode:soft-light;
+  }
+  .jp{font-family:"Zen Kaku Gothic New",sans-serif;}
+
+  /* ===== entête de la direction ===== */
+  .masthead{
+    max-width:1320px;margin:0 auto;
+    padding:56px 32px 8px;
+    display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap;
+    position:relative;z-index:1;
+  }
+  .masthead h1{
+    font-family:"Archivo Black",sans-serif;
+    font-size:6rem;line-height:.9;letter-spacing:-0.02em;
+    color:var(--papier);
+    text-shadow:4px 4px 0 var(--orange);
+    text-transform:uppercase;
+  }
+  .masthead .regmark{flex:0 0 auto;margin-bottom:10px;}
+  .masthead .desc{
+    max-width:46ch;margin-bottom:8px;
+    font-size:1rem;line-height:1.5;color:var(--papier);
+    border:3px solid var(--papier);padding:12px 16px;
+  }
+  .masthead .desc strong{color:var(--orange);font-weight:700;}
+
+  /* ===== galerie ===== */
+  .gallery{
+    display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+    gap:72px 56px;
+    padding:48px 32px 96px;
+    position:relative;z-index:1;
+  }
+  .cell{display:flex;flex-direction:column;gap:14px;}
+  .cap{
+    font-family:"Archivo Black",sans-serif;font-size:1.15rem;
+    text-transform:uppercase;letter-spacing:.02em;color:var(--papier);
+    display:flex;align-items:center;gap:10px;
+  }
+  .cap::before{content:"";width:14px;height:14px;background:var(--orange);flex:0 0 auto;}
+
+  /* ===== écran téléphone ===== */
+  .screen{
+    width:390px;height:840px;
+    background:var(--papier);color:var(--dense);
+    border:4px solid var(--dense);border-radius:34px;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    box-shadow:12px 14px 0 var(--orange);
+    font-size:15px;line-height:1.45;
+    position:relative;
+  }
+  .sbody{flex:1;overflow-y:auto;scrollbar-width:none;padding:16px 16px 14px;display:flex;flex-direction:column;gap:16px;}
+  .screen.dense-fit .sbody{gap:8px;padding:12px 14px 10px;}
+  .screen.dense-fit .bar,
+  .screen.dense-fit table.sens th{font-size:12px;padding:5px 10px;}
+  .screen.dense-fit table.sens td{padding:4px 10px;}
+  .screen.dense-fit .hero .word{font-size:86px;}
+  .screen.dense-fit .hero .furi{font-size:15px;}
+  .screen.dense-fit .compo .piece .g{font-size:30px;}
+  .screen.dense-fit .compo .row{padding:6px 12px;}
+  .screen.dense-fit .cta{min-height:48px;padding:10px;font-size:17px;}
+  .sbody::-webkit-scrollbar{display:none;}
+
+  /* superposition des deux encres : décalage d'impression */
+  .misreg{position:relative;display:inline-block;color:var(--orange);}
+  .misreg::after{
+    content:attr(data-text);
+    position:absolute;left:-2px;top:-2px;
+    color:var(--dense);
+    mix-blend-mode:multiply;
+  }
+
+  .stamp{
+    display:inline-block;
+    font-family:"Archivo Black",sans-serif;text-transform:uppercase;
+    border:3px solid currentColor;padding:3px 10px;
+    letter-spacing:.04em;
+  }
+
+  .dots{
+    position:absolute;pointer-events:none;
+    background-image:radial-gradient(circle,var(--bleu) 1.3px,transparent 1.6px);
+    background-size:8px 8px;opacity:.5;
+  }
+  .dots.orange{background-image:radial-gradient(circle,var(--orange) 1.4px,transparent 1.7px);opacity:.8;}
+
+  .bar{
+    font-family:"Archivo Black",sans-serif;font-size:13px;letter-spacing:.05em;
+    text-transform:uppercase;
+    background:var(--dense);color:var(--papier);
+    padding:6px 10px;
+  }
+  .bar.fluo{background:var(--orange);color:var(--dense);}
+
+  /* ============ ÉCRAN 1 : ACCUEIL ============ */
+  .mast{display:flex;align-items:stretch;gap:12px;border:4px solid var(--dense);padding:12px 14px;position:relative;overflow:hidden;}
+  .mast .kanji-side{
+    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;
+    background:var(--dense);color:var(--papier);
+    writing-mode:vertical-rl;font-size:20px;letter-spacing:.2em;
+    padding:8px 5px;display:flex;align-items:center;
+  }
+  .mast .logo{
+    font-family:"Archivo Black",sans-serif;font-size:44px;line-height:1;
+    letter-spacing:-0.02em;text-transform:uppercase;
+  }
+  .mast .sub{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:6px;}
+  .mast .sub em{font-style:normal;background:var(--orange);color:var(--dense);padding:1px 5px;font-weight:700;}
+
+  .search{display:flex;border:4px solid var(--dense);background:#fff;}
+  .search input{
+    flex:1;border:0;outline:0;background:transparent;
+    font:inherit;font-weight:500;color:var(--dense);
+    padding:13px 14px;min-width:0;
+  }
+  .search input::placeholder{color:var(--dense);opacity:1;}
+  .search button{
+    flex:0 0 52px;border:0;border-left:4px solid var(--dense);
+    background:var(--dense);color:var(--papier);
+    display:grid;place-items:center;cursor:pointer;min-height:44px;
+  }
+
+  .due{
+    background:var(--dense);color:var(--papier);
+    border:4px solid var(--dense);
+    padding:18px 16px 16px;position:relative;
+  }
+  .due .stamp-due{
+    position:absolute;top:14px;right:12px;
+    color:var(--orange);transform:rotate(2deg);
+    font-size:15px;
+  }
+  .due .lead{font-family:"Archivo Black",sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;}
+  .due .nums{font-family:"Archivo Black",sans-serif;font-size:34px;line-height:1.05;text-transform:uppercase;letter-spacing:-0.01em;}
+  .due .nums .fluo{color:var(--orange);}
+  .btn-session{
+    display:block;width:100%;margin-top:14px;
+    background:var(--orange);color:var(--dense);
+    border:4px solid var(--papier);
+    font-family:"Archivo Black",sans-serif;font-size:19px;text-transform:uppercase;
+    padding:13px 10px;cursor:pointer;letter-spacing:.02em;
+    min-height:52px;
+  }
+
+  .motd{border:4px solid var(--dense);padding:16px 16px 18px;position:relative;overflow:hidden;flex:1;}
+  .motd .stamp-motd{
+    position:absolute;top:12px;right:10px;transform:rotate(-2deg);
+    color:var(--dense);font-size:12px;background:var(--papier);
+  }
+  .motd .word{
+    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;
+    font-size:92px;line-height:1.05;letter-spacing:.01em;
+    margin-top:20px;
+  }
+  .motd .read{font-size:17px;font-weight:700;margin-top:2px;}
+  .motd .read .jp{font-size:19px;}
+  .motd .gloss{margin-top:8px;max-width:30ch;}
+  .motd .gloss b{background:var(--orange);color:var(--dense);padding:0 4px;}
+
+  .nav{
+    display:flex;border-top:4px solid var(--dense);background:var(--papier);flex:0 0 auto;
+  }
+  .nav a{
+    flex:1;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    text-decoration:none;color:var(--dense);
+    font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;
+  }
+  .nav a+a{border-left:3px solid var(--dense);}
+  .nav a.on{background:var(--dense);color:var(--papier);}
+  .nav .kana-ic{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:19px;line-height:20px;}
+  .nav svg{width:20px;height:20px;}
+
+  /* ============ ÉCRAN 2 : FICHE MOT ============ */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .back{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:"Archivo Black",sans-serif;font-size:12px;text-transform:uppercase;
+    color:var(--dense);text-decoration:none;
+    border:3px solid var(--dense);padding:6px 11px;min-height:44px;
+  }
+  .ficheno{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+
+  .hero{position:relative;text-align:center;padding:0;}
+  .hero .furi{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:700;font-size:16px;}
+  .hero .word{
+    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;
+    font-size:96px;line-height:1.05;
+  }
+  .hero .roma{display:flex;align-items:center;justify-content:center;gap:12px;}
+  .hero .roma .r{font-family:"Archivo Black",sans-serif;font-size:24px;text-transform:lowercase;letter-spacing:-0.01em;}
+  .audio{
+    width:44px;height:44px;border:4px solid var(--dense);
+    background:var(--orange);color:var(--dense);
+    display:grid;place-items:center;cursor:pointer;
+  }
+  .hero .dots{width:100px;height:100px;left:8px;top:16px;}
+
+  .tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .tag{border:3px solid var(--dense);padding:3px 9px;font-weight:700;font-size:12.5px;text-transform:uppercase;}
+  .tag.n5{
+    background:var(--orange);border-color:var(--dense);color:var(--dense);
+    font-family:"Archivo Black",sans-serif;transform:rotate(-2deg);
+  }
+
+  table.sens{width:100%;border-collapse:collapse;}
+  table.sens th{
+    font-family:"Archivo Black",sans-serif;font-size:13px;letter-spacing:.05em;text-transform:uppercase;
+    background:var(--dense);color:var(--papier);
+    border:3px solid var(--dense);padding:6px 10px;text-align:left;
+  }
+  table.sens td{border:3px solid var(--dense);padding:5px 10px;vertical-align:middle;}
+  table.sens td.num{
+    width:44px;text-align:center;
+    font-family:"Archivo Black",sans-serif;font-size:19px;
+    background:var(--papier);
+  }
+
+  .compo{border:3px solid var(--dense);}
+  .compo .row{display:flex;align-items:stretch;justify-content:space-between;padding:7px 12px;gap:6px;}
+  .compo .piece{text-align:center;flex:1;}
+  .compo .piece .g{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:34px;line-height:1.15;}
+  .compo .piece small{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;}
+  .compo .plus{font-family:"Archivo Black",sans-serif;font-size:22px;color:var(--orange);align-self:center;}
+
+  .mnemo{border:3px solid var(--dense);}
+  .mnemo blockquote{padding:8px 10px 6px;font-size:13.5px;line-height:1.42;}
+  .mnemo blockquote .jp{font-weight:900;}
+  .mnemo .meta{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    border-top:3px solid var(--dense);padding:4px 6px 4px 10px;
+  }
+  .mnemo .who{font-size:12px;font-weight:700;text-transform:uppercase;}
+  .vote{
+    display:inline-flex;align-items:center;gap:8px;
+    border:3px solid var(--dense);background:var(--papier);color:var(--dense);
+    font-family:"Archivo Black",sans-serif;font-size:15px;
+    padding:5px 12px;cursor:pointer;min-height:44px;
+  }
+  .vote .tri{color:var(--orange);text-shadow:0 0 0 var(--orange);}
+
+  .exemple{border:3px solid var(--dense);}
+  .exemple .segs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 4px;}
+  .seg{
+    border:3px solid var(--bleu);color:var(--dense);
+    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:700;font-size:18px;
+    padding:6px 9px;min-height:44px;display:inline-flex;align-items:center;
+    cursor:pointer;background:#fff;
+  }
+  .seg.hl{background:var(--orange);border-color:var(--dense);}
+  .exemple .trad{padding:2px 10px 8px;font-size:13.5px;}
+
+  .cta{
+    display:block;width:100%;
+    background:var(--dense);color:var(--papier);
+    border:4px solid var(--dense);
+    font-family:"Archivo Black",sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:.02em;
+    padding:12px 10px;cursor:pointer;min-height:52px;
+    box-shadow:5px 5px 0 var(--orange);
+    margin:0 5px 5px 0;
+  }
+
+  /* ============ ÉCRAN 3 : RÉVISION ============ */
+  .rev-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+  .rev-head .t{font-family:"Archivo Black",sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.02em;}
+  .rev-head .c{font-family:"Archivo Black",sans-serif;font-size:30px;}
+  .rev-head .c small{font-size:16px;}
+  .gauge{border:3px solid var(--dense);height:20px;background:var(--papier);}
+  .gauge i{
+    display:block;height:100%;width:35%;
+    background:repeating-linear-gradient(-45deg,var(--orange) 0 7px,var(--dense) 7px 14px);
+  }
+
+  .card{
+    border:4px solid var(--dense);position:relative;flex:1;
+    display:flex;flex-direction:column;background:#fff;
+    overflow:hidden;
+  }
+  .card .q{flex:1.2;display:grid;place-items:center;position:relative;}
+  .card .q .dots{width:130px;height:130px;right:6px;top:10px;}
+  .card .q .word{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:104px;line-height:1.05;}
+  .cut{
+    border-top:3px dashed var(--bleu);position:relative;margin:0 10px;
+  }
+  .cut span{
+    position:absolute;top:-11px;left:10px;background:#fff;padding:0 8px;
+    font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--bleu);
+  }
+  .card .a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px;}
+  .card .a .kana{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:34px;}
+  .card .a .fr{font-size:18px;font-weight:700;}
+
+  .stamp-win{
+    position:absolute;right:12px;top:40%;
+    transform:rotate(-7deg);
+    background:var(--orange);color:var(--dense);
+    border:4px solid var(--dense);
+    outline:3px solid var(--orange);outline-offset:3px;
+    font-family:"Archivo Black",sans-serif;font-size:30px;text-transform:uppercase;
+    padding:8px 16px;letter-spacing:.01em;
+    animation:tampon .4s cubic-bezier(.19,1,.22,1) both;
+  }
+  @keyframes tampon{
+    0%{transform:rotate(-16deg) scale(1.9);opacity:0;}
+    62%{transform:rotate(-6deg) scale(.94);opacity:1;}
+    100%{transform:rotate(-7deg) scale(1);opacity:1;}
+  }
+
+  .rates{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .rate{
+    min-height:74px;border:4px solid var(--dense);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Archivo Black",sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.02em;
+    color:var(--dense);background:var(--papier);
+    padding:8px;
+  }
+  .rate .tape{display:inline-flex;align-items:center;gap:8px;background:var(--papier);padding:5px 10px;}
+  .rate svg{width:20px;height:20px;flex:0 0 auto;}
+  .rate.hatch{background:repeating-linear-gradient(45deg,transparent 0 7px,var(--bleu) 7px 9px);}
+  .rate.dotted{background-image:radial-gradient(circle,var(--bleu) 1.6px,transparent 1.9px);background-size:9px 9px;}
+  .rate.full{background:var(--dense);color:var(--papier);}
+  .rate.full .tape{background:transparent;padding:0;}
+  .rate.ghost .tape{background:transparent;padding:0;}
+
+  .rev-foot{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;text-align:center;}
+  .rev-foot b{background:var(--orange);color:var(--dense);padding:1px 6px;}
+
+  @media (prefers-reduced-motion:reduce){
+    .stamp-win{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1>Riso</h1>
+  <svg class="regmark" width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--papier)" stroke-width="2.5"/>
+    <line x1="18" y1="0" x2="18" y2="36" stroke="var(--papier)" stroke-width="2.5"/>
+    <line x1="0" y1="18" x2="36" y2="18" stroke="var(--papier)" stroke-width="2.5"/>
+    <circle cx="18" cy="18" r="4" fill="var(--orange)"/>
+  </svg>
+  <p class="desc">Fanzine brutaliste tiré en risographe : deux encres qui se ratent d'un millimètre, <strong>bleu outremer + orange fluo</strong>, trames, tampons et papier recyclé.</p>
+</header>
+
+<main class="gallery">
+
+  <!-- ================= ACCUEIL ================= -->
+  <div class="cell">
+    <div class="cap">Accueil</div>
+    <article class="screen">
+      <div class="sbody">
+
+        <header class="mast">
+          <div class="kanji-side jp">字引</div>
+          <div>
+            <div class="logo misreg" data-text="JIBIKI">JIBIKI</div>
+            <div class="sub">dico japonais &amp; mémoire longue · <em>Nº 07</em></div>
+          </div>
+        </header>
+
+        <div class="search">
+          <input type="text" placeholder="Un mot, un kanji, du rōmaji…" aria-label="Rechercher dans le dictionnaire">
+          <button type="button" aria-label="Lancer la recherche">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/>
+            </svg>
+          </button>
+        </div>
+
+        <section class="due">
+          <span class="stamp stamp-due">Due</span>
+          <div class="lead">File d'attente du jour</div>
+          <div class="nums">12 à réviser<br><span class="fluo">5 nouvelles</span></div>
+          <button class="btn-session" type="button">Lancer la session ▸</button>
+        </section>
+
+        <section class="motd">
+          <div class="dots orange" style="width:120px;height:120px;right:-20px;bottom:-20px;"></div>
+          <span class="stamp stamp-motd">Mot du jour</span>
+          <div class="word jp misreg" data-text="花見">花見</div>
+          <div class="read"><span class="jp">はなみ</span> · hanami</div>
+          <p class="gloss"><b>pique-nique</b> sous les cerisiers en fleurs, au printemps.</p>
+        </section>
+
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="#" class="on" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 5.5C6 3.5 9 3.5 12 5.5v14c-3-2-6-2-9 0zM12 5.5c3-2 6-2 9 0v14c-3-2-6-2-9 0z"/></svg>
+          Dico</a>
+        <a href="#"><span class="kana-ic">あ</span>Kana</a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.9-6.2"/><path d="M20 2v5h-5"/></svg>
+          Réviser</a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 5h16v11H10l-6 5z"/></svg>
+          Communauté</a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg>
+          Profil</a>
+      </nav>
+    </article>
+  </div>
+
+  <!-- ================= FICHE MOT ================= -->
+  <div class="cell">
+    <div class="cap">Fiche mot</div>
+    <article class="screen dense-fit">
+      <div class="sbody">
+
+        <div class="topbar">
+          <a class="back" href="#">◀ Retour</a>
+          <span class="ficheno">Fiche Nº 0247</span>
+        </div>
+
+        <section class="hero">
+          <div class="dots"></div>
+          <div class="furi jp">さくら</div>
+          <div class="word jp misreg" data-text="桜">桜</div>
+          <div class="roma">
+            <span class="r">« sakura »</span>
+            <button class="audio" type="button" aria-label="Écouter la prononciation">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true">
+                <path d="M4 9.5v5h3.5L13 19V5L7.5 9.5H4z" fill="currentColor" stroke="none"/>
+                <path d="M16 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/>
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <div class="tags">
+          <span class="tag">Nom</span>
+          <span class="tag n5">JLPT N5</span>
+          <span class="tag">Fréquent</span>
+        </div>
+
+        <table class="sens">
+          <tr><th colspan="2">Sens</th></tr>
+          <tr><td class="num">1</td><td>cerisier (arbre)</td></tr>
+          <tr><td class="num">2</td><td>fleur de cerisier</td></tr>
+        </table>
+
+        <section class="compo">
+          <div class="bar">Composition</div>
+          <div class="row">
+            <div class="piece"><div class="g jp">木</div><small>arbre</small></div>
+            <span class="plus">+</span>
+            <div class="piece"><div class="g jp">⺍</div><small>radical</small></div>
+            <span class="plus">+</span>
+            <div class="piece"><div class="g jp">女</div><small>femme</small></div>
+          </div>
+        </section>
+
+        <section class="mnemo">
+          <div class="bar fluo">Mnémonique communautaire</div>
+          <blockquote>« Une femme (<span class="jp">女</span>) coiffée de pétales (<span class="jp">⺍</span>) danse sous un arbre (<span class="jp">木</span>) : le cerisier en fleurs. »</blockquote>
+          <div class="meta">
+            <span class="who">par @encre_fluo</span>
+            <button class="vote" type="button" aria-label="Voter pour ce mnémonique, 128 votes"><span class="tri">▲</span> 128</button>
+          </div>
+        </section>
+
+        <section class="exemple">
+          <div class="bar">Exemple</div>
+          <div class="segs">
+            <button class="seg jp hl" type="button">桜</button>
+            <button class="seg jp" type="button">の</button>
+            <button class="seg jp" type="button">花</button>
+            <button class="seg jp" type="button">が</button>
+            <button class="seg jp" type="button">咲いています</button>
+          </div>
+          <p class="trad">« Les cerisiers sont en fleurs. »</p>
+        </section>
+
+        <button class="cta" type="button">Ajouter au paquet</button>
+
+      </div>
+    </article>
+  </div>
+
+  <!-- ================= RÉVISION ================= -->
+  <div class="cell">
+    <div class="cap">Révision</div>
+    <article class="screen">
+      <div class="sbody">
+
+        <div class="rev-head">
+          <span class="t">Session en cours</span>
+          <span class="c">7<small>/20</small></span>
+        </div>
+        <div class="gauge" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="Progression : 7 cartes sur 20">
+          <i></i>
+        </div>
+
+        <section class="card">
+          <div class="q">
+            <div class="dots"></div>
+            <div class="word jp misreg" data-text="勉強">勉強</div>
+          </div>
+          <div class="cut"><span>Réponse</span></div>
+          <div class="a">
+            <div class="kana jp">べんきょう</div>
+            <div class="fr">« étude, travail »</div>
+          </div>
+          <div class="stamp-win">Retenu&nbsp;!</div>
+        </section>
+
+        <div class="rates">
+          <button class="rate ghost" type="button">
+            <span class="tape">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.9-6.2"/><path d="M4 2v5.5h5.5"/></svg>
+              Encore</span>
+          </button>
+          <button class="rate hatch" type="button">
+            <span class="tape">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M3 19h18"/><path d="M6 19l6-13 6 13"/></svg>
+              Difficile</span>
+          </button>
+          <button class="rate dotted" type="button">
+            <span class="tape">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
+              Bien</span>
+          </button>
+          <button class="rate full" type="button">
+            <span class="tape">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true"><path d="M2.5 12.5l4.5 4.5L16.5 7.5"/><path d="M11 13.5l3.5 3.5L21.5 7.5"/></svg>
+              Facile</span>
+          </button>
+        </div>
+
+        <p class="rev-foot">réussite = l'intervalle <b>s'allonge</b> · échec = retour en file</p>
+
+      </div>
+    </article>
+  </div>
+
+</main>
+
+</body>
+</html>

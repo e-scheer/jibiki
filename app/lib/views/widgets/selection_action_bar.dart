@@ -27,22 +27,37 @@ class SelectionActionBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
         decoration: BoxDecoration(color: jc.canvas, border: Border(top: BorderSide(color: jc.hairline))),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: enabled ? onAdd : null,
-                child: const Text('Add to study'),
+            // Two "add" buttons side by side aren't self-explanatory; spell out how
+            // they differ so the choice is obvious.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                '“Learn these” enter your reviews; “I know these” are marked done and skipped.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: jc.muted, fontSize: 12, height: 1.3),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FilledButton(
-                onPressed: enabled ? onKnown : null,
-                child: busy
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Text(count > 0 ? 'I know these ($count)' : 'I know these'),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: enabled ? onAdd : null,
+                    child: Text(count > 0 ? 'Learn these ($count)' : 'Learn these'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: enabled ? onKnown : null,
+                    child: busy
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Text(count > 0 ? 'I know these ($count)' : 'I know these'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

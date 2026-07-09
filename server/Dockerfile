@@ -1,4 +1,4 @@
-# jibiki API image — gunicorn behind Caddy in prod (mirrors tusorsou/web).
+# jibiki API image - gunicorn behind Caddy in prod (mirrors tusorsou/web).
 FROM python:3.13-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv

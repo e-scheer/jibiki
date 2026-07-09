@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jibiki · exploration 09 · Cupertino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== système iOS ===== */
+    --bg:#F2F2F7;                          /* systemGroupedBackground */
+    --card:#FFFFFF;
+    --label:#0A0A0C;                        /* label */
+    --label-2:rgba(60,60,67,.60);           /* secondaire sur BLANC (4.6:1) */
+    --label-2s:rgba(60,60,67,.78);          /* secondaire sur F2F2F7 (4.8:1) */
+    --label-3:rgba(60,60,67,.33);           /* tertiaire, décoratif (chevrons) */
+    --sep:rgba(60,60,67,.29);               /* séparateur hairline */
+    --fill:rgba(120,120,128,.12);           /* fond de champ / pilule */
+    --tint:#C93A22;                         /* vermillon jibiki — 5.1:1 blanc, 4.6:1 sur bg */
+    --tint-deep:#B03118;                    /* texte teinté PETIT sur fond teinté (5.4:1) */
+    --tint-fill:rgba(201,58,34,.12);
+    /* notes SRS — texte AA (≥4.5:1) sur leur propre fond teinté */
+    --again:#C21507;   --again-fill:rgba(255,59,48,.12);
+    --hard:#B25000;    --hard-fill:rgba(255,149,0,.14);
+    --good:#1B7A33;    --good-fill:rgba(52,199,89,.14);
+    --easy:#0A5FCC;    --easy-fill:rgba(0,122,255,.12);
+    /* page galerie */
+    --page:#E3E3E8;
+    --page-ink:#1C1C1E;
+    --page-mut:#48484E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{
+    background:var(--page);
+    color:var(--page-ink);
+    font-family:-apple-system,"Inter",sans-serif;
+    font-feature-settings:"cv11";
+    min-height:100vh;
+  }
+  .jp{font-family:"Noto Sans JP",-apple-system,sans-serif;}
+  svg{display:block;}
+
+  /* ===== entête de la galerie ===== */
+  .masthead{
+    max-width:1320px;margin:0 auto;
+    padding:64px 40px 8px;
+    text-align:center;
+  }
+  .masthead .kicker{font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--page-mut);}
+  .masthead h1{font-size:34px;font-weight:700;letter-spacing:-.022em;margin-top:6px;}
+  .masthead .desc{font-size:16px;line-height:1.5;color:var(--page-mut);max-width:62ch;margin:10px auto 0;}
+
+  .gallery{
+    display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+    gap:64px;
+    max-width:1480px;margin:0 auto;
+    padding:48px 40px 96px;
+  }
+  .slot{display:flex;flex-direction:column;gap:16px;}
+  .slot > figcaption{
+    text-align:center;font-size:14px;font-weight:600;letter-spacing:-.006em;
+    color:var(--page-mut);
+  }
+
+  /* ===== châssis iPhone ===== */
+  .screen{
+    position:relative;
+    width:390px;height:844px;
+    background:var(--bg);
+    border-radius:48px;
+    overflow:hidden;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.05),
+      0 2px 6px rgba(20,20,26,.06),
+      0 28px 64px -12px rgba(20,20,26,.18);
+    color:var(--label);
+    font-size:17px;letter-spacing:-.022em;line-height:1.3;
+  }
+  .island{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:122px;height:35px;border-radius:18px;background:#000;z-index:30;
+  }
+  .statusbar{
+    position:absolute;top:0;left:0;right:0;height:58px;z-index:25;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:2px 32px 0 40px;
+    pointer-events:none;
+  }
+  .statusbar .time{font-size:15px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;}
+  .homebar{
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    width:134px;height:5px;border-radius:3px;background:#000;z-index:30;opacity:.9;
+  }
+  .content{
+    position:absolute;inset:0;
+    overflow-y:auto;scrollbar-width:none;
+  }
+  .content::-webkit-scrollbar{display:none;}
+
+  /* ===== vocabulaire iOS partagé ===== */
+  .sectionhead{
+    font-size:13px;font-weight:500;letter-spacing:.01em;text-transform:uppercase;
+    color:var(--label-2s);
+    margin:22px 32px 7px;
+  }
+  .word-scroll .sectionhead{margin-top:12px;margin-bottom:6px;}
+  .inset{
+    background:var(--card);border-radius:12px;
+    margin:0 16px;
+  }
+  .row{
+    display:flex;align-items:center;gap:12px;
+    min-height:44px;padding:10px 16px;
+    position:relative;
+  }
+  .row + .row::before{
+    content:"";position:absolute;top:0;left:16px;right:0;
+    border-top:.5px solid var(--sep);
+  }
+  .chev{color:var(--label-3);flex:none;}
+
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    height:50px;border-radius:13px;
+    font-size:17px;font-weight:600;letter-spacing:-.022em;
+    transition:transform .15s ease-out,opacity .15s ease-out;
+    cursor:default;user-select:none;
+  }
+  .btn-filled{background:var(--tint);color:#fff;}
+  .btn:active{transform:scale(.98);opacity:.85;}
+
+  /* ===== tab bar ===== */
+  .tabbar{
+    position:absolute;left:0;right:0;bottom:0;z-index:20;
+    padding:7px 10px 24px;
+    background:rgba(248,248,251,.85);
+    backdrop-filter:blur(24px) saturate(1.8);
+    -webkit-backdrop-filter:blur(24px) saturate(1.8);
+    border-top:.5px solid rgba(60,60,67,.22);
+    display:flex;
+  }
+  .tab{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-height:44px;padding-top:2px;
+    color:rgba(60,60,67,.72);
+    font-size:10px;font-weight:500;letter-spacing:0;
+  }
+  .tab.active{color:var(--tint);font-weight:600;}
+  .tab .glyph{height:26px;display:flex;align-items:center;justify-content:center;}
+  .tab .kanaglyph{font-size:19px;font-weight:500;line-height:1;}
+
+  /* ===== nav bar ===== */
+  .navbar{
+    position:absolute;top:58px;left:0;right:0;height:46px;z-index:20;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+    background:rgba(242,242,247,.88);
+    backdrop-filter:blur(24px) saturate(1.8);
+    -webkit-backdrop-filter:blur(24px) saturate(1.8);
+  }
+  .navbar.edge{border-bottom:.5px solid rgba(60,60,67,.22);}
+  .nav-back{
+    display:flex;align-items:center;gap:3px;
+    color:var(--tint);font-size:17px;letter-spacing:-.022em;
+    margin-left:-4px;min-height:44px;
+  }
+  .nav-title{
+    position:absolute;left:50%;transform:translateX(-50%);
+    font-size:17px;font-weight:600;letter-spacing:-.022em;
+    font-variant-numeric:tabular-nums;
+  }
+  .nav-action{color:var(--tint);display:flex;align-items:center;min-height:44px;}
+  .nav-cancel{color:var(--tint);font-size:17px;letter-spacing:-.022em;min-height:44px;display:flex;align-items:center;}
+
+  /* ============ écran 1 · accueil ============ */
+  .home-head{padding:70px 16px 0;}
+  .home-head .date{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--label-2s);}
+  .home-head h2{font-size:34px;font-weight:700;letter-spacing:-.015em;line-height:1.18;margin-top:1px;}
+  .search{
+    margin:14px 16px 0;height:38px;border-radius:11px;
+    background:var(--fill);
+    display:flex;align-items:center;gap:7px;padding:0 10px;
+  }
+  .search .ph{font-size:17px;letter-spacing:-.022em;color:rgba(60,60,67,.78);}
+  .search svg{color:rgba(60,60,67,.78);flex:none;}
+
+  .due-card{padding:16px;}
+  .due-top{display:flex;align-items:center;gap:12px;}
+  .due-icon{
+    width:42px;height:42px;border-radius:21px;background:var(--tint-fill);
+    display:flex;align-items:center;justify-content:center;color:var(--tint);flex:none;
+  }
+  .due-line1{font-size:17px;font-weight:600;letter-spacing:-.022em;}
+  .due-line1 .dot{color:var(--label-3);font-weight:400;padding:0 2px;}
+  .due-line1 .new{color:var(--label-2);font-weight:500;}
+  .due-line2{font-size:13px;color:var(--label-2);margin-top:2px;letter-spacing:-.01em;}
+  .due-card .btn{margin-top:14px;}
+
+  .wotd{padding:16px;display:flex;align-items:center;gap:14px;}
+  .wotd-main{flex:1;min-width:0;}
+  .wotd-word{font-size:32px;font-weight:500;line-height:1.25;letter-spacing:0;}
+  .wotd-reading{font-size:15px;color:var(--label-2);letter-spacing:-.01em;margin-top:1px;}
+  .wotd-reading .jp{letter-spacing:0;}
+  .wotd-def{font-size:15px;letter-spacing:-.01em;margin-top:7px;line-height:1.4;}
+
+  .recent-char{
+    width:36px;height:36px;border-radius:9px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;font-weight:500;flex:none;letter-spacing:0;
+  }
+  .recent-main{flex:1;min-width:0;}
+  .recent-word{font-size:17px;letter-spacing:-.022em;}
+  .recent-sub{font-size:13px;color:var(--label-2);letter-spacing:-.01em;margin-top:1px;}
+  .recent-sub .jp{letter-spacing:0;}
+
+  /* ============ écran 2 · fiche mot ============ */
+  .word-scroll{padding:104px 0 120px;}
+  .hero{display:flex;flex-direction:column;align-items:center;padding:4px 16px 0;}
+  .hero .furigana{font-size:16px;color:var(--label-2s);letter-spacing:.14em;}
+  .hero .kanji{font-size:72px;font-weight:300;line-height:1.15;letter-spacing:0;margin-top:1px;}
+  .hero .sayrow{display:flex;align-items:center;gap:12px;margin-top:2px;}
+  .hero .romaji{font-size:17px;color:var(--label-2s);letter-spacing:-.01em;}
+  .speech{
+    width:44px;height:44px;border-radius:22px;background:var(--tint-fill);
+    color:var(--tint);display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease-out;
+  }
+  .speech:active{transform:scale(.94);}
+  .tags{display:flex;justify-content:center;gap:8px;margin-top:8px;}
+  .tag{
+    height:26px;padding:0 11px;border-radius:13px;background:var(--fill);
+    display:flex;align-items:center;
+    font-size:13px;font-weight:500;letter-spacing:-.006em;color:rgba(60,60,67,.78);
+  }
+  .sense-num{
+    font-size:13px;font-weight:600;color:var(--label-2);font-variant-numeric:tabular-nums;
+    width:16px;flex:none;text-align:center;
+  }
+  .sense-text{font-size:17px;letter-spacing:-.022em;flex:1;}
+
+  .compo{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px 6px;}
+  .compo-item{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:44px;}
+  .compo-char{font-size:25px;font-weight:400;line-height:1.3;letter-spacing:0;}
+  .compo-label{font-size:11px;color:var(--label-2);letter-spacing:-.006em;}
+  .compo-plus{font-size:15px;color:var(--label-3);font-weight:500;padding-bottom:15px;}
+  .mnemo{padding:10px 16px 12px;position:relative;}
+  .mnemo::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--sep);}
+  .mnemo-text{font-size:15px;line-height:1.5;letter-spacing:-.01em;}
+  .mnemo-text .jp{letter-spacing:0;}
+  .mnemo-foot{display:flex;align-items:center;justify-content:space-between;margin-top:9px;}
+  .vote{
+    display:flex;align-items:center;gap:5px;
+    height:30px;padding:0 11px;border-radius:15px;
+    background:var(--tint-fill);color:var(--tint-deep);
+    font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
+  }
+  .mnemo-author{font-size:13px;color:var(--label-2);letter-spacing:-.006em;}
+
+  .example{padding:12px 16px;}
+  .seg-line{display:flex;flex-wrap:wrap;gap:5px;}
+  .seg{
+    padding:3px 8px;border-radius:7px;background:rgba(120,120,128,.10);
+    font-size:19px;font-weight:400;line-height:1.35;letter-spacing:0;
+  }
+  .seg.on{background:var(--tint-fill);color:var(--tint);font-weight:600;}
+  .example-fr{font-size:15px;color:var(--label-2);letter-spacing:-.01em;margin-top:10px;}
+
+  .dock{
+    position:absolute;left:0;right:0;bottom:0;z-index:20;
+    padding:10px 16px 26px;
+    background:rgba(242,242,247,.86);
+    backdrop-filter:blur(24px) saturate(1.8);
+    -webkit-backdrop-filter:blur(24px) saturate(1.8);
+    border-top:.5px solid rgba(60,60,67,.22);
+  }
+
+  /* ============ écran 3 · révision ============ */
+  .review-body{
+    position:absolute;inset:0;
+    padding:104px 16px 34px;
+    display:flex;flex-direction:column;
+  }
+  .progress{
+    height:4px;border-radius:2px;background:rgba(120,120,128,.16);
+    overflow:hidden;margin-top:10px;flex:none;
+  }
+  .progress i{display:block;height:100%;width:35%;border-radius:2px;background:var(--tint);}
+  .review-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;}
+  .flashcard{
+    width:100%;
+    background:var(--card);border-radius:20px;
+    box-shadow:0 1px 2px rgba(20,20,26,.04),0 10px 30px -6px rgba(20,20,26,.08);
+    padding:42px 24px 36px;
+    display:flex;flex-direction:column;align-items:center;
+    animation:settle .25s ease-out;
+  }
+  @keyframes settle{from{transform:scale(.98);opacity:.6;}to{transform:scale(1);opacity:1;}}
+  .flash-kind{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label-2);}
+  .flash-kanji{font-size:72px;font-weight:400;line-height:1.2;letter-spacing:0;margin-top:10px;}
+  .flash-sep{width:56px;border-top:.5px solid var(--sep);margin:22px 0 20px;}
+  .flash-reading{font-size:22px;font-weight:600;line-height:1.3;letter-spacing:0;}
+  .flash-gloss{font-size:17px;color:var(--label-2);letter-spacing:-.022em;margin-top:5px;}
+  .streak{
+    display:flex;align-items:center;gap:7px;margin-top:20px;
+    font-size:13px;font-weight:500;letter-spacing:-.006em;color:var(--good);
+  }
+  .streak svg circle{
+    stroke-dasharray:63;stroke-dashoffset:63;
+    animation:draw .45s ease-out .15s forwards;
+  }
+  .streak svg path{
+    stroke-dasharray:20;stroke-dashoffset:20;
+    animation:draw .3s ease-out .5s forwards;
+  }
+  @keyframes draw{to{stroke-dashoffset:0;}}
+
+  .grades{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:none;}
+  .grade{
+    border-radius:14px;min-height:68px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:10px 8px;
+    transition:transform .15s ease-out;
+  }
+  .grade:active{transform:scale(.97);}
+  .grade-top{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;letter-spacing:-.01em;}
+  .grade-int{font-size:13px;font-weight:500;letter-spacing:-.006em;opacity:.95;font-variant-numeric:tabular-nums;}
+  .g-again{background:var(--again-fill);color:var(--again);}
+  .g-hard{background:var(--hard-fill);color:var(--hard);}
+  .g-good{background:var(--good-fill);color:var(--good);}
+  .g-easy{background:var(--easy-fill);color:var(--easy);}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+    .streak svg circle,.streak svg path{stroke-dashoffset:0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <p class="kicker">jibiki · exploration 09</p>
+  <h1>Cupertino</h1>
+  <p class="desc">Natif iOS, facture Apple Design Award : Human Interface Guidelines à la lettre, matériaux système, grille 8&nbsp;pt, une seule teinte vermillon. Le chrome s'efface, le japonais porte l'écran.</p>
+</header>
+
+<main class="gallery">
+
+  <!-- ================= écran 1 · accueil ================= -->
+  <figure class="slot">
+    <figcaption>Accueil</figcaption>
+    <article class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <svg width="76" height="14" viewBox="0 0 76 14" fill="#000" aria-hidden="true">
+          <rect x="0" y="8" width="3" height="5" rx="1"/>
+          <rect x="4.5" y="6" width="3" height="7" rx="1"/>
+          <rect x="9" y="3.5" width="3" height="9.5" rx="1"/>
+          <rect x="13.5" y="1" width="3" height="12" rx="1"/>
+          <path d="M30.9 4.2a8.5 8.5 0 0 1 10.9 0l-1.4 1.7a6.3 6.3 0 0 0-8.1 0zM33.2 7.1a5 5 0 0 1 6.3 0l-1.4 1.8a2.8 2.8 0 0 0-3.5 0zM36.4 11.5l-1.6-2a2.5 2.5 0 0 1 3.2 0z"/>
+          <rect x="52" y="1.5" width="21" height="11" rx="3.5" fill="none" stroke="rgba(0,0,0,.36)"/>
+          <rect x="54" y="3.5" width="13.5" height="7" rx="1.8"/>
+          <path d="M74.3 5v4a2.2 2.2 0 0 0 0-4z" fill="rgba(0,0,0,.4)"/>
+        </svg>
+      </div>
+
+      <div class="content" style="padding-bottom:96px;">
+        <header class="home-head">
+          <p class="date">Jeudi 9 juillet</p>
+          <h2>Dictionnaire</h2>
+        </header>
+
+        <div class="search" role="search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.3"/><path d="M15.9 15.9 20.2 20.2"/>
+          </svg>
+          <span class="ph">Un mot, un kanji, du rōmaji…</span>
+        </div>
+
+        <h3 class="sectionhead">Aujourd'hui</h3>
+        <section class="inset due-card">
+          <div class="due-top">
+            <span class="due-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="4" y="8.2" width="16" height="10.8" rx="2.4"/>
+                <path d="M6.6 5.2h10.8"/>
+              </svg>
+            </span>
+            <div>
+              <p class="due-line1">12 à réviser <span class="dot">·</span> <span class="new">5 nouvelles</span></p>
+              <p class="due-line2">Environ 8 minutes</p>
+            </div>
+          </div>
+          <div class="btn btn-filled">Lancer la session</div>
+        </section>
+
+        <h3 class="sectionhead">Mot du jour</h3>
+        <section class="inset wotd">
+          <div class="wotd-main">
+            <p class="wotd-word jp">花見</p>
+            <p class="wotd-reading"><span class="jp">はなみ</span> · hanami</p>
+            <p class="wotd-def">Pique-nique sous les cerisiers en fleurs.</p>
+          </div>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5.5 15.5 12 9 18.5"/>
+          </svg>
+        </section>
+
+        <h3 class="sectionhead">Recherches récentes</h3>
+        <section class="inset">
+          <div class="row">
+            <span class="recent-char jp">桜</span>
+            <div class="recent-main">
+              <p class="recent-word">cerisier</p>
+              <p class="recent-sub"><span class="jp">さくら</span> · sakura</p>
+            </div>
+            <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+          </div>
+          <div class="row">
+            <span class="recent-char jp">水</span>
+            <div class="recent-main">
+              <p class="recent-word">eau</p>
+              <p class="recent-sub"><span class="jp">みず</span> · mizu</p>
+            </div>
+            <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+          </div>
+        </section>
+      </div>
+
+      <nav class="tabbar">
+        <span class="tab active">
+          <span class="glyph">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M11.1 5.7C9.4 4.3 7 3.9 4.6 3.9c-.5 0-.9.4-.9.9v11.5c0 .5.4.9.9.9 2.4 0 4.8.4 6.5 1.8z"/>
+              <path d="M12.9 5.7c1.7-1.4 4.1-1.8 6.5-1.8.5 0 .9.4.9.9v11.5c0 .5-.4.9-.9.9-2.4 0-4.8.4-6.5 1.8z"/>
+            </svg>
+          </span>
+          Dico
+        </span>
+        <span class="tab">
+          <span class="glyph"><span class="kanaglyph jp">あ</span></span>
+          Kana
+        </span>
+        <span class="tab">
+          <span class="glyph">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="8.2" width="16" height="10.8" rx="2.4"/>
+              <path d="M6.6 5.2h10.8"/>
+            </svg>
+          </span>
+          Réviser
+        </span>
+        <span class="tab">
+          <span class="glyph">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9.2" cy="8.8" r="3"/>
+              <path d="M3.8 18.6c.6-2.9 2.8-4.7 5.4-4.7s4.8 1.8 5.4 4.7"/>
+              <path d="M14.8 6a3 3 0 0 1 0 5.6"/>
+              <path d="M16.2 14.2c2.2.4 3.7 2 4.2 4.4"/>
+            </svg>
+          </span>
+          Communauté
+        </span>
+        <span class="tab">
+          <span class="glyph">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.6"/>
+              <circle cx="12" cy="9.8" r="2.9"/>
+              <path d="M6.6 18.3c1-2.5 3-3.9 5.4-3.9s4.4 1.4 5.4 3.9"/>
+            </svg>
+          </span>
+          Profil
+        </span>
+      </nav>
+      <div class="homebar"></div>
+    </article>
+  </figure>
+
+  <!-- ================= écran 2 · fiche mot ================= -->
+  <figure class="slot">
+    <figcaption>Fiche mot</figcaption>
+    <article class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <svg width="76" height="14" viewBox="0 0 76 14" fill="#000" aria-hidden="true">
+          <rect x="0" y="8" width="3" height="5" rx="1"/>
+          <rect x="4.5" y="6" width="3" height="7" rx="1"/>
+          <rect x="9" y="3.5" width="3" height="9.5" rx="1"/>
+          <rect x="13.5" y="1" width="3" height="12" rx="1"/>
+          <path d="M30.9 4.2a8.5 8.5 0 0 1 10.9 0l-1.4 1.7a6.3 6.3 0 0 0-8.1 0zM33.2 7.1a5 5 0 0 1 6.3 0l-1.4 1.8a2.8 2.8 0 0 0-3.5 0zM36.4 11.5l-1.6-2a2.5 2.5 0 0 1 3.2 0z"/>
+          <rect x="52" y="1.5" width="21" height="11" rx="3.5" fill="none" stroke="rgba(0,0,0,.36)"/>
+          <rect x="54" y="3.5" width="13.5" height="7" rx="1.8"/>
+          <path d="M74.3 5v4a2.2 2.2 0 0 0 0-4z" fill="rgba(0,0,0,.4)"/>
+        </svg>
+      </div>
+
+      <nav class="navbar">
+        <span class="nav-back">
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 2 2.5 10 10 18"/>
+          </svg>
+          Retour
+        </span>
+        <span class="nav-action">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7.2 4.2h9.6c.4 0 .7.3.7.7v14.6L12 16.1l-5.5 3.4V4.9c0-.4.3-.7.7-.7z"/>
+          </svg>
+        </span>
+      </nav>
+
+      <div class="content word-scroll">
+        <section class="hero">
+          <p class="furigana jp">さくら</p>
+          <p class="kanji jp">桜</p>
+          <div class="sayrow">
+            <span class="romaji">sakura</span>
+            <span class="speech">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4.5 9.7v4.6h2.9l4.1 3.5V6.2L7.4 9.7z" fill="currentColor" stroke-linejoin="round"/>
+                <path d="M15.2 9.6a3.9 3.9 0 0 1 0 4.8"/>
+                <path d="M17.6 7.4a7 7 0 0 1 0 9.2"/>
+              </svg>
+            </span>
+          </div>
+          <div class="tags">
+            <span class="tag">Nom</span>
+            <span class="tag">JLPT N5</span>
+            <span class="tag">Fréquent</span>
+          </div>
+        </section>
+
+        <h3 class="sectionhead">Sens</h3>
+        <section class="inset">
+          <div class="row">
+            <span class="sense-num">1</span>
+            <span class="sense-text">cerisier (arbre)</span>
+          </div>
+          <div class="row">
+            <span class="sense-num">2</span>
+            <span class="sense-text">fleur de cerisier</span>
+          </div>
+        </section>
+
+        <h3 class="sectionhead">Composition &amp; mnémonique</h3>
+        <section class="inset">
+          <div class="compo">
+            <span class="compo-item">
+              <span class="compo-char jp">木</span>
+              <span class="compo-label">arbre</span>
+            </span>
+            <span class="compo-plus">+</span>
+            <span class="compo-item">
+              <span class="compo-char jp">⺍</span>
+              <span class="compo-label">radical</span>
+            </span>
+            <span class="compo-plus">+</span>
+            <span class="compo-item">
+              <span class="compo-char jp">女</span>
+              <span class="compo-label">femme</span>
+            </span>
+          </div>
+          <div class="mnemo">
+            <p class="mnemo-text">Une femme (<span class="jp">女</span>) coiffée de pétales (<span class="jp">⺍</span>) danse sous un arbre (<span class="jp">木</span>)&nbsp;: le cerisier en fleurs.</p>
+            <div class="mnemo-foot">
+              <span class="vote">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 19.5V5.5"/><path d="M6 11.3 12 5l6 6.3"/>
+                </svg>
+                128
+              </span>
+              <span class="mnemo-author">par @hanami.lys</span>
+            </div>
+          </div>
+        </section>
+
+        <h3 class="sectionhead">Exemple</h3>
+        <section class="inset example">
+          <p class="seg-line jp">
+            <span class="seg on">桜</span><span class="seg">の</span><span class="seg">花</span><span class="seg">が</span><span class="seg">咲いています</span>
+          </p>
+          <p class="example-fr">Les cerisiers sont en fleurs.</p>
+        </section>
+      </div>
+
+      <div class="dock">
+        <div class="btn btn-filled">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14"/><path d="M5 12h14"/>
+          </svg>
+          Ajouter au paquet
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </article>
+  </figure>
+
+  <!-- ================= écran 3 · révision ================= -->
+  <figure class="slot">
+    <figcaption>Révision</figcaption>
+    <article class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <svg width="76" height="14" viewBox="0 0 76 14" fill="#000" aria-hidden="true">
+          <rect x="0" y="8" width="3" height="5" rx="1"/>
+          <rect x="4.5" y="6" width="3" height="7" rx="1"/>
+          <rect x="9" y="3.5" width="3" height="9.5" rx="1"/>
+          <rect x="13.5" y="1" width="3" height="12" rx="1"/>
+          <path d="M30.9 4.2a8.5 8.5 0 0 1 10.9 0l-1.4 1.7a6.3 6.3 0 0 0-8.1 0zM33.2 7.1a5 5 0 0 1 6.3 0l-1.4 1.8a2.8 2.8 0 0 0-3.5 0zM36.4 11.5l-1.6-2a2.5 2.5 0 0 1 3.2 0z"/>
+          <rect x="52" y="1.5" width="21" height="11" rx="3.5" fill="none" stroke="rgba(0,0,0,.36)"/>
+          <rect x="54" y="3.5" width="13.5" height="7" rx="1.8"/>
+          <path d="M74.3 5v4a2.2 2.2 0 0 0 0-4z" fill="rgba(0,0,0,.4)"/>
+        </svg>
+      </div>
+
+      <nav class="navbar">
+        <span class="nav-cancel">Annuler</span>
+        <span class="nav-title">7 / 20</span>
+        <span style="width:52px;"></span>
+      </nav>
+
+      <div class="review-body">
+        <div class="progress" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20"><i></i></div>
+
+        <div class="review-center">
+          <section class="flashcard">
+            <p class="flash-kind">Signification</p>
+            <p class="flash-kanji jp">勉強</p>
+            <div class="flash-sep"></div>
+            <p class="flash-reading jp">べんきょう</p>
+            <p class="flash-gloss">étude, travail</p>
+          </section>
+          <div class="streak">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M7.5 12.5 10.7 15.7 16.5 8.7"/>
+            </svg>
+            6 réussites d'affilée
+          </div>
+        </div>
+
+        <div class="grades">
+          <span class="grade g-again">
+            <span class="grade-top">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4.8 4.6v5h5"/>
+                <path d="M5.3 9.4a7.6 7.6 0 1 1-1 4.2"/>
+              </svg>
+              Encore
+            </span>
+            <span class="grade-int">10 min</span>
+          </span>
+          <span class="grade g-hard">
+            <span class="grade-top">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5.4 16.8a7.6 7.6 0 1 1 13.2 0"/>
+                <path d="M11.6 14.6 7.6 12"/>
+                <circle cx="12.1" cy="15" r="1.4" fill="currentColor" stroke="none"/>
+              </svg>
+              Difficile
+            </span>
+            <span class="grade-int">1 j</span>
+          </span>
+          <span class="grade g-good">
+            <span class="grade-top">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12.5 10 17.5 19 7"/>
+              </svg>
+              Bien
+            </span>
+            <span class="grade-int">3 j</span>
+          </span>
+          <span class="grade g-easy">
+            <span class="grade-top">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3.5 12.8 7.6 16.9 13.6 9.4"/>
+                <path d="M13.2 15.4l1.6 1.5 6-7.5"/>
+              </svg>
+              Facile
+            </span>
+            <span class="grade-int">7 j</span>
+          </span>
+        </div>
+      </div>
+      <div class="homebar"></div>
+    </article>
+  </figure>
+
+</main>
+
+</body>
+</html>

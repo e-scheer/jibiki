@@ -4,7 +4,7 @@ DEEP_SEARCH: FSRS only beats its defaults once a user has ~1000 reviews, and the
 canonical trainer is fsrs-rs (Rust + the Burn ML framework). This is the pure-
 Python, no-torch stand-in: it replays each card's review history under a candidate
 parameter set, scores the predicted recall against what actually happened
-(log-loss), and runs a bounded coordinate descent — keeping a new value only when
+(log-loss), and runs a bounded coordinate descent - keeping a new value only when
 it lowers the loss. The result is adopted only if it beats the defaults on the
 user's own data, so it can never make scheduling worse.
 """
@@ -23,7 +23,7 @@ _EPS = 1e-6
 
 def mean_log_loss(sessions: list[Session], params, retention: float) -> tuple[float, int]:
     """Replay every card and return (mean log-loss, scored-review count). Only
-    genuine spaced reviews (≥ 1 day since the last one) are scored — same-day
+    genuine spaced reviews (≥ 1 day since the last one) are scored - same-day
     learning steps carry no retention signal."""
     try:
         f = FSRS(parameters=list(params), desired_retention=retention)

@@ -8,7 +8,7 @@ iterparse so a 400 MB JMdict fits in a small container.
 
 JMdict encodes part-of-speech / misc as XML entities (``<pos>&n;</pos>``). We seed
 the parser's entity table with {name: name} so those resolve to their short CODE
-("n", "vs", …) rather than the long human expansion — that is what the schema
+("n", "vs", …) rather than the long human expansion - that is what the schema
 stores. EDRDG attribution is required (see the repo README / NOTICE).
 """
 
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                     self.stdout.write(f"  … {count} entries")
                 if limit and count >= limit:
                     break
-        self.stdout.write(self.style.SUCCESS(f"Done — {count} JMdict entries imported."))
+        self.stdout.write(self.style.SUCCESS(f"Done - {count} JMdict entries imported."))
 
     def _ingest_entry(self, entry, langs: set[str]) -> None:
         seq_text = entry.findtext("ent_seq")

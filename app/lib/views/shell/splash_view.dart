@@ -101,7 +101,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
                 ),
                 const SizedBox(height: 2),
                 // Escape hatch: never trap a user on the splash when the API is
-                // unreachable or the stored session is unusable — always let them
+                // unreachable or the stored session is unusable - always let them
                 // drop it and reach the sign-in screen.
                 TextButton(
                   onPressed: () => context.read<AppState>().logout(),

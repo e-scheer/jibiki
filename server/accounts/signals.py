@@ -1,5 +1,5 @@
 """Auto-provision the per-user profile on user creation, so no endpoint ever has
-to guard against a missing profile. (allauth manages auth/session tokens itself —
+to guard against a missing profile. (allauth manages auth/session tokens itself -
 there is no separate DRF token to mint.)"""
 
 from __future__ import annotations

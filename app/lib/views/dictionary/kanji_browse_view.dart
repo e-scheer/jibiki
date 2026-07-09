@@ -138,7 +138,7 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
               ]
             : [
                 IconButton(
-                  tooltip: 'Mark what you know',
+                  tooltip: 'Select kanji',
                   icon: const Icon(Icons.checklist_rounded),
                   onPressed: () => setState(() => _selecting = true),
                 ),

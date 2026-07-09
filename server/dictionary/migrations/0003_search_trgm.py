@@ -1,12 +1,11 @@
 """Trigram GIN indexes for dictionary search.
 
 Search filters `text__icontains` / `text__istartswith` on WordForm, Gloss and
-KanjiMeaning. On PostgreSQL those are `LIKE '%q%'` — unindexable by a plain
+KanjiMeaning. On PostgreSQL those are `LIKE '%q%'` - unindexable by a plain
 B-tree, so they seq-scan the (potentially ~1M-row) tables three times per query.
 pg_trgm + a GIN(gin_trgm_ops) index makes them index-backed.
 
-This is a pure DB optimization (kept out of model state) and is a **no-op on
-SQLite**, so offline dev/tests are unaffected while prod (Postgres) benefits.
+This is a pure DB optimization, kept out of model state (Postgres-only).
 """
 
 from django.db import migrations
