@@ -191,6 +191,7 @@ MNEMONICS_TABLES = [
         kind TEXT,
         character TEXT,
         language TEXT,
+        reading TEXT,
         story TEXT,
         score INTEGER,
         image BLOB,

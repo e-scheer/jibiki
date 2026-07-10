@@ -95,8 +95,9 @@ INSERT_NAME = (
 )
 INSERT_EXAMPLE = "INSERT INTO examples(id, japanese, english) VALUES (?, ?, ?)"
 INSERT_MNEMONIC = (
-    "INSERT INTO mnemonics(id, kind, character, language, story, score, image, image_w, image_h)"
-    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO mnemonics"
+    "(id, kind, character, language, reading, story, score, image, image_w, image_h)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
 
@@ -305,7 +306,7 @@ def _fill_mnemonics(conn: sqlite3.Connection, lang: str) -> dict[str, int]:
                 except OSError:  # media file missing - ship the story without art
                     blob = None
             yield (
-                m.pk, m.kind, m.character, m.language, m.story, m.score,
+                m.pk, m.kind, m.character, m.language, m.reading, m.story, m.score,
                 blob, m.image_width, m.image_height,
             )  # fmt: skip
 

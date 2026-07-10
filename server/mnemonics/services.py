@@ -53,11 +53,14 @@ def initial_status(user) -> str:
 
 
 @transaction.atomic
-def create_mnemonic(user, *, character, kind, language, story, image_file=None) -> Mnemonic:
+def create_mnemonic(
+    user, *, character, kind, language, story, reading="", image_file=None
+) -> Mnemonic:
     mnemonic = Mnemonic(
         character=character,
         kind=kind,
         language=language,
+        reading=reading,
         story=story,
         author=user,
         status=initial_status(user),

@@ -34,13 +34,18 @@ def mnemonic_image_path(instance: "Mnemonic", filename: str) -> str:
 class Mnemonic(models.Model):
     class Kind(models.TextChoices):
         KANA = "kana", _("Kana")
-        KANJI = "kanji", _("Kanji")
+        KANJI = "kanji", _("Kanji")  # meaning mnemonic for a kanji
+        KANJI_READING = "kanji_reading", _("Kanji reading")  # sound of one reading
 
     id = models.BigAutoField(primary_key=True)
     character = models.CharField(max_length=4)  # the kana / kanji literal
-    kind = models.CharField(max_length=8, choices=Kind.choices)
+    kind = models.CharField(max_length=16, choices=Kind.choices)
     # Mnemonic language (ISO-639-1-ish) - separate from the app's UI language.
     language = models.CharField(max_length=8, default="en")
+    # Which reading this mnemonic anchors, for kind=KANJI_READING (e.g. "ショク").
+    # Empty for kana and kanji-meaning mnemonics. A kanji can carry one reading
+    # mnemonic per (reading, language): the sound association is per language.
+    reading = models.CharField(max_length=32, blank=True, default="")
 
     story = models.TextField()
     # FileField (not ImageField) - no implicit Pillow machinery; imaging.py
@@ -193,7 +198,7 @@ class UserMnemonicChoice(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mnemonic_choices"
     )
-    kind = models.CharField(max_length=8, choices=Mnemonic.Kind.choices)
+    kind = models.CharField(max_length=16, choices=Mnemonic.Kind.choices)
     character = models.CharField(max_length=4)
     language = models.CharField(max_length=8, default="en")
     mnemonic = models.ForeignKey(Mnemonic, on_delete=models.CASCADE, related_name="chosen_by")
@@ -233,7 +238,7 @@ class MnemonicDeck(models.Model):
     description = models.TextField(blank=True)
     # Same per-language segmentation as mnemonics - a FR pack keys off FR sounds.
     language = models.CharField(max_length=8, default="en")
-    kind = models.CharField(max_length=8, choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA)
+    kind = models.CharField(max_length=16, choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA)
 
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

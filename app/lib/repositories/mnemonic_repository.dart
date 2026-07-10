@@ -39,7 +39,7 @@ class MnemonicRepository {
       return const [];
     }
     final rows = await packs.db.select(
-      'SELECT id, kind, character, language, story, score, image, image_w, image_h '
+      'SELECT id, kind, character, language, reading, story, score, image, image_w, image_h '
       'FROM $schema.mnemonics WHERE kind = ? AND character = ? ORDER BY score DESC',
       [kind, character],
     );
@@ -50,6 +50,7 @@ class MnemonicRepository {
           character: r['character'] as String? ?? character,
           kind: r['kind'] as String? ?? kind,
           language: r['language'] as String? ?? language,
+          reading: r['reading'] as String? ?? '',
           story: r['story'] as String? ?? '',
           imageSrc: '',
           imageBytes: r['image'] as Uint8List?,

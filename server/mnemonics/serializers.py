@@ -28,6 +28,7 @@ class MnemonicSerializer(serializers.ModelSerializer):
             "character",
             "kind",
             "language",
+            "reading",
             "story",
             "image_src",
             "image_width",

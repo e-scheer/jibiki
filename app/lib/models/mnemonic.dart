@@ -18,6 +18,7 @@ class Mnemonic {
     required this.score,
     required this.myVote,
     required this.saved,
+    this.reading = '',
     this.imageBytes,
   });
 
@@ -25,6 +26,11 @@ class Mnemonic {
   final String character;
   final String kind;
   final String language;
+
+  /// For kind='kanji_reading', the on-yomi (katakana) this mnemonic anchors,
+  /// e.g. "ショク". Empty for kana and kanji-meaning mnemonics.
+  final String reading;
+
   final String story;
   final String imageSrc;
   final int imageWidth;
@@ -60,6 +66,7 @@ class Mnemonic {
         character: j['character'] as String? ?? '',
         kind: j['kind'] as String? ?? 'kana',
         language: j['language'] as String? ?? 'en',
+        reading: j['reading'] as String? ?? '',
         story: j['story'] as String? ?? '',
         imageSrc: j['image_src'] as String? ?? '',
         imageWidth: (j['image_width'] as num?)?.toInt() ?? 0,
@@ -77,6 +84,7 @@ class Mnemonic {
         character: character,
         kind: kind,
         language: language,
+        reading: reading,
         story: story,
         imageSrc: imageSrc,
         imageWidth: imageWidth,

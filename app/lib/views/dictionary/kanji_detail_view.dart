@@ -15,6 +15,7 @@ import '../study/writing_practice_view.dart';
 import '../widgets/study_status_bar.dart';
 import '../widgets/mnemonic_panel.dart';
 import '../widgets/origin_section.dart';
+import '../widgets/reading_mnemonic_section.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
 import '../widgets/stroke_order_view.dart';
@@ -128,6 +129,7 @@ class _KanjiDetail extends StatelessWidget {
         const SizedBox(height: 20),
         if (k.kunReadings.isNotEmpty) _readings(context, 'Kun', k.kunReadings),
         if (k.onReadings.isNotEmpty) _readings(context, 'On', k.onReadings),
+        ReadingMnemonicSection(character: k.literal, language: lang),
         if (k.componentDetails.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text('Composition', style: Theme.of(context).textTheme.titleMedium),
