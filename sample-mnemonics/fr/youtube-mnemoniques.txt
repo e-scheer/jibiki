@@ -1,0 +1,111 @@
+Sources:
+- https://www.youtube.com/watch?v=eqNv6_2sotY
+- https://www.youtube.com/watch?v=H2EHisggYyc
+
+Note:
+- Extraction manuelle à partir des sous-titres FR auto.
+- J’ai normalisé les mnémotechniques quand le transcript était bruité.
+- `[?]` = passage ambigu / mot reconstruit au mieux.
+- Quand elle ne donne pas de mémo clair, je l’indique.
+
+Format:
+script | kana | romaji | mnémotechnique(s) | note
+
+HIRAGANA
+hiragana | あ | a  | aïe ; visage qui a mal |
+hiragana | い | i  | rides du sourire / autour des yeux | [?] passage très bruité
+hiragana | う | u  | oulala ; personnage surpris avec bouche en cul-de-poule |
+hiragana | え | e  | éléphant énervé ; accent aigu au-dessus |
+hiragana | お | o  | oh triste ; larmes sur le côté |
+hiragana | か | ka | katana ; garde + lame + goutte de sang |
+hiragana | き | ki | quilles de bowling ; vieille clé anglaise (“key”) |
+hiragana | く | ku | cul ; quelqu’un qui twerke avec son cul ; quelqu’un courbé car il a mal au cul | transcript très bruité
+hiragana | け | ke | kebab |
+hiragana | こ | ko | carpes koï |
+hiragana | さ | sa | salade ; saladier |
+hiragana | し | shi | chimie ; petite éprouvette |
+hiragana | す | su | “sous le tee-shirt” ; lapin en tee-shirt avec queue visible dessous | [?] reconstruction
+hiragana | せ | se | sécateur |
+hiragana | そ | so | [pas de mémo clairement identifiable dans le transcript] |
+hiragana | た | ta | lettres T + A |
+hiragana | ち | chi | T’choupi |
+hiragana | つ | tsu | vague du tsunami |
+hiragana | て | te | lettre T penchée |
+hiragana | と | to | taureau |
+hiragana | な | na | Napoléon sur son cheval |
+hiragana | に | ni | nid d’oiseau sur un arbre |
+hiragana | ぬ | nu | gros sac de nœuds |
+hiragana | ね | ne | neko ; chat avec une queue |
+hiragana | の | no | deux anneaux entremêlés |
+hiragana | は | ha | harpiste ; harpe |
+hiragana | ひ | hi | hippopotame |
+hiragana | ふ | fu | fou qui danse avec un chapeau ; mont Fuji |
+hiragana | へ | he | saut de haies ; seau d’eau |
+hiragana | ほ | ho | hôtel ; ou “HO” si on le bascule |
+hiragana | ま | ma | mât d’un bateau |
+hiragana | み | mi | note mi sur une partition |
+hiragana | む | mu | vache qui fait meuh |
+hiragana | め | me | mèche d’une bombe |
+hiragana | も | mo | momie |
+hiragana | や | ya | yak |
+hiragana | ゆ | yu | yukata |
+hiragana | よ | yo | yoyo |
+hiragana | ら | ra | lapin joufflu |
+hiragana | り | ri | rides de rire ; deux limaces qui se rencontrent |
+hiragana | れ | re | lunettes |
+hiragana | ろ | ro | lézard un peu entortillé sur un piquet |
+hiragana | わ | wa | femme enceinte ; chat de dos sans queue |
+hiragana | ん | n  | lettre N |
+hiragana | を | wo | bonhomme qui glisse sur du verglas en criant “waouh” |
+
+KATAKANA
+katakana | ア | a  | A penché ; personne chez le médecin qui fait “aaa” ; arbre |
+katakana | イ | i  | lit ; chapeau penché ; i écrit au pinceau qui bave |
+katakana | ウ | u  | même logique que う | elle renvoie au mémo déjà vu
+katakana | エ | e  | étagère |
+katakana | オ | o  | chanteur d’opéra |
+katakana | カ | ka | katana sans la goutte de sang |
+katakana | キ | ki | vieille clé anglaise (“key”) |
+katakana | ク | ku | [pas d’astuce donnée] |
+katakana | ケ | ke | lettre K penchée ; K de “key” |
+katakana | コ | ko | coffre avec deux coins / “corners” |
+katakana | サ | sa | bonbonne de saké ; trois sardines ; coiffe de samouraï |
+katakana | シ | shi | smiley ; rappelle la forme de し |
+katakana | ス | su | ninja qui court super vite, bras en arrière |
+katakana | セ | se | même logique que せ | elle renvoie au mémo déjà vu
+katakana | ソ | so | pirate borgne qui regarde vers le sud (“south”) |
+katakana | タ | ta | hache qui fait “ta ta ta” |
+katakana | チ | chi | vieille antenne parabolique / antenne “cheap” |
+katakana | ツ | tsu | smiley aux yeux verticaux ; rappelle la forme de つ |
+katakana | テ | te | poteau électrique ; téléphone |
+katakana | ト | to | totem |
+katakana | ナ | na | narval |
+katakana | ニ | ni | kanji 二 ; chiffre 2 |
+katakana | ヌ | nu | [pas d’astuce donnée] |
+katakana | ネ | ne | chiffre 7 tout nu |
+katakana | ノ | no | panneau “no smoking” ; long nez (Cyrano / Usopp) |
+katakana | ハ | ha | chapeau conique chinois / asiatique |
+katakana | ヒ | hi | visage de profil qui sourit |
+katakana | フ | fu | [pas d’astuce donnée] |
+katakana | ヘ | he | même logique que へ | saut de haies
+katakana | ホ | ho | holy cross ; homard |
+katakana | マ | ma | maman qui porte son bébé |
+katakana | ミ | mi | trois missiles ; griffes d’un chat qui crie “mia” |
+katakana | ム | mu | chiffre 4 ; “quatre murs” |
+katakana | メ | me | cicatrice de Zorro / Kenshin |
+katakana | モ | mo | momie abîmée / décapitée |
+katakana | ヤ | ya | yak amputé d’une corne |
+katakana | ユ | yu | [pas d’astuce donnée] |
+katakana | ヨ | yo | petit bonhomme qui fait du yoga |
+katakana | ラ | ra | ramen ; baguettes + bol |
+katakana | リ | ri | même logique que り | rides / limaces
+katakana | ル | ru | rue ; route ; autoroute |
+katakana | レ | re | patte pliée de T-rex |
+katakana | ロ | ro | tête carrée de robot |
+katakana | ワ | wa | point d’interrogation ; “what?” |
+katakana | ヲ | wo | chien qui aboie ; énorme bouche ouverte avec la langue qui dépasse |
+katakana | ン | n  | pirate borgne qui regarde vers le nord (“north”) |
+
+Sons dérivés
+- Dakuten / handakuten: elle ne donne pas de nouveau mémo par kana ; elle dit de repartir du kana de base et d’appliquer la logique des tenten / maru.
+- Petits ya / yu / yo: idem, pas de nouveau stock d’images dédié dans ces vidéos ; elle explique surtout la logique de composition.

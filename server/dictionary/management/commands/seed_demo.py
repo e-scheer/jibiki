@@ -148,10 +148,8 @@ class Command(BaseCommand):
             MnemonicDeckItem,
             MnemonicStatus,
         )
-        from mnemonics.seeding import attach_art
 
         by_lang: dict[str, list] = {}
-        imaged = 0
         # One story per gojūon sound, applied to BOTH the hiragana and katakana
         # character, in every language → the complete built-in default pack.
         for romaji, hira, kata, _row, kind in KANA:
@@ -170,9 +168,6 @@ class Command(BaseCommand):
                         story=story,
                         defaults=dict(status=MnemonicStatus.VISIBLE, is_seed=True),
                     )
-                    # Give the seed mnemonic its generated picture, through the
-                    # same ingest as a user upload (idempotent - skips if set).
-                    imaged += attach_art(m)
                     by_lang.setdefault(lang, []).append(m)
 
         # A built-in default pack per language, so every user has a browsable /
@@ -196,6 +191,5 @@ class Command(BaseCommand):
 
         self.stdout.write(
             f"  kana mnemonics: {Mnemonic.objects.filter(is_seed=True).count()}"
-            f" ({imaged} with art)"
             f" · default packs: {MnemonicDeck.objects.filter(is_seed=True).count()}"
         )

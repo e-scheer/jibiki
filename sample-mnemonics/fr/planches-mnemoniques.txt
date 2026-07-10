@@ -1,0 +1,127 @@
+Sources images:
+- `C:\Users\sauron\Documents\Personnal\jibiki\sample-mnemonics\fr\page-0009.jpg`
+- `C:\Users\sauron\Documents\Personnal\jibiki\sample-mnemonics\fr\9782759052158_page4.png`
+
+Note:
+- Transcription manuelle depuis les deux planches.
+- Quand la planche donne directement un hiragana de référence au lieu d’un mot, je le garde tel quel.
+- J’ai gardé les indications de prononciation quand elles sont imprimées sur la planche.
+
+Format:
+script | kana | romaji | mnémotechnique
+
+HIRAGANA
+hiragana | あ | a  | a comme dans « amour »
+hiragana | い | i  | i comme dans « il »
+hiragana | う | u  | « oui »
+hiragana | え | e  | « échapper »
+hiragana | お | o  | « au secours ! »
+
+hiragana | か | ka | « karate »
+hiragana | き | ki | « kabuki »
+hiragana | く | ku | « coucou ! »
+hiragana | け | ke | « caisse de vin »
+hiragana | こ | ko | « coquillage »
+
+hiragana | さ | sa | « samuraï »
+hiragana | し | shi | « shiitaké » /shi/
+hiragana | す | su | « swimming pool »
+hiragana | せ | se | « sel » de marais salants
+hiragana | そ | so | « sauce d’okonomiyaki »*
+
+hiragana | た | ta | « table »
+hiragana | ち | chi | « chicken » /tchi/
+hiragana | つ | tsu | « tsunami » /tsu/
+hiragana | て | te | « tête »
+hiragana | と | to | « tomate »
+
+hiragana | な | na | « nager »
+hiragana | に | ni | « ninja »
+hiragana | ぬ | nu | « nouilles et baguettes »
+hiragana | ね | ne | « nettoyer »
+hiragana | の | no | « noix »
+
+hiragana | は | ha | « hallo ! »*
+hiragana | ひ | hi | « hi hi hi ! »
+hiragana | ふ | fu | « fujisan » /fu/
+hiragana | へ | he | « helicopter »*
+hiragana | ほ | ho | « hot ! »
+
+hiragana | ま | ma | « mât »
+hiragana | み | mi | « minet »
+hiragana | む | mu | « mouche »
+hiragana | め | me | « melon » /mé/
+hiragana | も | mo | « monnaie européenne »
+
+hiragana | や | ya | « yakuza »
+hiragana | ゆ | yu | « yuzu »*
+hiragana | よ | yo | « yo-yo »
+
+hiragana | ら | ra | « lapin »
+hiragana | り | ri | « liquide »
+hiragana | る | ru | « loup »
+hiragana | れ | re | « léopard »
+hiragana | ろ | ro | « locomotive »
+
+hiragana | わ | wa | « wallaby »
+hiragana | を | wo / o | « Jeux olympiques » /o/
+
+KATAKANA
+katakana | ア | a  | « Albert Einstein »
+katakana | イ | i  | « i grec »
+katakana | ウ | u  | « ours »
+katakana | エ | e  | « échelle »
+katakana | オ | o  | « homme »
+
+katakana | カ | ka | « か » /ka/
+katakana | キ | ki | « き » /ki/
+katakana | ク | ku | « couteau suisse »
+katakana | ケ | ke | « kebab »
+katakana | コ | ko | « corridor »
+
+katakana | サ | sa | « Borsalino »
+katakana | シ | shi | « し » /shi/
+katakana | ス | su | « super-héros »
+katakana | セ | se | « せ »
+katakana | ソ | so | « soja »
+
+katakana | タ | ta | « tabouret »
+katakana | チ | chi | « chili » /tchi/
+katakana | ツ | tsu | « つ » /tsu/
+katakana | テ | te | « terre »
+katakana | ト | to | « totem »
+
+katakana | ナ | na | « な » /na/
+katakana | ニ | ni | « に » /ni/
+katakana | ヌ | nu | « nurchaku »*
+katakana | ネ | ne | « flocon de neige »
+katakana | ノ | no | « no smoking »
+
+katakana | ハ | ha | « happy ! »
+katakana | ヒ | hi | « hip hop ! »
+katakana | フ | fu | « foudre » /fu/
+katakana | ヘ | he | « helicopter »*
+katakana | ホ | ho | « hotdog man »*
+
+katakana | マ | ma | « poitrine de maman »
+katakana | ミ | mi | « miaou »
+katakana | ム | mu | « moulin »
+katakana | メ | me | « mécanicien »
+katakana | モ | mo | « monnaie européenne »
+
+katakana | ヤ | ya | « や »
+katakana | ユ | yu | « yourte »
+katakana | ヨ | yo | « yodler »
+
+katakana | ラ | ra | « lard »
+katakana | リ | ri | « liquide »
+katakana | ル | ru | « kangourou »
+katakana | レ | re | « queue de léopard »
+katakana | ロ | ro | « loge »
+
+katakana | ワ | wa | « watt »
+katakana | ヲ | wo / o | /o/*
+
+Remarques d’édition
+- `*` = graphie reprise telle qu’elle apparaît sur la planche, même si elle mélange parfois FR/EN.
+- `nurchaku` est peut-être une graphie stylisée ou une coquille pour `nunchaku`.
