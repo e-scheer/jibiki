@@ -18,4 +18,21 @@ class FeedbackService {
         if (email.isNotEmpty) 'email': email,
         'context': context,
       });
+
+  /// Flag a dictionary entry as wrong or incomplete. Requires a signed-in
+  /// session (the endpoint rejects anonymous callers).
+  Future<void> reportContent({
+    required String itemType,
+    required String itemRef,
+    required String reason,
+    String message = '',
+    Map<String, dynamic> context = const {},
+  }) =>
+      _api.post(ApiConfig.contentReport, data: {
+        'item_type': itemType,
+        'item_ref': itemRef,
+        'reason': reason,
+        if (message.isNotEmpty) 'message': message,
+        'context': context,
+      });
 }

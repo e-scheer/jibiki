@@ -9,6 +9,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/word_detail_viewmodel.dart';
+import '../feedback/report_item_sheet.dart';
 import '../widgets/study_status_bar.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
@@ -37,7 +38,17 @@ class _WordDetail extends StatelessWidget {
     final lang = context.read<AppState>().mnemonicLanguage;
     final word = vm.word;
     return Scaffold(
-      appBar: AppBar(title: const Text('Word')),
+      appBar: AppBar(
+        title: const Text('Word'),
+        actions: word == null
+            ? null
+            : [
+                ReportItemAction(
+                    type: ReportItemType.word,
+                    itemRef: '${word.id}',
+                    label: word.headword),
+              ],
+      ),
       bottomNavigationBar:
           word == null ? null : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
       body: BoundedContent(

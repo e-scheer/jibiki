@@ -161,8 +161,12 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<PackManager?>.value(value: _packs),
-        Provider<SyncEngine?>.value(value: _sync),
+        // PackManager and SyncEngine are ChangeNotifiers, so plain Provider trips
+        // Provider's Listenable check at launch. They are read-only handles here
+        // (nothing watches them), so .value keeps identical behavior without the
+        // false-positive assertion, and never disposes what _JibikiAppState owns.
+        ChangeNotifierProvider<PackManager?>.value(value: _packs),
+        ChangeNotifierProvider<SyncEngine?>.value(value: _sync),
         Provider.value(value: _dictRepo),
         Provider.value(value: _studyRepo),
         Provider.value(value: _mnemonicRepo),

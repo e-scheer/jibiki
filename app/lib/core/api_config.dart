@@ -42,6 +42,9 @@ class ApiConfig {
 
   // In-app feedback (ideas / bugs / love) - open, works signed-out too.
   static const String feedback = '/api/v1/feedback';
+  // Flag a dictionary entry (kanji / kana / word) as wrong or incomplete.
+  // Sign-in required, unlike open feedback.
+  static const String contentReport = '/api/v1/feedback/report';
 
   // ── offline content packs (public, no account) ─────────────────────────────
   static const String packsManifest = '/api/v1/content/packs/manifest';

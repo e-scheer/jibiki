@@ -130,7 +130,12 @@ class _ListenStageState extends State<ListenStage> {
               ),
             ),
           );
-    return WinOverlay(show: _checked && _correct, child: content);
+    // A win pops a green check; a miss pops a red cross that fades to leave the
+    // corrected reading readable. Mutually exclusive, so both wrap the content.
+    return WinOverlay(
+      show: _checked && _correct,
+      child: MissOverlay(show: _checked && !_correct, child: content),
+    );
   }
 
   Widget _promptPanel(BuildContext context, StudyCard card) {

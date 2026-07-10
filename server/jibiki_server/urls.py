@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
 
+from feedback.views import ContentReportView
+
 
 def healthz(_request):
     """Liveness probe (Caddy/uptime ping - mirrors tusorsou's /healthz)."""
@@ -43,6 +45,9 @@ urlpatterns = [
     path("api/v1/content/", include("dictionary.content_urls")),
     path("api/v1/study/", include("srs.urls")),
     path("api/v1/mnemonics/", include("mnemonics.urls")),
+    # Content correction reports (sign-in required) sit beside open feedback.
+    # Declared before the include so the no-trailing-slash prefix doesn't swallow it.
+    path("api/v1/feedback/report", ContentReportView.as_view(), name="content_report"),
     path("api/v1/feedback", include("feedback.urls")),
     # DRF browsable-API login (dev convenience only).
     path("api-auth/", include("rest_framework.urls")),

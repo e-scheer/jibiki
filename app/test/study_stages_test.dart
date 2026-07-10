@@ -99,6 +99,21 @@ void main() {
       expect(find.byIcon(Icons.volume_up_outlined), findsNothing);
     });
 
+    testWidgets('recall direction flips prompt to the meaning and options to kanji',
+        (tester) async {
+      final vm = await _vm();
+      await tester.pumpWidget(_host(
+          QuizStage(vm: vm, lang: 'en', direction: StudyDirection.recall)));
+      await tester.pumpAndSettle();
+
+      // Reversed: you see the meaning, you produce the kanji.
+      expect(find.text('Which one means this?'), findsOneWidget);
+      expect(find.text('water'), findsOneWidget); // the prompt (was an option)
+      for (final glyph in ['水', '火', '木', '金']) {
+        expect(find.text(glyph), findsOneWidget); // options are now Japanese
+      }
+    });
+
     testWidgets('locking a choice marks correct/wrong and reveals audio', (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
@@ -197,6 +212,32 @@ void main() {
       // A correct build wins: the celebration shows and the word's meaning is
       // now taught here, not just its spelling.
       expect(find.byType(SuccessBurst), findsOneWidget);
+      expect(find.text('water'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 1700)); // drain the advance timer
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a wrong build shows the miss burst and the correct reading',
+        (tester) async {
+      final vm = await _vm();
+      await tester.pumpWidget(_host(ListenStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      // 水's reading is みず: place the kana in the wrong order to build ずみ.
+      await tester.tap(find.text('ず'));
+      await tester.pump();
+      await tester.tap(find.text('み'));
+      await tester.pump();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Check'));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // A miss is signalled as plainly as a win, not just a quiet colour change,
+      // and the correct reading + meaning are surfaced as a teaching moment.
+      expect(find.byType(MissBurst), findsOneWidget);
+      expect(find.byType(SuccessBurst), findsNothing);
+      expect(find.text('みず'), findsOneWidget); // corrected reading in the result block
       expect(find.text('water'), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 1700)); // drain the advance timer

@@ -11,6 +11,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/kanji_detail_viewmodel.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
+import '../feedback/report_item_sheet.dart';
 import '../study/writing_practice_view.dart';
 import '../widgets/study_status_bar.dart';
 import '../widgets/mnemonic_panel.dart';
@@ -71,7 +72,15 @@ class _KanjiDetail extends StatelessWidget {
     final vm = context.watch<KanjiDetailViewModel>();
     final k = vm.kanji;
     return Scaffold(
-      appBar: AppBar(title: const Text('Kanji')),
+      appBar: AppBar(
+        title: const Text('Kanji'),
+        actions: k == null
+            ? null
+            : [
+                ReportItemAction(
+                    type: ReportItemType.kanji, itemRef: k.literal, label: k.literal),
+              ],
+      ),
       bottomNavigationBar:
           k == null ? null : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
       body: BoundedContent(

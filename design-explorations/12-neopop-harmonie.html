@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki — exploration 12 · Neo-pop harmonisé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Famille analogique calibrée OKLCH : bleu ~272° → violet ~296° → rose ~350° */
+    --ink:#1b1830;         /* oklch(.23 .04 290) encre indigo */
+    --ink-2:#45415a;       /* secondaire sur blanc/papier */
+    --paper:#f4f4f9;       /* blanc cassé froid */
+    --white:#ffffff;
+    --blue:#3441d4;        /* dominante, klein calibré ~oklch(.47 .23 272) */
+    --blue-tint:#dfe3fb;   /* surface faiblement teintée bleu */
+    --violet:#7452c9;      /* voisin ~oklch(.51 .17 296) */
+    --violet-tint:#e9e3f8; /* surface faiblement teintée violet */
+    --rose:#f28ab4;        /* accent signal ~oklch(.75 .13 353) */
+    --rose-tint:#fbe4ef;
+    --peri:#a9b6f2;        /* échelon bleu clair (grade Bien) */
+    --lav:#cfb9ef;         /* échelon violet clair (grade Difficile) */
+    --backdrop:#b3aee6;    /* périwinkle ~oklch(.76 .09 285) */
+    --line:3px solid var(--ink);
+    --shadow:4px 4px 0 var(--ink);
+    --shadow-lg:6px 6px 0 var(--ink);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    font-family:"Space Grotesk",sans-serif;
+    background:var(--backdrop);
+    color:var(--ink);
+    min-height:100vh;
+    padding:56px 32px 88px;
+  }
+  :lang(ja){font-family:"Zen Kaku Gothic New",sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid #c22f76;outline-offset:2px}
+
+  /* ---------- backdrop ---------- */
+  .intro{max-width:1040px;margin:0 auto 60px;position:relative}
+  .intro h1{
+    font-size:72px;font-weight:700;letter-spacing:-0.03em;line-height:1;
+    display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  }
+  .intro .jp-tag{
+    font-size:20px;font-weight:900;letter-spacing:.08em;
+    background:var(--ink);color:var(--rose);
+    padding:9px 16px 10px;border-radius:10px;
+    transform:rotate(2deg);
+  }
+  .intro p{
+    margin-top:18px;font-size:19px;font-weight:500;max-width:66ch;line-height:1.45;
+  }
+  .deco{position:absolute;pointer-events:none}
+  .deco.ast{top:-26px;right:-4px}
+  .deco.bar{top:44px;right:56px;width:70px;height:18px;background:var(--blue);border:var(--line);border-radius:6px;transform:rotate(-10deg)}
+  .deco.dot{top:6px;right:110px;width:22px;height:22px;background:var(--rose);border:var(--line);border-radius:6px;transform:rotate(14deg)}
+
+  /* ---------- gallery ---------- */
+  .gallery{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:64px 48px;max-width:1400px;margin:0 auto;
+  }
+  .panel{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .caption{
+    font-size:16px;font-weight:700;
+    background:var(--white);border:var(--line);border-radius:10px;
+    padding:8px 20px;box-shadow:var(--shadow);
+  }
+  .screen{
+    width:390px;height:840px;flex:0 0 auto;
+    background:var(--paper);
+    border:var(--line);border-radius:34px;
+    box-shadow:10px 10px 0 var(--ink);
+    overflow-y:auto;overflow-x:hidden;
+    display:flex;flex-direction:column;
+  }
+
+  /* ---------- shared components ---------- */
+  .pressable{transition:transform .12s ease-out,box-shadow .12s ease-out}
+  .pressable:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)!important}
+  .icon{display:block;flex:0 0 auto}
+
+  .btn-primary{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:56px;width:100%;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    font-size:17px;font-weight:700;
+    background:var(--ink);color:var(--rose);
+  }
+  .tag{
+    font-size:12.5px;font-weight:700;color:var(--ink);
+    background:var(--white);border:2.5px solid var(--ink);border-radius:8px;
+    padding:5px 10px;
+  }
+
+  /* ================= ACCUEIL ================= */
+  .home-head{
+    background:var(--blue);color:#fff;
+    border-bottom:var(--line);
+    padding:22px 20px 24px;
+  }
+  .home-head .brand{display:flex;align-items:baseline;justify-content:space-between}
+  .home-head .logo{font-size:24px;font-weight:700;letter-spacing:-0.02em}
+  .home-head .logo::after{content:"";display:inline-block;width:9px;height:9px;background:var(--rose);border-radius:2px;margin-left:5px;transform:rotate(12deg)}
+  .home-head .streak{font-size:13px;font-weight:600;color:#fff}
+  .home-head .hello{font-size:26px;font-weight:700;margin:14px 0 16px;letter-spacing:-0.02em}
+  .search{
+    display:flex;align-items:center;gap:10px;
+    background:var(--white);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:0 14px;height:52px;
+  }
+  .search input{
+    border:0;outline:none;background:none;flex:1;
+    font:inherit;font-size:15px;font-weight:500;color:var(--ink);
+  }
+  .search input::placeholder{color:#4c4956;opacity:1}
+
+  .home-body{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;justify-content:space-between}
+
+  .due{
+    background:var(--blue-tint);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:18px 18px 16px;
+  }
+  .due-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .due-num{font-size:96px;font-weight:700;line-height:.86;letter-spacing:-0.04em}
+  .due-label{font-size:17px;font-weight:700;margin-top:8px}
+  .due-new{
+    font-size:12.5px;font-weight:700;
+    background:var(--rose);border:2.5px solid var(--ink);border-radius:8px;
+    padding:5px 10px;
+  }
+  .due-sub{font-size:13.5px;font-weight:600;color:var(--ink);margin:10px 0 14px}
+
+  .wod{
+    background:var(--violet-tint);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:18px;position:relative;
+  }
+  .wod-badge{
+    position:absolute;top:-13px;left:14px;
+    background:var(--blue);color:#fff;border:2.5px solid var(--ink);border-radius:8px;
+    padding:4px 10px;font-size:12px;font-weight:700;
+    transform:rotate(-2deg);box-shadow:3px 3px 0 var(--ink);
+  }
+  .wod-row{display:flex;align-items:center;gap:16px;margin-top:8px}
+  .wod-kanji{display:flex;flex-direction:column;align-items:center}
+  .wod-kanji .furi{font-size:13px;font-weight:700}
+  .wod-kanji .kj{font-size:52px;font-weight:900;line-height:1.05}
+  .wod-def{flex:1}
+  .wod-def .romaji{font-size:16px;font-weight:700}
+  .wod-def .gloss{font-size:13.5px;font-weight:500;line-height:1.4;margin-top:3px}
+
+  .recents{
+    background:var(--white);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .recents .lbl{font-size:13px;font-weight:700}
+  .recents .words{display:flex;gap:8px}
+  .recents .w{
+    font-size:15px;font-weight:700;
+    border:2.5px solid var(--ink);border-radius:8px;background:var(--paper);
+    padding:9px 11px;min-height:44px;
+  }
+
+  .nav{
+    margin-top:auto;
+    background:var(--white);border-top:var(--line);
+    display:flex;padding:10px 8px 14px;gap:4px;
+  }
+  .nav button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10.5px;font-weight:600;color:var(--ink);
+    padding:7px 0 6px;min-height:52px;border-radius:10px;
+  }
+  .nav button.active{
+    background:var(--blue-tint);border:2.5px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);font-weight:700;
+  }
+  .nav .kana-glyph{font-size:19px;font-weight:900;line-height:22px}
+
+  /* ================= FICHE MOT ================= */
+  .word-top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px 10px;
+  }
+  .sq-btn{
+    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    background:var(--white);border:var(--line);border-radius:10px;
+    box-shadow:var(--shadow);
+  }
+  .hero{
+    margin:0 16px;
+    background:var(--blue);color:#fff;
+    border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:12px 16px;text-align:center;
+  }
+  .hero .furi{font-size:16px;font-weight:700}
+  .hero .kj{font-size:82px;font-weight:900;line-height:1.04}
+  .hero .say{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--white);color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:10px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:8px 14px;min-height:44px;margin-top:4px;
+    font-size:16px;font-weight:700;
+  }
+  .hero-tags{display:flex;justify-content:center;gap:8px;margin-top:9px}
+
+  .word-body{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .sec-label{font-size:13px;font-weight:700}
+
+  .senses{
+    background:var(--white);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);padding:10px 14px;
+  }
+  .senses ol{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:6px}
+  .senses li{display:flex;gap:10px;font-size:15px;font-weight:500}
+  .senses li b{font-weight:700;color:var(--blue)}
+
+  .compo{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .compo .part{
+    flex:1;text-align:center;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:6px 4px 5px;
+  }
+  .compo .part .g{font-size:27px;font-weight:900;line-height:1.15}
+  .compo .part .n{font-size:11.5px;font-weight:700;margin-top:1px}
+  .compo .plus{align-self:center;font-size:20px;font-weight:700}
+  .part.p1{background:var(--blue-tint)}
+  .part.p2{background:var(--violet-tint)}
+  .part.p3{background:var(--rose-tint)}
+
+  .mnemo{
+    background:var(--violet-tint);
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:12px 16px;
+  }
+  .mnemo .quote{font-size:14.5px;font-weight:500;line-height:1.45}
+  .mnemo .quote b:lang(ja){font-weight:900}
+  .mnemo .meta{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:6px;
+  }
+  .mnemo .author{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  .vote{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--blue);color:#fff;
+    border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 14px;min-height:44px;
+    font-size:14px;font-weight:700;
+  }
+
+  .example .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{
+    background:var(--white);border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 10px;min-height:44px;
+    font-size:17px;font-weight:700;
+  }
+  .chip.hit{background:var(--blue-tint)}
+  .example .fr{font-size:13.5px;font-weight:600;color:var(--ink-2);margin-top:8px}
+
+  .word-cta{padding:0 16px 16px}
+
+  /* ================= RÉVISION ================= */
+  .rev{background:#e9e6f5}
+  .rev-head{padding:18px 18px 0}
+  .rev-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .rev-count{font-size:54px;font-weight:700;line-height:.95;letter-spacing:-0.03em}
+  .rev-count small{font-size:22px;font-weight:700;letter-spacing:0}
+  .rev-left{font-size:13.5px;font-weight:600;margin-top:5px}
+  .progress{
+    margin-top:14px;height:20px;
+    background:var(--white);border:var(--line);border-radius:10px;
+    overflow:hidden;
+  }
+  .progress i{display:block;height:100%;width:35%;background:var(--blue);border-right:3px solid var(--ink)}
+
+  .rev-stage{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 18px 10px;position:relative}
+  .flashcard{
+    background:var(--white);border:var(--line);border-radius:16px;
+    box-shadow:8px 8px 0 var(--ink);
+    padding:52px 20px 38px;text-align:center;position:relative;
+  }
+  .flashcard .kj{font-size:104px;font-weight:900;line-height:1.05}
+  .flashcard .divider{width:56px;height:4px;background:var(--ink);border-radius:2px;margin:18px auto 16px}
+  .flashcard .reading{font-size:27px;font-weight:900}
+  .flashcard .gloss{font-size:17.5px;font-weight:600;margin-top:6px}
+  .flashcard .seen{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:16px}
+
+  .sticker{
+    position:absolute;top:-20px;right:-6px;
+    background:var(--rose);border:var(--line);border-radius:10px;
+    box-shadow:5px 5px 0 var(--ink);
+    padding:10px 16px;
+    font-size:19px;font-weight:700;letter-spacing:.04em;
+    transform:rotate(-5deg);
+    animation:pop .38s cubic-bezier(.18,1.4,.4,1) both;
+  }
+  @keyframes pop{
+    from{transform:rotate(9deg) scale(.2);opacity:0}
+    to{transform:rotate(-5deg) scale(1);opacity:1}
+  }
+  .confetti{position:absolute;border:2.5px solid var(--ink);border-radius:2px;animation:conf .5s ease-out both}
+  .confetti.c1{width:18px;height:10px;background:var(--rose);top:-44px;right:120px;transform:rotate(24deg);animation-delay:.12s}
+  .confetti.c2{width:11px;height:19px;background:var(--blue);top:-58px;right:64px;transform:rotate(-15deg);animation-delay:.18s}
+  .confetti.c3{width:19px;height:11px;background:var(--peri);top:-14px;right:-24px;transform:rotate(-30deg);animation-delay:.24s}
+  .confetti.c4{width:12px;height:12px;background:var(--violet);top:34px;right:-20px;transform:rotate(12deg);animation-delay:.3s}
+  .confetti.c5{width:10px;height:17px;background:var(--rose);top:-36px;right:8px;transform:rotate(40deg);animation-delay:.36s}
+  @keyframes conf{
+    from{scale:0;translate:0 -10px;opacity:0}
+    to{scale:1;translate:0 0;opacity:1}
+  }
+
+  .grades{padding:14px 18px 18px}
+  .grades .hint{font-size:12.5px;font-weight:600;margin-bottom:10px}
+  .grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grade{
+    display:flex;align-items:center;gap:10px;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:10px 12px;min-height:60px;text-align:left;
+  }
+  .grade .txt{display:flex;flex-direction:column;gap:1px}
+  .grade .name{font-size:15.5px;font-weight:700;line-height:1.1}
+  .grade .int{font-size:12px;font-weight:600}
+  .grade.again{background:var(--rose)}
+  .grade.hard{background:var(--lav)}
+  .grade.good{background:var(--peri)}
+  .grade.easy{background:var(--blue);color:#fff}
+  .grade.easy .icon{stroke:#fff}
+
+  /* ---------- motion off ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .pressable{transition:none}
+    .sticker,.confetti{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <h1>Neo-pop harmonisé <span class="jp-tag" lang="ja">調和</span></h1>
+  <p>Même charpente : contours encre, ombres dures, blocs. Mais une seule famille bleu → violet → rose, calibrée en OKLCH : les aplats balisent, le texte vit sur papier froid.</p>
+  <svg class="deco ast" width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><path d="M26 4v44M4 26h44M10 10l32 32M42 10L10 42" stroke="#1b1830" stroke-width="7" stroke-linecap="round"/></svg>
+  <span class="deco bar" aria-hidden="true"></span>
+  <span class="deco dot" aria-hidden="true"></span>
+</header>
+
+<main class="gallery">
+
+  <!-- ============ ACCUEIL ============ -->
+  <section class="panel">
+    <span class="caption">Accueil</span>
+    <article class="screen" aria-label="Écran d'accueil">
+
+      <div class="home-head">
+        <div class="brand">
+          <span class="logo">jibiki</span>
+          <span class="streak">Série&nbsp;: 8 jours</span>
+        </div>
+        <p class="hello">Bonsoir. On s'y remet&nbsp;?</p>
+        <div class="search">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.7" fill="none" stroke="#1b1830" stroke-width="2.6"/><path d="M13 13l4.6 4.6" stroke="#1b1830" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Un mot, un kanji, du rōmaji…" aria-label="Rechercher dans le dictionnaire">
+        </div>
+      </div>
+
+      <div class="home-body">
+
+        <div class="due">
+          <div class="due-top">
+            <div>
+              <div class="due-num">12</div>
+              <div class="due-label">à réviser</div>
+            </div>
+            <span class="due-new">+ 5 nouvelles</span>
+          </div>
+          <p class="due-sub">9 minutes, chrono.</p>
+          <button class="btn-primary pressable">
+            Lancer la session
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.5l10 5.5-10 5.5z" fill="#f28ab4" stroke="#f28ab4" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="wod">
+          <span class="wod-badge">Mot du jour</span>
+          <div class="wod-row">
+            <div class="wod-kanji" lang="ja">
+              <span class="furi">はなみ</span>
+              <span class="kj">花見</span>
+            </div>
+            <div class="wod-def">
+              <div class="romaji">hanami</div>
+              <p class="gloss">Pique-nique sous les cerisiers en fleurs. De saison.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recents">
+          <span class="lbl">Vus hier</span>
+          <div class="words" lang="ja">
+            <button class="w pressable">咲く</button>
+            <button class="w pressable">満開</button>
+            <button class="w pressable">春</button>
+          </div>
+        </div>
+
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#1b1830" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#1b1830" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#1b1830" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#1b1830" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#1b1830" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#1b1830" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ FICHE MOT ============ -->
+  <section class="panel">
+    <span class="caption">Fiche mot</span>
+    <article class="screen" aria-label="Fiche du mot sakura">
+
+      <div class="word-top">
+        <button class="sq-btn pressable" aria-label="Retour">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#1b1830" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="sq-btn pressable" aria-label="Enregistrer le mot">
+          <svg class="icon" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M3 2.5h12v15l-6-4-6 4z" fill="none" stroke="#1b1830" stroke-width="2.6" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="hero">
+        <div lang="ja">
+          <div class="furi">さくら</div>
+          <div class="kj">桜</div>
+        </div>
+        <button class="say pressable">
+          <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#1b1830"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#1b1830" stroke-width="2" stroke-linecap="round"/></svg>
+          sakura
+        </button>
+        <div class="hero-tags">
+          <span class="tag">Nom</span>
+          <span class="tag">JLPT N5</span>
+          <span class="tag">Fréquent</span>
+        </div>
+      </div>
+
+      <div class="word-body">
+
+        <div class="senses">
+          <span class="sec-label">Sens</span>
+          <ol>
+            <li><b>1.</b> cerisier (l'arbre)</li>
+            <li><b>2.</b> fleur de cerisier</li>
+          </ol>
+        </div>
+
+        <div>
+          <span class="sec-label">Dans le kanji</span>
+          <div class="compo" lang="ja">
+            <div class="part p1"><div class="g">木</div><div class="n" lang="fr">arbre</div></div>
+            <span class="plus" lang="fr" aria-hidden="true">+</span>
+            <div class="part p2"><div class="g">⺍</div><div class="n" lang="fr">pétales</div></div>
+            <span class="plus" lang="fr" aria-hidden="true">+</span>
+            <div class="part p3"><div class="g">女</div><div class="n" lang="fr">femme</div></div>
+          </div>
+        </div>
+
+        <div class="mnemo">
+          <p class="quote">« Une femme <b lang="ja">女</b> coiffée de pétales <b lang="ja">⺍</b> danse sous un arbre <b lang="ja">木</b>&nbsp;: le cerisier en fleurs. »</p>
+          <div class="meta">
+            <span class="author">par HanaSensei</span>
+            <button class="vote pressable" aria-label="Voter pour ce mnémonique, 128 votes">
+              <svg class="icon" width="13" height="12" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#ffffff"/></svg>
+              128
+            </button>
+          </div>
+        </div>
+
+        <div class="example">
+          <span class="sec-label">En contexte</span>
+          <div class="chips" lang="ja">
+            <button class="chip hit pressable">桜</button>
+            <button class="chip pressable">の</button>
+            <button class="chip pressable">花</button>
+            <button class="chip pressable">が</button>
+            <button class="chip pressable">咲いています</button>
+          </div>
+          <p class="fr">« Les cerisiers sont en fleurs. »</p>
+        </div>
+
+      </div>
+
+      <div class="word-cta">
+        <button class="btn-primary pressable">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="#f28ab4" stroke-width="2.8" stroke-linecap="round"/></svg>
+          Ajouter au paquet
+        </button>
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ RÉVISION ============ -->
+  <section class="panel">
+    <span class="caption">Révision</span>
+    <article class="screen rev" aria-label="Écran de révision">
+
+      <div class="rev-head">
+        <div class="rev-top">
+          <div>
+            <div class="rev-count">7<small>&thinsp;/&thinsp;20</small></div>
+            <div class="rev-left">Encore 13. Tu tiens le rythme.</div>
+          </div>
+          <button class="sq-btn pressable" aria-label="Quitter la session">
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="#1b1830" stroke-width="2.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="progress" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="7 cartes sur 20"><i></i></div>
+      </div>
+
+      <div class="rev-stage">
+        <div class="flashcard">
+          <span class="sticker">RETENU</span>
+          <span class="confetti c1" aria-hidden="true"></span>
+          <span class="confetti c2" aria-hidden="true"></span>
+          <span class="confetti c3" aria-hidden="true"></span>
+          <span class="confetti c4" aria-hidden="true"></span>
+          <span class="confetti c5" aria-hidden="true"></span>
+          <div lang="ja">
+            <div class="kj">勉強</div>
+            <div class="divider" aria-hidden="true"></div>
+            <div class="reading">べんきょう</div>
+          </div>
+          <p class="gloss">« étude, travail »</p>
+          <p class="seen">Vu il y a 3 jours.</p>
+        </div>
+      </div>
+
+      <div class="grades">
+        <p class="hint">Tu l'avais&nbsp;?</p>
+        <div class="grade-grid">
+          <button class="grade again pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M17.5 11a6.5 6.5 0 11-1.9-4.6M17.5 3v4h-4" fill="none" stroke="#1b1830" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Encore</span><span class="int">2 min</span></span>
+          </button>
+          <button class="grade hard pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 11h4l2.5-6 4 12 2.5-6h4" fill="none" stroke="#1b1830" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Difficile</span><span class="int">1 j</span></span>
+          </button>
+          <button class="grade good pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 12l5 5L18.5 6" fill="none" stroke="#1b1830" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Bien</span><span class="int">3 j</span></span>
+          </button>
+          <button class="grade easy pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 12l4.5 4.5L15.5 8M10 12.5L14.5 17 21 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Facile</span><span class="int">7 j</span></span>
+          </button>
+        </div>
+      </div>
+
+    </article>
+  </section>
+
+</main>
+
+</body>
+</html>

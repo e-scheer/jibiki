@@ -9,6 +9,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
+import '../feedback/report_item_sheet.dart';
 import '../widgets/add_to_study_bar.dart';
 import '../widgets/mnemonic_panel.dart';
 import '../widgets/origin_section.dart';
@@ -91,6 +92,8 @@ class _KanaDetailState extends State<_KanaDetail> {
               return _EquivalentAction(twin: twin);
             },
           ),
+          ReportItemAction(
+              type: ReportItemType.kana, itemRef: widget.char, label: widget.char),
         ],
       ),
       bottomNavigationBar: AddToStudyBar(

@@ -61,6 +61,22 @@ enum ItemType {
 
 enum MnemonicKind { kana, kanji }
 
+/// Which way a card is tested. recognize = see the Japanese, produce the
+/// meaning (the easier default). recall = see the meaning, produce the
+/// Japanese (harder, and what actually matters for writing and speaking, the
+/// gap WaniKani leaves to third-party apps).
+enum StudyDirection {
+  recognize,
+  recall;
+
+  bool get isRecall => this == StudyDirection.recall;
+
+  String get label => switch (this) {
+        StudyDirection.recognize => 'Recognize',
+        StudyDirection.recall => 'Recall',
+      };
+}
+
 /// How a study session is played. One deck, several games (Quizlet-style): the
 /// learner switches freely between them over the same due queue.
 enum StudyMode {

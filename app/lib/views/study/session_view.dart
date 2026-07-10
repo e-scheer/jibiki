@@ -61,10 +61,15 @@ class _SessionState extends State<_Session> {
         widget.initialMode != StudyMode.swipe ? widget.initialMode : remembered;
   }
 
+  StudyDirection _direction = StudyDirection.recognize;
+
   void _pick(StudyMode m) {
     setState(() => _mode = m);
     context.read<AppState>().setStudyMode(m);
   }
+
+  void _toggleDirection() => setState(() => _direction =
+      _direction.isRecall ? StudyDirection.recognize : StudyDirection.recall);
 
   Future<void> _openPicker() async {
     final picked = await showModalBottomSheet<StudyMode>(
@@ -86,6 +91,15 @@ class _SessionState extends State<_Session> {
             ? (widget.title ?? 'Study')
             : '${vm.reviewed + 1} of ${vm.total}'),
         actions: [
+          // Recognize ↔ recall toggle. Quiz is the game that supports both
+          // directions (produce the meaning, or produce the Japanese).
+          if (!vm.finished && _mode == StudyMode.quiz)
+            IconButton(
+              icon: const Icon(Icons.swap_horiz_rounded),
+              tooltip: 'Direction: ${_direction.label}',
+              isSelected: _direction.isRecall,
+              onPressed: _toggleDirection,
+            ),
           if (!vm.finished)
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -149,9 +163,10 @@ class _SessionState extends State<_Session> {
                             vm: vm,
                             lang: lang),
                         StudyMode.quiz => QuizStage(
-                            key: ValueKey('q${vm.current!.id}'),
+                            key: ValueKey('q${vm.current!.id}-${_direction.name}'),
                             vm: vm,
-                            lang: lang),
+                            lang: lang,
+                            direction: _direction),
                         StudyMode.match => MatchStage(
                             key: ValueKey('m${vm.current!.id}'),
                             vm: vm,

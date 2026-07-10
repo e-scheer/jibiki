@@ -55,3 +55,63 @@ class Feedback(models.Model):
 
     def __str__(self) -> str:
         return f"feedback#{self.pk} [{self.kind}] {self.message[:40]}"
+
+
+class ContentItemType(models.TextChoices):
+    KANJI = "kanji", "Kanji"
+    KANA = "kana", "Kana"
+    WORD = "word", "Word"
+
+
+class ContentReportReason(models.TextChoices):
+    WRONG = "wrong", "Something is wrong"
+    MISSING = "missing", "Something is missing"
+    TYPO = "typo", "Typo or formatting"
+    OTHER = "other", "Something else"
+
+
+class ContentReport(models.Model):
+    """A signed-in learner flagging a dictionary entry (a kanji, a kana, or a
+    word): a wrong reading, a missing meaning, a typo. Unlike open product
+    feedback these must carry an account, so a correction is accountable and we
+    can reply, and re-reporting the same item just updates the existing row.
+
+    Distinct from mnemonics' MnemonicReport, which moderates user-generated
+    content; this is about the reference data itself.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="content_reports"
+    )
+    # What entry was flagged. item_ref is the kanji/kana glyph or the word id as
+    # a string, so one column addresses all three dictionaries.
+    item_type = models.CharField(max_length=8, choices=ContentItemType.choices)
+    item_ref = models.CharField(max_length=64)
+    reason = models.CharField(
+        max_length=8, choices=ContentReportReason.choices, default=ContentReportReason.OTHER
+    )
+    message = models.TextField(max_length=2000, blank=True)
+    # Auto-attached by the client (platform, app mode, the entry's label) so the
+    # report is actionable without a lookup.
+    context = models.JSONField(default=dict, blank=True)
+
+    status = models.CharField(
+        max_length=8, choices=FeedbackStatus.choices, default=FeedbackStatus.NEW
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "content_reports"
+        ordering = ["-created_at"]
+        constraints = [
+            # One active report per user per entry: re-reporting updates in place
+            # rather than piling up duplicates a human has to dedupe.
+            models.UniqueConstraint(
+                fields=["reporter", "item_type", "item_ref"], name="uq_content_report_per_user"
+            )
+        ]
+        indexes = [models.Index(fields=["status", "created_at"])]
+
+    def __str__(self) -> str:
+        return f"report#{self.pk} [{self.reason}] {self.item_type}:{self.item_ref}"

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki — exploration 11 · Superflat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17131f;
+    --acid:#f2e51c;      /* jaune acide */
+    --klein:#2b36e3;     /* bleu klein */
+    --magenta:#ff57a8;   /* rose magenta */
+    --lime:#8fe838;      /* vert lime */
+    --lav:#c9b8f9;       /* lavande */
+    --coral:#ff6952;     /* corail (Encore) */
+    --sun:#ffd21f;       /* jaune soleil : cœur des fleurs */
+    --bg:#f4f4f6;        /* blanc cassé froid */
+    --paperw:#ffffff;
+    --ink-2:#45414e;     /* texte secondaire sur blanc */
+    --line:3px solid var(--ink);
+    --shadow:4px 4px 0 var(--ink);
+    --shadow-lg:6px 6px 0 var(--ink);
+    /* cadre pixel : coins en escalier, 3 marches de 4px */
+    --steps:polygon(0px 12px,4px 12px,4px 8px,8px 8px,8px 4px,12px 4px,12px 0px,calc(100% - 12px) 0px,calc(100% - 12px) 4px,calc(100% - 8px) 4px,calc(100% - 8px) 8px,calc(100% - 4px) 8px,calc(100% - 4px) 12px,100% 12px,100% calc(100% - 12px),calc(100% - 4px) calc(100% - 12px),calc(100% - 4px) calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) calc(100% - 4px),calc(100% - 12px) calc(100% - 4px),calc(100% - 12px) 100%,12px 100%,12px calc(100% - 4px),8px calc(100% - 4px),8px calc(100% - 8px),4px calc(100% - 8px),4px calc(100% - 12px),0px calc(100% - 12px));
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    font-family:"Space Grotesk",sans-serif;
+    background:var(--acid);
+    color:var(--ink);
+    min-height:100vh;
+    padding:56px 32px 96px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  :lang(ja){font-family:"Zen Kaku Gothic New",sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid var(--klein);outline-offset:2px}
+
+  /* ---------- fleur Murakami pixel (sprite 16×16 en box-shadow, 1 pixel = 1em) ---------- */
+  .pxmk{
+    --k:var(--ink);--pp:#ff57a8;--pc:var(--sun);--pf:var(--ink);
+    position:relative;width:16em;height:16em;flex:0 0 auto;
+  }
+  .pxmk::before{
+    content:"";position:absolute;top:0;left:0;width:1em;height:1em;
+    box-shadow:7em 0em var(--k),8em 0em var(--k),4em 1em var(--k),5em 1em var(--k),6em 1em var(--k),7em 1em var(--pp),8em 1em var(--pp),9em 1em var(--k),10em 1em var(--k),11em 1em var(--k),3em 2em var(--k),4em 2em var(--pp),5em 2em var(--pp),6em 2em var(--pp),7em 2em var(--pp),8em 2em var(--pp),9em 2em var(--pp),10em 2em var(--pp),11em 2em var(--pp),12em 2em var(--k),2em 3em var(--k),3em 3em var(--pp),4em 3em var(--pp),5em 3em var(--pp),6em 3em var(--pp),7em 3em var(--pp),8em 3em var(--pp),9em 3em var(--pp),10em 3em var(--pp),11em 3em var(--pp),12em 3em var(--pp),13em 3em var(--k),1em 4em var(--k),2em 4em var(--pp),3em 4em var(--pp),4em 4em var(--pp),5em 4em var(--pp),6em 4em var(--k),7em 4em var(--k),8em 4em var(--k),9em 4em var(--k),10em 4em var(--pp),11em 4em var(--pp),12em 4em var(--pp),13em 4em var(--pp),14em 4em var(--k),1em 5em var(--k),2em 5em var(--pp),3em 5em var(--pp),4em 5em var(--pp),5em 5em var(--k),6em 5em var(--pc),7em 5em var(--pc),8em 5em var(--pc),9em 5em var(--pc),10em 5em var(--k),11em 5em var(--pp),12em 5em var(--pp),13em 5em var(--pp),14em 5em var(--k),1em 6em var(--k),2em 6em var(--pp),3em 6em var(--pp),4em 6em var(--k),5em 6em var(--pc),6em 6em var(--pf),7em 6em var(--pc),8em 6em var(--pc),9em 6em var(--pf),10em 6em var(--pc),11em 6em var(--k),12em 6em var(--pp),13em 6em var(--pp),14em 6em var(--k),0em 7em var(--k),1em 7em var(--pp),2em 7em var(--pp),3em 7em var(--pp),4em 7em var(--k),5em 7em var(--pc),6em 7em var(--pc),7em 7em var(--pc),8em 7em var(--pc),9em 7em var(--pc),10em 7em var(--pc),11em 7em var(--k),12em 7em var(--pp),13em 7em var(--pp),14em 7em var(--pp),15em 7em var(--k),0em 8em var(--k),1em 8em var(--pp),2em 8em var(--pp),3em 8em var(--pp),4em 8em var(--k),5em 8em var(--pc),6em 8em var(--pc),7em 8em var(--pc),8em 8em var(--pc),9em 8em var(--pc),10em 8em var(--pc),11em 8em var(--k),12em 8em var(--pp),13em 8em var(--pp),14em 8em var(--pp),15em 8em var(--k),1em 9em var(--k),2em 9em var(--pp),3em 9em var(--pp),4em 9em var(--k),5em 9em var(--pf),6em 9em var(--pc),7em 9em var(--pc),8em 9em var(--pc),9em 9em var(--pc),10em 9em var(--pf),11em 9em var(--k),12em 9em var(--pp),13em 9em var(--pp),14em 9em var(--k),1em 10em var(--k),2em 10em var(--pp),3em 10em var(--pp),4em 10em var(--pp),5em 10em var(--k),6em 10em var(--pf),7em 10em var(--pf),8em 10em var(--pf),9em 10em var(--pf),10em 10em var(--k),11em 10em var(--pp),12em 10em var(--pp),13em 10em var(--pp),14em 10em var(--k),1em 11em var(--k),2em 11em var(--pp),3em 11em var(--pp),4em 11em var(--pp),5em 11em var(--pp),6em 11em var(--k),7em 11em var(--k),8em 11em var(--k),9em 11em var(--k),10em 11em var(--pp),11em 11em var(--pp),12em 11em var(--pp),13em 11em var(--pp),14em 11em var(--k),2em 12em var(--k),3em 12em var(--pp),4em 12em var(--pp),5em 12em var(--pp),6em 12em var(--pp),7em 12em var(--pp),8em 12em var(--pp),9em 12em var(--pp),10em 12em var(--pp),11em 12em var(--pp),12em 12em var(--pp),13em 12em var(--k),3em 13em var(--k),4em 13em var(--pp),5em 13em var(--pp),6em 13em var(--pp),7em 13em var(--pp),8em 13em var(--pp),9em 13em var(--pp),10em 13em var(--pp),11em 13em var(--pp),12em 13em var(--k),4em 14em var(--k),5em 14em var(--k),6em 14em var(--k),7em 14em var(--pp),8em 14em var(--pp),9em 14em var(--k),10em 14em var(--k),11em 14em var(--k),7em 15em var(--k),8em 15em var(--k);
+  }
+  .px-orange{--pp:#ff8a1e}
+  .px-sky{--pp:#3fa9f5}
+  .px-lime{--pp:#8fe838;--pc:#fff}
+  .px-purple{--pp:#c05ef0}
+  .px-klein{--pp:#2b36e3}
+  .px-red{--pp:#ff4b3e}
+  .px-off{--pp:transparent;--pc:transparent;--pf:transparent}
+
+  /* ---------- cadre pixel (escalier) ---------- */
+  .pxframe{
+    background:var(--ink);padding:3px;
+    clip-path:var(--steps);
+    filter:drop-shadow(8px 8px 0 var(--ink));
+  }
+  .pxframe>.inner{clip-path:var(--steps);background:var(--paperw)}
+  .pxbtn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:56px;width:100%;
+    clip-path:var(--steps);
+    background:var(--ink);color:var(--acid);
+    font-size:17px;font-weight:700;
+    filter:drop-shadow(5px 5px 0 var(--ink));
+    transition:transform .12s ease-out,filter .12s ease-out;
+  }
+  .pxbtn:active{transform:translate(5px,5px);filter:drop-shadow(0 0 0 var(--ink))}
+
+  /* ---------- backdrop : champ de fleurs ---------- */
+  .field{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .bloom{position:absolute;display:block;transform:rotate(var(--rot,0deg))}
+  @keyframes sway{
+    from{transform:rotate(calc(var(--rot,0deg) - 4deg))}
+    to{transform:rotate(calc(var(--rot,0deg) + 4deg))}
+  }
+  .field .bloom{animation:sway 6s ease-in-out infinite alternate}
+  .field .bloom:nth-child(2n){animation-duration:7.4s;animation-delay:-2.1s}
+  .field .bloom:nth-child(3n){animation-duration:8.6s;animation-delay:-4.3s}
+
+  .intro,.gallery{position:relative;z-index:1}
+
+  /* ---------- en-tête de la direction ---------- */
+  .intro{max-width:1040px;margin:0 auto 60px}
+  .intro h1{
+    font-size:76px;font-weight:700;letter-spacing:-0.03em;line-height:1;
+    display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  }
+  .intro .jp-tag{
+    font-size:20px;font-weight:900;letter-spacing:.08em;
+    background:var(--ink);color:var(--acid);
+    padding:9px 16px 10px;border-radius:10px;
+    transform:rotate(2deg);
+  }
+  .intro p{margin-top:18px;font-size:19px;font-weight:500;max-width:64ch;line-height:1.45}
+  .intro .deco-fl{position:absolute;right:-6px;top:-30px;pointer-events:none}
+  .intro .deco-px{position:absolute;right:118px;top:52px;pointer-events:none}
+
+  /* ---------- galerie ---------- */
+  .gallery{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:64px 48px;max-width:1400px;margin:0 auto;
+  }
+  .panel{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .caption{
+    font-size:16px;font-weight:700;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    padding:8px 20px;box-shadow:var(--shadow);
+  }
+  .screen{
+    width:390px;height:840px;flex:0 0 auto;
+    background:var(--bg);
+    border:var(--line);border-radius:34px;
+    box-shadow:10px 10px 0 var(--ink);
+    overflow-y:auto;overflow-x:hidden;
+    display:flex;flex-direction:column;
+  }
+
+  /* ---------- composants partagés ---------- */
+  .pressable{transition:transform .12s ease-out,box-shadow .12s ease-out}
+  .pressable:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)!important}
+  .icon{display:block;flex:0 0 auto}
+  .tag{
+    font-size:12.5px;font-weight:700;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:8px;
+    padding:5px 10px;
+  }
+  .btn-primary{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:56px;width:100%;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    font-size:17px;font-weight:700;
+  }
+  .dot{font-family:"DotGothic16",monospace;font-weight:400}
+
+  /* ================= ACCUEIL ================= */
+  .home-head{
+    background:var(--klein);color:#fff;
+    border-bottom:var(--line);
+    padding:22px 20px 24px;
+  }
+  .home-head .brand{display:flex;align-items:center;justify-content:space-between}
+  .home-head .logo{font-size:24px;font-weight:700;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:7px}
+  .home-head .streak{font-size:13px;font-weight:600;color:#fff}
+  .home-head .hello{font-size:26px;font-weight:700;margin:14px 0 16px;letter-spacing:-0.02em}
+  .search{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:0 14px;height:52px;
+  }
+  .search input{
+    border:0;outline:none;background:none;flex:1;
+    font:inherit;font-size:15px;font-weight:500;color:var(--ink);
+  }
+  .search input::placeholder{color:#4c4956;opacity:1}
+
+  .home-body{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:14px;justify-content:space-between}
+
+  .due{
+    background:var(--acid);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:16px 18px;
+  }
+  .due-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .due-num{font-size:96px;font-weight:700;line-height:.86;letter-spacing:-0.04em}
+  .due-label{font-size:17px;font-weight:700;margin-top:7px}
+  .due-sub{font-size:13.5px;font-weight:600;margin-top:7px}
+  .due .pxbtn{margin-top:14px}
+
+  .pastille{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .pastille .pfl{position:relative;width:104px;height:104px}
+  .pastille .pfl svg{display:block;width:100%;height:100%}
+  .pastille .pnum{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:19px;font-weight:700;letter-spacing:-0.02em;
+  }
+  .pastille .plbl{font-size:12.5px;font-weight:700}
+
+  .wod{
+    background:var(--lav);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:18px;position:relative;
+  }
+  .wod-badge{
+    position:absolute;top:-13px;left:14px;
+    background:var(--magenta);border:2.5px solid var(--ink);border-radius:8px;
+    padding:4px 10px;font-size:12px;font-weight:700;
+    transform:rotate(-2deg);box-shadow:3px 3px 0 var(--ink);
+  }
+  .wod-fl{position:absolute;top:-16px;right:12px;transform:rotate(9deg);pointer-events:none}
+  .wod-row{display:flex;align-items:center;gap:16px;margin-top:8px}
+  .wod-kanji{display:flex;flex-direction:column;align-items:center}
+  .wod-kanji .furi{font-size:13px;font-weight:700}
+  .wod-kanji .kj{font-size:52px;font-weight:900;line-height:1.05}
+  .wod-def{flex:1}
+  .wod-def .romaji{font-size:16px;font-weight:700}
+  .wod-def .gloss{font-size:13.5px;font-weight:500;line-height:1.4;margin-top:3px}
+
+  .recents{
+    background:var(--paperw);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .recents .lbl{font-size:13px;font-weight:700}
+  .recents .words{display:flex;gap:8px}
+  .recents .w{
+    font-size:15px;font-weight:700;
+    border:2.5px solid var(--ink);border-radius:8px;background:var(--bg);
+    padding:9px 11px;min-height:44px;
+  }
+
+  .nav{
+    margin-top:auto;
+    background:var(--paperw);border-top:var(--line);
+    display:flex;padding:10px 8px 14px;gap:4px;
+  }
+  .nav button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10.5px;font-weight:600;color:var(--ink);
+    padding:7px 0 6px;min-height:52px;border-radius:10px;
+  }
+  .nav button.active{
+    background:var(--acid);border:2.5px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);font-weight:700;
+  }
+  .nav .kana-glyph{font-size:19px;font-weight:900;line-height:22px}
+
+  /* ================= FICHE MOT ================= */
+  .word-top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 16px 6px;
+  }
+  .sq-btn{
+    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    box-shadow:var(--shadow);
+  }
+  .hero{
+    margin:0 16px;
+    background:var(--magenta);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:8px 16px 10px;text-align:center;
+  }
+  .hero .furi{font-size:15px;font-weight:700}
+  .hero-fl{position:relative;width:156px;height:156px;margin:2px auto 0}
+  .hero-fl svg{display:block;width:100%;height:100%}
+  .hero-kj{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:58px;font-weight:900;line-height:1;
+  }
+  .hero .say{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:10px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:8px 14px;min-height:44px;margin-top:-12px;
+    position:relative;
+    font-size:16px;font-weight:700;
+  }
+  .hero-tags{display:flex;justify-content:center;gap:8px;margin-top:8px}
+
+  .word-body{flex:1;padding:10px 16px;display:flex;flex-direction:column;gap:8px}
+  .sec-label{font-size:13px;font-weight:700}
+
+  .senses{
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);padding:8px 14px;
+  }
+  .senses ol{list-style:none;display:flex;flex-direction:column;gap:4px;margin-top:5px}
+  .senses li{display:flex;gap:10px;font-size:15px;font-weight:500}
+  .senses li b{font-weight:700;color:var(--klein)}
+
+  .compo{display:flex;align-items:stretch;gap:6px;margin-top:5px}
+  .compo .part{
+    flex:1;text-align:center;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:5px 4px;
+  }
+  .compo .part .g{font-size:26px;font-weight:900;line-height:1.15}
+  .compo .part .n{font-size:11.5px;font-weight:700;margin-top:1px}
+  .compo .plus{align-self:center;font-size:20px;font-weight:700}
+  .part.p1{background:var(--lime)}
+  .part.p2{background:var(--acid)}
+  .part.p3{background:var(--lav)}
+
+  .mnemo{
+    background:var(--klein);color:#fff;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:10px 14px;
+  }
+  .mnemo .quote{font-size:14.5px;font-weight:500;line-height:1.42}
+  .mnemo .quote b:lang(ja){font-weight:900}
+  .mnemo .meta{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
+  .mnemo .author{font-size:12.5px;font-weight:600;color:#fff}
+  .vote{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--acid);color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 14px;min-height:44px;
+    font-size:14px;font-weight:700;
+  }
+
+  .example .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+  .chip{
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 10px;min-height:44px;
+    font-size:17px;font-weight:700;
+  }
+  .chip.hit{background:var(--acid)}
+  .example .fr{font-size:13.5px;font-weight:600;color:var(--ink-2);margin-top:7px}
+
+  .word-cta{padding:0 16px 12px}
+  .word-cta .btn-primary{background:var(--acid);color:var(--ink)}
+
+  /* ================= RÉVISION ================= */
+  .rev{background:var(--lav)}
+  .rev-head{
+    padding:16px 16px 14px;
+    border-bottom:var(--line);
+    background:repeating-conic-gradient(var(--lav) 0% 25%,#b9a5f2 0% 50%) 0 0/4px 4px;
+  }
+  .rev-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .rev-count{font-size:40px;line-height:1;letter-spacing:.02em}
+  .rev-count small{font-size:22px}
+  .rev-left{font-size:13.5px;font-weight:600;margin-top:6px}
+  .gauge{
+    display:flex;flex-wrap:wrap;justify-content:space-between;row-gap:5px;
+    margin-top:12px;font-size:2px;
+  }
+  .gauge .pxmk{width:16em;height:16em}
+
+  .rev-stage{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 18px 10px}
+  .fc-wrap{position:relative}
+  .flashcard{padding:44px 20px 30px;text-align:center}
+  .flashcard .kj{font-size:96px;font-weight:900;line-height:1.05}
+  .flashcard .divider{width:56px;height:4px;background:var(--ink);margin:16px auto 14px}
+  .flashcard .reading{font-size:26px;font-weight:900}
+  .flashcard .gloss{font-size:17.5px;font-weight:600;margin-top:6px}
+  .flashcard .seen{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:14px}
+
+  .sticker{
+    position:absolute;top:-20px;right:-4px;z-index:2;
+    background:var(--acid);border:var(--line);border-radius:10px;
+    box-shadow:5px 5px 0 var(--ink);
+    padding:10px 16px;
+    font-size:19px;font-weight:700;letter-spacing:.04em;
+    transform:rotate(-5deg);
+    animation:pop .38s cubic-bezier(.18,1.4,.4,1) both;
+  }
+  @keyframes pop{
+    from{transform:rotate(9deg) scale(.2);opacity:0}
+    to{transform:rotate(-5deg) scale(1);opacity:1}
+  }
+  .burst{position:absolute;z-index:1;animation:bloompop .45s cubic-bezier(.18,1.4,.4,1) both}
+  .burst.b1{font-size:2px;top:-46px;right:128px;--rot:-14deg;animation-delay:.10s}
+  .burst.b2{font-size:1.5px;top:-58px;right:78px;--rot:18deg;animation-delay:.16s}
+  .burst.b3{font-size:2px;top:-66px;right:-14px;--rot:10deg;animation-delay:.22s}
+  .burst.b4{font-size:1.5px;top:30px;right:-9px;--rot:-22deg;animation-delay:.28s}
+  .burst.b5{font-size:1.5px;top:-52px;left:26px;--rot:12deg;animation-delay:.34s}
+  .burst.b6{font-size:1px;top:-18px;left:-12px;--rot:-8deg;animation-delay:.40s}
+  .burst .pxmk{transform:rotate(var(--rot,0deg))}
+  @keyframes bloompop{
+    from{scale:0;translate:0 14px;opacity:0}
+    to{scale:1;translate:0 0;opacity:1}
+  }
+
+  .grades{padding:12px 16px 16px}
+  .grades .hint{font-size:12.5px;font-weight:600;margin-bottom:9px}
+  .grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grade{
+    display:flex;align-items:center;gap:10px;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:10px 12px;min-height:60px;text-align:left;
+  }
+  .grade .txt{display:flex;flex-direction:column;gap:2px}
+  .grade .name{font-size:15.5px;font-weight:700;line-height:1.1}
+  .grade .int{font-size:11.5px;letter-spacing:.02em}
+  .grade.again{background:var(--coral)}
+  .grade.hard{background:var(--acid)}
+  .grade.good{background:var(--lime)}
+  .grade.easy{background:var(--klein);color:#fff}
+  .grade.easy .icon{stroke:#fff}
+
+  /* ---------- motion off ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .pressable,.pxbtn{transition:none}
+    .sticker,.burst,.field .bloom{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- défs SVG : la fleur Murakami -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="petals12" fill="var(--p,#ff57a8)" stroke="#17131f" stroke-width="3.5">
+      <circle cx="60" cy="20" r="17"/><circle cx="80" cy="25.36" r="17"/>
+      <circle cx="94.64" cy="40" r="17"/><circle cx="100" cy="60" r="17"/>
+      <circle cx="94.64" cy="80" r="17"/><circle cx="80" cy="94.64" r="17"/>
+      <circle cx="60" cy="100" r="17"/><circle cx="40" cy="94.64" r="17"/>
+      <circle cx="25.36" cy="80" r="17"/><circle cx="20" cy="60" r="17"/>
+      <circle cx="25.36" cy="40" r="17"/><circle cx="40" cy="25.36" r="17"/>
+    </g>
+    <g id="rainbow12" stroke="#17131f" stroke-width="3.5">
+      <circle cx="60" cy="20" r="17" fill="#ff4b3e"/><circle cx="80" cy="25.36" r="17" fill="#ff8a1e"/>
+      <circle cx="94.64" cy="40" r="17" fill="#ffc31f"/><circle cx="100" cy="60" r="17" fill="#ffe81c"/>
+      <circle cx="94.64" cy="80" r="17" fill="#a4e327"/><circle cx="80" cy="94.64" r="17" fill="#35c96b"/>
+      <circle cx="60" cy="100" r="17" fill="#26cfc0"/><circle cx="40" cy="94.64" r="17" fill="#3fa9f5"/>
+      <circle cx="25.36" cy="80" r="17" fill="#2b36e3"/><circle cx="20" cy="60" r="17" fill="#7b5cf0"/>
+      <circle cx="25.36" cy="40" r="17" fill="#c05ef0"/><circle cx="40" cy="25.36" r="17" fill="#ff57a8"/>
+    </g>
+    <g id="heroPetals" stroke="#17131f" stroke-width="3.5">
+      <circle cx="60" cy="18" r="15.5" fill="#ff4b3e"/><circle cx="81" cy="23.63" r="15.5" fill="#ff8a1e"/>
+      <circle cx="96.37" cy="39" r="15.5" fill="#ffc31f"/><circle cx="102" cy="60" r="15.5" fill="#ffe81c"/>
+      <circle cx="96.37" cy="81" r="15.5" fill="#a4e327"/><circle cx="81" cy="96.37" r="15.5" fill="#35c96b"/>
+      <circle cx="60" cy="102" r="15.5" fill="#26cfc0"/><circle cx="39" cy="96.37" r="15.5" fill="#3fa9f5"/>
+      <circle cx="23.63" cy="81" r="15.5" fill="#2b36e3"/><circle cx="18" cy="60" r="15.5" fill="#7b5cf0"/>
+      <circle cx="23.63" cy="39" r="15.5" fill="#c05ef0"/><circle cx="39" cy="23.63" r="15.5" fill="#ff57a8"/>
+    </g>
+    <g id="face" fill="#17131f">
+      <circle cx="51.5" cy="54" r="3.3"/><circle cx="68.5" cy="54" r="3.3"/>
+      <path d="M43.5 63.5 Q60 83 76.5 63.5 Q60 71 43.5 63.5 Z"/>
+    </g>
+    <g id="mkf">
+      <use href="#petals12"/>
+      <circle cx="60" cy="60" r="26" fill="var(--c,#ffd21f)" stroke="#17131f" stroke-width="3.5"/>
+      <use href="#face"/>
+    </g>
+    <g id="mkf-rainbow">
+      <use href="#rainbow12"/>
+      <circle cx="60" cy="60" r="26" fill="var(--c,#ffd21f)" stroke="#17131f" stroke-width="3.5"/>
+      <use href="#face"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- champ de fleurs du backdrop -->
+<div class="field" aria-hidden="true">
+  <svg class="bloom" style="left:-30px;top:-24px;width:126px;--p:#ff57a8;--rot:-10deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <svg class="bloom" style="left:44px;top:132px;width:60px;--p:#3fa9f5;--rot:12deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <div class="bloom pxmk px-orange" style="left:126px;top:26px;font-size:2px;--rot:8deg"></div>
+  <svg class="bloom" style="left:-16px;top:42%;width:78px;--p:#c05ef0;--rot:8deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <svg class="bloom" style="right:-24px;top:44%;width:96px;--p:#ff8a1e;--c:#ffffff;--rot:-6deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <svg class="bloom" style="right:40px;top:184px;width:48px;--p:#8fe838;--c:#ffffff;--rot:-14deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <div class="bloom pxmk px-sky" style="left:33.8%;top:460px;font-size:2px;--rot:-6deg"></div>
+  <svg class="bloom" style="left:33.4%;top:800px;width:46px;--p:#ff4b3e;--c:#ffffff;--rot:14deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <div class="bloom pxmk px-lime" style="left:67.2%;top:560px;font-size:2px;--rot:10deg"></div>
+  <svg class="bloom" style="left:67%;top:860px;width:50px;--p:#2b36e3;--rot:-10deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <svg class="bloom" style="left:8%;bottom:-20px;width:98px;--rot:6deg" viewBox="0 0 120 120"><use href="#mkf-rainbow"/></svg>
+  <div class="bloom pxmk px-purple" style="left:27%;bottom:8px;font-size:3px;--rot:-8deg"></div>
+  <svg class="bloom" style="left:47%;bottom:-12px;width:70px;--p:#3fa9f5;--rot:-12deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <svg class="bloom" style="left:66%;bottom:0;width:54px;--p:#ff8a1e;--c:#ffffff;--rot:10deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+  <div class="bloom pxmk px-red" style="left:82%;bottom:14px;font-size:2px;--rot:12deg"></div>
+  <svg class="bloom" style="left:93%;bottom:-16px;width:88px;--p:#ff57a8;--rot:-7deg" viewBox="0 0 120 120"><use href="#mkf"/></svg>
+</div>
+
+<header class="intro">
+  <h1>Superflat <span class="jp-tag" lang="ja">スーパーフラット</span></h1>
+  <p>Le squelette Neo-pop passé au champ de fleurs : même outil sec, contours encre et ombres dures, mais le sourire arc-en-ciel de Murakami pousse entre les blocs, en vectoriel comme en 8-bit.</p>
+  <svg class="deco-fl" width="96" height="96" viewBox="0 0 120 120" aria-hidden="true"><use href="#mkf-rainbow"/></svg>
+  <div class="deco-px pxmk px-klein" style="font-size:2px" aria-hidden="true"></div>
+</header>
+
+<main class="gallery">
+
+  <!-- ============ ACCUEIL ============ -->
+  <section class="panel">
+    <span class="caption">Accueil</span>
+    <article class="screen" aria-label="Écran d'accueil">
+
+      <div class="home-head">
+        <div class="brand">
+          <span class="logo">jibiki
+            <svg width="17" height="17" viewBox="0 0 120 120" aria-hidden="true"><use href="#mkf" style="--p:#f2e51c"/></svg>
+          </span>
+          <span class="streak">Série&nbsp;: 8 jours</span>
+        </div>
+        <p class="hello">Bonsoir. On s'y remet&nbsp;?</p>
+        <div class="search">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.7" fill="none" stroke="#17131f" stroke-width="2.6"/><path d="M13 13l4.6 4.6" stroke="#17131f" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Un mot, un kanji, du rōmaji…" aria-label="Rechercher dans le dictionnaire">
+        </div>
+      </div>
+
+      <div class="home-body">
+
+        <div class="due">
+          <div class="due-top">
+            <div>
+              <div class="due-num">12</div>
+              <div class="due-label">à réviser</div>
+              <p class="due-sub">9 minutes, chrono.</p>
+            </div>
+            <div class="pastille" role="img" aria-label="5 nouvelles cartes">
+              <span class="pfl">
+                <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#petals12" style="--p:#2b36e3"/><circle cx="60" cy="60" r="26" fill="#fff" stroke="#17131f" stroke-width="3.5"/></svg>
+                <span class="pnum">+5</span>
+              </span>
+              <span class="plbl">nouvelles</span>
+            </div>
+          </div>
+          <button class="pxbtn">
+            Lancer la session
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.5l10 5.5-10 5.5z" fill="#f2e51c" stroke="#f2e51c" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="wod">
+          <span class="wod-badge">Mot du jour</span>
+          <svg class="wod-fl" width="42" height="42" viewBox="0 0 120 120" aria-hidden="true"><use href="#mkf" style="--p:#ff57a8"/></svg>
+          <div class="wod-row">
+            <div class="wod-kanji" lang="ja">
+              <span class="furi">はなみ</span>
+              <span class="kj">花見</span>
+            </div>
+            <div class="wod-def">
+              <div class="romaji">hanami</div>
+              <p class="gloss">Pique-nique sous les cerisiers en fleurs. De saison.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recents">
+          <span class="lbl">Vus hier</span>
+          <div class="words" lang="ja">
+            <button class="w pressable">咲く</button>
+            <button class="w pressable">満開</button>
+            <button class="w pressable">春</button>
+          </div>
+        </div>
+
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ FICHE MOT ============ -->
+  <section class="panel">
+    <span class="caption">Fiche mot</span>
+    <article class="screen" aria-label="Fiche du mot sakura">
+
+      <div class="word-top">
+        <button class="sq-btn pressable" aria-label="Retour">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#17131f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="sq-btn pressable" aria-label="Enregistrer le mot">
+          <svg class="icon" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M3 2.5h12v15l-6-4-6 4z" fill="none" stroke="#17131f" stroke-width="2.6" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="hero">
+        <div class="furi" lang="ja">さくら</div>
+        <div class="hero-fl">
+          <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#heroPetals"/><circle cx="60" cy="60" r="33.5" fill="#ffd21f" stroke="#17131f" stroke-width="3.5"/></svg>
+          <span class="hero-kj" lang="ja">桜</span>
+        </div>
+        <button class="say pressable">
+          <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#17131f"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>
+          sakura
+        </button>
+        <div class="hero-tags">
+          <span class="tag">Nom</span>
+          <span class="tag">JLPT N5</span>
+          <span class="tag">Fréquent</span>
+        </div>
+      </div>
+
+      <div class="word-body">
+
+        <div class="senses">
+          <span class="sec-label">Sens</span>
+          <ol>
+            <li><b>1.</b> cerisier (l'arbre)</li>
+            <li><b>2.</b> fleur de cerisier</li>
+          </ol>
+        </div>
+
+        <div>
+          <span class="sec-label">Dans le kanji</span>
+          <div class="compo" lang="ja">
+            <div class="part p1"><div class="g">木</div><div class="n" lang="fr">arbre</div></div>
+            <span class="plus" lang="fr" aria-hidden="true">+</span>
+            <div class="part p2"><div class="g">⺍</div><div class="n" lang="fr">pétales</div></div>
+            <span class="plus" lang="fr" aria-hidden="true">+</span>
+            <div class="part p3"><div class="g">女</div><div class="n" lang="fr">femme</div></div>
+          </div>
+        </div>
+
+        <div class="mnemo">
+          <p class="quote">« Une femme <b lang="ja">女</b> coiffée de pétales <b lang="ja">⺍</b> danse sous un arbre <b lang="ja">木</b>&nbsp;: le cerisier en fleurs. »</p>
+          <div class="meta">
+            <span class="author">par HanaSensei</span>
+            <button class="vote pressable" aria-label="Voter pour ce mnémonique, 128 votes">
+              <svg class="icon" width="13" height="12" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>
+              128
+            </button>
+          </div>
+        </div>
+
+        <div class="example">
+          <span class="sec-label">En contexte</span>
+          <div class="chips" lang="ja">
+            <button class="chip hit pressable">桜</button>
+            <button class="chip pressable">の</button>
+            <button class="chip pressable">花</button>
+            <button class="chip pressable">が</button>
+            <button class="chip pressable">咲いています</button>
+          </div>
+          <p class="fr">« Les cerisiers sont en fleurs. »</p>
+        </div>
+
+      </div>
+
+      <div class="word-cta">
+        <button class="btn-primary pressable">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="#17131f" stroke-width="2.8" stroke-linecap="round"/></svg>
+          Ajouter au paquet
+        </button>
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ RÉVISION ============ -->
+  <section class="panel">
+    <span class="caption">Révision</span>
+    <article class="screen rev" aria-label="Écran de révision">
+
+      <div class="rev-head">
+        <div class="rev-top">
+          <div>
+            <div class="rev-count dot">7<small>&thinsp;/&thinsp;20</small></div>
+            <div class="rev-left">Encore 13. Tu tiens le rythme.</div>
+          </div>
+          <button class="sq-btn pressable" aria-label="Quitter la session">
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="#17131f" stroke-width="2.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="gauge" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="7 cartes sur 20">
+          <i class="pxmk" aria-hidden="true"></i><i class="pxmk px-orange" aria-hidden="true"></i><i class="pxmk px-sky" aria-hidden="true"></i><i class="pxmk px-lime" aria-hidden="true"></i><i class="pxmk px-purple" aria-hidden="true"></i><i class="pxmk" aria-hidden="true"></i><i class="pxmk px-orange" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i><i class="pxmk px-off" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="rev-stage">
+        <div class="fc-wrap">
+          <span class="sticker">RETENU</span>
+          <span class="burst b1 pxmk px-orange" aria-hidden="true"></span>
+          <span class="burst b2 pxmk px-sky" aria-hidden="true"></span>
+          <span class="burst b3 pxmk" aria-hidden="true"></span>
+          <span class="burst b4 pxmk px-lime" aria-hidden="true"></span>
+          <span class="burst b5 pxmk px-purple" aria-hidden="true"></span>
+          <span class="burst b6 pxmk px-red" aria-hidden="true"></span>
+          <div class="pxframe">
+            <div class="inner flashcard">
+              <div lang="ja">
+                <div class="kj">勉強</div>
+                <div class="divider" aria-hidden="true"></div>
+                <div class="reading">べんきょう</div>
+              </div>
+              <p class="gloss">« étude, travail »</p>
+              <p class="seen">Vu il y a 3 jours.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grades">
+        <p class="hint">Tu l'avais&nbsp;?</p>
+        <div class="grade-grid">
+          <button class="grade again pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M17.5 11a6.5 6.5 0 11-1.9-4.6M17.5 3v4h-4" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Encore</span><span class="int dot">2 min</span></span>
+          </button>
+          <button class="grade hard pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 11h4l2.5-6 4 12 2.5-6h4" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Difficile</span><span class="int dot">1 j</span></span>
+          </button>
+          <button class="grade good pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 12l5 5L18.5 6" fill="none" stroke="#17131f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Bien</span><span class="int dot">3 j</span></span>
+          </button>
+          <button class="grade easy pressable">
+            <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 12l4.5 4.5L15.5 8M10 12.5L14.5 17 21 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="txt"><span class="name">Facile</span><span class="int dot">7 j</span></span>
+          </button>
+        </div>
+      </div>
+
+    </article>
+  </section>
+
+</main>
+
+</body>
+</html>

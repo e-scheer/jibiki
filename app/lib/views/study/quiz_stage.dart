@@ -10,18 +10,20 @@ import '../widgets/speech_button.dart';
 import 'study_feedback.dart';
 import 'study_prompts.dart';
 
-String _question(ItemType t) => switch (t) {
-      ItemType.kana => 'How do you read this?',
-      ItemType.kanji => 'What does this mean?',
-      ItemType.word => 'What does this mean?',
-    };
-
 /// Multiple-choice study over one card. Options are built client-side from the
 /// rest of the session; a correct pick grades Good, a wrong pick grades Again.
+/// [direction] flips it between recognize (see Japanese, pick the meaning) and
+/// recall (see the meaning, pick the Japanese).
 class QuizStage extends StatefulWidget {
-  const QuizStage({super.key, required this.vm, required this.lang});
+  const QuizStage({
+    super.key,
+    required this.vm,
+    required this.lang,
+    this.direction = StudyDirection.recognize,
+  });
   final ReviewViewModel vm;
   final String lang;
+  final StudyDirection direction;
 
   @override
   State<QuizStage> createState() => _QuizStageState();
@@ -43,10 +45,10 @@ class _QuizStageState extends State<QuizStage>
   void initState() {
     super.initState();
     final card = widget.vm.current!;
-    _correct = answerLabel(card, widget.lang);
+    _correct = quizAnswer(card, widget.lang, widget.direction);
     final pool = widget.vm.sessionCards
         .where((c) => c.id != card.id)
-        .map((c) => answerLabel(c, widget.lang))
+        .map((c) => quizAnswer(c, widget.lang, widget.direction))
         .where((a) => a.isNotEmpty && a != _correct)
         .toSet()
         .toList()
@@ -86,7 +88,11 @@ class _QuizStageState extends State<QuizStage>
   Widget build(BuildContext context) {
     final card = widget.vm.current!;
     if (!Motion.enabled(context)) _intro.value = 1;
-    final prompt = _Prompt(card: card, answered: _locked);
+    final prompt = _Prompt(
+        card: card,
+        answered: _locked,
+        direction: widget.direction,
+        lang: widget.lang);
     final options = _optionsColumn();
     // Rotation-adaptive: landscape splits prompt | options into two panes so both
     // fit on a short wide screen; portrait stacks them, bounded so a tablet shows a
@@ -160,13 +166,22 @@ class _QuizStageState extends State<QuizStage>
 /// The card being tested: the question line, the glyph, and, once answered, a
 /// play button so the learner hears it right after committing.
 class _Prompt extends StatelessWidget {
-  const _Prompt({required this.card, required this.answered});
+  const _Prompt({
+    required this.card,
+    required this.answered,
+    required this.direction,
+    required this.lang,
+  });
   final StudyCard card;
   final bool answered;
+  final StudyDirection direction;
+  final String lang;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
+    final isJp = quizPromptIsJapanese(direction);
+    final promptText = quizPrompt(card, lang, direction);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -179,7 +194,7 @@ class _Prompt extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_question(card.itemType),
+          Text(quizQuestion(card.itemType, direction),
               style: TextStyle(
                   color: jc.muted,
                   fontSize: 13.5,
@@ -188,12 +203,16 @@ class _Prompt extends StatelessWidget {
           Flexible(
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(card.front,
+              child: Text(promptText,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontFamily: JpFonts.variant(card.id + card.reps),
-                      fontSize: 88,
+                      // A glyph gets the rotating JP face; a meaning phrase
+                      // (recall) is Latin and set smaller so a long gloss
+                      // doesn't shrink to nothing under FittedBox.
+                      fontFamily: isJp ? JpFonts.variant(card.id + card.reps) : null,
+                      fontSize: isJp ? 88 : 40,
                       fontWeight: FontWeight.w700,
-                      height: 1,
+                      height: 1.05,
                       color: jc.ink)),
             ),
           ),

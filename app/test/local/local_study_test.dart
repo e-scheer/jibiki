@@ -138,6 +138,23 @@ void main() {
     expect(syncPokes, greaterThan(0));
   });
 
+  test('new-card order puts prerequisites first (kanji before its word)', () async {
+    // 食べる (word) contains the kanji 食. Add the WORD first so the raw
+    // created_at order is word-then-kanji; the prerequisite sort must still
+    // surface the kanji ahead of the word it builds.
+    final wordId = (await dict.search('食べる')).words.first.id;
+    await store.addCard(ItemType.word, '$wordId');
+    await store.addCard(ItemType.kanji, '食');
+
+    final q = await store.queue(newLimit: 100);
+    final order = [for (final c in q.newCards) '${c.itemType.wire}:${c.itemRef}'];
+    final iKanji = order.indexOf('kanji:食');
+    final iWord = order.indexOf('word:$wordId');
+    expect(iKanji, greaterThanOrEqualTo(0));
+    expect(iWord, greaterThanOrEqualTo(0));
+    expect(iKanji, lessThan(iWord), reason: 'kanji 食 must lead its word 食べる');
+  });
+
   test('new cards are a per-session batch, "Study more" pulls the rest', () async {
     await store.enrollDeck('hiragana');
     final deck = (await store.decks()).firstWhere((d) => d.id == 'hiragana');
