@@ -1,0 +1,2579 @@
+{
+  "schema": "jibiki-kanji-reading-briefs/1",
+  "generated": "2026-07-10",
+  "status": "Primary on-yomi reading mnemonics for JLPT N2, en + fr.",
+  "purpose": "Per-language phonetic reading mnemonics: the on-yomi sound anchored to a keyword that sounds like it in each language, nodding to the meaning. Seeds as kind='kanji_reading' with the reading field, keyed by language.",
+  "legal": "Original jibiki writing. Readings from KANJIDIC2 (CC BY-SA), already ingested.",
+  "count": 367,
+  "kanji": [
+    {
+      "literal": "袋",
+      "reading": "タイ",
+      "meaning": "sack, bag",
+      "en": "Tie (タイ) the neck of the sack tight so nothing spills from the bag.",
+      "fr": "Un grand sac thaï (タイ) rempli à ras bord de courses."
+    },
+    {
+      "literal": "設",
+      "reading": "セツ",
+      "meaning": "establish, set up",
+      "en": "They set (セツ) up the tents and establish the new base camp.",
+      "fr": "On plante sept (セツ) piquets pour établir l'installation."
+    },
+    {
+      "literal": "貨",
+      "reading": "カ",
+      "meaning": "goods, freight",
+      "en": "A cargo (カ) hold stuffed with goods and freight rolls into port.",
+      "fr": "Le car (カ) est chargé de marchandises jusqu'au toit."
+    },
+    {
+      "literal": "販",
+      "reading": "ハン",
+      "meaning": "sell, marketing",
+      "en": "The vendor hands (ハン) over the goods he is selling at the stall.",
+      "fr": "Au hangar (ハン), on vend et on fait la promo des produits."
+    },
+    {
+      "literal": "軟",
+      "reading": "ナン",
+      "meaning": "soft",
+      "en": "Warm naan (ナン) bread, pillowy and wonderfully soft.",
+      "fr": "Un naan (ナン) tout chaud, moelleux et tout doux."
+    },
+    {
+      "literal": "郵",
+      "reading": "ユウ",
+      "meaning": "mail, post",
+      "en": "A letter in the mail addressed to you (ユウ), fresh from the post office.",
+      "fr": "Youhou (ユウ), le facteur arrive avec le courrier !"
+    },
+    {
+      "literal": "陸",
+      "reading": "リク",
+      "meaning": "land",
+      "en": "After weeks at sea, dry land at last, even if the harbor reeks (リク) of tar.",
+      "fr": "Rico (リク) débarque enfin sur la terre ferme."
+    },
+    {
+      "literal": "黄",
+      "reading": "コウ",
+      "meaning": "yellow",
+      "en": "A canary yellow coat (コウ), bright as a fresh lemon.",
+      "fr": "Un foulard jaune vif noué autour du cou (コウ)."
+    },
+    {
+      "literal": "募",
+      "reading": "ボ",
+      "meaning": "recruit, campaign",
+      "en": "Recruiters boast (ボ) about the campaign to sign up fresh troops.",
+      "fr": "Un beau (ボ) discours pour recruter des volontaires."
+    },
+    {
+      "literal": "喫",
+      "reading": "キツ",
+      "meaning": "consume, eat",
+      "en": "In the kitchen (キツ) they eat and consume the whole feast.",
+      "fr": "On dévore une quiche (キツ), et tout est mangé."
+    },
+    {
+      "literal": "営",
+      "reading": "エイ",
+      "meaning": "camp, manage",
+      "en": "They aim (エイ) to manage the summer camp without a single hitch.",
+      "fr": "Le chef lance un « hé (エイ) ! » pour gérer tout le camp."
+    },
+    {
+      "literal": "塔",
+      "reading": "トウ",
+      "meaning": "pagoda, tower",
+      "en": "Climb the tower to ring the bell as the hours toll (トウ).",
+      "fr": "Du haut de la tour, on voit tout (トウ) le pays."
+    },
+    {
+      "literal": "奥",
+      "reading": "オウ",
+      "meaning": "interior, heart",
+      "en": "Deep in the forest's heart stands one ancient oak (オウ).",
+      "fr": "Au cœur du lac, tout au fond, l'eau (オウ) la plus profonde."
+    },
+    {
+      "literal": "尊",
+      "reading": "ソン",
+      "meaning": "revered, precious",
+      "en": "They revere the precious son (ソン), heir to the whole throne.",
+      "fr": "On vénère son (ソン) nom précieux dans tout le royaume."
+    },
+    {
+      "literal": "帽",
+      "reading": "ボウ",
+      "meaning": "cap, headgear",
+      "en": "The bowler cap sits like an upturned bowl (ボウ) on his head.",
+      "fr": "On enfonce le chapeau jusqu'au bout (ボウ), bien calé sur la tête."
+    },
+    {
+      "literal": "幅",
+      "reading": "フク",
+      "meaning": "width, hanging scroll",
+      "en": "The hanging scroll unrolls to its full (フク) width across the wall.",
+      "fr": "On mesure la largeur d'un foulard (フク) suspendu au mur."
+    },
+    {
+      "literal": "復",
+      "reading": "フク",
+      "meaning": "return, restore",
+      "en": "Like a cuckoo (フク) clock's bird, it returns on the hour, good as new.",
+      "fr": "Coucou (フク) ! Le voilà de retour, comme neuf."
+    },
+    {
+      "literal": "換",
+      "reading": "カン",
+      "meaning": "interchange, exchange",
+      "en": "Exchange one empty can (カン) for a full one at the swap.",
+      "fr": "On échange une canne (カン) contre une autre au marché."
+    },
+    {
+      "literal": "敬",
+      "reading": "ケイ",
+      "meaning": "awe, respect",
+      "en": "In awe, the squire gives an obedient okay (ケイ) to the knight.",
+      "fr": "Devant l'officier au képi (ケイ), tous saluent avec respect."
+    },
+    {
+      "literal": "普",
+      "reading": "フ",
+      "meaning": "universal, widely",
+      "en": "Good food (フ) is a universal joy, loved widely everywhere.",
+      "fr": "C'est un succès fou (フ), connu partout, universel."
+    },
+    {
+      "literal": "替",
+      "reading": "タイ",
+      "meaning": "exchange, spare",
+      "en": "Trade your ticket for a spare seat on the Thai (タイ) train, a quick exchange.",
+      "fr": "Le tailleur garde une veste à la bonne taille (タイ), une pièce de rechange."
+    },
+    {
+      "literal": "棒",
+      "reading": "ボウ",
+      "meaning": "rod, stick",
+      "en": "An archer's bow (ボウ), a springy wooden rod bent to a curve.",
+      "fr": "Une branche de bouleau (ボウ), droite comme une baguette."
+    },
+    {
+      "literal": "森",
+      "reading": "シン",
+      "meaning": "forest, woods",
+      "en": "Wading through the deep forest, ferns brushing every shin (シン).",
+      "fr": "Une forêt de chênes (シン), sombre et profonde."
+    },
+    {
+      "literal": "植",
+      "reading": "ショク",
+      "meaning": "to plant",
+      "en": "Plant the seedling and it roots; what a shock (ショク) to see it bloom.",
+      "fr": "Quel choc (ショク) de voir la graine plantée pousser si vite !"
+    },
+    {
+      "literal": "極",
+      "reading": "キョク",
+      "meaning": "extreme, pole",
+      "en": "An extreme queue (キョク) of penguins waits at the very Pole.",
+      "fr": "Un kiosque (キョク) planté à l'extrême bord du pôle Nord."
+    },
+    {
+      "literal": "減",
+      "reading": "ゲン",
+      "meaning": "decrease, dwindle",
+      "en": "The stockpile decreases again (ゲン) and again, dwindling fast.",
+      "fr": "Avec cette gaine (ゲン), le tour de taille diminue vite."
+    },
+    {
+      "literal": "温",
+      "reading": "オン",
+      "meaning": "warm",
+      "en": "Switch the heater on (オン) and the whole room turns warm.",
+      "fr": "On (オン) allume le feu et il fait bien chaud."
+    },
+    {
+      "literal": "測",
+      "reading": "ソク",
+      "meaning": "to fathom, to gauge",
+      "en": "He pulls out a tape to gauge the length, down to his sock (ソク).",
+      "fr": "On mesure la hauteur du socle (ソク) au millimètre près."
+    },
+    {
+      "literal": "湖",
+      "reading": "コ",
+      "meaning": "lake",
+      "en": "A quiet cove (コ) tucked along the edge of the still lake.",
+      "fr": "Un lac paisible niché sous le col (コ) de la montagne."
+    },
+    {
+      "literal": "湯",
+      "reading": "トウ",
+      "meaning": "hot water, bath",
+      "en": "Dip a toe (トウ) into the steaming hot bath.",
+      "fr": "Un bain chaud, un vrai tourbillon (トウ) de vapeur."
+    },
+    {
+      "literal": "塩",
+      "reading": "エン",
+      "meaning": "salt",
+      "en": "A hen (エン) pecks at a heap of coarse salt in the barnyard.",
+      "fr": "Un renne (エン) lèche un bloc de sel gemme dans la neige."
+    },
+    {
+      "literal": "損",
+      "reading": "ソン",
+      "meaning": "damage, loss",
+      "en": "Their only son (ソン) crashed the car: a costly loss and real damage.",
+      "fr": "La tôle sonne (ソン) sous le choc : gros dégâts, lourde perte."
+    },
+    {
+      "literal": "殿",
+      "reading": "デン",
+      "meaning": "hall, Mr.",
+      "en": "The lord's grand hall doubles as a cozy den (デン).",
+      "fr": "Dans le grand hall, Monsieur exhibe sa dent (デン) en or."
+    },
+    {
+      "literal": "準",
+      "reading": "ジュン",
+      "meaning": "standard, level",
+      "en": "By June (ジュン) every recruit must reach the standard level.",
+      "fr": "Le jeune (ジュン) apprenti atteint enfin le niveau standard."
+    },
+    {
+      "literal": "溶",
+      "reading": "ヨウ",
+      "meaning": "melt, dissolve",
+      "en": "The yo-yo (ヨウ) string goes soft and melts in the summer heat.",
+      "fr": "Dans le yoga (ヨウ) chaud, la bougie fond et se dissout."
+    },
+    {
+      "literal": "照",
+      "reading": "ショウ",
+      "meaning": "illuminate, shine",
+      "en": "The stage lights show (ショウ) up bright, illuminating the whole set.",
+      "fr": "Le soleil chaud (ショウ) illumine et fait briller la vallée."
+    },
+    {
+      "literal": "禁",
+      "reading": "キン",
+      "meaning": "prohibition, ban",
+      "en": "Even your own kin (キン) are banned from entering: strictly prohibited.",
+      "fr": "Interdit aux moins de quinze (キン) ans : c'est prohibé."
+    },
+    {
+      "literal": "署",
+      "reading": "ショ",
+      "meaning": "government office",
+      "en": "The harbor authority's office sits right on the shore (ショ).",
+      "fr": "Au bureau administratif, chaque chose (ショ) est dûment tamponnée."
+    },
+    {
+      "literal": "群",
+      "reading": "グン",
+      "meaning": "flock, group",
+      "en": "One gun (グン) shot scatters the whole flock into a swirling group.",
+      "fr": "Le gang (グン) se déplace toujours en groupe serré."
+    },
+    {
+      "literal": "腰",
+      "reading": "ヨウ",
+      "meaning": "loins, hips",
+      "en": "In yoga (ヨウ) class she folds forward, hinging right at the hips.",
+      "fr": "Ses hanches se balancent comme un yo-yo (ヨウ) sur la piste."
+    },
+    {
+      "literal": "蒸",
+      "reading": "ジョウ",
+      "meaning": "steam",
+      "en": "A hot cup of Joe (ジョウ) sends steam curling into the air.",
+      "fr": "La vapeur monte de la tasse et réchauffe la joue (ジョウ)."
+    },
+    {
+      "literal": "裏",
+      "reading": "リ",
+      "meaning": "back, reverse side",
+      "en": "Flip the page over and read (リ) the notes on the reverse side.",
+      "fr": "On retourne le sac de riz (リ) pour lire l'envers."
+    },
+    {
+      "literal": "触",
+      "reading": "ショク",
+      "meaning": "touch, contact",
+      "en": "One touch and a static shock (ショク) crackles on contact.",
+      "fr": "Au moindre contact, un choc (ショク) électrique te fait sursauter."
+    },
+    {
+      "literal": "詰",
+      "reading": "キツ",
+      "meaning": "packed, pressed",
+      "en": "The survival kit (キツ) is packed so tight everything is pressed flat.",
+      "fr": "La valise est si pleine qu'une fois fermée on est quitte (キツ), tout bien tassé."
+    },
+    {
+      "literal": "豊",
+      "reading": "ホウ",
+      "meaning": "bountiful, abundant",
+      "en": "Swing the hoe (ホウ) and reap a bountiful, abundant harvest.",
+      "fr": "Un grenier haut (ホウ) et rempli d'une récolte abondante."
+    },
+    {
+      "literal": "跡",
+      "reading": "セキ",
+      "meaning": "tracks, mark",
+      "en": "Muddy tracks and a spilled cup of sake (セキ) mark the crime scene.",
+      "fr": "Le sol sec (セキ) garde nettement la trace et la marque des pas."
+    },
+    {
+      "literal": "農",
+      "reading": "ノウ",
+      "meaning": "agriculture, farming",
+      "en": "Farmers just know (ノウ) the land: agriculture runs in their blood.",
+      "fr": "Le paysan noue (ノウ) les gerbes de blé au milieu de son champ."
+    },
+    {
+      "literal": "鉄",
+      "reading": "テツ",
+      "meaning": "iron",
+      "en": "Iron blocks drop and lock into place like a game of Tetris (テツ).",
+      "fr": "Une lourde tête (テツ) de marteau en fer forgé."
+    },
+    {
+      "literal": "鉱",
+      "reading": "コウ",
+      "meaning": "ore, mineral",
+      "en": "Miners haul out coal (コウ) and glittering ore from the deep seam.",
+      "fr": "Dans le col (コウ) de la montagne, on extrait le minerai brut."
+    },
+    {
+      "literal": "零",
+      "reading": "レイ",
+      "meaning": "zero, to spill",
+      "en": "Not one ray (レイ) of light gets through: the gauge reads zero.",
+      "fr": "Pas un rai (レイ) de lumière ne passe : le compteur affiche zéro."
+    },
+    {
+      "literal": "預",
+      "reading": "ヨ",
+      "meaning": "deposit, custody",
+      "en": "\"Yo (ヨ), hold my cash safe,\" he said, handing over his deposit.",
+      "fr": "« Yo (ヨ), garde mes économies ! » : un dépôt confié en toute confiance."
+    },
+    {
+      "literal": "像",
+      "reading": "ゾウ",
+      "meaning": "statue, image",
+      "en": "A bronze elephant statue stands guard at the zoo (ゾウ) gates.",
+      "fr": "Une statue d'éléphant monte la garde à l'entrée du zoo (ゾウ)."
+    },
+    {
+      "literal": "境",
+      "reading": "キョウ",
+      "meaning": "boundary, border",
+      "en": "A long queue (キョウ) forms right at the border crossing.",
+      "fr": "Une longue queue (キョウ) s'étire le long de la frontière."
+    },
+    {
+      "literal": "層",
+      "reading": "ソウ",
+      "meaning": "stratum, layer",
+      "en": "Layer by layer, she sews (ソウ) thin sheets into thick strata.",
+      "fr": "Le sable s'empile en couches comme au fond d'un seau (ソウ)."
+    },
+    {
+      "literal": "憎",
+      "reading": "ゾウ",
+      "meaning": "hate, detest",
+      "en": "I hate crossing into that grim zone (ゾウ), it fills me with loathing.",
+      "fr": "Je déteste cette zone (ゾウ) sinistre, elle m'inspire de la haine."
+    },
+    {
+      "literal": "歴",
+      "reading": "レキ",
+      "meaning": "history, course",
+      "en": "History unfolds like one long wreck (レキ) of empires rising and falling.",
+      "fr": "Les vieilles reliques (レキ) racontent toute l'histoire du passé."
+    },
+    {
+      "literal": "滴",
+      "reading": "テキ",
+      "meaning": "drop, drip",
+      "en": "A tacky (テキ) drop of syrup slowly drips down the side of the jar.",
+      "fr": "Une goutte d'eau tombe pile sur le museau du teckel (テキ)."
+    },
+    {
+      "literal": "漁",
+      "reading": "ギョ",
+      "meaning": "fishing, fishery",
+      "en": "They stuff a gyoza (ギョ) with fish fresh from the day's fishery haul.",
+      "fr": "On garnit un gyoza (ギョ) de poisson tout juste sorti des filets."
+    },
+    {
+      "literal": "算",
+      "reading": "サン",
+      "meaning": "calculate, reckon",
+      "en": "Reckon the whole bill and calculate the final sum (サン).",
+      "fr": "Additionne tout et le calcul te mène pile à cent (サン)."
+    },
+    {
+      "literal": "管",
+      "reading": "カン",
+      "meaning": "pipe, tube",
+      "en": "Water rushes through the pipe like soda hissing from a can (カン).",
+      "fr": "L'eau file dans le tuyau comme dans une canne (カン) bien creuse."
+    },
+    {
+      "literal": "湾",
+      "reading": "ワン",
+      "meaning": "gulf, bay",
+      "en": "Boats shelter in the one (ワン) calm bay along the whole coast.",
+      "fr": "Le golfe qui borde Taïwan (ワン), une baie tranquille."
+    },
+    {
+      "literal": "湿",
+      "reading": "シツ",
+      "meaning": "damp, wet",
+      "en": "The bed sheets (シツ) are still damp after the storm.",
+      "fr": "La chute (シツ) d'eau laisse toute la roche humide."
+    },
+    {
+      "literal": "焼",
+      "reading": "ショウ",
+      "meaning": "to bake, to burn",
+      "en": "A baking show (ショウ) where every loaf comes out charred.",
+      "fr": "Dans le four brûlant, tout est chaud (ショウ) et grillé."
+    },
+    {
+      "literal": "畳",
+      "reading": "ジョウ",
+      "meaning": "tatami mat",
+      "en": "Old Joe (ジョウ) kneels down on the woven tatami mat.",
+      "fr": "On joue (ジョウ) aux cartes assis sur le tatami."
+    },
+    {
+      "literal": "短",
+      "reading": "タン",
+      "meaning": "short, brief",
+      "en": "A quick tan (タン) from one brief moment in the sun.",
+      "fr": "Le cuir qu'on tanne (タン) en un temps très court."
+    },
+    {
+      "literal": "硬",
+      "reading": "コウ",
+      "meaning": "hard, stiff",
+      "en": "A lump of coal (コウ), hard and unyielding in your fist.",
+      "fr": "Un col (コウ) rigide et dur, raide autour du cou."
+    },
+    {
+      "literal": "税",
+      "reading": "ゼイ",
+      "meaning": "tax, duty",
+      "en": "Zane (ゼイ) the collector knocks at every door for the tax.",
+      "fr": "Le percepteur met tout son zèle (ゼイ) à lever l'impôt."
+    },
+    {
+      "literal": "童",
+      "reading": "ドウ",
+      "meaning": "child, juvenile",
+      "en": "A juvenile shaping dough (ドウ) like a delighted little child.",
+      "fr": "L'enfant tout doux (ドウ) joue seul dans la cour."
+    },
+    {
+      "literal": "筆",
+      "reading": "ヒツ",
+      "meaning": "writing brush",
+      "en": "The brush hits (ヒツ) the paper in one clean stroke.",
+      "fr": "Le pinceau glisse sur le tissu (ヒツ) comme sur le papier."
+    },
+    {
+      "literal": "筒",
+      "reading": "トウ",
+      "meaning": "cylinder, pipe",
+      "en": "He stubbed his toe (トウ) on the heavy metal pipe.",
+      "fr": "La toux (トウ) résonne dans le long tuyau creux."
+    },
+    {
+      "literal": "絡",
+      "reading": "ラク",
+      "meaning": "entwine, coil around",
+      "en": "Ivy coils and entwines around the mossy rock (ラク).",
+      "fr": "Les mèches s'enroulent, tenues serrées par la laque (ラク)."
+    },
+    {
+      "literal": "腕",
+      "reading": "ワン",
+      "meaning": "arm",
+      "en": "Flex that one (ワン) mighty arm to lift the beam.",
+      "fr": "L'iguane (ワン) enroule son bras autour de la branche."
+    },
+    {
+      "literal": "装",
+      "reading": "ソウ",
+      "meaning": "attire",
+      "en": "Sew (ソウ) the elegant attire slowly by hand.",
+      "fr": "Une belle tenue cousue pour quelques sous (ソウ)."
+    },
+    {
+      "literal": "補",
+      "reading": "ホ",
+      "meaning": "supplement",
+      "en": "Grab a hoe (ホ) to supplement the meagre harvest.",
+      "fr": "On ajoute un étage tout en haut (ホ) : un supplément."
+    },
+    {
+      "literal": "詞",
+      "reading": "シ",
+      "meaning": "part of speech",
+      "en": "In grammar, 'she' (シ) is a pronoun, one part of speech.",
+      "fr": "Le mot 'si' (シ) est une conjonction, une partie du discours."
+    },
+    {
+      "literal": "象",
+      "reading": "ショウ",
+      "meaning": "elephant",
+      "en": "The elephant is the star of the whole circus show (ショウ).",
+      "fr": "L'éléphant croque un chou (ショウ) énorme d'une bouchée."
+    },
+    {
+      "literal": "貯",
+      "reading": "チョ",
+      "meaning": "savings",
+      "en": "Extra chores (チョ) each week to build up her savings.",
+      "fr": "Elle économise sou par sou pour un énorme chocolat (チョ)."
+    },
+    {
+      "literal": "貿",
+      "reading": "ボウ",
+      "meaning": "trade",
+      "en": "The two merchants bow (ボウ) to seal the trade deal.",
+      "fr": "Un beau (ボウ) marché conclu entre deux marchands rivaux."
+    },
+    {
+      "literal": "超",
+      "reading": "チョウ",
+      "meaning": "transcend",
+      "en": "The chosen (チョウ) hero transcends every mortal limit.",
+      "fr": "Il dépasse toute chose (チョウ) et transcende ses limites."
+    },
+    {
+      "literal": "軽",
+      "reading": "ケイ",
+      "meaning": "light",
+      "en": "The sponge cake (ケイ) is feather-light on the plate.",
+      "fr": "La caille (ケイ), petit oiseau tout léger, s'envole."
+    },
+    {
+      "literal": "量",
+      "reading": "リョウ",
+      "meaning": "quantity",
+      "en": "A staggering quantity of fish roe (リョウ) fills the barrel.",
+      "fr": "À Rio (リョウ), une quantité folle de marchandises transite."
+    },
+    {
+      "literal": "鈍",
+      "reading": "ドン",
+      "meaning": "dull",
+      "en": "A dull, grey dawn (ドン) with no shine at all.",
+      "fr": "Le vieux donjon (ドン) gris, terne et sans éclat."
+    },
+    {
+      "literal": "隅",
+      "reading": "グウ",
+      "meaning": "corner",
+      "en": "Sticky goo (グウ) has gathered in the dusty corner.",
+      "fr": "L'égout (グウ) s'ouvre juste au coin de la ruelle."
+    },
+    {
+      "literal": "階",
+      "reading": "カイ",
+      "meaning": "storey, stair",
+      "en": "Climb the stairs storey by storey toward the sky (カイ).",
+      "fr": "On monte l'escalier, étage par étage, un caillou (カイ) dans la chaussure."
+    },
+    {
+      "literal": "雇",
+      "reading": "コ",
+      "meaning": "employ, hire",
+      "en": "The team hires a brand new coach (コ) this season.",
+      "fr": "On embauche un commis (コ) pour tenir la boutique."
+    },
+    {
+      "literal": "雲",
+      "reading": "ウン",
+      "meaning": "cloud",
+      "en": "Grey clouds drift slowly across the pale moon (ウン).",
+      "fr": "Un (ウン) seul nuage traverse tout le ciel d'été."
+    },
+    {
+      "literal": "順",
+      "reading": "ジュン",
+      "meaning": "obey",
+      "en": "By June (ジュン), the recruits have learned to obey in order.",
+      "fr": "La junte (ジュン) exige qu'on obéisse sans discuter."
+    },
+    {
+      "literal": "傾",
+      "reading": "ケイ",
+      "meaning": "lean, incline",
+      "en": "Kay (ケイ) leans and inclines against the tilted wall.",
+      "fr": "Il se penche, incliné contre le bord du quai (ケイ)."
+    },
+    {
+      "literal": "勢",
+      "reading": "セイ",
+      "meaning": "force, energy",
+      "en": "The wind fills the sail (セイ) with surging force.",
+      "fr": "L'essaim (セイ) fonce avec une énergie brute et folle."
+    },
+    {
+      "literal": "塗",
+      "reading": "ト",
+      "meaning": "paint",
+      "en": "A drop of wet paint splashes right on his toe (ト).",
+      "fr": "On peint tôt (ト) le matin, avant la grosse chaleur."
+    },
+    {
+      "literal": "担",
+      "reading": "タン",
+      "meaning": "shoulder, carry",
+      "en": "The porter with a deep tan (タン) carries the heavy sacks on one shoulder.",
+      "fr": "Il porte tant (タン) de sacs sur l'épaule qu'il ploie."
+    },
+    {
+      "literal": "拝",
+      "reading": "ハイ",
+      "meaning": "worship, bow",
+      "en": "The monk bows low, then lifts his hands high (ハイ) in silent worship.",
+      "fr": "Il s'incline si bas qu'il en crie aïe (ハイ), puis se relève pour prier."
+    },
+    {
+      "literal": "昇",
+      "reading": "ショウ",
+      "meaning": "rise, ascend",
+      "en": "The dawn sun puts on a show (ショウ) as it rises over the horizon.",
+      "fr": "Le soleil monte et devient chaud (ショウ) en s'élevant dans le ciel."
+    },
+    {
+      "literal": "板",
+      "reading": "ハン",
+      "meaning": "plank, board",
+      "en": "He planes the rough plank by hand (ハン) until it's a smooth board.",
+      "fr": "Il pousse la planche en criant han (ハン) sous l'effort du rabot."
+    },
+    {
+      "literal": "林",
+      "reading": "リン",
+      "meaning": "grove, woods",
+      "en": "A ring (リン) of tall trees closes around the shady little grove.",
+      "fr": "Le long du Rhin (リン), un bois épais borde toute la rive."
+    },
+    {
+      "literal": "枚",
+      "reading": "マイ",
+      "meaning": "counter for flat thin objects",
+      "en": "My (マイ) tidy stack of thin paper, counted one flat sheet at a time.",
+      "fr": "En mai (マイ), on compte les feuilles fines une à une."
+    },
+    {
+      "literal": "枝",
+      "reading": "シ",
+      "meaning": "branch, bough",
+      "en": "She (シ) snaps a slender branch cleanly off the old tree.",
+      "fr": "Si (シ) tu montes, prends la branche la plus solide."
+    },
+    {
+      "literal": "欧",
+      "reading": "オウ",
+      "meaning": "Europe",
+      "en": "I owe (オウ) my whole grand tour of Europe to one cheap ticket.",
+      "fr": "Où (オウ) irons-nous voyager en Europe cet été ?"
+    },
+    {
+      "literal": "武",
+      "reading": "ブ",
+      "meaning": "warrior, military",
+      "en": "The young warrior sweats through boot (ブ) camp before joining the military.",
+      "fr": "Le guerrier fait bouh (ブ) et toute l'armée ennemie recule."
+    },
+    {
+      "literal": "毒",
+      "reading": "ドク",
+      "meaning": "poison",
+      "en": "The old Doc (ドク) warns that the little vial holds deadly poison.",
+      "fr": "Le doc (ドク) analyse le poison au fond de l'éprouvette."
+    },
+    {
+      "literal": "河",
+      "reading": "カ",
+      "meaning": "river",
+      "en": "A kayak (カ) glides silently down the wide, slow river.",
+      "fr": "Le canoë (カ) descend la rivière au fil du courant."
+    },
+    {
+      "literal": "沸",
+      "reading": "フツ",
+      "meaning": "boil",
+      "en": "The spring is so hot it seems to boil your foot (フツ) the instant it dips in.",
+      "fr": "Après le foot (フツ), l'eau bout enfin dans la marmite pour les pâtes."
+    },
+    {
+      "literal": "油",
+      "reading": "ユ",
+      "meaning": "oil",
+      "en": "You (ユ) pour a thin golden stream of cooking oil into the pan.",
+      "fr": "Hue (ユ), le cheval glisse sur une flaque d'huile."
+    },
+    {
+      "literal": "況",
+      "reading": "キョウ",
+      "meaning": "situation",
+      "en": "In this tense situation, the director finally gives the cue (キョウ) to act.",
+      "fr": "Vu la situation, la queue (キョウ) s'allonge devant le guichet."
+    },
+    {
+      "literal": "泊",
+      "reading": "ハク",
+      "meaning": "overnight stay",
+      "en": "We booked one overnight stay at the little Hawk (ハク) Inn by the road.",
+      "fr": "Il eut le hoquet (ハク) toute la nuit lors de son séjour à l'auberge."
+    },
+    {
+      "literal": "波",
+      "reading": "ハ",
+      "meaning": "waves",
+      "en": "The surfer laughs, ha (ハ), as the big wave crashes over him.",
+      "fr": "Ha (ハ), quelle vague immense qui déferle sur la plage !"
+    },
+    {
+      "literal": "泥",
+      "reading": "デイ",
+      "meaning": "mud",
+      "en": "After a whole rainy day (デイ), the field turned to thick brown mud.",
+      "fr": "Le dé (デイ) roule et se perd aussitôt dans la boue."
+    },
+    {
+      "literal": "版",
+      "reading": "ハン",
+      "meaning": "printing block",
+      "en": "Under the ancient Han (ハン) dynasty, artisans carved each printing block.",
+      "fr": "Sous la dynastie Han (ハン), on gravait les blocs d'impression."
+    },
+    {
+      "literal": "祈",
+      "reading": "キ",
+      "meaning": "pray",
+      "en": "She clutches the key (キ) to the chapel and kneels down to pray.",
+      "fr": "Qui (キ) prie ce soir, agenouillé dans l'église vide ?"
+    },
+    {
+      "literal": "肩",
+      "reading": "ケン",
+      "meaning": "shoulder",
+      "en": "Ken (ケン) hoists the heavy wooden beam onto one shoulder.",
+      "fr": "Ken (ケン) cale la lourde poutre sur son épaule."
+    },
+    {
+      "literal": "肯",
+      "reading": "コウ",
+      "meaning": "consent",
+      "en": "He gently coaxed (コウ) a nod of consent from the wary client.",
+      "fr": "Il hoche le cou (コウ) pour donner enfin son accord."
+    },
+    {
+      "literal": "述",
+      "reading": "ジュツ",
+      "meaning": "state, mention",
+      "en": "Sharp as a jujitsu (ジュツ) move, he states his single point.",
+      "fr": "Sur un sac de jute (ジュツ), il énonce calmement son témoignage."
+    },
+    {
+      "literal": "門",
+      "reading": "モン",
+      "meaning": "gate",
+      "en": "The old iron gate gives a low moan (モン) as it swings open.",
+      "fr": "Mon (モン) grand portail grince en s'ouvrant sur la cour."
+    },
+    {
+      "literal": "則",
+      "reading": "ソク",
+      "meaning": "rule, law",
+      "en": "The gym rule is strict: no sock (ソク) touches the mat, that's the law.",
+      "fr": "Le soc (ソク) de la charrue obéit à une règle stricte de labour."
+    },
+    {
+      "literal": "勇",
+      "reading": "ユウ",
+      "meaning": "courage",
+      "en": "You (ユウ), yes you, will find the courage to step forward.",
+      "fr": "Youpi (ユウ), il a eu le courage de sauter du plongeoir !"
+    },
+    {
+      "literal": "厚",
+      "reading": "コウ",
+      "meaning": "thick",
+      "en": "He buttons up a thick winter coat (コウ), layers deep against the cold.",
+      "fr": "Une côte (コウ) de bœuf bien épaisse grésille sur le gril."
+    },
+    {
+      "literal": "咲",
+      "reading": "ショウ",
+      "meaning": "bloom",
+      "en": "The garden puts on a showy (ショウ) burst as every flower comes into bloom.",
+      "fr": "Le rosier fleurit enfin, regarde ça, mon petit chou (ショウ)."
+    },
+    {
+      "literal": "型",
+      "reading": "ケイ",
+      "meaning": "mould",
+      "en": "Pour the batter into the K-shaped cake (ケイ) mould and let it set.",
+      "fr": "Sur le quai (ケイ), le pâtissier démoule son gâteau du moule."
+    },
+    {
+      "literal": "城",
+      "reading": "ジョウ",
+      "meaning": "castle",
+      "en": "Big Joe (ジョウ) stands guard at the towering castle gate.",
+      "fr": "On joue (ジョウ) au roi et à la reine dans le vieux château."
+    },
+    {
+      "literal": "封",
+      "reading": "フウ",
+      "meaning": "seal",
+      "en": "Phew (フウ), the hot wax finally set into a firm seal on the letter.",
+      "fr": "Il faut être fou (フウ) pour oser briser un tel sceau de cire."
+    },
+    {
+      "literal": "臣",
+      "reading": "シン",
+      "meaning": "retainer, subject",
+      "en": "The loyal retainer bows low, his shin (シン) brushing the palace floor.",
+      "fr": "Le sujet fidèle sert l'empereur de Chine (シン) sans jamais broncher."
+    },
+    {
+      "literal": "芸",
+      "reading": "ゲイ",
+      "meaning": "art, technique",
+      "en": "A geisha (ゲイ) perfecting every gesture, her art down to the fingertips.",
+      "fr": "Un artiste gai (ゲイ) qui maîtrise sa technique avec le sourire."
+    },
+    {
+      "literal": "角",
+      "reading": "カク",
+      "meaning": "angle, horn",
+      "en": "A cactus (カク) bristling with horns at every sharp angle.",
+      "fr": "Le fruit kaki (カク), dur et anguleux comme une corne."
+    },
+    {
+      "literal": "谷",
+      "reading": "コク",
+      "meaning": "valley",
+      "en": "A mug of cocoa (コク) steaming at the bottom of the deep valley.",
+      "fr": "Un coq (コク) chante tout au fond de la vallée."
+    },
+    {
+      "literal": "貝",
+      "reading": "バイ",
+      "meaning": "shellfish, cowrie",
+      "en": "With cowrie shells you could buy (バイ) bread at the ancient market.",
+      "fr": "Dans la baie (バイ), on ramasse des coquillages à marée basse."
+    },
+    {
+      "literal": "辛",
+      "reading": "シン",
+      "meaning": "spicy, bitter",
+      "en": "The chili was so spicy it stung like a kick to the shin (シン).",
+      "fr": "Un piment si fort qu'il chauffe comme une machine (シン)."
+    },
+    {
+      "literal": "防",
+      "reading": "ボウ",
+      "meaning": "defend, ward off",
+      "en": "He raised his bow (ボウ) to defend the gate and ward off the raiders.",
+      "fr": "On lève le bouclier (ボウ) pour se défendre des flèches."
+    },
+    {
+      "literal": "麦",
+      "reading": "バク",
+      "meaning": "wheat, barley",
+      "en": "A frothy bock (バク) beer, brewed straight from the barley.",
+      "fr": "On charge le bac (バク) de blé et d'orge fraîchement moissonnés."
+    },
+    {
+      "literal": "並",
+      "reading": "ヘイ",
+      "meaning": "row, line up",
+      "en": "Hey (ヘイ), everyone line up in a neat, straight row!",
+      "fr": "Les coureurs s'alignent en rang devant la haie (ヘイ)."
+    },
+    {
+      "literal": "乳",
+      "reading": "ニュウ",
+      "meaning": "milk, breast",
+      "en": "The newborn calf needs new (ニュウ), warm milk right away.",
+      "fr": "Le bébé nu (ニュウ) tète le lait au sein de sa mère."
+    },
+    {
+      "literal": "依",
+      "reading": "イ",
+      "meaning": "depend on, rely",
+      "en": "A clingy eel (イ) that depends on the rock it hides beneath.",
+      "fr": "On compte sur lui, on s'y (イ) fie les yeux fermés."
+    },
+    {
+      "literal": "刷",
+      "reading": "サツ",
+      "meaning": "printing, print",
+      "en": "The ink still glistened where the cat sat (サツ) on the fresh print.",
+      "fr": "La presse tourne, l'encre vole, ça tousse (サツ) de poussière d'impression."
+    },
+    {
+      "literal": "券",
+      "reading": "ケン",
+      "meaning": "ticket",
+      "en": "Ken (ケン) clutched his concert ticket tight at the turnstile.",
+      "fr": "Un billet pour le Kenya (ケン), tamponné à l'entrée."
+    },
+    {
+      "literal": "刺",
+      "reading": "シ",
+      "meaning": "thorn, pierce",
+      "en": "A thorn pierced her finger as she (シ) reached for the rose.",
+      "fr": "L'épine transperce le carton, juste sur le chiffre (シ)."
+    },
+    {
+      "literal": "効",
+      "reading": "コウ",
+      "meaning": "merit, efficacy",
+      "en": "A coach (コウ) whose drills really work: proven, measurable efficacy.",
+      "fr": "Un remède qui réussit son coup (コウ) : d'une efficacité redoutable."
+    },
+    {
+      "literal": "卒",
+      "reading": "ソツ",
+      "meaning": "soldier, graduate",
+      "en": "The fresh graduate spilled sauce (ソツ) all over his gown.",
+      "fr": "Le jeune soldat n'est pas sot (ソツ), il vient d'être diplômé."
+    },
+    {
+      "literal": "協",
+      "reading": "キョウ",
+      "meaning": "cooperation",
+      "en": "The whole crew took its cue (キョウ) and cooperated in perfect time.",
+      "fr": "À Kyoto (キョウ), tout le quartier coopère pour la fête."
+    },
+    {
+      "literal": "周",
+      "reading": "シュウ",
+      "meaning": "circumference, circuit",
+      "en": "She walked the full circuit, her shoe (シュウ) tracing the circumference.",
+      "fr": "Autour du chou (シュウ) bien rond, on trace le tour complet."
+    },
+    {
+      "literal": "固",
+      "reading": "コ",
+      "meaning": "harden, set",
+      "en": "The lava cooled into coal (コ), hard and firmly set.",
+      "fr": "Le béton durcit, dur comme une coque (コ) de noix."
+    },
+    {
+      "literal": "姓",
+      "reading": "セイ",
+      "meaning": "surname",
+      "en": "A perfectly sane (セイ) man signs his surname without hesitating.",
+      "fr": "Il inscrit son nom de famille en seize (セイ) lettres bien nettes."
+    },
+    {
+      "literal": "委",
+      "reading": "イ",
+      "meaning": "entrust, committee",
+      "en": "The committee put him at ease (イ), entrusting him the whole job.",
+      "fr": "Le comité lui confie l'île (イ) entière à gérer."
+    },
+    {
+      "literal": "季",
+      "reading": "キ",
+      "meaning": "season",
+      "en": "Each key (キ) on the ring unlocks a different season of the year.",
+      "fr": "Le kiwi (キ) mûrit pile à la bonne saison."
+    },
+    {
+      "literal": "宝",
+      "reading": "ホウ",
+      "meaning": "treasure",
+      "en": "A pirate digging up buried treasure with a rusty hoe (ホウ).",
+      "fr": "Avec une houe (ホウ), le pirate déterre son trésor enfoui."
+    },
+    {
+      "literal": "届",
+      "reading": "カイ",
+      "meaning": "deliver, reach",
+      "en": "A kayak (カイ) delivering the mail across the lake, reaching the far shore.",
+      "fr": "La caille (カイ) porte le message jusqu'au nid, livraison réussie."
+    },
+    {
+      "literal": "岩",
+      "reading": "ガン",
+      "meaning": "rock, boulder",
+      "en": "A boulder so hard it could stop a gun (ガン) dead.",
+      "fr": "Un rocher si dur qu'il use le gant (ガン) du grimpeur."
+    },
+    {
+      "literal": "岸",
+      "reading": "ガン",
+      "meaning": "shore, bank",
+      "en": "A gander (ガン) waddling along the muddy river shore.",
+      "fr": "Sur la berge, à Gand (ガン), on pêche au bord de l'eau."
+    },
+    {
+      "literal": "底",
+      "reading": "テイ",
+      "meaning": "bottom, base",
+      "en": "At the very bottom of the tank sank the goldfish's tail (テイ).",
+      "fr": "Au fond de la tasse de thé (テイ), le marc se dépose."
+    },
+    {
+      "literal": "府",
+      "reading": "フ",
+      "meaning": "urban prefecture, office",
+      "en": "The prefecture office reeked of stale food (フ) from the break room.",
+      "fr": "À la préfecture, la file au guichet rend fou (フ)."
+    },
+    {
+      "literal": "延",
+      "reading": "エン",
+      "meaning": "prolong, stretch",
+      "en": "They stretched the meeting on and on, no end (エン) in sight.",
+      "fr": "On fait traîner le débat en (エン) longueur, sans jamais finir."
+    },
+    {
+      "literal": "承",
+      "reading": "ショウ",
+      "meaning": "receive, consent",
+      "en": "He nodded to show (ショウ) he had received the news and consented.",
+      "fr": "Il accepte, tout chaud (ショウ) d'avoir reçu la bonne nouvelle."
+    },
+    {
+      "literal": "史",
+      "reading": "シ",
+      "meaning": "history",
+      "en": "History is hers: she (シ) writes down every great event that ever happened.",
+      "fr": "Un livre d'histoire très chic (シ), relié de cuir, raconte tout le passé."
+    },
+    {
+      "literal": "圧",
+      "reading": "アツ",
+      "meaning": "pressure",
+      "en": "The pressure in my sinuses builds until it bursts out as a huge atchoo (アツ).",
+      "fr": "La pression monte dans le nez jusqu'à l'atchoum (アツ) final."
+    },
+    {
+      "literal": "央",
+      "reading": "オウ",
+      "meaning": "center",
+      "en": "Dead center of the bullseye, and the whole crowd gasps oh (オウ).",
+      "fr": "Où (オウ) se trouve le centre exact ? Juste au milieu de la cible."
+    },
+    {
+      "literal": "巨",
+      "reading": "キョ",
+      "meaning": "gigantic",
+      "en": "The temples of Kyoto (キョ) are gigantic, dwarfing the tourists below.",
+      "fr": "Un kiosque (キョ) gigantesque se dresse au milieu du parc."
+    },
+    {
+      "literal": "布",
+      "reading": "フ",
+      "meaning": "cloth",
+      "en": "Wrapping a long strip of cloth snugly around each bare foot (フ).",
+      "fr": "Un fou (フ) se drape dans un immense morceau de tissu."
+    },
+    {
+      "literal": "幼",
+      "reading": "ヨウ",
+      "meaning": "infancy",
+      "en": "Back in infancy, you (ヨウ) could barely crawl across the rug.",
+      "fr": "Le tout-petit joue avec un yo-yo (ヨウ) : la première enfance."
+    },
+    {
+      "literal": "庁",
+      "reading": "チョウ",
+      "meaning": "government office",
+      "en": "Grab some chow (チョウ) in the canteen of the government office.",
+      "fr": "Un chou (チョウ) oublié traîne sur un bureau de l'administration."
+    },
+    {
+      "literal": "旧",
+      "reading": "キュウ",
+      "meaning": "old times",
+      "en": "In the old days a long queue (キュウ) of carriages filled the lane.",
+      "fr": "Un vieil écu (キュウ) d'autrefois, terni par le temps ancien."
+    },
+    {
+      "literal": "札",
+      "reading": "サツ",
+      "meaning": "tag",
+      "en": "A price tag stuck right on a ripe satsuma (サツ) orange.",
+      "fr": "Une étiquette saturée (サツ) d'infos, collée sur le colis."
+    },
+    {
+      "literal": "氷",
+      "reading": "ヒョウ",
+      "meaning": "ice",
+      "en": "The block of ice glows with a pale blue hue (ヒョウ).",
+      "fr": "Pfiou (ヒョウ), quelle glace, on se gèle sur ce lac gelé !"
+    },
+    {
+      "literal": "永",
+      "reading": "エイ",
+      "meaning": "eternity",
+      "en": "Waiting for the kettle felt like an age (エイ), an eternity that never ends.",
+      "fr": "Et (エイ), et encore, sans fin : voilà l'éternité."
+    },
+    {
+      "literal": "玉",
+      "reading": "ギョク",
+      "meaning": "jewel, ball",
+      "en": "A round jewel as golden and glossy as an egg yolk (ギョク).",
+      "fr": "Le jockey (ギョク) serre une perle ronde comme une bille."
+    },
+    {
+      "literal": "甘",
+      "reading": "カン",
+      "meaning": "sweet",
+      "en": "A can (カン) of syrup, thick and impossibly sweet.",
+      "fr": "Une canne (カン) à sucre, douce et bien sucrée."
+    },
+    {
+      "literal": "皮",
+      "reading": "ヒ",
+      "meaning": "pelt, skin",
+      "en": "Tough skin, like the leathery pelt on the heel (ヒ) of your foot.",
+      "fr": "Un hippie (ヒ) s'enroule dans une peau de bête, poil contre peau."
+    },
+    {
+      "literal": "皿",
+      "reading": "ベイ",
+      "meaning": "dish, a helping",
+      "en": "A single bay (ベイ) leaf resting on the edge of the dish.",
+      "fr": "Un plat garni de baies (ベイ), une belle petite portion."
+    },
+    {
+      "literal": "辺",
+      "reading": "ヘン",
+      "meaning": "environs, boundary",
+      "en": "A stray hen (ヘン) pecks along the boundary of the farmyard.",
+      "fr": "Hein (ヘン) ? La limite passe juste au bord du champ."
+    },
+    {
+      "literal": "仲",
+      "reading": "チュウ",
+      "meaning": "go-between, relationship",
+      "en": "The go-between hands each side some gum to chew (チュウ) while she smooths the relationship.",
+      "fr": "Le chouchou (チュウ) de la classe sert d'intermédiaire entre les deux amis."
+    },
+    {
+      "literal": "兆",
+      "reading": "チョウ",
+      "meaning": "portent, trillion",
+      "en": "Destiny chose (チョウ) this comet as a portent, one in a trillion.",
+      "fr": "Le ciel offre un show (チョウ) grandiose, présage de mille milliards d'étoiles."
+    },
+    {
+      "literal": "再",
+      "reading": "サイ",
+      "meaning": "again, twice",
+      "en": "You sigh (サイ) and run the whole thing again, twice over.",
+      "fr": "Ça y est (サイ), on recommence une deuxième fois."
+    },
+    {
+      "literal": "印",
+      "reading": "イン",
+      "meaning": "stamp, seal",
+      "en": "The keeper presses a red wax seal at the door of the inn (イン).",
+      "fr": "On appose un insigne (イン), le sceau officiel, sur la lettre."
+    },
+    {
+      "literal": "叫",
+      "reading": "キョウ",
+      "meaning": "shout, exclaim",
+      "en": "A coyote (キョウ) howls into the night, one long shout.",
+      "fr": "Il crie à pleins poumons et lance un caillou (キョウ) : quel cri !"
+    },
+    {
+      "literal": "各",
+      "reading": "カク",
+      "meaning": "each, every",
+      "en": "Each and every recruit lines up in the same khaki (カク) uniform.",
+      "fr": "Chaque fève de cacao (カク) est triée, une par une."
+    },
+    {
+      "literal": "団",
+      "reading": "ダン",
+      "meaning": "group, association",
+      "en": "Dan (ダン) leads the whole group, the club's proud association.",
+      "fr": "Toute la troupe se lance dans la danse (ダン), tout le groupe ensemble."
+    },
+    {
+      "literal": "宇",
+      "reading": "ウ",
+      "meaning": "eaves, roof",
+      "en": "You tip your head back and go ooh (ウ) at the carved eaves of the roof.",
+      "fr": "Ouh (ウ), regarde ces grands avant-toits qui débordent du toit !"
+    },
+    {
+      "literal": "寺",
+      "reading": "ジ",
+      "meaning": "Buddhist temple",
+      "en": "Gee (ジ), the Buddhist temple gleams gold in the morning light.",
+      "fr": "J'y (ジ) retourne chaque matin, au temple bouddhiste."
+    },
+    {
+      "literal": "州",
+      "reading": "シュウ",
+      "meaning": "state, province",
+      "en": "On the map the whole province is shaped like a giant shoe (シュウ).",
+      "fr": "Toute la province dévale en schuss (シュウ) sur la neige."
+    },
+    {
+      "literal": "机",
+      "reading": "キ",
+      "meaning": "desk, table",
+      "en": "A single brass key (キ) lies forgotten on the writing desk.",
+      "fr": "Qui (キ) a laissé ce gros livre sur le bureau ?"
+    },
+    {
+      "literal": "汗",
+      "reading": "カン",
+      "meaning": "sweat, perspire",
+      "en": "The old Khan (カン) wipes rivers of sweat from his brow after battle.",
+      "fr": "En plein camp (カン) d'été, tout le monde transpire à grosses gouttes."
+    },
+    {
+      "literal": "汚",
+      "reading": "オ",
+      "meaning": "dirty, pollute",
+      "en": "Oh (オ), the river has turned dirty and polluted again.",
+      "fr": "L'eau (オ) du canal est sale, toute polluée."
+    },
+    {
+      "literal": "池",
+      "reading": "チ",
+      "meaning": "pond, cistern",
+      "en": "A thirsty cheetah (チ) laps water at the edge of the pond.",
+      "fr": "Un chihuahua (チ) boit au bord de la petite mare."
+    },
+    {
+      "literal": "綿",
+      "reading": "メン",
+      "meaning": "cotton",
+      "en": "The men (メン) in the field gather armfuls of soft white cotton.",
+      "fr": "Le contremaître mène (メン) la récolte du coton dans le champ."
+    },
+    {
+      "literal": "総",
+      "reading": "ソウ",
+      "meaning": "general, whole",
+      "en": "Sew (ソウ) every panel together into one whole coat.",
+      "fr": "Pas un sou (ソウ) manquant : voilà la somme totale, la somme entière."
+    },
+    {
+      "literal": "緑",
+      "reading": "リョク",
+      "meaning": "green",
+      "en": "Rio Coo (リョク), the parrot, fluffs up his brilliant green feathers.",
+      "fr": "La rivière de Rio coule (リョク), toute verte, à travers la jungle."
+    },
+    {
+      "literal": "練",
+      "reading": "レン",
+      "meaning": "practice, train",
+      "en": "A wren (レン) practises its trill, singing the same phrase again and again.",
+      "fr": "Le renne (レン) s'entraîne à tirer le traîneau, encore et encore."
+    },
+    {
+      "literal": "複",
+      "reading": "フク",
+      "meaning": "duplicate, double",
+      "en": "Focus (フク) the lens twice and you get a double exposure, a duplicate frame.",
+      "fr": "Le phoque (フク) se dédouble dans le reflet lisse de l'eau."
+    },
+    {
+      "literal": "誌",
+      "reading": "シ",
+      "meaning": "records, document",
+      "en": "Every record lands on its own crisp sheet (シ) of paper.",
+      "fr": "Un magazine chic (シ) qui consigne chaque événement, document par document."
+    },
+    {
+      "literal": "踊",
+      "reading": "ヨウ",
+      "meaning": "dance, leap",
+      "en": "Yo (ヨウ)! they shout, and the whole crowd leaps into the dance.",
+      "fr": "Le yo-yo (ヨウ) bondit et danse au bout de son fil."
+    },
+    {
+      "literal": "銅",
+      "reading": "ドウ",
+      "meaning": "copper",
+      "en": "A lump of dough (ドウ) baked to the warm glow of copper.",
+      "fr": "Le cuivre doux (ドウ) brille, chaud et rougeoyant."
+    },
+    {
+      "literal": "領",
+      "reading": "リョウ",
+      "meaning": "dominion, jurisdiction",
+      "en": "Leo (リョウ) the lion rules his whole dominion from the high rock.",
+      "fr": "Le roi étend sa juridiction jusqu'aux portes de Rio (リョウ)."
+    },
+    {
+      "literal": "鼻",
+      "reading": "ビ",
+      "meaning": "nose",
+      "en": "A bee (ビ) lands right on the tip of his nose.",
+      "fr": "Une bille (ビ) en équilibre sur le bout du nez."
+    },
+    {
+      "literal": "億",
+      "reading": "オク",
+      "meaning": "hundred million",
+      "en": "An oak (オク) so ancient it has dropped a hundred million acorns.",
+      "fr": "Cent millions de perles au cou (オク) de la reine."
+    },
+    {
+      "literal": "劇",
+      "reading": "ゲキ",
+      "meaning": "drama",
+      "en": "A gecko (ゲキ) steals the lead role in the school drama.",
+      "fr": "Un gecko (ゲキ) grimpe sur les planches en plein drame."
+    },
+    {
+      "literal": "導",
+      "reading": "ドウ",
+      "meaning": "guidance",
+      "en": "A gentle doe (ドウ) offers guidance, leading her fawn through the woods.",
+      "fr": "Le guide montre d'où (ドウ) vient le sentier."
+    },
+    {
+      "literal": "暴",
+      "reading": "ボウ",
+      "meaning": "outburst",
+      "en": "He takes a bow (ボウ), then erupts in a violent outburst.",
+      "fr": "Le ciel si beau (ボウ) explose soudain en un orage violent."
+    },
+    {
+      "literal": "線",
+      "reading": "セン",
+      "meaning": "line",
+      "en": "A red sensor (セン) beam draws a thin line across the floor.",
+      "fr": "La Seine (セン) trace une longue ligne à travers Paris."
+    },
+    {
+      "literal": "編",
+      "reading": "ヘン",
+      "meaning": "compilation",
+      "en": "A hen (ヘン) pecks scattered scraps into one tidy compilation.",
+      "fr": "Elle compile ses motifs au henné (ヘン) dans un grand carnet."
+    },
+    {
+      "literal": "膚",
+      "reading": "フ",
+      "meaning": "skin",
+      "en": "A few (フ) freckles scattered across smooth, soft skin.",
+      "fr": "Sa peau est si douce, à en devenir fou (フ)."
+    },
+    {
+      "literal": "蔵",
+      "reading": "ゾウ",
+      "meaning": "storehouse",
+      "en": "The zoo (ゾウ) locks its winter feed in a huge stone storehouse.",
+      "fr": "Le zoo (ゾウ) entrepose son foin dans une vaste grange."
+    },
+    {
+      "literal": "課",
+      "reading": "カ",
+      "meaning": "lesson",
+      "en": "The cat (カ) sits in on today's lesson at the back of the class.",
+      "fr": "La maîtresse tire une leçon de chaque cas (カ)."
+    },
+    {
+      "literal": "諸",
+      "reading": "ショ",
+      "meaning": "various",
+      "en": "The talent show (ショ) brings various acts from around the world.",
+      "fr": "Toutes sortes de choses (ショ) variées s'entassent dans le tiroir."
+    },
+    {
+      "literal": "賞",
+      "reading": "ショウ",
+      "meaning": "prize",
+      "en": "A shower (ショウ) of confetti falls as she lifts the grand prize.",
+      "fr": "Elle décroche le prix du grand show (ショウ) télévisé."
+    },
+    {
+      "literal": "輪",
+      "reading": "リン",
+      "meaning": "wheel",
+      "en": "Each wheel is a perfect ring (リン) of gleaming steel.",
+      "fr": "On rince (リン) chaque roue crottée du vélo."
+    },
+    {
+      "literal": "鋭",
+      "reading": "エイ",
+      "meaning": "sharp",
+      "en": "An ace (エイ) blade, honed razor sharp.",
+      "fr": "Aïe (エイ)! la lame est si affûtée qu'un frôlement suffit."
+    },
+    {
+      "literal": "震",
+      "reading": "シン",
+      "meaning": "quake",
+      "en": "The quake hit so hard he felt it right up his shins (シン).",
+      "fr": "Le séisme fait trembler toute la Chine (シン)."
+    },
+    {
+      "literal": "駐",
+      "reading": "チュウ",
+      "meaning": "stop-over",
+      "en": "We stop over to chew (チュウ) a quick snack halfway through the trip.",
+      "fr": "Tchou-tchou (チュウ), le train s'arrête en gare pour une halte."
+    },
+    {
+      "literal": "曇",
+      "reading": "ドン",
+      "meaning": "cloudy",
+      "en": "A grey, cloudy dawn (ドン) with not a ray of sun.",
+      "fr": "Ciel bas et gris, sombre comme un vieux donjon (ドン)."
+    },
+    {
+      "literal": "橋",
+      "reading": "キョウ",
+      "meaning": "bridge",
+      "en": "On cue (キョウ), the drawbridge lowers to let us cross.",
+      "fr": "Une longue queue (キョウ) s'étire sur le pont pour traverser."
+    },
+    {
+      "literal": "濃",
+      "reading": "ノウ",
+      "meaning": "concentrated",
+      "en": "The espresso is so concentrated you just know (ノウ) it will jolt you awake.",
+      "fr": "Une sauce épaisse et concentrée, dense comme un nœud (ノウ)."
+    },
+    {
+      "literal": "燃",
+      "reading": "ネン",
+      "meaning": "burn",
+      "en": "A nun (ネン) leans in to let the candle burn brighter.",
+      "fr": "Une naine (ネン) blanche qui brûle, ardente, au fond du ciel."
+    },
+    {
+      "literal": "磨",
+      "reading": "マ",
+      "meaning": "grind",
+      "en": "Ma (マ) grinds the beans and polishes the pot till it shines.",
+      "fr": "On ponce et on polit le mât (マ) du bateau jusqu'à l'éclat."
+    },
+    {
+      "literal": "党",
+      "reading": "トウ",
+      "meaning": "party, faction",
+      "en": "Every party member steps in toe (トウ) to toe, one faction marching as one.",
+      "fr": "Tout (トウ) le parti vote ensemble, une seule faction unie."
+    },
+    {
+      "literal": "凍",
+      "reading": "トウ",
+      "meaning": "frozen",
+      "en": "The tow (トウ) truck's cable is frozen stiff in the ice.",
+      "fr": "Une toux (トウ) sèche résonne dans l'air gelé de l'hiver."
+    },
+    {
+      "literal": "埋",
+      "reading": "マイ",
+      "meaning": "bury",
+      "en": "My (マイ) grandfather buried the old treasure right under this oak.",
+      "fr": "En mai (マイ), on enterre les bulbes au fond du jardin."
+    },
+    {
+      "literal": "孫",
+      "reading": "ソン",
+      "meaning": "grandchild",
+      "en": "My son's (ソン) son is my little grandchild bouncing on my knee.",
+      "fr": "Son (ソン) petit-fils vient la voir chaque dimanche."
+    },
+    {
+      "literal": "将",
+      "reading": "ショウ",
+      "meaning": "commander",
+      "en": "The commander runs the whole show (ショウ) from the front line.",
+      "fr": "Le commandant lance l'assaut, l'air chaud (ショウ), en vrai chef."
+    },
+    {
+      "literal": "島",
+      "reading": "トウ",
+      "meaning": "island",
+      "en": "I dip a toe (トウ) onto the warm sand of the deserted island.",
+      "fr": "On accoste tôt (トウ) sur la petite île déserte."
+    },
+    {
+      "literal": "帯",
+      "reading": "タイ",
+      "meaning": "sash, belt",
+      "en": "She knots the sash like a tie (タイ) around her waist.",
+      "fr": "L'obi lui serre la taille (タイ) comme une large ceinture."
+    },
+    {
+      "literal": "庫",
+      "reading": "コ",
+      "meaning": "warehouse",
+      "en": "The warehouse is stacked with crates of winter coats (コ).",
+      "fr": "L'entrepôt est rempli de gros pots de colle (コ)."
+    },
+    {
+      "literal": "弱",
+      "reading": "ジャク",
+      "meaning": "weak",
+      "en": "Too weak to lift the crate, he reached for a jack (ジャク).",
+      "fr": "Le frêle Jacques (ジャク), trop faible pour soulever le sac."
+    },
+    {
+      "literal": "恋",
+      "reading": "レン",
+      "meaning": "romantic love",
+      "en": "Two wrens (レン) nuzzling on a branch, lost in romantic love.",
+      "fr": "Il aime sa reine (レン) d'un amour éperdu."
+    },
+    {
+      "literal": "悩",
+      "reading": "ノウ",
+      "meaning": "worry",
+      "en": "She just doesn't know (ノウ) what to do, sick with worry.",
+      "fr": "L'angoisse lui noue (ノウ) l'estomac toute la nuit."
+    },
+    {
+      "literal": "捜",
+      "reading": "ソウ",
+      "meaning": "search, look for",
+      "en": "She searches every drawer for the thread to sew (ソウ) with.",
+      "fr": "On fouille partout pour retrouver le seau (ソウ) disparu."
+    },
+    {
+      "literal": "根",
+      "reading": "コン",
+      "meaning": "root",
+      "en": "The corn's (コン) roots dig deep into the dark soil.",
+      "fr": "Les racines du concombre (コン) plongent dans la terre."
+    },
+    {
+      "literal": "浴",
+      "reading": "ヨク",
+      "meaning": "bathe",
+      "en": "She scrubs the egg yolk (ヨク) off her hands in a warm bath.",
+      "fr": "Le duc d'York (ヨク) se baigne dans la Tamise glacée."
+    },
+    {
+      "literal": "涙",
+      "reading": "ルイ",
+      "meaning": "tears",
+      "en": "Poor Louie (ルイ), tears streaming down his cheeks.",
+      "fr": "Le petit Louis (ルイ) pleure à chaudes larmes."
+    },
+    {
+      "literal": "畜",
+      "reading": "チク",
+      "meaning": "livestock",
+      "en": "Fluffy chicks (チク) darting among all the farm's livestock.",
+      "fr": "L'éleveur chique (チク) du tabac en surveillant son bétail."
+    },
+    {
+      "literal": "粉",
+      "reading": "フン",
+      "meaning": "powder, flour",
+      "en": "Flour dusts the whole kitchen, what messy fun (フン) baking is!",
+      "fr": "Une fine poudre repose au fond (フン) du sachet de farine."
+    },
+    {
+      "literal": "純",
+      "reading": "ジュン",
+      "meaning": "pure, genuine",
+      "en": "Pure as a clear, bright morning in June (ジュン).",
+      "fr": "Un cœur jeune (ジュン) et pur, sans la moindre tache."
+    },
+    {
+      "literal": "耕",
+      "reading": "コウ",
+      "meaning": "till, plow",
+      "en": "He plows past a black seam of coal (コウ) in the field.",
+      "fr": "D'un coup (コウ) de charrue, il retourne la terre du champ."
+    },
+    {
+      "literal": "胸",
+      "reading": "キョウ",
+      "meaning": "chest, bosom",
+      "en": "He puffs out his chest and takes his cue (キョウ) to sing.",
+      "fr": "À Kyoto (キョウ), il bombe le torse plein de fierté."
+    },
+    {
+      "literal": "脂",
+      "reading": "シ",
+      "meaning": "fat, grease",
+      "en": "She (シ) fries the bacon, grease spitting in the pan.",
+      "fr": "On essuie la graisse épaisse avec un vieux chiffon (シ)."
+    },
+    {
+      "literal": "航",
+      "reading": "コウ",
+      "meaning": "navigate, sail",
+      "en": "The ship sails past a rocky cove (コウ) on its long voyage.",
+      "fr": "La coque (コウ) fend les vagues en pleine navigation."
+    },
+    {
+      "literal": "般",
+      "reading": "ハン",
+      "meaning": "carry, convey",
+      "en": "He carries the heavy crate by hand (ハン) across the yard.",
+      "fr": "L'âne (ハン) transporte les lourds sacs à travers le col."
+    },
+    {
+      "literal": "荷",
+      "reading": "カ",
+      "meaning": "baggage, load",
+      "en": "The cargo (カ) is loaded, baggage stacked to the ceiling.",
+      "fr": "Elle remplit son cabas (カ) de toutes ses provisions."
+    },
+    {
+      "literal": "被",
+      "reading": "ヒ",
+      "meaning": "incur, cover",
+      "en": "He (ヒ) tugs the blanket up to cover himself from the cold.",
+      "fr": "Le hibou (ヒ) se couvre de ses ailes dans le froid."
+    },
+    {
+      "literal": "訓",
+      "reading": "クン",
+      "meaning": "instruction",
+      "en": "The kung (クン) fu master barks his instructions at the pupils.",
+      "fr": "Le maître donne à chacun (クン) ses consignes précises."
+    },
+    {
+      "literal": "軒",
+      "reading": "ケン",
+      "meaning": "counter for houses",
+      "en": "Counting the houses down the lane: Ken's (ケン) place, then the next.",
+      "fr": "On compte les maisons: celle de Ken (ケン), puis la suivante."
+    },
+    {
+      "literal": "造",
+      "reading": "ゾウ",
+      "meaning": "create, make",
+      "en": "They built a whole new zoo (ゾウ) from nothing.",
+      "fr": "On a créé un zoo (ゾウ) entier de toutes pièces."
+    },
+    {
+      "literal": "針",
+      "reading": "シン",
+      "meaning": "needle",
+      "en": "The needle jabs him right in the shin (シン).",
+      "fr": "Une aiguille fine venue tout droit de Chine (シン)."
+    },
+    {
+      "literal": "隻",
+      "reading": "セキ",
+      "meaning": "counter for ships",
+      "en": "One ship for every cup of sake (セキ) at the harbor feast.",
+      "fr": "Chaque navire accoste, la cale bien au sec (セキ)."
+    },
+    {
+      "literal": "了",
+      "reading": "リョウ",
+      "meaning": "finish",
+      "en": "Pull the final row (リョウ) of the oars and finish the race.",
+      "fr": "Arrivé à Rio (リョウ), le périple est enfin bel et bien fini."
+    },
+    {
+      "literal": "丸",
+      "reading": "ガン",
+      "meaning": "round",
+      "en": "A round brass gong (ガン) hung in the temple hall.",
+      "fr": "Le gong (ガン) tout rond résonne au fond du dojo."
+    },
+    {
+      "literal": "久",
+      "reading": "キュウ",
+      "meaning": "long time",
+      "en": "The queue (キュウ) crawled forward: we waited a very long time.",
+      "fr": "Une longue cure (キュウ) thermale, ça dure un bon moment."
+    },
+    {
+      "literal": "干",
+      "reading": "カン",
+      "meaning": "dry",
+      "en": "Genghis Khan (カン) rode across the dry, cracked desert.",
+      "fr": "Un camp (カン) planté en plein désert, tout sec et poussiéreux."
+    },
+    {
+      "literal": "介",
+      "reading": "カイ",
+      "meaning": "jammed in between",
+      "en": "Poor Kai (カイ) got wedged, jammed in between two heavy lockers.",
+      "fr": "Une caille (カイ) coincée, bien serrée entre deux barreaux."
+    },
+    {
+      "literal": "仏",
+      "reading": "ブツ",
+      "meaning": "Buddha",
+      "en": "The stone Buddha sits calmly in heavy carved boots (ブツ).",
+      "fr": "Le Bouddha de pierre porte de lourdes boots (ブツ) sculptées."
+    },
+    {
+      "literal": "匹",
+      "reading": "ヒツ",
+      "meaning": "equal",
+      "en": "Both boxers land equal hits (ヒツ), a dead-even tie.",
+      "fr": "Deux albums à égalité, autant de hits (ヒツ) chacun."
+    },
+    {
+      "literal": "区",
+      "reading": "ク",
+      "meaning": "ward, district",
+      "en": "Every district has its own cook (ク) and its own market.",
+      "fr": "Coucou (ク) ! Bienvenue dans le quartier, notre petit district."
+    },
+    {
+      "literal": "双",
+      "reading": "ソウ",
+      "meaning": "pair",
+      "en": "Sew (ソウ) a matching pair of gloves for the cold.",
+      "fr": "Un saut (ソウ) parfaitement synchronisé, une paire de plongeurs."
+    },
+    {
+      "literal": "戸",
+      "reading": "コ",
+      "meaning": "door",
+      "en": "A coat (コ) hangs on a hook right behind the door.",
+      "fr": "Un coq (コ) picore juste devant la porte de la ferme."
+    },
+    {
+      "literal": "比",
+      "reading": "ヒ",
+      "meaning": "compare",
+      "en": "He (ヒ) compares the two offers before choosing one.",
+      "fr": "Le hibou (ヒ) compare deux proies avant de fondre."
+    },
+    {
+      "literal": "毛",
+      "reading": "モウ",
+      "meaning": "fur, hair",
+      "en": "Time to mow (モウ) the lawn's furry, hairy tangle.",
+      "fr": "Une moumoute (モウ) bien poilue posée sur le crâne."
+    },
+    {
+      "literal": "片",
+      "reading": "ヘン",
+      "meaning": "one-sided",
+      "en": "The hen (ヘン) always tilts to one side, ever one-sided.",
+      "fr": "Une haine (ヘン) à sens unique, jamais réciproque."
+    },
+    {
+      "literal": "令",
+      "reading": "レイ",
+      "meaning": "orders",
+      "en": "The orders arrived like a ray (レイ) piercing the fog.",
+      "fr": "La reine (レイ) lance ses ordres d'un ton sec."
+    },
+    {
+      "literal": "冊",
+      "reading": "サツ",
+      "meaning": "tome",
+      "en": "He sat (サツ) all evening with a dusty tome on his knees.",
+      "fr": "Il lit un gros tome en pelant une satsuma (サツ)."
+    },
+    {
+      "literal": "刊",
+      "reading": "カン",
+      "meaning": "publish",
+      "en": "The press fires out fresh copies like a cannon (カン), ready to publish.",
+      "fr": "On publie enfin les œuvres complètes de Kant (カン)."
+    },
+    {
+      "literal": "包",
+      "reading": "ホウ",
+      "meaning": "wrap",
+      "en": "Santa laughs ho ho (ホウ) as he wraps every last gift.",
+      "fr": "On emballe le cadeau dans une jolie branche de houx (ホウ)."
+    },
+    {
+      "literal": "占",
+      "reading": "セン",
+      "meaning": "divination",
+      "en": "The mystic sensed (セン) your future in the cards: pure divination.",
+      "fr": "Pendant la séance (セン), la voyante lit l'avenir dans la boule."
+    },
+    {
+      "literal": "召",
+      "reading": "ショウ",
+      "meaning": "summon",
+      "en": "The ringmaster summons the whole crowd to the great show (ショウ).",
+      "fr": "Le sorcier invoque une flamme toute chaude (ショウ) d'un geste."
+    },
+    {
+      "literal": "専",
+      "reading": "セン",
+      "meaning": "exclusive",
+      "en": "Send (セン) only the chosen few inside, this lounge is exclusive.",
+      "fr": "Réservé à cent (セン) privilégiés seulement : un club exclusif."
+    },
+    {
+      "literal": "巻",
+      "reading": "カン",
+      "meaning": "scroll, volume",
+      "en": "She rolled the ancient scroll and tucked it into a can (カン).",
+      "fr": "On enroule le vieux parchemin autour d'une canne (カン) de bambou."
+    },
+    {
+      "literal": "律",
+      "reading": "リツ",
+      "meaning": "law, rhythm",
+      "en": "The Ritz (リツ) runs on strict rules and a steady rhythm.",
+      "fr": "Le rite (リツ) suit une loi précise, à un rythme immuable."
+    },
+    {
+      "literal": "拾",
+      "reading": "シュウ",
+      "meaning": "pick up",
+      "en": "I bent down to pick up a lost shoe (シュウ) on the pavement.",
+      "fr": "Je me penche pour ramasser un chou (シュウ) tombé du cabas."
+    },
+    {
+      "literal": "挟",
+      "reading": "キョウ",
+      "meaning": "pinch, hold between",
+      "en": "A billiard cue (キョウ) held pinched tight between two fingers.",
+      "fr": "À Kyoto (キョウ), coincé entre deux murs dans la ruelle étroite."
+    },
+    {
+      "literal": "星",
+      "reading": "セイ",
+      "meaning": "star",
+      "en": "Make a wish and say (セイ) it softly to the first star.",
+      "fr": "Ses (セイ) yeux scintillent comme une étoile dans la nuit."
+    },
+    {
+      "literal": "枯",
+      "reading": "コ",
+      "meaning": "wither",
+      "en": "The cocoa (コ) plant withered to brown in the frost.",
+      "fr": "Le coco (コ) s'est desséché, ratatiné par la sécheresse."
+    },
+    {
+      "literal": "柔",
+      "reading": "ジュウ",
+      "meaning": "tender",
+      "en": "A tender jewel (ジュウ), soft and smooth to the touch.",
+      "fr": "La joue (ジュウ) du bébé, si tendre et si douce."
+    },
+    {
+      "literal": "柱",
+      "reading": "チュウ",
+      "meaning": "pillar",
+      "en": "He leaned on the stone pillar to chew (チュウ) his gum.",
+      "fr": "Une pièce montée : un pilier de choux (チュウ) à la crème."
+    },
+    {
+      "literal": "査",
+      "reading": "サ",
+      "meaning": "investigate",
+      "en": "The inspector saw (サ) the odd clue and began to investigate.",
+      "fr": "Ça (サ) mérite une enquête, murmure l'inspecteur."
+    },
+    {
+      "literal": "栄",
+      "reading": "エイ",
+      "meaning": "flourish",
+      "en": "The tavern flourished, ale (エイ) flowing all night long.",
+      "fr": "Hé (エイ) ! Ce verger prospère, croulant sous les fruits."
+    },
+    {
+      "literal": "泉",
+      "reading": "セン",
+      "meaning": "spring, fountain",
+      "en": "The scent (セン) of fresh water drifting from the mountain spring.",
+      "fr": "Une source sacrée jaillit tout près du vieux saint (セン)."
+    },
+    {
+      "literal": "浅",
+      "reading": "セン",
+      "meaning": "shallow",
+      "en": "The sensei (セン) barely wet his ankles in the shallow stream.",
+      "fr": "L'eau est peu profonde, sans (セン) danger pour les enfants."
+    },
+    {
+      "literal": "炭",
+      "reading": "タン",
+      "meaning": "charcoal",
+      "en": "The charcoal left a tan (タン) smudge across his cheek.",
+      "fr": "Tante (タン) fait griller les brochettes sur le charbon."
+    },
+    {
+      "literal": "珍",
+      "reading": "チン",
+      "meaning": "rare, precious",
+      "en": "He stroked his chin (チン), admiring the rare, precious gem.",
+      "fr": "Une porcelaine de Chine (チン), rare et précieuse."
+    },
+    {
+      "literal": "省",
+      "reading": "セイ",
+      "meaning": "ministry, to inspect",
+      "en": "The ministry set sail (セイ) to inspect the distant coast.",
+      "fr": "C'est (セイ) le ministère qui vient tout inspecter."
+    },
+    {
+      "literal": "県",
+      "reading": "ケン",
+      "meaning": "prefecture",
+      "en": "Every town here lies within his ken (ケン), his own prefecture.",
+      "fr": "Le préfet ajuste son képi (ケン) dans chaque préfecture."
+    },
+    {
+      "literal": "砂",
+      "reading": "サ",
+      "meaning": "sand",
+      "en": "The Sahara (サ) stretches on, nothing but endless sand.",
+      "fr": "Le Sahara (サ), rien que du sable à perte de vue."
+    },
+    {
+      "literal": "祝",
+      "reading": "シュク",
+      "meaning": "celebrate",
+      "en": "They shook (シュク) hands and cheered to celebrate the win.",
+      "fr": "Pour fêter la victoire, on sort les chouquettes (シュク) !"
+    },
+    {
+      "literal": "秒",
+      "reading": "ビョウ",
+      "meaning": "second (of time)",
+      "en": "It was over in a beautiful (ビョウ) second, gone in a blink.",
+      "fr": "En une seconde, tout le rayon bio (ビョウ) fut dévalisé."
+    },
+    {
+      "literal": "紅",
+      "reading": "コウ",
+      "meaning": "crimson",
+      "en": "Crimson embers glow deep in the smouldering coal (コウ).",
+      "fr": "Un coup (コウ) de pinceau cramoisi sur la toile blanche."
+    },
+    {
+      "literal": "胃",
+      "reading": "イ",
+      "meaning": "stomach",
+      "en": "The slippery eel (イ) slid down and settled in his stomach.",
+      "fr": "Après le festin, il y (イ) a un poids dans l'estomac."
+    },
+    {
+      "literal": "荒",
+      "reading": "コウ",
+      "meaning": "laid waste, wild",
+      "en": "A wild, storm-lashed cove (コウ), laid waste by the sea.",
+      "fr": "Le col (コウ) de montagne, sauvage et balayé par le vent."
+    },
+    {
+      "literal": "軍",
+      "reading": "グン",
+      "meaning": "army",
+      "en": "The army marched in, every soldier's gun (グン) at the ready.",
+      "fr": "L'armée avance au son grave du gong (グン)."
+    },
+    {
+      "literal": "逆",
+      "reading": "ギャク",
+      "meaning": "reverse, contrary",
+      "en": "Gee, that yak (ギャク) trots backwards, contrary to every rule.",
+      "fr": "Le guacamole (ギャク) écrasé à l'envers, tout à contresens."
+    },
+    {
+      "literal": "郊",
+      "reading": "コウ",
+      "meaning": "outskirts",
+      "en": "The old coach (コウ) rattled through the outskirts of town.",
+      "fr": "Colombes (コウ), en banlieue, aux portes de la ville."
+    },
+    {
+      "literal": "革",
+      "reading": "カク",
+      "meaning": "leather",
+      "en": "The witch's cackle (カク) as she stitched her leather boots.",
+      "fr": "Un cactus (カク) qui perce le cuir épais de la botte."
+    },
+    {
+      "literal": "香",
+      "reading": "コウ",
+      "meaning": "fragrance",
+      "en": "A cloud of cologne (コウ), that unmistakable fragrance.",
+      "fr": "L'eau de Cologne (コウ), un parfum délicat et fleuri."
+    },
+    {
+      "literal": "個",
+      "reading": "コ",
+      "meaning": "individual, item",
+      "en": "Each individual item gets its own scannable code (コ).",
+      "fr": "Chaque colis (コ) est un article compté à part."
+    },
+    {
+      "literal": "倍",
+      "reading": "バイ",
+      "meaning": "double",
+      "en": "Buy (バイ) one today and they double it, two for one.",
+      "fr": "Le bail (バイ) a doublé le loyer d'un seul coup."
+    },
+    {
+      "literal": "築",
+      "reading": "チク",
+      "meaning": "build",
+      "en": "A little chick (チク) builds its first nest, twig by twig.",
+      "fr": "Sur un chantier chic (チク), on bâtit un immeuble tout neuf."
+    },
+    {
+      "literal": "薄",
+      "reading": "ハク",
+      "meaning": "thin",
+      "en": "A hawk (ハク) so thin you can count its ribs in flight.",
+      "fr": "Après le haka (ハク), le maillot est si fin qu'il craque."
+    },
+    {
+      "literal": "賢",
+      "reading": "ケン",
+      "meaning": "wise",
+      "en": "That riddle lies beyond my ken (ケン); only the wise elder can solve it.",
+      "fr": "Le sage khan (ケン) résout chaque énigme du désert."
+    },
+    {
+      "literal": "輸",
+      "reading": "ユ",
+      "meaning": "transport",
+      "en": "This truck will transport you (ユ) and all your boxes across town.",
+      "fr": "On transporte des caisses de yuzu (ユ) d'un port à l'autre."
+    },
+    {
+      "literal": "録",
+      "reading": "ロク",
+      "meaning": "record",
+      "en": "The rock (ロク) band steps into the booth to record their first album.",
+      "fr": "Il grave son record dans le roc (ロク), pour l'éternité."
+    },
+    {
+      "literal": "濯",
+      "reading": "タク",
+      "meaning": "wash",
+      "en": "A dropped taco (タク) stains his shirt, straight into the wash.",
+      "fr": "Une tache de taco (タク), et hop, direction la lessive."
+    },
+    {
+      "literal": "燥",
+      "reading": "ソウ",
+      "meaning": "dry up",
+      "en": "The farmer sows (ソウ) seeds in soil so dry it cracks.",
+      "fr": "Pas un sou (ソウ), pas une goutte : la rivière est à sec."
+    },
+    {
+      "literal": "療",
+      "reading": "リョウ",
+      "meaning": "heal",
+      "en": "A slow trip to Rio (リョウ) to heal, all sun and sea air.",
+      "fr": "Le rire guérit, alors rions (リョウ) pour aller mieux."
+    },
+    {
+      "literal": "績",
+      "reading": "セキ",
+      "meaning": "achievements",
+      "en": "Raise a warm cup of sake (セキ) to toast your achievements.",
+      "fr": "On trinque au saké (セキ) pour fêter ses résultats."
+    },
+    {
+      "literal": "講",
+      "reading": "コウ",
+      "meaning": "lecture",
+      "en": "The whole lecture was about writing clean code (コウ).",
+      "fr": "Le conférencier tend le cou (コウ) pour capter tout l'amphi."
+    },
+    {
+      "literal": "齢",
+      "reading": "レイ",
+      "meaning": "age",
+      "en": "Each ray (レイ) of the tree's rings marks another year of age.",
+      "fr": "Chaque rai (レイ) de lumière sur les cernes trahit l'âge de l'arbre."
+    },
+    {
+      "literal": "簡",
+      "reading": "カン",
+      "meaning": "simplicity, brevity",
+      "en": "The whole recipe fits on a single can (カン) label, brief and simple.",
+      "fr": "Une consigne si brève qu'elle tient sur une canne (カン)."
+    },
+    {
+      "literal": "贈",
+      "reading": "ゾウ",
+      "meaning": "present, to send",
+      "en": "She sends a huge present to the zoo (ゾウ) for the newborn panda.",
+      "fr": "On envoie un cadeau au zoo (ゾウ) pour le jeune éléphant."
+    },
+    {
+      "literal": "額",
+      "reading": "ガク",
+      "meaning": "forehead, framed tablet",
+      "en": "He gawks (ガク) so hard his forehead wrinkles up.",
+      "fr": "Un gag (ガク) qui fait plisser le front."
+    },
+    {
+      "literal": "爆",
+      "reading": "バク",
+      "meaning": "to burst open, bomb",
+      "en": "The firework bursts and blasts the whole crowd back (バク).",
+      "fr": "La bombe explose et fait voler le bac (バク) en éclats."
+    },
+    {
+      "literal": "臓",
+      "reading": "ゾウ",
+      "meaning": "entrails, viscera",
+      "en": "The surgeon zones (ゾウ) in on the tangled viscera.",
+      "fr": "Le chirurgien explore la zone (ゾウ) des viscères."
+    },
+    {
+      "literal": "競",
+      "reading": "キョウ",
+      "meaning": "to compete",
+      "en": "On cue (キョウ), the sprinters compete off the starting line.",
+      "fr": "À Kyoto (キョウ), les coureurs s'affrontent jusqu'à la ligne."
+    },
+    {
+      "literal": "籍",
+      "reading": "セキ",
+      "meaning": "register, to enroll",
+      "en": "Sign in as Saki (セキ) to enroll on the class register.",
+      "fr": "On inscrit son nom, net et sec (セキ), au registre."
+    },
+    {
+      "literal": "骨",
+      "reading": "コツ",
+      "meaning": "bone, skeleton",
+      "en": "A row of cots (コツ) in the field hospital, each one holding a rattle of bones.",
+      "fr": "On compte les côtes (コツ) du squelette, os par os."
+    },
+    {
+      "literal": "乾",
+      "reading": "カン",
+      "meaning": "dry, drought",
+      "en": "An empty can (カン) rattling across the bone-dry, drought-struck plain.",
+      "fr": "Le camp (カン) planté en plein désert, tout sec sous la sécheresse."
+    },
+    {
+      "literal": "停",
+      "reading": "テイ",
+      "meaning": "halt, stop",
+      "en": "Stay (テイ) right there, halt, do not take another step.",
+      "fr": "« Tais (テイ)-toi ! », lance le chef, et le train s'arrête net."
+    },
+    {
+      "literal": "副",
+      "reading": "フク",
+      "meaning": "vice-, assistant",
+      "en": "The assistant, a full cook (フク) still in training, backs up the head chef.",
+      "fr": "Le phoque (フク), fidèle assistant du dresseur, joue les seconds."
+    },
+    {
+      "literal": "域",
+      "reading": "イキ",
+      "meaning": "region, range",
+      "en": "Every icky (イキ) swamp in this region is a no-go zone on the map.",
+      "fr": "Dans cette région, il y a un hic (イキ) à chaque frontière."
+    },
+    {
+      "literal": "患",
+      "reading": "カン",
+      "meaning": "afflicted, disease",
+      "en": "The Khan (カン) lay afflicted, a strange disease creeping through his court.",
+      "fr": "Quand (カン) la maladie frappe, tout le village en est atteint."
+    },
+    {
+      "literal": "捨",
+      "reading": "シャ",
+      "meaning": "discard, throw away",
+      "en": "The Shah (シャ) tosses out his old crowns, discarding them one by one.",
+      "fr": "Le chat (シャ) jette la vieille pelote à la poubelle, tout au rebut."
+    },
+    {
+      "literal": "掃",
+      "reading": "ソウ",
+      "meaning": "sweep",
+      "en": "So (ソウ) much dust, yet one broom sweeps the whole porch clean.",
+      "fr": "Pas un sou (ソウ) par terre après un bon coup de balai."
+    },
+    {
+      "literal": "掘",
+      "reading": "クツ",
+      "meaning": "dig, delve",
+      "en": "The spade cuts (クツ) deep as we dig the long trench.",
+      "fr": "Le couteau (クツ) fouille la terre et creuse le trou."
+    },
+    {
+      "literal": "採",
+      "reading": "サイ",
+      "meaning": "pick, gather",
+      "en": "With a happy sigh (サイ), she picks the ripe berries and gathers them up.",
+      "fr": "En cette saison (サイ), on cueille et on récolte les fruits mûrs."
+    },
+    {
+      "literal": "接",
+      "reading": "セツ",
+      "meaning": "touch, contact",
+      "en": "The two bare wires touch, and that sets (セツ) off the contact.",
+      "fr": "Cette (セツ) main qui en touche une autre : c'est le contact."
+    },
+    {
+      "literal": "械",
+      "reading": "カイ",
+      "meaning": "contraption, fetter",
+      "en": "A tangled kite (カイ) contraption of string, struts and gears.",
+      "fr": "Une drôle de machine à plumer les cailles (カイ), quel engin."
+    },
+    {
+      "literal": "液",
+      "reading": "エキ",
+      "meaning": "liquid, fluid",
+      "en": "An achy (エキ) throat needs a warm fluid to soothe it.",
+      "fr": "L'équipe (エキ) verse le liquide dans chaque fiole."
+    },
+    {
+      "literal": "涼",
+      "reading": "リョウ",
+      "meaning": "refreshing, cool",
+      "en": "A cool Rio (リョウ) breeze off the bay, so refreshing.",
+      "fr": "Une brise de Rio (リョウ), fraîche et rafraîchissante."
+    },
+    {
+      "literal": "混",
+      "reading": "コン",
+      "meaning": "mix, blend",
+      "en": "A con (コン) artist mixing truth and lies into one smooth blend.",
+      "fr": "On mêle le concombre (コン) et la menthe dans un même mélange."
+    },
+    {
+      "literal": "清",
+      "reading": "セイ",
+      "meaning": "pure, purify",
+      "en": "They say (セイ) the spring is pure, purified by the mountain itself.",
+      "fr": "L'eau du saint (セイ) ruisseau, pure et purifiée."
+    },
+    {
+      "literal": "瓶",
+      "reading": "ビン",
+      "meaning": "bottle, vial",
+      "en": "An empty glass bottle rolling around in the recycling bin (ビン).",
+      "fr": "La bouteille et le flacon finissent au fond de la benne (ビン)."
+    },
+    {
+      "literal": "略",
+      "reading": "リャク",
+      "meaning": "abbreviation, omission",
+      "en": "A glaring lack (リャク) of detail: whole lines omitted and abbreviated.",
+      "fr": "On abrège tout, plus court qu'un cri de yack (リャク)."
+    },
+    {
+      "literal": "祭",
+      "reading": "サイ",
+      "meaning": "ritual, festival",
+      "en": "A wild psy (サイ)-trance festival, drums and ritual all night long.",
+      "fr": "L'essai (サイ) d'un nouveau rituel ouvre la fête du village."
+    },
+    {
+      "literal": "移",
+      "reading": "イ",
+      "meaning": "shift, move",
+      "en": "An eel (イ) shifts and slides, moving across the muddy bank.",
+      "fr": "On y (イ) va : on déménage et on déplace tout le salon."
+    },
+    {
+      "literal": "章",
+      "reading": "ショウ",
+      "meaning": "chapter, badge",
+      "en": "Each chapter is its own little show (ショウ), and the last one earns a badge.",
+      "fr": "Un chou (ショウ) brodé sur l'insigne clôt le dernier chapitre."
+    },
+    {
+      "literal": "符",
+      "reading": "フ",
+      "meaning": "token, sign",
+      "en": "A few (フ) little tokens, each one a secret sign to get in.",
+      "fr": "Le fou (フ) du roi porte un jeton, signe de sa charge."
+    },
+    {
+      "literal": "粒",
+      "reading": "リュウ",
+      "meaning": "grain, drop",
+      "en": "A single grain of rue (リュウ), one bitter drop on the tongue.",
+      "fr": "Chaque grain, chaque goutte roule le long de la rue (リュウ)."
+    },
+    {
+      "literal": "細",
+      "reading": "サイ",
+      "meaning": "slender, fine",
+      "en": "Trimmed down to the finest, slenderest size (サイ) you can imagine.",
+      "fr": "Une fine saillie (サイ), mince et élancée sur le mur."
+    },
+    {
+      "literal": "紹",
+      "reading": "ショウ",
+      "meaning": "introduce",
+      "en": "To introduce herself, she stepped forward in one bright red shoe (ショウ).",
+      "fr": "Il fait les présentations à chaud (ショウ) pour bien t'introduire."
+    },
+    {
+      "literal": "翌",
+      "reading": "ヨク",
+      "meaning": "the following, next",
+      "en": "The next morning, the very following day, a fresh egg yolk (ヨク) on the plate.",
+      "fr": "Dès le lendemain, une séance de yoga (ヨク) pour bien commencer le jour suivant."
+    },
+    {
+      "literal": "脳",
+      "reading": "ノウ",
+      "meaning": "brain",
+      "en": "Your brain is the one thing you use to know (ノウ) anything at all.",
+      "fr": "C'est avec le cerveau que nous (ノウ) pensons et réfléchissons."
+    },
+    {
+      "literal": "菓",
+      "reading": "カ",
+      "meaning": "candy, cakes",
+      "en": "One chewy caramel (カ), pure candy melting on the tongue.",
+      "fr": "Un gâteau au cacao (カ), sucré comme un bonbon."
+    },
+    {
+      "literal": "菜",
+      "reading": "サイ",
+      "meaning": "vegetable",
+      "en": "Swing the scythe (サイ) through neat rows of leafy vegetables.",
+      "fr": "Une belle salade (サイ) de légumes tout droit du potager."
+    },
+    {
+      "literal": "著",
+      "reading": "チョ",
+      "meaning": "renowned, publish",
+      "en": "The renowned author finally chose (チョ) to publish her long-secret book.",
+      "fr": "L'auteur renommé fait la tchatche (チョ) pour lancer son livre."
+    },
+    {
+      "literal": "灯",
+      "reading": "トウ",
+      "meaning": "lamp, light",
+      "en": "You stub your toe (トウ) in the dark and reach for the lamp.",
+      "fr": "Un tout (トウ) petit lampadaire éclaire toute la ruelle."
+    },
+    {
+      "literal": "灰",
+      "reading": "カイ",
+      "meaning": "ashes",
+      "en": "A kayak (カイ) glides past a shore of cold grey ashes.",
+      "fr": "La caille (カイ) rôtie a fini réduite en cendres."
+    },
+    {
+      "literal": "竹",
+      "reading": "チク",
+      "meaning": "bamboo",
+      "en": "A fluffy chick (チク) pecking between the tall bamboo stalks.",
+      "fr": "Un salon très chic (チク), tout habillé de bambou."
+    },
+    {
+      "literal": "糸",
+      "reading": "シ",
+      "meaning": "thread",
+      "en": "She (シ) tugs a loose thread hanging from her sleeve.",
+      "fr": "Chiche (シ) que je passe ce fil dans le chas de l'aiguille !"
+    },
+    {
+      "literal": "缶",
+      "reading": "カン",
+      "meaning": "tin can",
+      "en": "A dented tin can (カン) rattling down the empty street.",
+      "fr": "Quand (カン) la boîte de conserve est vide, on la recycle."
+    },
+    {
+      "literal": "羽",
+      "reading": "ウ",
+      "meaning": "feathers",
+      "en": "Ooh (ウ), a single soft feather drifting slowly down.",
+      "fr": "Où (ウ) s'est envolée la plume que je tenais ?"
+    },
+    {
+      "literal": "肌",
+      "reading": "キ",
+      "meaning": "texture, skin",
+      "en": "Run your thumb over the key (キ) and feel its ridged texture.",
+      "fr": "Qui (キ) a la peau la plus douce au toucher ?"
+    },
+    {
+      "literal": "舟",
+      "reading": "シュウ",
+      "meaning": "boat, ship",
+      "en": "A wooden shoe (シュウ) floating along like a tiny boat.",
+      "fr": "Un petit chou (シュウ) qui flotte comme une barque."
+    },
+    {
+      "literal": "虫",
+      "reading": "チュウ",
+      "meaning": "insect, bug",
+      "en": "An insect that will chew (チュウ) right through your garden.",
+      "fr": "Atchoum (チュウ), un insecte m'a chatouillé le nez !"
+    },
+    {
+      "literal": "血",
+      "reading": "ケツ",
+      "meaning": "blood",
+      "en": "Ketchup (ケツ) splattered like blood across the white plate.",
+      "fr": "La quetsche (ケツ), rouge sombre comme une goutte de sang."
+    },
+    {
+      "literal": "衣",
+      "reading": "イ",
+      "meaning": "garment, clothes",
+      "en": "An easy (イ), loose garment you can slip on in seconds.",
+      "fr": "Il y (イ) a un vêtement plié au pied du lit."
+    },
+    {
+      "literal": "乱",
+      "reading": "ラン",
+      "meaning": "riot, disorder",
+      "en": "The mob ran (ラン) wild, turning the square into a riot.",
+      "fr": "Un rang (ラン) de manifestants sombre dans le désordre."
+    },
+    {
+      "literal": "伸",
+      "reading": "シン",
+      "meaning": "stretch, expand",
+      "en": "Stretch out and feel the shin (シン) muscle slowly lengthen.",
+      "fr": "On étire le tissu made in Chine (シン) pour l'agrandir."
+    },
+    {
+      "literal": "伺",
+      "reading": "シ",
+      "meaning": "pay respects, visit",
+      "en": "She (シ) drops by to pay her respects to the old master.",
+      "fr": "Tout chic (シ), il rend visite pour présenter ses respects."
+    },
+    {
+      "literal": "低",
+      "reading": "テイ",
+      "meaning": "low, lower",
+      "en": "Stay (テイ) low and keep your head well down.",
+      "fr": "La taie (テイ) glissée tout en bas de l'oreiller."
+    },
+    {
+      "literal": "児",
+      "reading": "ジ",
+      "meaning": "newborn child",
+      "en": "Gee (ジ), what a tiny little newborn baby!",
+      "fr": "La petite Gigi (ジ) vient tout juste de naître."
+    },
+    {
+      "literal": "兵",
+      "reading": "ヘイ",
+      "meaning": "soldier",
+      "en": "Hey (ヘイ), soldier, fall straight into line!",
+      "fr": "Hé (ヘイ), soldat, au garde-à-vous !"
+    },
+    {
+      "literal": "卵",
+      "reading": "ラン",
+      "meaning": "egg, ovum",
+      "en": "The yolk ran (ラン) bright orange from the cracked egg.",
+      "fr": "Un œuf par rang (ラン), bien alignés dans la boîte."
+    },
+    {
+      "literal": "含",
+      "reading": "ガン",
+      "meaning": "contain, hold in",
+      "en": "The chamber holds a single gun (ガン) round inside it.",
+      "fr": "Le gant (ガン) contient encore la chaleur de la main."
+    },
+    {
+      "literal": "囲",
+      "reading": "イ",
+      "meaning": "surround, besiege",
+      "en": "Troops on each (イ) side surround the old fortress.",
+      "fr": "L'île (イ) est cernée par la mer de tous les côtés."
+    },
+    {
+      "literal": "坂",
+      "reading": "ハン",
+      "meaning": "slope, incline",
+      "en": "Steady yourself with a hand (ハン) as you climb the steep slope.",
+      "fr": "Un hangar (ハン) perché tout en haut de la pente raide."
+    },
+    {
+      "literal": "均",
+      "reading": "キン",
+      "meaning": "level, average",
+      "en": "Keen (キン) to keep every share perfectly level and even.",
+      "fr": "Un coquin (キン) qui partage le butin à parts bien égales."
+    },
+    {
+      "literal": "希",
+      "reading": "キ",
+      "meaning": "hope, wish for",
+      "en": "Make a wish and hope the key (キ) opens the door to your dream.",
+      "fr": "Qui (キ) n'a jamais fait un vœu plein d'espoir ?"
+    },
+    {
+      "literal": "床",
+      "reading": "ショウ",
+      "meaning": "bed, floor",
+      "en": "A mattress on the floor, center stage for the late-night show (ショウ).",
+      "fr": "Le lit bien chaud (ショウ) posé à même le sol."
+    },
+    {
+      "literal": "快",
+      "reading": "カイ",
+      "meaning": "cheerful, pleasant",
+      "en": "In a cheerful mood, spirits high as the wide blue sky (カイ).",
+      "fr": "Une balade joyeuse sur le quai (カイ) ensoleillé."
+    },
+    {
+      "literal": "技",
+      "reading": "ギ",
+      "meaning": "skill, craft",
+      "en": "It takes real skill to shift each gear (ギ) smoothly.",
+      "fr": "Il faut du métier pour accorder la guitare (ギ)."
+    },
+    {
+      "literal": "改",
+      "reading": "カイ",
+      "meaning": "reform, change",
+      "en": "They reformed the whole plan and let it soar like a kite (カイ).",
+      "fr": "On repeint tout en kaki (カイ) : un vrai changement."
+    },
+    {
+      "literal": "材",
+      "reading": "ザイ",
+      "meaning": "lumber, timber",
+      "en": "Lumber cut to the exact design (ザイ) of the new frame.",
+      "fr": "Du bois massif importé tout droit du Zaïre (ザイ)."
+    },
+    {
+      "literal": "村",
+      "reading": "ソン",
+      "meaning": "village",
+      "en": "Every son (ソン) in the village knows each footpath by heart.",
+      "fr": "Le son (ソン) des cloches résonne dans tout le village."
+    },
+    {
+      "literal": "沈",
+      "reading": "チン",
+      "meaning": "sink, submerge",
+      "en": "The water rose past his chin (チン) as the boat sank.",
+      "fr": "Tchin (チン), et le verre coule aussitôt au fond de l'eau."
+    }
+  ]
+}

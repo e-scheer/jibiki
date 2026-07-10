@@ -1,0 +1,563 @@
+{
+  "schema": "jibiki-kanji-reading-briefs/1",
+  "generated": "2026-07-10",
+  "status": "Primary on-yomi reading mnemonics for JLPT N5, en + fr.",
+  "purpose": "Per-language phonetic reading mnemonics: the on-yomi sound anchored to a keyword that sounds like it in each language, nodding to the meaning. Seeds as kind='kanji_reading' with the reading field, keyed by language.",
+  "legal": "Original jibiki writing. Readings from KANJIDIC2 (CC BY-SA), already ingested.",
+  "count": 79,
+  "kanji": [
+    {
+      "literal": "土",
+      "reading": "ド",
+      "meaning": "soil",
+      "en": "The gardener works the soil until it is soft as dough (ド).",
+      "fr": "On courbe le dos (ド) pour retourner la terre du jardin."
+    },
+    {
+      "literal": "木",
+      "reading": "ボク",
+      "meaning": "tree",
+      "en": "Every book (ボク) begins its life as a tree in the forest.",
+      "fr": "Il y a beaucoup (ボク) d'arbres dans cette forêt épaisse."
+    },
+    {
+      "literal": "本",
+      "reading": "ホン",
+      "meaning": "book, origin",
+      "en": "Hone (ホン) your mind by reading a good book from cover to cover.",
+      "fr": "Quelle honte (ホン) de corner les pages d'un si beau livre."
+    },
+    {
+      "literal": "休",
+      "reading": "キュウ",
+      "meaning": "rest",
+      "en": "Waiting for the director's cue (キュウ), the tired actor finally rests.",
+      "fr": "Une bonne cure (キュウ) thermale pour se reposer une semaine."
+    },
+    {
+      "literal": "水",
+      "reading": "スイ",
+      "meaning": "water",
+      "en": "A sweet (スイ) gulp of cold spring water on a scorching day.",
+      "fr": "Je suis (スイ) assoiffé : vite, un grand verre d'eau."
+    },
+    {
+      "literal": "火",
+      "reading": "カ",
+      "meaning": "fire",
+      "en": "A yellow cab (カ) burst into flames right in the street.",
+      "fr": "Le car (カ) scolaire prend feu sur le bord de la route."
+    },
+    {
+      "literal": "日",
+      "reading": "ニチ",
+      "meaning": "sun, day",
+      "en": "The cat found a sunny niche (ニチ) to bask in all day.",
+      "fr": "Le chien dort dans sa niche (ニチ) sous le soleil de midi."
+    },
+    {
+      "literal": "月",
+      "reading": "ゲツ",
+      "meaning": "moon, month",
+      "en": "The full moon gets (ゲツ) brighter each night of the month.",
+      "fr": "On enfile ses guêtres (ゲツ) pour marcher sous la lune tout le mois."
+    },
+    {
+      "literal": "雨",
+      "reading": "ウ",
+      "meaning": "rain",
+      "en": "Everyone goes ooh (ウ) as the sudden rain soaks the street.",
+      "fr": "Où (ウ) est le parapluie ? La pluie tombe déjà."
+    },
+    {
+      "literal": "天",
+      "reading": "テン",
+      "meaning": "heaven, sky",
+      "en": "Cloud nine, no, cloud ten (テン), floating high in heaven.",
+      "fr": "Le temps (テン) est au beau fixe, un ciel tout dégagé."
+    },
+    {
+      "literal": "気",
+      "reading": "キ",
+      "meaning": "spirit, mood",
+      "en": "The key (キ) to a good mood is a full night of sleep.",
+      "fr": "Qui (キ) est de si bonne humeur ce matin ?"
+    },
+    {
+      "literal": "円",
+      "reading": "エン",
+      "meaning": "circle, yen",
+      "en": "There is no beginning and no end (エン) to a perfect circle.",
+      "fr": "Une pièce d'un yen (エン), toute ronde et brillante."
+    },
+    {
+      "literal": "白",
+      "reading": "ハク",
+      "meaning": "white",
+      "en": "A snow-white hawk (ハク) circling high overhead.",
+      "fr": "Un haïku (ハク) tracé sur la neige toute blanche."
+    },
+    {
+      "literal": "北",
+      "reading": "ホク",
+      "meaning": "north",
+      "en": "A fish hook (ホク) frozen solid in the icy north.",
+      "fr": "Le froid du nord me donne le hoquet (ホク)."
+    },
+    {
+      "literal": "南",
+      "reading": "ナン",
+      "meaning": "south",
+      "en": "Warm naan (ナン) bread baked under the sunny south.",
+      "fr": "Le train file vers Nantes (ナン), plein sud."
+    },
+    {
+      "literal": "東",
+      "reading": "トウ",
+      "meaning": "east",
+      "en": "I point my toe (トウ) toward the sunrise in the east.",
+      "fr": "Tout (トウ) à l'est, le soleil se lève enfin."
+    },
+    {
+      "literal": "西",
+      "reading": "セイ",
+      "meaning": "west",
+      "en": "Say (セイ) goodbye to the sun as it sinks in the west.",
+      "fr": "C'est (セイ) à l'ouest que le soleil se couche."
+    },
+    {
+      "literal": "右",
+      "reading": "ウ",
+      "meaning": "right",
+      "en": "One U (ウ) turn later, we finally bear off to the right.",
+      "fr": "À gauche ou (ウ) à droite ? On prend à droite."
+    },
+    {
+      "literal": "左",
+      "reading": "サ",
+      "meaning": "left",
+      "en": "I saw (サ) her wave hello with her left hand.",
+      "fr": "Elle lève sa (サ) main gauche pour saluer."
+    },
+    {
+      "literal": "外",
+      "reading": "ガイ",
+      "meaning": "outside",
+      "en": "A lonely guy (ガイ) waiting outside in the cold.",
+      "fr": "Il fait gai (ガイ) dehors, sortons donc jouer !"
+    },
+    {
+      "literal": "前",
+      "reading": "ゼン",
+      "meaning": "front, before",
+      "en": "A moment of zen (ゼン) calm before the crowd, right out in front.",
+      "fr": "Reste zen (ゼン) juste avant de passer devant tout le monde."
+    },
+    {
+      "literal": "後",
+      "reading": "ゴ",
+      "meaning": "behind, after",
+      "en": "Ready, set, go (ゴ): you leave last, behind the others.",
+      "fr": "Une gaufre (ゴ) en dessert, juste après le repas."
+    },
+    {
+      "literal": "半",
+      "reading": "ハン",
+      "meaning": "half",
+      "en": "Slice the apple clean in half with one steady hand (ハン).",
+      "fr": "Han (ハン) ! il fend la bûche en deux d'un seul coup."
+    },
+    {
+      "literal": "今",
+      "reading": "コン",
+      "meaning": "now",
+      "en": "Grab that ice cream cone (コン) right now before it melts.",
+      "fr": "On règle le compte (コン) maintenant, tout de suite."
+    },
+    {
+      "literal": "時",
+      "reading": "ジ",
+      "meaning": "time, hour",
+      "en": "Gee (ジ), is it really that time already?",
+      "fr": "J'y (ジ) pense sans cesse : l'heure tourne vite."
+    },
+    {
+      "literal": "年",
+      "reading": "ネン",
+      "meaning": "year",
+      "en": "A quiet nun (ネン) marks each passing year in the convent.",
+      "fr": "Un petit nain (ネン) fête son anniversaire chaque année."
+    },
+    {
+      "literal": "毎",
+      "reading": "マイ",
+      "meaning": "every",
+      "en": "My (マイ), oh my, I water these plants every single day.",
+      "fr": "Chaque mai (マイ), les fleurs reviennent sans faute."
+    },
+    {
+      "literal": "午",
+      "reading": "ゴ",
+      "meaning": "noon",
+      "en": "At high noon the whistle blows and off we go (ゴ) to lunch.",
+      "fr": "Au douzième coup de gong (ゴ), il est pile midi."
+    },
+    {
+      "literal": "国",
+      "reading": "コク",
+      "meaning": "country",
+      "en": "Every country grows its cocoa (コク) a little differently.",
+      "fr": "Le coq (コク), fier symbole de tout le pays."
+    },
+    {
+      "literal": "学",
+      "reading": "ガク",
+      "meaning": "study",
+      "en": "The students gawk (ガク) at the proof, then knuckle down to study.",
+      "fr": "Un bon gag (ガク) détend la classe avant d'étudier."
+    },
+    {
+      "literal": "一",
+      "reading": "イチ",
+      "meaning": "one",
+      "en": "One itchy (イチ) mosquito bite, just a single one.",
+      "fr": "Un seul litchi (イチ) au fond du bol, un et pas plus."
+    },
+    {
+      "literal": "二",
+      "reading": "ニ",
+      "meaning": "two",
+      "en": "Two knees (ニ) knocking together in the cold.",
+      "fr": "Deux oiseaux blottis dans le nid (ニ)."
+    },
+    {
+      "literal": "三",
+      "reading": "サン",
+      "meaning": "three",
+      "en": "Three tenors sang (サン) the very same note.",
+      "fr": "Trois gouttes de sang (サン) tombées sur la neige."
+    },
+    {
+      "literal": "四",
+      "reading": "シ",
+      "meaning": "four",
+      "en": "She (シ) counted to four on her fingers.",
+      "fr": "Quatre tenues chic (シ) alignées pour le défilé."
+    },
+    {
+      "literal": "五",
+      "reading": "ゴ",
+      "meaning": "five",
+      "en": "Give me five, then go (ゴ)!",
+      "fr": "Cinq gaufres (ゴ) empilées pour le goûter."
+    },
+    {
+      "literal": "六",
+      "reading": "ロク",
+      "meaning": "six",
+      "en": "Six smooth rocks (ロク) lined up on the sill.",
+      "fr": "Six rocs (ロク) plantés le long de la falaise."
+    },
+    {
+      "literal": "七",
+      "reading": "シチ",
+      "meaning": "seven",
+      "en": "She cheered (シチ) her lucky seven at the table.",
+      "fr": "Sept petits chichis (シチ) dorés sur l'étal du marché."
+    },
+    {
+      "literal": "八",
+      "reading": "ハチ",
+      "meaning": "eight",
+      "en": "Eight rabbits crowded into the hutch (ハチ).",
+      "fr": "Huit bûcherons, une hache (ハチ) chacun."
+    },
+    {
+      "literal": "九",
+      "reading": "キュウ",
+      "meaning": "nine",
+      "en": "Nine fans stood waiting in the queue (キュウ).",
+      "fr": "Neuf clients font la queue (キュウ) au guichet."
+    },
+    {
+      "literal": "十",
+      "reading": "ジュウ",
+      "meaning": "ten",
+      "en": "Ten glasses of juice (ジュウ) lined up on the tray.",
+      "fr": "Dix joujoux (ジュウ) alignés sous le sapin."
+    },
+    {
+      "literal": "百",
+      "reading": "ヒャク",
+      "meaning": "hundred",
+      "en": "A herd of a hundred yaks (ヒャク) across the plateau.",
+      "fr": "Cent hyacinthes (ヒャク) fleuries dans le pré."
+    },
+    {
+      "literal": "千",
+      "reading": "セン",
+      "meaning": "thousand",
+      "en": "A thousand roses giving off one giant scent (セン).",
+      "fr": "Mille, c'est simplement dix fois cent (セン)."
+    },
+    {
+      "literal": "万",
+      "reading": "マン",
+      "meaning": "ten thousand",
+      "en": "Ten thousand men (マン) packed into the stadium.",
+      "fr": "Une manne (マン) de dix mille pièces d'or."
+    },
+    {
+      "literal": "上",
+      "reading": "ジョウ",
+      "meaning": "above",
+      "en": "Joe (ジョウ) lifted the trophy high above his head.",
+      "fr": "Le joker (ジョウ) posé tout au-dessus de la pile."
+    },
+    {
+      "literal": "下",
+      "reading": "カ",
+      "meaning": "below",
+      "en": "The car (カ) parked below the overpass.",
+      "fr": "Le carreau (カ) froid du sol, tout en bas."
+    },
+    {
+      "literal": "中",
+      "reading": "チュウ",
+      "meaning": "middle",
+      "en": "Chew (チュウ) right through the middle of the sandwich.",
+      "fr": "Le wagon du milieu fait tchou-tchou (チュウ)."
+    },
+    {
+      "literal": "大",
+      "reading": "ダイ",
+      "meaning": "big",
+      "en": "One big vat of crimson dye (ダイ).",
+      "fr": "Une tête d'ail (ダイ) énorme au potager."
+    },
+    {
+      "literal": "小",
+      "reading": "ショウ",
+      "meaning": "small",
+      "en": "A tiny show (ショウ) on a matchbox stage.",
+      "fr": "Mon petit chou (ショウ), minuscule et tout mignon."
+    },
+    {
+      "literal": "人",
+      "reading": "ジン",
+      "meaning": "person",
+      "en": "A person unwinding with a cold glass of gin (ジン) at day's end.",
+      "fr": "On frotte la lampe et un djinn (ジン) en sort: la personne magique."
+    },
+    {
+      "literal": "入",
+      "reading": "ニュウ",
+      "meaning": "enter",
+      "en": "A new (ニュウ) student enters through the wide door.",
+      "fr": "Il entre tout nu (ニュウ) dans les bains chauds."
+    },
+    {
+      "literal": "女",
+      "reading": "ジョ",
+      "meaning": "woman",
+      "en": "Jo (ジョ), the boldest woman in Little Women.",
+      "fr": "Une femme si jolie (ジョ) qu'on se retourne."
+    },
+    {
+      "literal": "子",
+      "reading": "シ",
+      "meaning": "child",
+      "en": "A child hiding under a big white sheet (シ).",
+      "fr": "L'enfant déborde de chi (シ), plein d'énergie vitale."
+    },
+    {
+      "literal": "男",
+      "reading": "ダン",
+      "meaning": "man",
+      "en": "Dan (ダン), the strongest man on the crew.",
+      "fr": "Un vrai dandy (ダン), un homme tiré à quatre épingles."
+    },
+    {
+      "literal": "父",
+      "reading": "フ",
+      "meaning": "father",
+      "en": "Father sets the food (フ) down on the table.",
+      "fr": "Un père un brin fou (フ), mais toujours tendre."
+    },
+    {
+      "literal": "母",
+      "reading": "ボ",
+      "meaning": "mother",
+      "en": "Mother tied a bright bow (ボ) in her hair.",
+      "fr": "Maman souffle sur le bobo (ボ) pour le soigner."
+    },
+    {
+      "literal": "友",
+      "reading": "ユウ",
+      "meaning": "friend",
+      "en": "A good friend is just a second you (ユウ).",
+      "fr": "On crie you-hou (ユウ) pour héler un ami."
+    },
+    {
+      "literal": "先",
+      "reading": "セン",
+      "meaning": "ahead",
+      "en": "Send (セン) the scout on ahead of the group.",
+      "fr": "Le sens (セン) de la marche: toujours devant."
+    },
+    {
+      "literal": "生",
+      "reading": "セイ",
+      "meaning": "life",
+      "en": "A newborn's first cry, as if to say (セイ) hello to life.",
+      "fr": "Le bébé sait (セイ) déjà pleurer: la vie qui commence."
+    },
+    {
+      "literal": "山",
+      "reading": "サン",
+      "meaning": "mountain",
+      "en": "The sun (サン) rising right behind the mountain peak.",
+      "fr": "Le sommet sans (サン) un seul nuage."
+    },
+    {
+      "literal": "川",
+      "reading": "セン",
+      "meaning": "river",
+      "en": "The river winds wide like the Seine (セン) through town.",
+      "fr": "La Seine (セン), ce fleuve qui traverse Paris."
+    },
+    {
+      "literal": "校",
+      "reading": "コウ",
+      "meaning": "school",
+      "en": "The coach (コウ) blows his whistle across the school yard.",
+      "fr": "On tend le cou (コウ) au fond de la classe pour voir le tableau."
+    },
+    {
+      "literal": "高",
+      "reading": "コウ",
+      "meaning": "tall, high",
+      "en": "A tall Coke (コウ) can perched high on the very top shelf.",
+      "fr": "Le coucou (コウ) chante, perché tout en haut de l'arbre."
+    },
+    {
+      "literal": "食",
+      "reading": "ショク",
+      "meaning": "eat, food",
+      "en": "A shock (ショク) of hunger hits, so it is time to eat.",
+      "fr": "Un choc (ショク) de saveurs à chaque bouchée du repas."
+    },
+    {
+      "literal": "行",
+      "reading": "コウ",
+      "meaning": "go, journey",
+      "en": "We go down to the hidden cove (コウ) at dawn to start the journey.",
+      "fr": "D'un coup (コウ), on lève l'ancre et on part en voyage."
+    },
+    {
+      "literal": "来",
+      "reading": "ライ",
+      "meaning": "come",
+      "en": "Come in, there is warm rye (ライ) bread waiting on the table.",
+      "fr": "Le train arrive : il vient sur le rail (ライ)."
+    },
+    {
+      "literal": "出",
+      "reading": "シュツ",
+      "meaning": "exit",
+      "en": "He shoots (シュツ) out the exit the moment the bell rings.",
+      "fr": "On sort en glissant tout droit par la chute (シュツ)."
+    },
+    {
+      "literal": "見",
+      "reading": "ケン",
+      "meaning": "see",
+      "en": "That tiny speck was beyond my ken (ケン); I simply could not see it.",
+      "fr": "Le guide kényan (ケン) repère le lion avant tout le monde."
+    },
+    {
+      "literal": "聞",
+      "reading": "ブン",
+      "meaning": "hear",
+      "en": "He cupped a bun (ブン) to his ear like a shell to hear the sea.",
+      "fr": "La bonne (ブン) écoute aux portes pour tout entendre."
+    },
+    {
+      "literal": "話",
+      "reading": "ワ",
+      "meaning": "talk, tale",
+      "en": "He waffles (ワ) on, talking without ever reaching a point.",
+      "fr": "L'oie (ワ) jacasse sans arrêt : elle parle, elle raconte."
+    },
+    {
+      "literal": "語",
+      "reading": "ゴ",
+      "meaning": "word, language",
+      "en": "'Go (ゴ)' was the first word she learned in the new language.",
+      "fr": "L'argot (ゴ) des rues, c'est toute une langue à décoder."
+    },
+    {
+      "literal": "読",
+      "reading": "ドク",
+      "meaning": "read",
+      "en": "He sat on the dock (ドク) and read his book from cover to cover.",
+      "fr": "Le doc (ドク) lit le dossier ligne par ligne."
+    },
+    {
+      "literal": "書",
+      "reading": "ショ",
+      "meaning": "write",
+      "en": "He scribbled a note to show (ショ) exactly what he meant.",
+      "fr": "Il écrit à chaud (ショ), les mots encore brûlants."
+    },
+    {
+      "literal": "名",
+      "reading": "メイ",
+      "meaning": "name",
+      "en": "May (メイ) I write your name on the guest list?",
+      "fr": "Chaque mai (メイ), l'enfant réapprend à écrire son nom."
+    },
+    {
+      "literal": "車",
+      "reading": "シャ",
+      "meaning": "car, vehicle",
+      "en": "The shah (シャ) glides past in a golden car.",
+      "fr": "Un chat (シャ) file devant la voiture qui freine."
+    },
+    {
+      "literal": "金",
+      "reading": "キン",
+      "meaning": "gold, money",
+      "en": "He left every last gold coin to his kin (キン).",
+      "fr": "Elle fait quine (キン) au loto et rafle la cagnotte en or."
+    },
+    {
+      "literal": "長",
+      "reading": "チョウ",
+      "meaning": "long, leader",
+      "en": "The chow (チョウ) line stretched long, right around the block.",
+      "fr": "Le plus long des choux (チョウ) trône dans le potager."
+    },
+    {
+      "literal": "電",
+      "reading": "デン",
+      "meaning": "electricity",
+      "en": "The den (デン) buzzed, every socket alive with electricity.",
+      "fr": "La décharge électrique fait grincer les dents (デン)."
+    },
+    {
+      "literal": "間",
+      "reading": "カン",
+      "meaning": "interval, space",
+      "en": "Leave a can's (カン) width of space between each shelf.",
+      "fr": "Quand ? (カン) C'est l'intervalle exact entre deux instants."
+    },
+    {
+      "literal": "何",
+      "reading": "カ",
+      "meaning": "what",
+      "en": "What car (カ) is that? she asked, completely puzzled.",
+      "fr": "Quoi ? Dans quel cas (カ), au juste ?"
+    }
+  ]
+}
