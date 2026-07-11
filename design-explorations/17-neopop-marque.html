@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki · exploration 17 · Neo-pop marque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17131f;
+    --acid:#f2e51c;
+    --klein:#2b36e3;
+    --magenta:#ff57a8;
+    --lime:#8fe838;
+    --lav:#c9b8f9;
+    --coral:#ff6952;
+    --bg:#f4f4f6;
+    --paperw:#ffffff;
+    --ink-2:#45414e;
+    --line:3px solid var(--ink);
+    --shadow:4px 4px 0 var(--ink);
+    --shadow-lg:6px 6px 0 var(--ink);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    font-family:"Space Grotesk",sans-serif;
+    background:var(--acid);
+    color:var(--ink);
+    min-height:100vh;
+    padding:56px 32px 88px;
+  }
+  :lang(ja){font-family:"Zen Kaku Gothic New",sans-serif}
+
+  /* ---------- intro ---------- */
+  .intro{max-width:1200px;margin:0 auto 56px;position:relative}
+  .intro h1{
+    font-size:64px;font-weight:700;letter-spacing:-0.03em;line-height:1;
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  }
+  .intro .jp-tag{
+    font-size:19px;font-weight:900;letter-spacing:.08em;
+    background:var(--ink);color:var(--acid);
+    padding:9px 16px 10px;border-radius:10px;
+    transform:rotate(2deg);
+  }
+  .intro p{margin-top:16px;font-size:19px;font-weight:500;max-width:72ch;line-height:1.45}
+  .deco{position:absolute;pointer-events:none}
+  .deco.bar{top:42px;right:58px;width:70px;height:18px;background:var(--klein);border:var(--line);border-radius:6px;transform:rotate(-10deg)}
+  .deco.dot{top:6px;right:112px;width:22px;height:22px;background:var(--magenta);border:var(--line);border-radius:6px;transform:rotate(14deg)}
+
+  /* ---------- planche ---------- */
+  main{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:72px}
+  .band-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+  .caption{
+    font-size:16px;font-weight:700;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    padding:8px 20px;box-shadow:var(--shadow);
+  }
+  .band-head p{font-size:14.5px;font-weight:600;max-width:78ch;line-height:1.4}
+
+  .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:24px}
+  .tile{display:flex;flex-direction:column;gap:12px}
+  .span2{grid-column:span 2}
+  .span3{grid-column:span 3}
+  .span4{grid-column:span 4}
+  .span6{grid-column:span 6}
+  .plate{
+    flex:1;min-height:250px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--paperw);border:var(--line);border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    padding:28px;
+  }
+  .plate.on-bg{background:var(--bg)}
+  .plate.on-lav{background:var(--lav)}
+  .plate.on-ink{background:var(--ink)}
+  .tile figcaption{display:flex;flex-direction:column;gap:1px;padding:0 4px}
+  .tile figcaption b{font-size:14.5px;font-weight:700}
+  .tile figcaption span{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+
+  /* ---------- symbole (SVG partagé) ---------- */
+  .sym{display:block;flex:0 0 auto;--m-ink:var(--ink);--m-face:var(--acid)}
+  .sym.mono{--m-face:var(--paperw)}
+  .sym.neg{--m-ink:#fff;--m-face:var(--ink)}
+
+  /* ---------- wordmark ---------- */
+  .wm{
+    display:inline-flex;align-items:baseline;
+    font-weight:700;letter-spacing:-0.03em;line-height:1;
+    color:var(--wm-ink,var(--ink));
+  }
+  .wm::after{
+    content:"";display:inline-block;
+    width:.375em;height:.375em;
+    background:var(--wm-dot,var(--acid));
+    border:.07em solid var(--wm-dot-line,var(--ink));
+    border-radius:.09em;
+    margin-left:.10em;
+    transform:rotate(12deg);
+  }
+  .wm.mono{--wm-dot:var(--ink);--wm-dot-line:var(--ink)}
+  .wm.neg{--wm-ink:#fff;--wm-dot:var(--acid);--wm-dot-line:#fff}
+
+  .lockup{display:inline-flex;align-items:center;gap:18px}
+  .lockup .wm{font-size:46px}
+  .lockup.mid .wm{font-size:36px;gap:14px}
+  .lockup.mid{gap:14px}
+
+  /* ---------- icône d'app ---------- */
+  .spring{display:flex;align-items:flex-end;gap:40px}
+  .spring .app{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .spring .app span{font-size:12px;font-weight:600}
+  .appicon{
+    position:relative;flex:0 0 auto;
+    background:var(--acid);border:var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .appicon .g{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;line-height:1}
+  .appicon.s120{width:120px;height:120px;border-radius:27px;box-shadow:5px 5px 0 var(--ink)}
+  .appicon.s120 .g{font-size:64px}
+  .appicon.s60{width:60px;height:60px;border-radius:14px;border-width:2.5px;box-shadow:3px 3px 0 var(--ink)}
+  .appicon.s60 .g{font-size:32px}
+
+  /* ---------- rangée de tailles ---------- */
+  .sizes{display:flex;align-items:flex-end;gap:44px;flex-wrap:wrap;justify-content:center}
+  .sizes .sz{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .sizes .sz em{font-style:normal;font-size:12px;font-weight:700;color:var(--ink-2)}
+  .sizes .sep{width:3px;height:64px;background:var(--ink);border-radius:2px;align-self:center}
+  .lockup.s24{gap:8px}
+  .lockup.s24 .wm{font-size:17px}
+
+  /* ---------- téléphones ---------- */
+  .phones{display:flex;gap:56px;justify-content:center;flex-wrap:wrap}
+  .panel{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .screen{
+    width:390px;height:844px;flex:0 0 auto;
+    border:var(--line);border-radius:34px;
+    box-shadow:10px 10px 0 var(--ink);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .splash.on-klein{background:var(--klein)}
+  .splash.on-dark{background:var(--ink)}
+
+  .sp-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding-bottom:24px}
+  .blockmark{
+    position:relative;width:148px;height:148px;
+    background:var(--acid);border:5px solid var(--ink);border-radius:36px;
+    box-shadow:9px 9px 0 var(--ink);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .blockmark .g{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:96px;line-height:1;color:var(--ink)}
+  .sp-wm{font-size:44px;--wm-ink:#fff;--wm-dot:var(--acid);--wm-dot-line:var(--ink)}
+  .splash.on-dark .sp-wm{--wm-dot-line:#fff}
+  .sp-foot{display:flex;flex-direction:column;align-items:center;gap:22px;padding:0 24px 44px}
+  .sp-base{font-size:13.5px;font-weight:600;letter-spacing:.02em;color:#fff}
+  .splash.on-dark .sp-base{color:var(--lav)}
+
+  /* ---------- loader « poursuite » ---------- */
+  .chase{position:relative;flex:0 0 auto;width:var(--s);height:var(--s);--o:calc(var(--s) - var(--b))}
+  .chase i{
+    position:absolute;top:0;left:0;
+    width:var(--b);height:var(--b);
+    background:var(--klein);
+    border:var(--lw) solid var(--ink);border-radius:var(--lr);
+    box-shadow:var(--lsh) var(--lsh) 0 var(--ink);
+    animation:chase var(--t,640ms) steps(1,end) infinite;
+  }
+  .chase i:nth-child(2){background:var(--magenta);translate:var(--o) 0;animation-delay:calc(var(--t,640ms) * -0.25)}
+  .chase i:nth-child(3){background:var(--lime);translate:var(--o) var(--o);animation-delay:calc(var(--t,640ms) * -0.5)}
+  .chase.alt i:nth-child(1){background:var(--acid)}
+  .chase.lg{--s:56px;--b:24px;--lw:2.5px;--lr:6px;--lsh:3px}
+  .chase.sm{--s:18px;--b:8px;--lw:1.5px;--lr:2px;--lsh:1.5px}
+  @keyframes chase{
+    0%{translate:0 0}
+    25%{translate:var(--o) 0}
+    50%{translate:var(--o) var(--o)}
+    75%{translate:0 var(--o)}
+    100%{translate:0 0}
+  }
+
+  .loader-demo{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .loader-demo p{font-size:13px;font-weight:700}
+
+  /* ---------- inline ---------- */
+  .inline-col{display:flex;flex-direction:column;gap:18px;width:100%;max-width:300px}
+  .fbtn{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    min-height:56px;width:100%;
+    background:var(--acid);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    font-size:17px;font-weight:700;
+  }
+  .frow{
+    display:flex;align-items:center;gap:14px;
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:12px 14px;
+  }
+  .frow .txt{flex:1;min-width:0}
+  .frow .t1{font-size:15px;font-weight:700}
+  .frow .t2{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:2px}
+
+  /* ---------- skeleton ---------- */
+  .skl{
+    display:block;
+    background:#d7d3e3;
+    border:2.5px solid var(--ink);border-radius:8px;
+    animation:skl .9s ease-in-out infinite alternate;
+  }
+  @keyframes skl{
+    from{background:#e6e3f0}
+    to{background:#c6c0d8}
+  }
+  .sk-stack{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px}
+  .sk-hero{
+    background:var(--paperw);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .sk-hero .big{width:96px;height:96px;border-radius:12px}
+  .sk-hero .bar{height:12px;border-radius:6px}
+  .sk-hero .pill{width:110px;height:34px;border-radius:10px}
+  .sk-card{
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:14px;display:flex;flex-direction:column;gap:9px;
+  }
+  .sk-card .bar{height:11px;border-radius:6px}
+  .w30{width:30%}.w45{width:45%}.w60{width:60%}.w80{width:80%}
+  .sk-chips{display:flex;gap:8px}
+  .sk-chips .skl{height:36px;border-radius:9px}
+  .c1{width:44px}.c2{width:36px}.c3{width:58px}.c4{width:40px}
+
+  /* ---------- footer ---------- */
+  .foot{max-width:1200px;margin:72px auto 0;font-size:12.5px;font-weight:600;color:var(--ink-2);text-align:center}
+
+  /* ---------- motion off ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .chase i,.skl{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= définitions SVG partagées ======= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="0 0 140 140">
+      <rect x="14" y="28" width="104" height="104" rx="26" fill="var(--m-ink,#17131f)"/>
+      <rect x="6" y="20" width="104" height="104" rx="26" fill="var(--m-face,#f2e51c)" stroke="var(--m-ink,#17131f)" stroke-width="7"/>
+      <text x="58" y="74" text-anchor="middle" dominant-baseline="central" font-family="Zen Kaku Gothic New, sans-serif" font-weight="900" font-size="70" fill="var(--m-ink,#17131f)">字</text>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="intro">
+  <h1>Neo-pop · marque <span class="jp-tag" lang="ja">ロゴ</span></h1>
+  <p>La déclinaison marque du thème 10 : un logo, un splash screen, un loader. Le symbole prend le caractère <span lang="ja">字</span>, premier kanji de <span lang="ja">字引</span> (jibiki, le dictionnaire). Contours encre, ombres dures, rien qui traîne.</p>
+  <span class="deco bar" aria-hidden="true"></span>
+  <span class="deco dot" aria-hidden="true"></span>
+</header>
+
+<main>
+
+  <!-- ============ 1 · LOGO ============ -->
+  <section class="band">
+    <div class="band-head">
+      <span class="caption">1 · Logo</span>
+      <p>Un bloc encré à ombre dure, le kanji <span lang="ja">字</span> en Zen Kaku 900. Wordmark « jibiki » en Space Grotesk 700, point jaune signature.</p>
+    </div>
+    <div class="tiles">
+
+      <figure class="tile span2">
+        <div class="plate">
+          <svg class="sym" width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole jibiki : le kanji 字 dans un bloc jaune"><use href="#mark"/></svg>
+        </div>
+        <figcaption><b>Symbole seul</b><span>Fond clair · usage par défaut</span></figcaption>
+      </figure>
+
+      <figure class="tile span4">
+        <div class="plate on-bg">
+          <div class="lockup">
+            <svg class="sym" width="68" height="68" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+        </div>
+        <figcaption><b>Lockup horizontal</b><span>Symbole + wordmark · en-têtes, marketing, à propos</span></figcaption>
+      </figure>
+
+      <figure class="tile span2">
+        <div class="plate on-lav">
+          <div class="spring">
+            <div class="app">
+              <div class="appicon s120" role="img" aria-label="Icône d'app jibiki, 120 pixels">
+                <span class="g" lang="ja">字</span>
+              </div>
+              <span>jibiki</span>
+            </div>
+            <div class="app">
+              <div class="appicon s60" role="img" aria-label="Icône d'app jibiki, 60 pixels">
+                <span class="g" lang="ja">字</span>
+              </div>
+              <span>jibiki</span>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Icône d'app</b><span>Squircle plein acide · 120 et 60 px</span></figcaption>
+      </figure>
+
+      <figure class="tile span2">
+        <div class="plate">
+          <div class="lockup mid">
+            <svg class="sym mono" width="56" height="56" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg>
+            <span class="wm mono" role="img" aria-label="jibiki, version monochrome">jibiki</span>
+          </div>
+        </div>
+        <figcaption><b>Monochrome encre</b><span>Une couleur · tampon, impression, favicon</span></figcaption>
+      </figure>
+
+      <figure class="tile span2">
+        <div class="plate on-ink">
+          <div class="lockup mid">
+            <svg class="sym neg" width="56" height="56" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg>
+            <span class="wm neg" role="img" aria-label="jibiki, version négatif">jibiki</span>
+          </div>
+        </div>
+        <figcaption><b>Négatif</b><span>Sur fond encre · pied de page, mode sombre</span></figcaption>
+      </figure>
+
+      <figure class="tile span6">
+        <div class="plate">
+          <div class="sizes">
+            <div class="sz"><svg class="sym" width="120" height="120" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg><em>120 px</em></div>
+            <div class="sz"><svg class="sym" width="60" height="60" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg><em>60 px</em></div>
+            <div class="sz"><svg class="sym" width="32" height="32" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg><em>32 px</em></div>
+            <div class="sz"><svg class="sym" width="24" height="24" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg><em>24 px</em></div>
+            <span class="sep" aria-hidden="true"></span>
+            <div class="sz">
+              <div class="lockup s24">
+                <svg class="sym" width="24" height="24" viewBox="0 0 140 140" aria-hidden="true"><use href="#mark"/></svg>
+                <span class="wm">jibiki</span>
+              </div>
+              <em>lockup à 24 px</em>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Test de taille</b><span>Le symbole reste lisible à 24 px : bloc et glyphe</span></figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- ============ 2 · SPLASH ============ -->
+  <section class="band">
+    <div class="band-head">
+      <span class="caption">2 · Splash screen</span>
+      <p>Lancement à froid, 390 × 844. Lockup vertical centré, loader et baseline en pied. La baseline vient des réglages du thème.</p>
+    </div>
+    <div class="phones">
+
+      <section class="panel">
+        <span class="caption">Splash · klein</span>
+        <article class="screen splash on-klein" aria-label="Splash screen, fond bleu klein">
+          <div class="sp-center">
+            <div class="blockmark">
+              <span class="g" lang="ja">字</span>
+            </div>
+            <span class="wm sp-wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <div class="sp-foot">
+            <div class="chase lg alt" role="status" aria-label="Chargement"><i></i><i></i><i></i></div>
+            <p class="sp-base">dictionnaire libre, mémoire durable</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <span class="caption">Splash · sombre</span>
+        <article class="screen splash on-dark" aria-label="Splash screen, fond encre">
+          <div class="sp-center">
+            <div class="blockmark">
+              <span class="g" lang="ja">字</span>
+            </div>
+            <span class="wm sp-wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <div class="sp-foot">
+            <div class="chase lg alt" role="status" aria-label="Chargement"><i></i><i></i><i></i></div>
+            <p class="sp-base">dictionnaire libre, mémoire durable</p>
+          </div>
+        </article>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- ============ 3 · LOADER ============ -->
+  <section class="band">
+    <div class="band-head">
+      <span class="caption">3 · Loader</span>
+      <p>Une seule mécanique : trois blocs qui se poursuivent autour d'un carré, par crans secs (steps, 640 ms le tour, toute pose est nette). Déclinée en plein écran, en inline 18 px et en skeleton. reduced-motion : tout se fige proprement.</p>
+    </div>
+    <div class="tiles">
+
+      <figure class="tile span2">
+        <div class="plate on-bg">
+          <div class="loader-demo">
+            <div class="chase lg" role="status" aria-label="Chargement"><i></i><i></i><i></i></div>
+            <p>Chargement…</p>
+          </div>
+        </div>
+        <figcaption><b>Plein écran</b><span>Splash, changement de paquet, premier lancement</span></figcaption>
+      </figure>
+
+      <figure class="tile span2">
+        <div class="plate">
+          <div class="inline-col">
+            <div class="fbtn" role="status" aria-label="Recherche en cours">
+              <span class="chase sm" aria-hidden="true"><i></i><i></i><i></i></span>
+              Recherche…
+            </div>
+            <div class="frow" role="status" aria-label="Synchronisation du paquet en cours">
+              <span class="chase sm" aria-hidden="true"><i></i><i></i><i></i></span>
+              <div class="txt">
+                <div class="t1">Kanji des panneaux de gare</div>
+                <div class="t2">Synchronisation · 84 sur 214 cartes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Inline · 18 px</b><span>Même mécanique, miniaturisée : bouton et ligne de liste</span></figcaption>
+      </figure>
+
+      <figure class="tile span2">
+        <div class="plate on-bg">
+          <div class="sk-stack" role="status" aria-label="Fiche mot en cours de chargement">
+            <div class="sk-hero">
+              <span class="skl big"></span>
+              <span class="skl bar w45"></span>
+              <span class="skl pill"></span>
+            </div>
+            <div class="sk-card">
+              <span class="skl bar w30"></span>
+              <span class="skl bar w80"></span>
+              <span class="skl bar w60"></span>
+            </div>
+            <div class="sk-chips" aria-hidden="true">
+              <span class="skl c1"></span>
+              <span class="skl c2"></span>
+              <span class="skl c3"></span>
+              <span class="skl c4"></span>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Skeleton</b><span>Fiche mot qui charge : contour encre, pulsation d'aplat</span></figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">jibiki · exploration 17 · marque Neo-pop, déclinée du thème 10</footer>
+
+</body>
+</html>

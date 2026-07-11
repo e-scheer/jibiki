@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki · exploration 18 · Neo-pop, logos alternatifs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17131f;
+    --acid:#f2e51c;
+    --klein:#2b36e3;
+    --magenta:#ff57a8;
+    --lime:#8fe838;
+    --lav:#c9b8f9;
+    --coral:#ff6952;
+    --bg:#f4f4f6;
+    --paperw:#ffffff;
+    --ink-2:#45414e;
+    --line:3px solid var(--ink);
+    --shadow:4px 4px 0 var(--ink);
+    --shadow-lg:6px 6px 0 var(--ink);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    font-family:"Space Grotesk",sans-serif;
+    background:var(--acid);
+    color:var(--ink);
+    min-height:100vh;
+    padding:56px 32px 88px;
+  }
+  :lang(ja){font-family:"Zen Kaku Gothic New",sans-serif}
+
+  /* ---------- intro ---------- */
+  .intro{max-width:1200px;margin:0 auto 48px;position:relative}
+  .intro h1{
+    font-size:60px;font-weight:700;letter-spacing:-0.03em;line-height:1;
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  }
+  .intro .jp-tag{
+    font-size:19px;font-weight:900;letter-spacing:.08em;
+    background:var(--ink);color:var(--acid);
+    padding:9px 16px 10px;border-radius:10px;
+    transform:rotate(2deg);
+  }
+  .intro p{margin-top:16px;font-size:18px;font-weight:500;max-width:74ch;line-height:1.45}
+  .deco{position:absolute;pointer-events:none;border:var(--line)}
+  .deco.bar{top:-6px;right:26px;width:74px;height:18px;background:var(--klein);border-radius:6px;transform:rotate(-10deg)}
+  .deco.dot{top:34px;right:2px;width:22px;height:22px;background:var(--magenta);border-radius:6px;transform:rotate(14deg)}
+  .deco.dot2{top:44px;right:96px;width:16px;height:16px;background:var(--paperw);border-radius:5px;transform:rotate(-18deg)}
+
+  /* ---------- grille de concepts ---------- */
+  main{max-width:1200px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media (max-width:1023px){.grid{grid-template-columns:1fr}}
+
+  .concept{
+    background:var(--paperw);border:var(--line);border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    padding:20px 20px 18px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .c-head{display:flex;align-items:center;gap:12px}
+  .c-num{
+    width:32px;height:32px;flex:0 0 auto;display:grid;place-items:center;
+    background:var(--ink);color:var(--acid);
+    border-radius:9px;font-size:16px;font-weight:700;
+  }
+  .c-head h2{font-size:21px;font-weight:700;letter-spacing:-0.02em}
+
+  .stage{
+    min-height:212px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg);border:2.5px solid var(--ink);border-radius:12px;
+    padding:20px;
+  }
+
+  .uses{display:grid;grid-template-columns:158px 1fr;gap:12px}
+  .use{display:flex;flex-direction:column;gap:6px}
+  .uselbl{font-size:11.5px;font-weight:700;color:var(--ink-2);padding-left:2px}
+  .miniplate{
+    flex:1;min-height:118px;
+    display:flex;align-items:center;justify-content:center;
+    border:2.5px solid var(--ink);border-radius:12px;
+    padding:10px;
+  }
+  .homescr{
+    background:var(--lav);
+    flex-direction:column;gap:7px;
+  }
+  .lockplate{background:var(--bg);gap:14px}
+
+  .appicon{
+    width:64px;height:64px;flex:0 0 auto;
+    border:3px solid var(--ink);border-radius:16px;
+    box-shadow:4px 4px 0 var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .applabel{font-size:11.5px;font-weight:700}
+  .i1,.i2,.i4{background:var(--acid)}
+  .i3{background:var(--paperw)}
+  .i5{background:var(--lime)}
+  .i6{background:var(--paperw)}
+  .i7{background:var(--magenta)}
+
+  .intent{font-size:13.5px;font-weight:600;line-height:1.45;color:var(--ink)}
+  .intent b{font-weight:700}
+
+  /* ---------- wordmark ---------- */
+  .wm{
+    display:inline-flex;align-items:baseline;
+    font-weight:700;letter-spacing:-0.03em;line-height:1;
+    font-size:30px;color:var(--ink);
+  }
+  .wm::after{
+    content:"";display:inline-block;
+    width:.375em;height:.375em;
+    background:var(--acid);
+    border:.07em solid var(--ink);
+    border-radius:.09em;
+    margin-left:.10em;
+    transform:rotate(12deg);
+  }
+
+  /* wordmark ruby (concept 3) */
+  .wm-ruby{
+    display:inline-flex;align-items:flex-end;
+    font-weight:700;letter-spacing:-0.02em;line-height:1;
+    font-size:30px;color:var(--ink);
+  }
+  .wm-ruby .syl{display:inline-flex;flex-direction:column;align-items:center}
+  .wm-ruby .rb{
+    font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;
+    font-size:.34em;line-height:1;color:var(--klein);
+    margin-bottom:.14em;letter-spacing:0;
+  }
+  .wm-ruby .lt{line-height:1}
+  .wm-ruby::after{
+    content:"";display:inline-block;
+    width:.375em;height:.375em;
+    background:var(--acid);
+    border:.07em solid var(--ink);
+    border-radius:.09em;
+    margin-left:.10em;margin-bottom:.04em;
+    transform:rotate(12deg);
+  }
+  .wm-ruby.big{font-size:58px}
+
+  /* wordmark aux trois i (concept 4) */
+  .wm-dots{
+    display:inline-block;
+    font-weight:700;letter-spacing:-0.03em;line-height:1;
+    font-size:30px;color:var(--ink);
+  }
+  .wm-dots.big{font-size:62px}
+  .di{position:relative;display:inline-block}
+  .di i{
+    position:absolute;left:50%;top:.07em;
+    width:.19em;height:.19em;
+    background:var(--dc,var(--klein));
+    border:.045em solid var(--ink);
+    border-radius:.045em;
+    transform:translateX(-50%) rotate(var(--dr,0deg));
+  }
+  .di.d1 i{--dc:var(--klein);--dr:-8deg}
+  .di.d2 i{--dc:var(--magenta);--dr:10deg}
+  .di.d3 i{--dc:var(--lime);--dr:-14deg}
+
+  /* ---------- carte « pour trancher » ---------- */
+  .howto{
+    background:var(--ink);color:var(--paperw);
+    border:var(--line);border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    padding:24px 24px 22px;
+    display:flex;flex-direction:column;gap:12px;justify-content:center;
+  }
+  .howto h2{font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--acid)}
+  .howto ol{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .howto li{display:flex;gap:10px;font-size:14.5px;font-weight:600;line-height:1.4}
+  .howto li b{
+    flex:0 0 auto;width:24px;height:24px;display:grid;place-items:center;
+    background:var(--acid);color:var(--ink);border-radius:7px;
+    font-size:13px;font-weight:700;margin-top:1px;
+  }
+  .howto p{font-size:12.5px;font-weight:600;line-height:1.45;color:var(--lav)}
+
+  /* ---------- test de taille ---------- */
+  .sizeband{margin-top:28px}
+  .sizecard{
+    background:var(--paperw);border:var(--line);border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    padding:22px 26px 20px;
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .sizehead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .sizehead h2{font-size:21px;font-weight:700;letter-spacing:-0.02em}
+  .sizehead p{font-size:13px;font-weight:600;color:var(--ink-2)}
+  .striprow{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:10px;flex-wrap:wrap;
+    background:var(--bg);border:2.5px solid var(--ink);border-radius:12px;
+    padding:18px 22px 14px;
+  }
+  .sz{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:96px}
+  .sz em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-2);text-align:center}
+
+  footer{max-width:1200px;margin:64px auto 0;font-size:12.5px;font-weight:600;color:var(--ink-2);text-align:center}
+</style>
+</head>
+<body>
+
+<!-- ======= symboles SVG partagés ======= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+
+    <!-- motif 1 · 字 seul -->
+    <symbol id="g1" viewBox="0 0 140 140">
+      <text x="64" y="72" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="82" fill="#17131f">字</text>
+    </symbol>
+
+    <!-- 1 · le bloc nu -->
+    <symbol id="s1" viewBox="0 0 140 140">
+      <rect x="20" y="28" width="104" height="104" rx="26" fill="#17131f"/>
+      <rect x="12" y="20" width="104" height="104" rx="26" fill="#f2e51c" stroke="#17131f" stroke-width="7"/>
+      <text x="63" y="73" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="74" fill="#17131f">字</text>
+    </symbol>
+
+    <!-- 2 · la bulle (motif complet, réutilisé tel quel en icône) -->
+    <symbol id="s2" viewBox="0 0 140 140">
+      <path d="M26,16 H110 Q126,16 126,32 V84 Q126,100 110,100 H64 L36,128 L44,100 H26 Q10,100 10,84 V32 Q10,16 26,16 Z" transform="translate(8,8)" fill="#17131f"/>
+      <path d="M26,16 H110 Q126,16 126,32 V84 Q126,100 110,100 H64 L36,128 L44,100 H26 Q10,100 10,84 V32 Q10,16 26,16 Z" fill="#2b36e3" stroke="#17131f" stroke-width="7"/>
+      <text x="68" y="58" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="56" fill="#ffffff">じ</text>
+    </symbol>
+
+    <!-- motif 3 · ruby -->
+    <symbol id="g3" viewBox="0 0 140 140">
+      <text x="64" y="41" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="27" fill="#2b36e3">じ</text>
+      <text x="64" y="85" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="60" fill="#17131f">字</text>
+    </symbol>
+
+    <!-- 3 · le ruby -->
+    <symbol id="s3" viewBox="0 0 140 140">
+      <rect x="20" y="28" width="104" height="104" rx="26" fill="#17131f"/>
+      <rect x="12" y="20" width="104" height="104" rx="26" fill="#ffffff" stroke="#17131f" stroke-width="7"/>
+      <use href="#g3"/>
+    </symbol>
+
+    <!-- motif 4 · trois blocs en triangle -->
+    <symbol id="g4" viewBox="0 0 140 140">
+      <rect x="52" y="40" width="34" height="34" rx="8" fill="#17131f"/>
+      <rect x="47" y="35" width="34" height="34" rx="8" fill="#2b36e3" stroke="#17131f" stroke-width="6"/>
+      <rect x="32" y="80" width="34" height="34" rx="8" fill="#17131f"/>
+      <rect x="27" y="75" width="34" height="34" rx="8" fill="#ff57a8" stroke="#17131f" stroke-width="6"/>
+      <rect x="72" y="80" width="34" height="34" rx="8" fill="#17131f"/>
+      <rect x="67" y="75" width="34" height="34" rx="8" fill="#8fe838" stroke="#17131f" stroke-width="6"/>
+    </symbol>
+
+    <!-- 4 · les trois i -->
+    <symbol id="s4" viewBox="0 0 140 140">
+      <rect x="20" y="28" width="104" height="104" rx="26" fill="#17131f"/>
+      <rect x="12" y="20" width="104" height="104" rx="26" fill="#ffffff" stroke="#17131f" stroke-width="7"/>
+      <use href="#g4"/>
+    </symbol>
+
+    <!-- motif 5 · contenu de cellule -->
+    <symbol id="g5" viewBox="0 0 140 140">
+      <text x="60" y="61" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="46" fill="#17131f">じ</text>
+      <text x="60" y="100" text-anchor="middle" dominant-baseline="central" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="21" fill="#17131f">ji</text>
+      <path d="M87,37 l6,7 11,-14" fill="none" stroke="#17131f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+
+    <!-- 5 · la cellule -->
+    <symbol id="s5" viewBox="0 0 140 140">
+      <rect x="20" y="28" width="104" height="104" rx="14" fill="#17131f"/>
+      <rect x="12" y="20" width="104" height="104" rx="14" fill="#8fe838" stroke="#17131f" stroke-width="7"/>
+      <use href="#g5"/>
+    </symbol>
+
+    <!-- 6 · la pile -->
+    <symbol id="s6" viewBox="0 0 140 140">
+      <g transform="rotate(-14 50 62)">
+        <rect x="20" y="21" width="70" height="92" rx="10" fill="#17131f"/>
+        <rect x="15" y="16" width="70" height="92" rx="10" fill="#2b36e3" stroke="#17131f" stroke-width="6.5"/>
+      </g>
+      <g transform="rotate(-6 62 67)">
+        <rect x="32" y="26" width="70" height="92" rx="10" fill="#17131f"/>
+        <rect x="27" y="21" width="70" height="92" rx="10" fill="#ff57a8" stroke="#17131f" stroke-width="6.5"/>
+      </g>
+      <g transform="rotate(3 76 73)">
+        <rect x="48" y="34" width="70" height="92" rx="10" fill="#17131f"/>
+        <rect x="41" y="27" width="70" height="92" rx="10" fill="#f2e51c" stroke="#17131f" stroke-width="6.5"/>
+        <text x="76" y="72" text-anchor="middle" dominant-baseline="central" font-family="'Zen Kaku Gothic New',sans-serif" font-weight="900" font-size="44" fill="#17131f">字</text>
+      </g>
+    </symbol>
+
+    <!-- motif 7 · j au carré-point -->
+    <symbol id="g7" viewBox="0 0 140 140">
+      <clipPath id="cutdot"><rect x="0" y="53" width="140" height="87"/></clipPath>
+      <g clip-path="url(#cutdot)">
+        <text x="62" y="94" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="76" fill="#17131f">j</text>
+      </g>
+      <rect x="56" y="27.5" width="21" height="21" rx="5" fill="#f2e51c" stroke="#17131f" stroke-width="5" transform="rotate(12 66.5 38)"/>
+    </symbol>
+
+    <!-- 7 · le monogramme -->
+    <symbol id="s7" viewBox="0 0 140 140">
+      <rect x="20" y="28" width="104" height="104" rx="26" fill="#17131f"/>
+      <rect x="12" y="20" width="104" height="104" rx="26" fill="#ff57a8" stroke="#17131f" stroke-width="7"/>
+      <use href="#g7"/>
+    </symbol>
+
+  </defs>
+</svg>
+
+<header class="intro">
+  <h1>Neo-pop · logos alternatifs <span class="jp-tag" lang="ja">ロゴ案</span></h1>
+  <p>Sept concepts réellement distincts pour remplacer le bloc à étincelle de l'exploration 17, exécutés dans le même langage : contours encre, ombres dures, aplats du thème. Chaque vignette montre le symbole en grand, l'icône posée sur un écran d'accueil et le lockup ; la rangée finale compare la tenue à 24 px.</p>
+  <span class="deco bar" aria-hidden="true"></span>
+  <span class="deco dot" aria-hidden="true"></span>
+  <span class="deco dot2" aria-hidden="true"></span>
+</header>
+
+<main>
+  <div class="grid">
+
+    <!-- ============ 1 · LE BLOC NU ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">1</span><h2>Le <span lang="ja">字</span> nu</h2></header>
+      <div class="stage">
+        <svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole : le kanji 字 dans un squircle jaune acide, sans satellite"><use href="#s1"/></svg>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i1"><svg width="56" height="56" viewBox="0 0 140 140" aria-hidden="true"><use href="#g1"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s1"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>Le point de comparaison :</b> le bloc validé, débarrassé du satellite. Solide à toutes les tailles ; risque : interchangeable avec n'importe quelle app de kanji.</p>
+    </article>
+
+    <!-- ============ 2 · LA BULLE ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">2</span><h2>La bulle</h2></header>
+      <div class="stage">
+        <svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole : le hiragana じ blanc dans une bulle de dialogue carrée bleu klein, queue franche"><use href="#s2"/></svg>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i2"><svg width="50" height="50" viewBox="0 0 140 140" aria-hidden="true"><use href="#s2"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s2"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>Le dictionnaire qui parle :</b> chaque mot s'écoute dans l'app. La forme carrée et la queue franche tiennent le style ; risque : lu comme une app de messages au premier regard.</p>
+    </article>
+
+    <!-- ============ 3 · LE RUBY ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">3</span><h2>Le ruby</h2></header>
+      <div class="stage">
+        <span class="wm-ruby big" role="img" aria-label="jibiki, avec ses furigana じびき en annotation ruby">
+          <span class="syl"><span class="rb" lang="ja">じ</span><span class="lt">ji</span></span><span class="syl"><span class="rb" lang="ja">び</span><span class="lt">bi</span></span><span class="syl"><span class="rb" lang="ja">き</span><span class="lt">ki</span></span>
+        </span>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i3"><svg width="52" height="52" viewBox="0 0 140 140" aria-hidden="true"><use href="#g3"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s3"/></svg>
+            <span class="wm-ruby" role="img" aria-label="jibiki, avec furigana">
+              <span class="syl"><span class="rb" lang="ja">じ</span><span class="lt">ji</span></span><span class="syl"><span class="rb" lang="ja">び</span><span class="lt">bi</span></span><span class="syl"><span class="rb" lang="ja">き</span><span class="lt">ki</span></span>
+            </span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>Le geste du produit :</b> annoter une lecture, comme les furigana partout dans l'app. Le nom s'explique seul ; risque : le détail ruby disparaît en petit, le bloc d'appoint devient obligatoire.</p>
+    </article>
+
+    <!-- ============ 4 · LES TROIS I ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">4</span><h2>Les trois i</h2></header>
+      <div class="stage">
+        <span class="wm-dots big" role="img" aria-label="jibiki, les points des trois i remplacés par des blocs bleu, magenta et lime">j<span class="di d1">ı<i aria-hidden="true"></i></span>b<span class="di d2">ı<i aria-hidden="true"></i></span>k<span class="di d3">ı<i aria-hidden="true"></i></span></span>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i4"><svg width="50" height="50" viewBox="0 0 140 140" aria-hidden="true"><use href="#g4"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s4"/></svg>
+            <span class="wm-dots" role="img" aria-label="jibiki">j<span class="di d1">ı<i aria-hidden="true"></i></span>b<span class="di d2">ı<i aria-hidden="true"></i></span>k<span class="di d3">ı<i aria-hidden="true"></i></span></span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>Le système dans le nom :</b> les trois blocs du loader et des confettis vivent dans les points des i. Risque : sans le nom à côté, le symbole dérivé reste abstrait.</p>
+    </article>
+
+    <!-- ============ 5 · LA CELLULE ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">5</span><h2>La cellule</h2></header>
+      <div class="stage">
+        <svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole : une cellule de la matrice kana, じ avec son rōmaji ji et une coche, sur fond lime"><use href="#s5"/></svg>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i5"><svg width="54" height="54" viewBox="0 0 140 140" aria-hidden="true"><use href="#g5"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s5"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>L'écran le plus iconique de l'app,</b> la cellule du gojūon, promue marque : glyphe, rōmaji, état appris. Très produit ; risque : ressemble à une touche de clavier.</p>
+    </article>
+
+    <!-- ============ 6 · LA PILE ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">6</span><h2>La pile</h2></header>
+      <div class="stage">
+        <svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole : trois cartes empilées, bleue, magenta et jaune, le kanji 字 sur celle du dessus"><use href="#s6"/></svg>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i6"><svg width="52" height="52" viewBox="0 0 140 140" aria-hidden="true"><use href="#s6"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s6"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>La répétition espacée incarnée :</b> les cartes reviennent, la pile ne s'épuise jamais. Risque : le motif flashcards est le plus partagé de la catégorie (Anki, Quizlet).</p>
+    </article>
+
+    <!-- ============ 7 · LE MONOGRAMME ============ -->
+    <article class="concept">
+      <header class="c-head"><span class="c-num">7</span><h2>Le monogramme</h2></header>
+      <div class="stage">
+        <svg width="150" height="150" viewBox="0 0 140 140" role="img" aria-label="Symbole : un j minuscule dont le point est le carré jaune du wordmark, sur squircle magenta"><use href="#s7"/></svg>
+      </div>
+      <div class="uses">
+        <div class="use">
+          <div class="miniplate homescr">
+            <div class="appicon i7"><svg width="52" height="52" viewBox="0 0 140 140" aria-hidden="true"><use href="#g7"/></svg></div>
+            <span class="applabel">jibiki</span>
+          </div>
+          <span class="uselbl">icône d'app · 64 px</span>
+        </div>
+        <div class="use">
+          <div class="miniplate lockplate">
+            <svg width="46" height="46" viewBox="0 0 140 140" aria-hidden="true"><use href="#s7"/></svg>
+            <span class="wm" role="img" aria-label="jibiki">jibiki</span>
+          </div>
+          <span class="uselbl">lockup horizontal</span>
+        </div>
+      </div>
+      <p class="intent"><b>Le carré-point promu :</b> l'élément préféré du wordmark devient le symbole, posé sur un j. Latin, franc, très app ; risque : plus aucun signe japonais dans l'icône.</p>
+    </article>
+
+    <!-- ============ POUR TRANCHER ============ -->
+    <aside class="howto">
+      <h2>Pour trancher</h2>
+      <ol>
+        <li><b>1</b><span>Encore reconnaissable à 24 px, en favicon, dans un onglet ?</span></li>
+        <li><b>2</b><span>Raconte le produit sans légende : dictionnaire, voix, mémoire ?</span></li>
+        <li><b>3</b><span>Personne d'autre ne l'a : ni app de kanji, ni app de cartes ?</span></li>
+      </ol>
+      <p>Le carré-point du wordmark reste disponible pour tous les concepts ; seul « les trois i » le remplace, puisque les points colorés prennent son rôle.</p>
+    </aside>
+
+  </div>
+
+  <!-- ============ TEST DE TAILLE ============ -->
+  <section class="sizeband">
+    <div class="sizecard">
+      <div class="sizehead">
+        <h2>Test de taille · 24 px</h2>
+        <p>Chaque symbole à taille favicon, côte à côte : ce qui ne tient pas ici ne tiendra nulle part.</p>
+      </div>
+      <div class="striprow">
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="Le 字 nu à 24 pixels"><use href="#s1"/></svg><em>1 · le <span lang="ja">字</span> nu</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="La bulle à 24 pixels"><use href="#s2"/></svg><em>2 · la bulle</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="Le ruby à 24 pixels"><use href="#s3"/></svg><em>3 · le ruby</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="Les trois i à 24 pixels"><use href="#s4"/></svg><em>4 · les trois i</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="La cellule à 24 pixels"><use href="#s5"/></svg><em>5 · la cellule</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="La pile à 24 pixels"><use href="#s6"/></svg><em>6 · la pile</em></div>
+        <div class="sz"><svg width="24" height="24" viewBox="0 0 140 140" role="img" aria-label="Le monogramme à 24 pixels"><use href="#s7"/></svg><em>7 · le monogramme</em></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>jibiki · exploration 18 · logos alternatifs Neo-pop, dérivés du thème 10 · l'étincelle a disparu, le carré-point reste</footer>
+
+</body>
+</html>

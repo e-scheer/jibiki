@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jibiki · exploration 16 · Neo-pop tablette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17131f;
+    --acid:#f2e51c;      /* jaune acide */
+    --klein:#2b36e3;     /* bleu klein */
+    --magenta:#ff57a8;   /* rose magenta */
+    --lime:#8fe838;      /* vert lime */
+    --lav:#c9b8f9;       /* lavande */
+    --coral:#ff6952;     /* corail (Encore) */
+    --bg:#f4f4f6;        /* blanc cassé froid */
+    --paperw:#ffffff;
+    --ink-2:#45414e;     /* texte secondaire sur blanc */
+    --line:3px solid var(--ink);
+    --shadow:4px 4px 0 var(--ink);
+    --shadow-lg:6px 6px 0 var(--ink);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    font-family:"Space Grotesk",sans-serif;
+    background:var(--acid);
+    color:var(--ink);
+    min-height:100vh;
+    padding:56px 32px 88px;
+  }
+  :lang(ja){font-family:"Zen Kaku Gothic New",sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+  button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid var(--klein);outline-offset:2px}
+
+  /* ---------- backdrop ---------- */
+  .intro{max-width:1180px;margin:0 auto 64px;position:relative}
+  .intro h1{
+    font-size:68px;font-weight:700;letter-spacing:-0.03em;line-height:1;
+    display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  }
+  .intro .jp-tag{
+    font-size:20px;font-weight:900;letter-spacing:.08em;
+    background:var(--ink);color:var(--acid);
+    padding:9px 16px 10px;border-radius:10px;
+    transform:rotate(2deg);
+  }
+  .intro p{
+    margin-top:18px;font-size:19px;font-weight:500;max-width:74ch;line-height:1.45;
+  }
+  .deco{position:absolute;pointer-events:none}
+  .deco.ast{top:-26px;right:-4px}
+  .deco.bar{top:44px;right:56px;width:70px;height:18px;background:var(--klein);border:var(--line);border-radius:6px;transform:rotate(-10deg)}
+  .deco.dot{top:6px;right:110px;width:22px;height:22px;background:var(--magenta);border:var(--line);border-radius:6px;transform:rotate(14deg)}
+
+  /* ---------- gallery ---------- */
+  .gallery{
+    display:flex;flex-direction:column;align-items:center;
+    gap:76px;max-width:1400px;margin:0 auto;
+  }
+  .panel{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .caption{
+    font-size:16px;font-weight:700;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    padding:8px 20px;box-shadow:var(--shadow);
+  }
+  .screen{
+    width:1180px;height:820px;flex:0 0 auto;
+    background:var(--bg);
+    border:var(--line);border-radius:28px;
+    box-shadow:12px 12px 0 var(--ink);
+    overflow:hidden;
+    display:flex;
+  }
+  .pane{overflow-y:auto;overflow-x:hidden}
+
+  /* ---------- shared components ---------- */
+  .pressable{transition:transform .12s ease-out,box-shadow .12s ease-out}
+  .pressable:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)!important}
+  .icon{display:block;flex:0 0 auto}
+
+  .btn-primary{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:56px;width:100%;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    font-size:17px;font-weight:700;
+  }
+  .tag{
+    font-size:12.5px;font-weight:700;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:8px;
+    padding:5px 10px;
+  }
+  .sec-label{font-size:13px;font-weight:700}
+  .stick{display:inline-block;background:var(--acid);border:var(--line);border-radius:10px;box-shadow:4px 4px 0 var(--ink);padding:8px 14px;font-size:15px;font-weight:700;transform:rotate(-3deg)}
+  .chev{font-size:22px;font-weight:700;line-height:1}
+  .sq-btn{
+    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .search{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:0 14px;height:52px;
+  }
+  .search input{
+    border:0;outline:none;background:none;flex:1;min-width:0;
+    font:inherit;font-size:15px;font-weight:500;color:var(--ink);
+  }
+  .search input::placeholder{color:#4c4956;opacity:1}
+  .seg{display:flex;gap:4px;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);padding:4px}
+  .seg button{flex:1;min-height:44px;padding:0 12px;border-radius:8px;font-size:14px;font-weight:700;white-space:nowrap}
+  .seg button.on{background:var(--acid);border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+  .progress{
+    height:20px;
+    background:var(--paperw);border:var(--line);border-radius:10px;
+    overflow:hidden;
+  }
+  .progress i{display:block;height:100%;width:35%;background:var(--klein);border-right:3px solid var(--ink)}
+
+  /* ---------- rail de navigation ---------- */
+  .rail{
+    width:76px;flex:0 0 auto;
+    background:var(--paperw);border-right:var(--line);
+    display:flex;flex-direction:column;align-items:center;
+    padding:14px 7px 14px;gap:6px;
+  }
+  .rail-logo{
+    width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+    background:var(--klein);color:#fff;
+    border:2.5px solid var(--ink);border-radius:12px;
+    box-shadow:3px 3px 0 var(--ink);
+    font-size:24px;font-weight:700;line-height:1;
+    transform:rotate(-4deg);margin-bottom:12px;position:relative;
+  }
+  .rail-logo::after{content:"";position:absolute;right:9px;bottom:9px;width:7px;height:7px;background:var(--acid);border-radius:2px;transform:rotate(12deg)}
+  .rail button{
+    width:100%;min-height:56px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-size:10.5px;font-weight:600;color:var(--ink);
+    padding:7px 0 6px;border-radius:10px;
+  }
+  .rail button.active{
+    background:var(--acid);border:2.5px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);font-weight:700;
+  }
+  .rail .kana-glyph{font-size:19px;font-weight:900;line-height:22px}
+
+  /* ================= DICTIONNAIRE · DEUX VOLETS ================= */
+  .list-col{
+    width:340px;flex:0 0 auto;
+    border-right:var(--line);
+    display:flex;flex-direction:column;gap:10px;
+    padding:16px 16px 14px;
+  }
+  .list-meta{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  .results{display:flex;flex-direction:column;gap:9px;flex:1}
+  .res{
+    display:flex;align-items:center;gap:12px;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:11px;
+    padding:8px 12px;min-height:66px;text-align:left;width:100%;
+  }
+  .res .rj{font-size:23px;font-weight:900;flex:0 0 auto;min-width:58px;line-height:1.1}
+  .res .rtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .res .rr{font-size:12px;font-weight:700}
+  .res .rg{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  .res.sel{
+    background:var(--acid);border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .list-foot{margin-top:auto;font-size:11.5px;font-weight:600;color:var(--ink-2);text-align:center}
+
+  .detail{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:18px 20px 16px}
+
+  .hero-t{
+    position:relative;
+    background:var(--magenta);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:16px 22px;
+    display:flex;align-items:center;gap:26px;
+  }
+  .hero-t .ht-kj{display:flex;flex-direction:column;align-items:center;flex:0 0 auto}
+  .hero-t .furi{font-size:16px;font-weight:700}
+  .hero-t .kj{font-size:92px;font-weight:900;line-height:1.02}
+  .ht-info{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+  .say{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:10px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:8px 14px;min-height:44px;
+    font-size:16px;font-weight:700;
+  }
+  .hero-tags{display:flex;gap:8px;flex-wrap:wrap}
+  .hero-save{position:absolute;top:14px;right:14px}
+
+  .senses{
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);padding:10px 14px;
+  }
+  .senses ol{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:6px}
+  .senses li{display:flex;gap:10px;font-size:15px;font-weight:500}
+  .senses li b{font-weight:700;color:var(--klein)}
+
+  .dx{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
+  .dx-card{
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);padding:12px 14px;
+    display:flex;flex-direction:column;
+  }
+  .compo{display:flex;align-items:stretch;gap:6px;margin-top:10px;flex:1}
+  .compo .part{
+    flex:1;text-align:center;
+    border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);
+    padding:10px 4px 8px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .compo .part .g{font-size:34px;font-weight:900;line-height:1.15}
+  .compo .part .n{font-size:12px;font-weight:700;margin-top:2px}
+  .compo .plus{align-self:center;font-size:20px;font-weight:700}
+  .part.p1{background:var(--lime)}
+  .part.p2{background:var(--acid)}
+  .part.p3{background:var(--lav)}
+
+  .mnemo{
+    background:var(--klein);color:#fff;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:12px 16px;
+    display:flex;flex-direction:column;
+  }
+  .mnemo .quote{font-size:14.5px;font-weight:500;line-height:1.45}
+  .mnemo .quote b:lang(ja){font-weight:900}
+  .mnemo .meta{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:auto;padding-top:8px;
+  }
+  .mnemo .author{font-size:12.5px;font-weight:600;color:#fff}
+  .vote{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--acid);color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 14px;min-height:44px;
+    font-size:14px;font-weight:700;
+  }
+
+  .example .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:9px;
+    box-shadow:3px 3px 0 var(--ink);
+    padding:7px 10px;min-height:44px;
+    font-size:17px;font-weight:700;
+  }
+  .chip.hit{background:var(--acid)}
+  .example .fr{font-size:13.5px;font-weight:600;color:var(--ink-2);margin-top:8px}
+
+  .also{display:flex;align-items:center;gap:8px}
+  .also .w{
+    font-size:15px;font-weight:700;
+    border:2.5px solid var(--ink);border-radius:8px;background:var(--paperw);
+    padding:9px 11px;min-height:44px;
+  }
+  .d-cta{margin-top:auto}
+  .detail .d-cta{margin-top:0}
+  .d-cta .btn-primary{background:var(--acid);color:var(--ink)}
+
+  /* ================= KANA · MATRICE + DÉTAIL ================= */
+  .kana-col{
+    width:524px;flex:0 0 auto;
+    border-right:var(--line);
+    display:flex;flex-direction:column;
+    padding:16px 18px 16px;
+  }
+  .kana-top{display:flex;align-items:stretch;gap:12px}
+  .kana-top .seg{flex:1}
+  .kana-count{align-self:center;text-align:right;font-size:12px;font-weight:700;line-height:1.15;flex:0 0 auto}
+  .kana-count b{display:block;font-size:24px;letter-spacing:-0.02em}
+  .kana-legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px}
+  .kana-legend li{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600}
+  .klm{width:17px;height:17px;flex:0 0 auto;background:var(--paperw);border:2px solid var(--ink);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;line-height:1}
+  .klm.ok{background:var(--lime)}
+  .klm.mid{background:var(--acid);font-size:7px}
+  .klm.is-due{background:var(--magenta);font-size:8px}
+  .kana-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:10px;flex:1}
+  .kc{position:relative;min-height:56px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1}
+  .kc .kg{font-size:26px;font-weight:900}
+  .kc .kr{font-size:10px;font-weight:700;font-family:"Space Grotesk",sans-serif}
+  .kc .ks{position:absolute;top:3px;right:6px;font-size:10px;font-weight:700;line-height:1}
+  .kc.ok{background:var(--lime)}
+  .kc.mid{background:var(--acid)}
+  .kc.mid .ks{font-size:8px;top:4px}
+  .kc.is-due{background:var(--magenta)}
+  .kc.is-due .ks{font-size:9.5px}
+  .kc.sel{
+    border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--ink);
+    transform:translate(-2px,-2px);
+  }
+  .kc.sel::before{
+    content:"";position:absolute;left:-3px;bottom:-3px;
+    width:16px;height:16px;background:var(--klein);
+    border:2.5px solid var(--ink);border-radius:5px;
+    transform:translate(-40%,40%) rotate(14deg);
+  }
+  .kc-void{min-height:56px;border:2.5px dashed #a49fb0;border-radius:10px}
+
+  .kd-pane{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;padding:18px 20px 16px}
+  .kd-hero{background:var(--lime)}
+  .kd-hero .kj{font-size:96px}
+  .kd-strokes{display:flex;gap:14px;margin-top:8px}
+  .kd-box{width:172px;height:172px;flex:0 0 auto;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .kd-box svg{display:block;width:100%;height:100%}
+  .kd-notes{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:flex-start}
+  .kd-note{font-size:13px;font-weight:600;line-height:1.4;max-width:34ch}
+  .kd-near-row{display:flex;gap:8px;margin-top:6px}
+  .kd-near-row .kc{width:70px;flex:0 0 auto}
+
+  /* ================= RÉVISION · PAYSAGE ================= */
+  .rev-t{background:var(--lav);flex-direction:column}
+  .rvt-bar{display:flex;align-items:flex-start;gap:20px;padding:18px 24px 0}
+  .rvt-mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px}
+  .rvt-count{font-size:34px;font-weight:700;line-height:.95;letter-spacing:-0.03em}
+  .rvt-count small{font-size:18px;font-weight:700;letter-spacing:0}
+  .rvt-mid .progress{width:100%;max-width:460px}
+  .rvt-left-note{font-size:12.5px;font-weight:600}
+  .rvt-body{flex:1;display:flex;min-height:0}
+  .rvt-stage{flex:0 0 55%;display:flex;align-items:center;justify-content:center;padding:20px 30px 26px}
+  .flashcard{
+    width:100%;max-width:548px;
+    background:var(--paperw);border:var(--line);border-radius:16px;
+    box-shadow:8px 8px 0 var(--ink);
+    padding:62px 24px 44px;text-align:center;position:relative;
+  }
+  .flashcard .kj{font-size:148px;font-weight:900;line-height:1.05}
+  .flashcard .divider{width:56px;height:4px;background:var(--ink);border-radius:2px;margin:20px auto 18px}
+  .flashcard .reading{font-size:30px;font-weight:900}
+  .flashcard .gloss{font-size:18.5px;font-weight:600;margin-top:7px}
+  .flashcard .seen{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:18px}
+
+  .sticker{
+    position:absolute;top:-20px;right:-8px;
+    background:var(--acid);border:var(--line);border-radius:10px;
+    box-shadow:5px 5px 0 var(--ink);
+    padding:10px 16px;
+    font-size:19px;font-weight:700;letter-spacing:.04em;
+    transform:rotate(-5deg);
+    animation:pop .38s cubic-bezier(.18,1.4,.4,1) both;
+  }
+  @keyframes pop{
+    from{transform:rotate(9deg) scale(.2);opacity:0}
+    to{transform:rotate(-5deg) scale(1);opacity:1}
+  }
+  .confetti{position:absolute;border:2.5px solid var(--ink);border-radius:2px;animation:conf .5s ease-out both}
+  .confetti.c1{width:18px;height:10px;background:var(--magenta);top:-46px;right:140px;transform:rotate(24deg);animation-delay:.12s}
+  .confetti.c2{width:11px;height:19px;background:var(--klein);top:-60px;right:72px;transform:rotate(-15deg);animation-delay:.18s}
+  .confetti.c3{width:19px;height:11px;background:var(--lime);top:-12px;right:-28px;transform:rotate(-30deg);animation-delay:.24s}
+  .confetti.c4{width:12px;height:12px;background:var(--coral);top:40px;right:-24px;transform:rotate(12deg);animation-delay:.3s}
+  .confetti.c5{width:10px;height:17px;background:var(--magenta);top:-38px;right:6px;transform:rotate(40deg);animation-delay:.36s}
+  @keyframes conf{
+    from{scale:0;translate:0 -10px;opacity:0}
+    to{scale:1;translate:0 0;opacity:1}
+  }
+
+  .rvt-side{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:20px 30px 26px 0}
+  .rvt-side .hint{font-size:14px;font-weight:700}
+  .grades-v{display:flex;flex-direction:column;gap:10px}
+  .grade{
+    display:flex;align-items:center;gap:14px;
+    border:var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:12px 16px;min-height:70px;text-align:left;width:100%;
+  }
+  .grade .name{font-size:18px;font-weight:700;line-height:1.1}
+  .grade .int{
+    margin-left:auto;flex:0 0 auto;
+    font-size:14px;font-weight:700;
+    background:var(--paperw);color:var(--ink);
+    border:2px solid var(--ink);border-radius:7px;
+    padding:5px 10px;
+  }
+  .grade.again{background:var(--coral)}
+  .grade.hard{background:var(--acid)}
+  .grade.good{background:var(--lime)}
+  .grade.easy{background:var(--klein);color:#fff}
+
+  .ctx{
+    background:var(--paperw);border:var(--line);border-radius:12px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;text-align:left;width:100%;
+    margin-top:6px;
+  }
+  .ctx .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .ctx .chip{box-shadow:none;min-height:40px;padding:5px 9px;font-size:16px}
+  .ctx .fr{font-size:13.5px;font-weight:600;color:var(--ink-2);margin-top:8px}
+  .ctx .go{display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;margin-top:8px}
+
+  /* ================= ACCUEIL · TABLEAU DE BORD ================= */
+  .home-t{flex:1;min-width:0;display:flex;flex-direction:column}
+  .home-head-t{
+    background:var(--klein);color:#fff;
+    border-bottom:var(--line);
+    padding:18px 24px 22px;
+  }
+  .hh-row1{display:flex;align-items:center;justify-content:space-between}
+  .hh-row1 .logo{font-size:24px;font-weight:700;letter-spacing:-0.02em}
+  .hh-row1 .logo::after{content:"";display:inline-block;width:9px;height:9px;background:var(--acid);border-radius:2px;margin-left:5px;transform:rotate(12deg)}
+  .hh-row1 .streak{font-size:13px;font-weight:600;color:#fff}
+  .hh-row2{display:flex;align-items:center;gap:24px;margin-top:14px}
+  .hh-row2 .hello{font-size:26px;font-weight:700;letter-spacing:-0.02em;flex:0 0 auto}
+  .hh-row2 .search{flex:1}
+
+  .dash{
+    flex:1;min-height:0;
+    display:grid;
+    grid-template-columns:1.32fr 1fr 1fr;
+    grid-template-rows:186px 1fr 108px;
+    grid-template-areas:
+      "due wod wod"
+      "due fore cmy"
+      "rec rec cmy";
+    gap:16px;
+    padding:20px 24px 22px;
+  }
+
+  .due{
+    grid-area:due;
+    background:var(--acid);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:20px 20px 18px;
+    display:flex;flex-direction:column;
+  }
+  .due-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .due-num{font-size:128px;font-weight:700;line-height:.84;letter-spacing:-0.04em}
+  .due-label{font-size:20px;font-weight:700;margin-top:10px}
+  .due-new{
+    font-size:12.5px;font-weight:700;
+    background:var(--paperw);border:2.5px solid var(--ink);border-radius:8px;
+    padding:5px 10px;
+  }
+  .due-sub{font-size:14px;font-weight:600;margin-top:14px}
+  .due-mix{font-size:13px;font-weight:600;color:var(--ink-2);margin-top:4px}
+  .due .btn-primary{background:var(--ink);color:var(--acid);margin-top:auto}
+
+  .wod{
+    grid-area:wod;
+    background:var(--lav);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:18px 20px;position:relative;
+    display:flex;align-items:center;
+  }
+  .wod-badge{
+    position:absolute;top:-13px;left:16px;
+    background:var(--magenta);border:2.5px solid var(--ink);border-radius:8px;
+    padding:4px 10px;font-size:12px;font-weight:700;
+    transform:rotate(-2deg);box-shadow:3px 3px 0 var(--ink);
+  }
+  .wod-row{display:flex;align-items:center;gap:22px;width:100%}
+  .wod-kanji{display:flex;flex-direction:column;align-items:center;flex:0 0 auto}
+  .wod-kanji .furi{font-size:14px;font-weight:700}
+  .wod-kanji .kj{font-size:58px;font-weight:900;line-height:1.05}
+  .wod-def{flex:1;min-width:0}
+  .wod-def .romaji{font-size:17px;font-weight:700}
+  .wod-def .gloss{font-size:14px;font-weight:500;line-height:1.4;margin-top:3px;max-width:44ch}
+  .wod .say{flex:0 0 auto}
+
+  .fore{
+    grid-area:fore;
+    background:var(--paperw);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    display:flex;flex-direction:column;
+  }
+  .pf-bars{display:flex;align-items:flex-end;gap:6px;flex:1;margin-top:10px;min-height:0}
+  .pfb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+  .pfb b{font-size:11px;font-weight:700;line-height:1}
+  .pfb i{width:100%;background:var(--klein);border:2.5px solid var(--ink);border-radius:5px}
+  .pfb.hi i{background:var(--acid)}
+  .pfb .d{font-size:10.5px;font-weight:600;margin-top:1px}
+  .fore-line{font-size:12.5px;font-weight:600;margin-top:10px}
+
+  .cmy-block{
+    grid-area:cmy;
+    background:var(--magenta);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:16px;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .cmy-block h3{font-size:20px;font-weight:700;letter-spacing:-0.01em}
+  .cmy-block .sub{font-size:12.5px;font-weight:600;margin-top:-6px}
+  .cmy{background:var(--paperw);border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);padding:11px 13px;text-align:left;width:100%}
+  .cmy-name{font-size:15px;font-weight:700}
+  .cmy-meta{font-size:12px;font-weight:600;color:var(--ink-2);margin-top:2px}
+  .cmy-stats{display:flex;gap:14px;margin-top:7px;font-size:13px;font-weight:700;align-items:center}
+  .cmy-stats .st{display:inline-flex;align-items:center;gap:5px}
+  .cmy-block .btn-primary{background:var(--ink);color:var(--acid);margin-top:auto;min-height:50px;font-size:15px}
+
+  .rec{
+    grid-area:rec;
+    background:var(--paperw);border:var(--line);border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:14px 18px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .rec .lbl{font-size:13px;font-weight:700;flex:0 0 auto}
+  .rec .words{display:flex;gap:8px;flex-wrap:wrap}
+  .rec .w{
+    font-size:15px;font-weight:700;
+    border:2.5px solid var(--ink);border-radius:8px;background:var(--bg);
+    padding:9px 11px;min-height:44px;
+  }
+  .rec .more{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;min-height:44px;padding:0 6px}
+
+  /* ---------- motion off ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .pressable{transition:none}
+    .sticker,.confetti{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <h1>Neo-pop · tablette <span class="jp-tag" lang="ja">ネオポップ</span></h1>
+  <p>Le même langage, déplié en paysage : rail de navigation à gauche, deux volets liste + détail, la carte et ses notes côte à côte. Quatre écrans iPad, densité d'un vrai poste de travail.</p>
+  <svg class="deco ast" width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><path d="M26 4v44M4 26h44M10 10l32 32M42 10L10 42" stroke="#17131f" stroke-width="7" stroke-linecap="round"/></svg>
+  <span class="deco bar" aria-hidden="true"></span>
+  <span class="deco dot" aria-hidden="true"></span>
+</header>
+
+<main class="gallery">
+
+  <!-- ============ 1 · DICTIONNAIRE · DEUX VOLETS ============ -->
+  <section class="panel">
+    <span class="caption">Dictionnaire · deux volets</span>
+    <article class="screen" aria-label="Dictionnaire en deux volets, recherche sakura, fiche du mot sakura">
+
+      <nav class="rail" aria-label="Navigation principale">
+        <span class="rail-logo" aria-hidden="true">j</span>
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Commu
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+      <div class="list-col pane">
+        <div class="search">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.7" fill="none" stroke="#17131f" stroke-width="2.6"/><path d="M13 13l4.6 4.6" stroke="#17131f" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <input type="search" value="sakura" aria-label="Rechercher dans le dictionnaire">
+          <button aria-label="Effacer la recherche" style="min-width:28px;min-height:44px;display:flex;align-items:center;justify-content:center">
+            <svg class="icon" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="#17131f" stroke-width="2.6" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <p class="list-meta">7 résultats pour « sakura ».</p>
+        <div class="results" role="listbox" aria-label="Résultats de recherche">
+          <button class="res sel pressable" role="option" aria-selected="true">
+            <span class="rj" lang="ja">桜</span>
+            <span class="rtx"><b class="rr" lang="ja">さくら</b><span class="rg">cerisier</span></span>
+            <svg class="icon" width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M2 1.5l8.5 5.5L2 12.5z" fill="#17131f"/></svg>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">咲く</span>
+            <span class="rtx"><b class="rr" lang="ja">さく</b><span class="rg">fleurir</span></span>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">桜色</span>
+            <span class="rtx"><b class="rr" lang="ja">さくらいろ</b><span class="rg">rose sakura</span></span>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">花見</span>
+            <span class="rtx"><b class="rr" lang="ja">はなみ</b><span class="rg">hanami, pique-nique fleuri</span></span>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">桜餅</span>
+            <span class="rtx"><b class="rr" lang="ja">さくらもち</b><span class="rg">mochi sakura</span></span>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">葉桜</span>
+            <span class="rtx"><b class="rr" lang="ja">はざくら</b><span class="rg">cerisier en feuilles</span></span>
+          </button>
+          <button class="res pressable" role="option" aria-selected="false">
+            <span class="rj" lang="ja">夜桜</span>
+            <span class="rtx"><b class="rr" lang="ja">よざくら</b><span class="rg">cerisiers de nuit</span></span>
+          </button>
+        </div>
+        <p class="list-foot">Tri : pertinence. Tape en rōmaji, on translittère.</p>
+      </div>
+
+      <div class="detail pane">
+
+        <div class="hero-t">
+          <div class="ht-kj" lang="ja">
+            <div class="furi">さくら</div>
+            <div class="kj">桜</div>
+          </div>
+          <div class="ht-info">
+            <button class="say pressable">
+              <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#17131f"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>
+              sakura
+            </button>
+            <div class="hero-tags">
+              <span class="tag">Nom</span>
+              <span class="tag">JLPT N5</span>
+              <span class="tag">Fréquent</span>
+            </div>
+          </div>
+          <button class="sq-btn hero-save pressable" aria-label="Enregistrer le mot">
+            <svg class="icon" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M3 2.5h12v15l-6-4-6 4z" fill="none" stroke="#17131f" stroke-width="2.6" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="senses">
+          <span class="sec-label">Sens</span>
+          <ol>
+            <li><b>1.</b> cerisier (l'arbre)</li>
+            <li><b>2.</b> fleur de cerisier</li>
+          </ol>
+        </div>
+
+        <div class="dx">
+          <div class="dx-card">
+            <span class="sec-label">Dans le kanji</span>
+            <div class="compo" lang="ja">
+              <div class="part p1"><div class="g">木</div><div class="n" lang="fr">arbre</div></div>
+              <span class="plus" lang="fr" aria-hidden="true">+</span>
+              <div class="part p2"><div class="g">⺍</div><div class="n" lang="fr">pétales</div></div>
+              <span class="plus" lang="fr" aria-hidden="true">+</span>
+              <div class="part p3"><div class="g">女</div><div class="n" lang="fr">femme</div></div>
+            </div>
+          </div>
+          <div class="mnemo">
+            <p class="quote">« Une femme <b lang="ja">女</b> coiffée de pétales <b lang="ja">⺍</b> danse sous un arbre <b lang="ja">木</b>&nbsp;: le cerisier en fleurs. »</p>
+            <div class="meta">
+              <span class="author">par HanaSensei</span>
+              <button class="vote pressable" aria-label="Voter pour ce mnémonique, 128 votes">
+                <svg class="icon" width="13" height="12" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>
+                128
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="example">
+          <span class="sec-label">En contexte</span>
+          <div class="chips" lang="ja">
+            <button class="chip hit pressable">桜</button>
+            <button class="chip pressable">の</button>
+            <button class="chip pressable">花</button>
+            <button class="chip pressable">が</button>
+            <button class="chip pressable">咲いています</button>
+          </div>
+          <p class="fr">« Les cerisiers sont en fleurs. »</p>
+        </div>
+
+        <div class="also">
+          <span class="sec-label">Voir aussi</span>
+          <button class="w pressable" lang="ja">桜色</button>
+          <button class="w pressable" lang="ja">桜餅</button>
+          <button class="w pressable" lang="ja">葉桜</button>
+        </div>
+
+        <div class="d-cta">
+          <button class="btn-primary pressable">
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="#17131f" stroke-width="2.8" stroke-linecap="round"/></svg>
+            Ajouter au paquet
+          </button>
+        </div>
+
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ 2 · KANA · MATRICE + DÉTAIL ============ -->
+  <section class="panel">
+    <span class="caption">Kana · matrice + détail</span>
+    <article class="screen" aria-label="Matrice des kana avec fiche du kana a">
+
+      <nav class="rail" aria-label="Navigation principale">
+        <span class="rail-logo" aria-hidden="true">j</span>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button class="active" aria-current="page">
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Commu
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+      <div class="kana-col pane">
+        <div class="kana-top">
+          <div class="seg" role="tablist" aria-label="Syllabaire">
+            <button class="on" role="tab" aria-selected="true" lang="ja">ひらがな</button>
+            <button role="tab" aria-selected="false" lang="ja">カタカナ</button>
+          </div>
+          <div class="kana-count"><b>32/46</b>apprises</div>
+        </div>
+        <ul class="kana-legend" aria-label="Légende des états">
+          <li><span class="klm ok" aria-hidden="true">✓</span> apprise</li>
+          <li><span class="klm mid" aria-hidden="true">●</span> en cours</li>
+          <li><span class="klm is-due" aria-hidden="true">dû</span> à revoir</li>
+          <li><span class="klm" aria-hidden="true"></span> nouvelle</li>
+        </ul>
+        <div class="kana-grid">
+          <button class="kc ok sel pressable" aria-label="あ, a, apprise, sélectionnée" aria-current="true"><span class="kg" lang="ja">あ</span><span class="kr">a</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="い, i, apprise"><span class="kg" lang="ja">い</span><span class="kr">i</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="う, u, apprise"><span class="kg" lang="ja">う</span><span class="kr">u</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="え, e, apprise"><span class="kg" lang="ja">え</span><span class="kr">e</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="お, o, apprise"><span class="kg" lang="ja">お</span><span class="kr">o</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="か, ka, apprise"><span class="kg" lang="ja">か</span><span class="kr">ka</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="き, ki, apprise"><span class="kg" lang="ja">き</span><span class="kr">ki</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="く, ku, apprise"><span class="kg" lang="ja">く</span><span class="kr">ku</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc is-due pressable" aria-label="け, ke, à revoir aujourd'hui"><span class="kg" lang="ja">け</span><span class="kr">ke</span><span class="ks" aria-hidden="true">dû</span></button>
+          <button class="kc ok pressable" aria-label="こ, ko, apprise"><span class="kg" lang="ja">こ</span><span class="kr">ko</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="さ, sa, apprise"><span class="kg" lang="ja">さ</span><span class="kr">sa</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="し, shi, apprise"><span class="kg" lang="ja">し</span><span class="kr">shi</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="す, su, apprise"><span class="kg" lang="ja">す</span><span class="kr">su</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="せ, se, apprise"><span class="kg" lang="ja">せ</span><span class="kr">se</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc is-due pressable" aria-label="そ, so, à revoir aujourd'hui"><span class="kg" lang="ja">そ</span><span class="kr">so</span><span class="ks" aria-hidden="true">dû</span></button>
+          <button class="kc ok pressable" aria-label="た, ta, apprise"><span class="kg" lang="ja">た</span><span class="kr">ta</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc is-due pressable" aria-label="ち, chi, à revoir aujourd'hui"><span class="kg" lang="ja">ち</span><span class="kr">chi</span><span class="ks" aria-hidden="true">dû</span></button>
+          <button class="kc ok pressable" aria-label="つ, tsu, apprise"><span class="kg" lang="ja">つ</span><span class="kr">tsu</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="て, te, apprise"><span class="kg" lang="ja">て</span><span class="kr">te</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="と, to, apprise"><span class="kg" lang="ja">と</span><span class="kr">to</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="な, na, apprise"><span class="kg" lang="ja">な</span><span class="kr">na</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="に, ni, apprise"><span class="kg" lang="ja">に</span><span class="kr">ni</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc is-due pressable" aria-label="ぬ, nu, à revoir aujourd'hui"><span class="kg" lang="ja">ぬ</span><span class="kr">nu</span><span class="ks" aria-hidden="true">dû</span></button>
+          <button class="kc ok pressable" aria-label="ね, ne, apprise"><span class="kg" lang="ja">ね</span><span class="kr">ne</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="の, no, apprise"><span class="kg" lang="ja">の</span><span class="kr">no</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="は, ha, apprise"><span class="kg" lang="ja">は</span><span class="kr">ha</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="ひ, hi, apprise"><span class="kg" lang="ja">ひ</span><span class="kr">hi</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="ふ, fu, apprise"><span class="kg" lang="ja">ふ</span><span class="kr">fu</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="へ, he, apprise"><span class="kg" lang="ja">へ</span><span class="kr">he</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="ほ, ho, apprise"><span class="kg" lang="ja">ほ</span><span class="kr">ho</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="ま, ma, apprise"><span class="kg" lang="ja">ま</span><span class="kr">ma</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc ok pressable" aria-label="み, mi, apprise"><span class="kg" lang="ja">み</span><span class="kr">mi</span><span class="ks" aria-hidden="true">✓</span></button>
+          <button class="kc mid pressable" aria-label="む, mu, en cours"><span class="kg" lang="ja">む</span><span class="kr">mu</span><span class="ks" aria-hidden="true">●</span></button>
+          <button class="kc mid pressable" aria-label="め, me, en cours"><span class="kg" lang="ja">め</span><span class="kr">me</span><span class="ks" aria-hidden="true">●</span></button>
+          <button class="kc mid pressable" aria-label="も, mo, en cours"><span class="kg" lang="ja">も</span><span class="kr">mo</span><span class="ks" aria-hidden="true">●</span></button>
+          <button class="kc mid pressable" aria-label="や, ya, en cours"><span class="kg" lang="ja">や</span><span class="kr">ya</span><span class="ks" aria-hidden="true">●</span></button>
+          <span class="kc-void" aria-hidden="true"></span>
+          <button class="kc pressable" aria-label="ゆ, yu, nouvelle"><span class="kg" lang="ja">ゆ</span><span class="kr">yu</span></button>
+          <span class="kc-void" aria-hidden="true"></span>
+          <button class="kc pressable" aria-label="よ, yo, nouvelle"><span class="kg" lang="ja">よ</span><span class="kr">yo</span></button>
+          <button class="kc pressable" aria-label="ら, ra, nouvelle"><span class="kg" lang="ja">ら</span><span class="kr">ra</span></button>
+          <button class="kc pressable" aria-label="り, ri, nouvelle"><span class="kg" lang="ja">り</span><span class="kr">ri</span></button>
+          <button class="kc pressable" aria-label="る, ru, nouvelle"><span class="kg" lang="ja">る</span><span class="kr">ru</span></button>
+          <button class="kc pressable" aria-label="れ, re, nouvelle"><span class="kg" lang="ja">れ</span><span class="kr">re</span></button>
+          <button class="kc pressable" aria-label="ろ, ro, nouvelle"><span class="kg" lang="ja">ろ</span><span class="kr">ro</span></button>
+          <button class="kc pressable" aria-label="わ, wa, nouvelle"><span class="kg" lang="ja">わ</span><span class="kr">wa</span></button>
+          <span class="kc-void" aria-hidden="true"></span>
+          <span class="kc-void" aria-hidden="true"></span>
+          <span class="kc-void" aria-hidden="true"></span>
+          <button class="kc pressable" aria-label="を, wo, nouvelle"><span class="kg" lang="ja">を</span><span class="kr">wo</span></button>
+          <button class="kc pressable" aria-label="ん, n, nouvelle"><span class="kg" lang="ja">ん</span><span class="kr">n</span></button>
+        </div>
+      </div>
+
+      <div class="kd-pane pane">
+
+        <div class="hero-t kd-hero">
+          <div class="ht-kj" lang="ja">
+            <div class="kj">あ</div>
+          </div>
+          <div class="ht-info">
+            <button class="say pressable">
+              <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#17131f"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>
+              a
+            </button>
+            <div class="hero-tags">
+              <span class="tag">Hiragana</span>
+              <span class="tag">Voyelle</span>
+              <span class="tag">Rangée 1</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="sec-label">Ordre des traits</span>
+          <div class="kd-strokes">
+            <div class="kd-box">
+              <svg viewBox="0 0 168 168" role="img" aria-label="Tracé de あ en 3 traits numérotés">
+                <path d="M84 8V160M8 84H160" stroke="#b6b2c0" stroke-width="2" stroke-dasharray="6 7" fill="none"/>
+                <path d="M44 46C60 41 84 40 104 43" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <path d="M72 20C74 52 70 86 50 126" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <path d="M100 48C96 76 80 98 58 112C44 121 45 136 62 140C82 144 100 130 101 111C102 95 87 87 75 93C68 96 66 100 68 106" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <circle cx="44" cy="46" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <circle cx="72" cy="20" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <circle cx="100" cy="48" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <g font-family="Space Grotesk" font-size="12" font-weight="700" fill="#17131f" text-anchor="middle">
+                  <circle cx="24" cy="32" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="24" y="36.5">1</text>
+                  <circle cx="96" cy="14" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="96" y="18.5">2</text>
+                  <circle cx="132" cy="44" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="132" y="48.5">3</text>
+                </g>
+              </svg>
+            </div>
+            <div class="kd-notes">
+              <span class="tag">3 traits</span>
+              <p class="kd-note">Départ de chaque trait marqué en rose.</p>
+              <p class="kd-note">Du haut vers le bas, de gauche à droite.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mnemo">
+          <p class="quote">« Un “a” cursif qui a poussé une antenne. Tu le vois, tu l'entends. »</p>
+          <div class="meta">
+            <span class="author">par YonaYona</span>
+            <button class="vote pressable" aria-label="Voter pour ce mnémonique, 214 votes">
+              <svg class="icon" width="13" height="12" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>
+              214
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="sec-label">Kana proches</span>
+          <div class="kd-near-row">
+            <button class="kc ok pressable" aria-label="お, o, apprise"><span class="kg" lang="ja">お</span><span class="kr">o</span><span class="ks" aria-hidden="true">✓</span></button>
+            <button class="kc mid pressable" aria-label="め, me, en cours"><span class="kg" lang="ja">め</span><span class="kr">me</span><span class="ks" aria-hidden="true">●</span></button>
+            <button class="kc is-due pressable" aria-label="ぬ, nu, à revoir aujourd'hui"><span class="kg" lang="ja">ぬ</span><span class="kr">nu</span><span class="ks" aria-hidden="true">dû</span></button>
+          </div>
+        </div>
+
+        <div class="d-cta">
+          <button class="btn-primary pressable">
+            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 15c3-1 5-2.5 7-5.5M13 3l2 2-3.5 3.5-2-2z" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Pratiquer le tracé
+          </button>
+        </div>
+
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ 3 · RÉVISION · PAYSAGE ============ -->
+  <section class="panel">
+    <span class="caption">Révision · paysage</span>
+    <article class="screen rev-t" aria-label="Session de révision en paysage">
+
+      <div class="rvt-bar">
+        <button class="sq-btn pressable" aria-label="Quitter la session">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="#17131f" stroke-width="2.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="rvt-mid">
+          <div class="rvt-count">7<small>&thinsp;/&thinsp;20</small></div>
+          <div class="progress" role="progressbar" aria-valuenow="7" aria-valuemin="0" aria-valuemax="20" aria-label="7 cartes sur 20"><i></i></div>
+          <p class="rvt-left-note">Encore 13. Tu tiens le rythme.</p>
+        </div>
+        <span class="stick">Série&nbsp;: 8 jours</span>
+      </div>
+
+      <div class="rvt-body">
+
+        <div class="rvt-stage">
+          <div class="flashcard">
+            <span class="sticker">RETENU</span>
+            <span class="confetti c1" aria-hidden="true"></span>
+            <span class="confetti c2" aria-hidden="true"></span>
+            <span class="confetti c3" aria-hidden="true"></span>
+            <span class="confetti c4" aria-hidden="true"></span>
+            <span class="confetti c5" aria-hidden="true"></span>
+            <div lang="ja">
+              <div class="kj">勉強</div>
+              <div class="divider" aria-hidden="true"></div>
+              <div class="reading">べんきょう</div>
+            </div>
+            <p class="gloss">« étude, travail »</p>
+            <p class="seen">Vu il y a 3 jours.</p>
+          </div>
+        </div>
+
+        <div class="rvt-side">
+          <p class="hint">Tu l'avais&nbsp;?</p>
+          <div class="grades-v">
+            <button class="grade again pressable">
+              <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M17.5 11a6.5 6.5 0 11-1.9-4.6M17.5 3v4h-4" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="name">Encore</span>
+              <span class="int">2 min</span>
+            </button>
+            <button class="grade hard pressable">
+              <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 11h4l2.5-6 4 12 2.5-6h4" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="name">Difficile</span>
+              <span class="int">1 j</span>
+            </button>
+            <button class="grade good pressable">
+              <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 12l5 5L18.5 6" fill="none" stroke="#17131f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="name">Bien</span>
+              <span class="int">3 j</span>
+            </button>
+            <button class="grade easy pressable">
+              <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M2.5 12l4.5 4.5L15.5 8M10 12.5L14.5 17 21 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="name">Facile</span>
+              <span class="int">7 j</span>
+            </button>
+          </div>
+
+          <button class="ctx pressable">
+            <span class="sec-label">En contexte</span>
+            <span class="chips" lang="ja">
+              <span class="chip">毎日</span>
+              <span class="chip">日本語</span>
+              <span class="chip">を</span>
+              <span class="chip hit">勉強します</span>
+            </span>
+            <span class="fr" style="display:block">« J'étudie le japonais tous les jours. »</span>
+            <span class="go">Ouvrir la fiche <span class="chev" aria-hidden="true">›</span></span>
+          </button>
+        </div>
+
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ 4 · ACCUEIL · TABLEAU DE BORD ============ -->
+  <section class="panel">
+    <span class="caption">Accueil · tableau de bord</span>
+    <article class="screen" aria-label="Accueil en tableau de bord">
+
+      <nav class="rail" aria-label="Navigation principale">
+        <span class="rail-logo" aria-hidden="true">j</span>
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Commu
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+      <div class="home-t">
+
+        <div class="home-head-t">
+          <div class="hh-row1">
+            <span class="logo">jibiki</span>
+            <span class="streak">Série&nbsp;: 8 jours</span>
+          </div>
+          <div class="hh-row2">
+            <p class="hello">Bonsoir. On s'y remet&nbsp;?</p>
+            <div class="search">
+              <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.7" fill="none" stroke="#17131f" stroke-width="2.6"/><path d="M13 13l4.6 4.6" stroke="#17131f" stroke-width="2.6" stroke-linecap="round"/></svg>
+              <input type="search" placeholder="Un mot, un kanji, du rōmaji…" aria-label="Rechercher dans le dictionnaire">
+            </div>
+          </div>
+        </div>
+
+        <div class="dash">
+
+          <div class="due">
+            <div class="due-top">
+              <div>
+                <div class="due-num">12</div>
+                <div class="due-label">à réviser</div>
+              </div>
+              <span class="due-new">+ 5 nouvelles</span>
+            </div>
+            <p class="due-sub">9 minutes, chrono.</p>
+            <p class="due-mix">8 kanji · 3 mots · 1 kana.</p>
+            <button class="btn-primary pressable">
+              Lancer la session
+              <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.5l10 5.5-10 5.5z" fill="#f2e51c" stroke="#f2e51c" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div class="wod">
+            <span class="wod-badge">Mot du jour</span>
+            <div class="wod-row">
+              <div class="wod-kanji" lang="ja">
+                <span class="furi">はなみ</span>
+                <span class="kj">花見</span>
+              </div>
+              <div class="wod-def">
+                <div class="romaji">hanami</div>
+                <p class="gloss">Pique-nique sous les cerisiers en fleurs. De saison.</p>
+              </div>
+              <button class="say pressable">
+                <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#17131f"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>
+                hanami
+              </button>
+            </div>
+          </div>
+
+          <div class="fore">
+            <span class="sec-label">Charge à venir</span>
+            <div class="pf-bars" role="img" aria-label="Prévision de révisions : demain 18 cartes, puis 11, 9, 14, 5, 3 et 4 sur les six jours suivants">
+              <div class="pfb hi"><b>18</b><i style="height:74%"></i><span class="d">+1</span></div>
+              <div class="pfb"><b>11</b><i style="height:47%"></i><span class="d">+2</span></div>
+              <div class="pfb"><b>9</b><i style="height:39%"></i><span class="d">+3</span></div>
+              <div class="pfb"><b>14</b><i style="height:58%"></i><span class="d">+4</span></div>
+              <div class="pfb"><b>5</b><i style="height:23%"></i><span class="d">+5</span></div>
+              <div class="pfb"><b>3</b><i style="height:15%"></i><span class="d">+6</span></div>
+              <div class="pfb"><b>4</b><i style="height:19%"></i><span class="d">+7</span></div>
+            </div>
+            <p class="fore-line">Demain&nbsp;: 18 · Dans 7 j&nbsp;: 64 au total.</p>
+          </div>
+
+          <div class="cmy-block">
+            <h3>Communauté</h3>
+            <p class="sub">Les paquets des autres. Prends, note, améliore.</p>
+            <button class="cmy pressable">
+              <div class="cmy-name">Kanji des panneaux de gare</div>
+              <p class="cmy-meta">par TokyoLine · 214 cartes</p>
+              <div class="cmy-stats">
+                <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>412</span>
+                <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>3,1 k</span>
+              </div>
+            </button>
+            <button class="cmy pressable">
+              <div class="cmy-name">Onomatopées du quotidien</div>
+              <p class="cmy-meta">par MojiMoji · 120 cartes</p>
+              <div class="cmy-stats">
+                <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>286</span>
+                <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>1,8 k</span>
+              </div>
+            </button>
+            <button class="btn-primary pressable">Explorer <span class="chev" aria-hidden="true">›</span></button>
+          </div>
+
+          <div class="rec">
+            <span class="lbl">Vus hier</span>
+            <div class="words" lang="ja">
+              <button class="w pressable">咲く</button>
+              <button class="w pressable">満開</button>
+              <button class="w pressable">春</button>
+              <button class="w pressable">花見</button>
+            </div>
+            <button class="more pressable">Tout l'historique <span class="chev" aria-hidden="true">›</span></button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+  </section>
+
+</main>
+
+</body>
+</html>
