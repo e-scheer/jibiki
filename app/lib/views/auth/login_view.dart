@@ -59,10 +59,27 @@ class _LoginFormState extends State<_LoginForm> {
     // On success AppState flips to authenticated and the router redirects.
   }
 
+  Future<void> _continueWithoutAccount() async {
+    // Settings, report sheets and other signed-in entry points push this
+    // screen. In that case "continue" means cancel the optional sign-in,
+    // not changing the current local/account state.
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    await context.read<AppState>().continueWithoutAccount();
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
     return Scaffold(
+      appBar: context.canPop()
+          ? AppBar(
+              leading: const BackButton(),
+              title: Text(context.trText('Sign in')),
+            )
+          : null,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -164,8 +181,7 @@ class _LoginFormState extends State<_LoginForm> {
                     // sync + community. Signing up later uploads the whole
                     // local history, nothing is lost by starting here.
                     TextButton(
-                      onPressed: () =>
-                          context.read<AppState>().continueWithoutAccount(),
+                      onPressed: vm.isLoading ? null : _continueWithoutAccount,
                       child:
                           Text(context.trText('Continue without an account')),
                     ),
