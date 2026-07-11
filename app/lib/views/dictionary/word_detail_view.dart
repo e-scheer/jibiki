@@ -39,7 +39,7 @@ class _WordDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<WordDetailViewModel>();
-    final lang = context.read<AppState>().mnemonicLanguage;
+    final lang = context.watch<AppState>().mnemonicLanguage;
     final word = vm.word;
     return Scaffold(
       appBar: AppBar(
