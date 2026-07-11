@@ -155,6 +155,7 @@ class MnemonicCreateView(APIView):
                 character=data["character"],
                 kind=data["kind"],
                 language=data["language"],
+                reading=data["reading"],
                 story=data["story"],
                 image_file=data.get("image"),
             )

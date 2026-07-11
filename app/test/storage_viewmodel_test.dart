@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jibiki/data/packs/pack_manager.dart';
+import 'package:jibiki/infrastructure/packs/pack_manager.dart';
 import 'package:jibiki/viewmodels/storage_viewmodel.dart';
 import 'package:sqlite3/sqlite3.dart' as sq;
 
@@ -22,7 +22,13 @@ void main() {
     tmp = await Directory.systemTemp.createTemp('jibiki-storage-vm');
     final dbFile = '${tmp.path}/tiny.db';
     final db = sq.sqlite3.open(dbFile);
-    db.execute("CREATE TABLE kana(\"char\" TEXT PRIMARY KEY); INSERT INTO kana VALUES ('あ');");
+    db.execute('''
+      CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT);
+      INSERT INTO meta VALUES ('pack_id', 'dict-base');
+      INSERT INTO meta VALUES ('schema_version', '1');
+      CREATE TABLE kana("char" TEXT PRIMARY KEY);
+      INSERT INTO kana VALUES ('あ');
+    ''');
     db.dispose();
     final raw = File(dbFile).readAsBytesSync();
     final gz = gzip.encode(raw);
@@ -30,11 +36,13 @@ void main() {
       root: () async => Directory('${tmp.path}/packs'),
       dio: Dio(), // unreachable server: checkUpdates will fail
       loadAsset: (key) async => switch (key) {
-        'assets/packs/base.db.gz' => ByteData.sublistView(Uint8List.fromList(gz)),
+        'assets/packs/base.db.gz' =>
+          ByteData.sublistView(Uint8List.fromList(gz)),
         'assets/packs/base_manifest.json' =>
           ByteData.sublistView(Uint8List.fromList(utf8.encode(jsonEncode({
             'id': 'dict-base',
             'version': '1',
+            'schema_version': 1,
             'file': 'base.db.gz',
             'bytes': gz.length,
             'installed_bytes': raw.length,
@@ -47,7 +55,10 @@ void main() {
     await packs.ensureReady();
   });
 
-  tearDown(() => tmp.delete(recursive: true));
+  tearDown(() async {
+    await packs.close();
+    await tmp.delete(recursive: true);
+  });
 
   test('rows show the installed base even with no server manifest', () {
     final vm = StorageViewModel(packs, null);

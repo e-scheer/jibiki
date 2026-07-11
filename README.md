@@ -12,8 +12,10 @@ This monorepo holds a **Flutter MVVM app** (`app/`) and a **Django + DRF API**
 
 ```
 jibiki/
-├── app/           Flutter app (MVVM: models · services · repositories · viewmodels · views)
-├── server/        Django + DRF API (accounts · dictionary · srs · mnemonics)
+├── app/           Flutter app (MVVM plus native offline infrastructure)
+├── server/        Django API (dictionary · mnemonics · contentpacks · srs)
+├── docs/          Product, data architecture and research notes
+├── var/           Generated packs and local media (ignored)
 ├── compose.yaml   Postgres + api [+ caddy]           (prod topology)
 ├── compose.override.yaml   dev-only (exposes the DB port)
 ├── caddy/Caddyfile
@@ -125,6 +127,8 @@ principle). Study and mnemonic writes require the session token.
 |---|---|
 | **SRS = FSRS-6** (not SM-2) | `server/srs/fsrs.py` - self-contained 21-param FSRS-6; full `ReviewLog` from day one for later per-user training |
 | **Excellent dictionary** (JMdict/KANJIDIC/kana) | `server/dictionary/` - normalized Word→Form/Sense→Gloss + real EDRDG importers + curated seed |
+| **Localized content model** | neutral entities plus language-tagged child rows; mnemonics remain independent language-native content. See `docs/CONTENT_PACK.md` |
+| **Offline content packs** | `server/contentpacks/` owns schema v2, manifest v3, build and serving; `app/lib/infrastructure/` owns install, registry and local reads |
 | **Configurable modes** (Dictionary ↔ Learning) | one `AppMode` flag on the profile drives home layout, the due badge and notification defaults - not three code paths |
 | **Kanji decomposition + stroke order** | `KRADFILE` components + `component_details` (tappable, jpdb-style) + **KanjiVG stroke-order animation** (`server/dictionary/management/commands/import_kanjivg.py`, `app/.../stroke_order_view.dart`) |
 | **Community, language-dependent mnemonics** (the moat) | `server/mnemonics/` - `(character, language, kind)` first-class entity, votes, trust tiers, auto-hide moderation, never hard-deleted; app: `MnemonicPanel` |

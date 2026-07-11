@@ -16,7 +16,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from dictionary.models import ExampleSentence
+from dictionary.models import ExampleSentence, ExampleTranslation
 
 
 class Command(BaseCommand):
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             raise CommandError(f"file not found: {path}")
 
         ExampleSentence.objects.all().delete()
-        batch: list[ExampleSentence] = []
+        batch: list[tuple[ExampleSentence, str]] = []
         total = 0
         with path.open(encoding="utf-8", errors="replace") as fh:
             for line in fh:
@@ -43,12 +43,21 @@ class Command(BaseCommand):
                 jp = jp.strip()
                 if not jp:
                     continue
-                batch.append(ExampleSentence(japanese=jp, english=english))
+                batch.append((ExampleSentence(japanese=jp), english))
                 if len(batch) >= 2000:
-                    ExampleSentence.objects.bulk_create(batch)
+                    self._flush(batch)
                     total += len(batch)
                     batch = []
         if batch:
-            ExampleSentence.objects.bulk_create(batch)
+            self._flush(batch)
             total += len(batch)
         self.stdout.write(self.style.SUCCESS(f"Done - {total} example sentences imported."))
+
+    @staticmethod
+    def _flush(batch: list[tuple[ExampleSentence, str]]) -> None:
+        rows = ExampleSentence.objects.bulk_create([row for row, _text in batch])
+        ExampleTranslation.objects.bulk_create(
+            ExampleTranslation(example=row, language="en", text=text)
+            for row, (_source, text) in zip(rows, batch, strict=True)
+            if text
+        )

@@ -46,7 +46,7 @@ void main() {
       'SELECT w.headword FROM gloss_fts f '
       'JOIN glosses g ON g.id = f.rowid '
       'JOIN words w ON w.id = g.word_id '
-      "WHERE gloss_fts MATCH '\"eat\"*' AND g.lang = 'en' "
+      "WHERE gloss_fts MATCH '\"eat\"*' AND g.language = 'en' "
       'ORDER BY g.word_rank LIMIT 3',
     );
     expect(rows.first['headword'], '食べる');

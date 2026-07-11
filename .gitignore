@@ -10,7 +10,9 @@ server/staticfiles/
 
 # Env / secrets
 .env
-data/
+/data/
+/var/
+/server/backups/
 
 # Flutter / Dart
 app/.dart_tool/

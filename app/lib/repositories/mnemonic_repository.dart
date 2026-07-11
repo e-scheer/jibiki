@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import '../data/packs/pack_manager.dart';
+import '../infrastructure/packs/pack_manager.dart';
 import '../models/mnemonic.dart';
 import '../services/mnemonic_service.dart';
 

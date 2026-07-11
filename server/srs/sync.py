@@ -24,6 +24,7 @@ from __future__ import annotations
 from datetime import timedelta
 
 from django.db import transaction
+from django.db.models import Max
 from django.utils import timezone
 from rest_framework import serializers as drf_serializers
 
@@ -55,11 +56,22 @@ class OpRejected(Exception):
     """An op that must not be retried - acked to the client with a reason."""
 
 
+@transaction.atomic
 def apply_sync(user, data: dict) -> dict:
     """Apply one sync request. Returns the response payload with ``cards`` as
     model instances (the view serializes them)."""
     now = timezone.now()
     cursor = data.get("last_synced_at")
+    mode = data.get("mode", "sync")
+
+    if mode == "preview":
+        return _empty_response(user, now, cloud=_cloud_status(user))
+    if mode == "replace_cloud":
+        if cursor is not None:
+            raise drf_serializers.ValidationError(
+                {"last_synced_at": "Cloud replacement requires an initial sync."}
+            )
+        _clear_study_cloud(user)
 
     applied_ops, rejected_ops = _apply_ops(user, data.get("ops") or [], now)
     applied_reviews, rejected_reviews = _apply_reviews(user, data.get("reviews") or [], now)
@@ -77,7 +89,43 @@ def apply_sync(user, data: dict) -> dict:
         "cards": delta_cards,
         "deleted": deleted,
         "profile": ProfileSerializer(profile).data,
+        "cloud": _cloud_status(user),
     }
+
+
+def _cloud_status(user) -> dict:
+    card_at = Card.objects.filter(user=user).aggregate(value=Max("updated_at"))["value"]
+    review_at = ReviewLog.objects.filter(user=user).aggregate(value=Max("reviewed_at"))["value"]
+    changed_at = max((value for value in (card_at, review_at) if value), default=None)
+    return {
+        "cards": Card.objects.filter(user=user).count(),
+        "reviews": ReviewLog.objects.filter(user=user).count(),
+        "changed_at": changed_at,
+    }
+
+
+def _empty_response(user, now, *, cloud: dict) -> dict:
+    from accounts.models import UserProfile
+
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    return {
+        "synced_at": now,
+        "applied_review_ids": [],
+        "rejected": [],
+        "applied_op_ids": [],
+        "rejected_ops": [],
+        "cards": [],
+        "deleted": [],
+        "profile": ProfileSerializer(profile).data,
+        "cloud": cloud,
+    }
+
+
+def _clear_study_cloud(user) -> None:
+    ReviewLog.objects.filter(user=user).delete()
+    Card.objects.filter(user=user).delete()
+    CardTombstone.objects.filter(user=user).delete()
+    SyncedOp.objects.filter(user=user).delete()
 
 
 # ── ops ──────────────────────────────────────────────────────────────────────

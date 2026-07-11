@@ -37,7 +37,7 @@ StudyCard _kanji(int id, String literal, String meaning, String kun) => StudyCar
         nanori: const [],
         components: const [],
         meanings: [
-          {'lang': 'en', 'text': meaning},
+          {'language': 'en', 'text': meaning},
         ],
       ),
     );

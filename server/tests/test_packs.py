@@ -1,4 +1,4 @@
-"""SQLite content packs: build_packs output + the v2 manifest/file endpoints."""
+"""SQLite content packs: build output and v3 manifest/file endpoints."""
 
 import gzip
 import hashlib
@@ -43,12 +43,13 @@ def test_build_base_pack(seeded, tmp_path):
     assert count("kanji") == Kanji.objects.filter(jlpt__isnull=False).count() > 0
     assert count("kana") == Kana.objects.count() > 0
     assert count("radicals") == Radical.objects.count() > 0
-    gloss_q = Gloss.objects.filter(lang__in=["en", "fr"], sense__word__in=word_q)
+    gloss_q = Gloss.objects.filter(language__in=["en", "fr"], sense__word__in=word_q)
     assert count("glosses") == gloss_q.count() > 0
 
     meta = dict(conn.execute("SELECT key, value FROM meta"))
     assert meta["pack_id"] == "dict-base"
-    assert meta["schema_version"] == "1"
+    assert meta["schema_version"] == "2"
+    assert meta["content_type"] == "dictionary_base"
     assert json.loads(meta["languages"]) == ["en", "fr"]
     assert "JMdict" in json.loads(meta["attribution"])["words"]
 
@@ -62,16 +63,18 @@ def test_build_base_pack(seeded, tmp_path):
     assert hits
 
 
-def test_build_core_and_gloss_packs(seeded, tmp_path):
+def test_build_core_and_locale_packs(seeded, tmp_path):
     from dictionary.models import Gloss, Word
 
-    _build(tmp_path, "--packs", "core,gloss-en")
+    _build(tmp_path, "--packs", "core,locale-en")
     manifest = json.loads((tmp_path / "packs_manifest.json").read_text(encoding="utf-8"))
-    assert manifest["schema"] == "jibiki-packs/2"
+    assert manifest["schema"] == "jibiki-packs/3"
     packs = {p["id"]: p for p in manifest["packs"]}
-    assert set(packs) == {"dict-core", "gloss-en"}
+    assert set(packs) == {"dict-core", "dict-locale-en"}
     assert packs["dict-core"]["requires"] == []
-    assert packs["gloss-en"]["requires"] == [{"id": "dict-core", "version": VERSION}]
+    assert packs["dict-locale-en"]["requires"] == [
+        {"id": "dict-core", "version": VERSION}
+    ]
 
     # kanji_words: dense ranks from 0, capped at 12, ordered by the words' own
     # ranking (is_common DESC, freq_rank ASC - the build-time precomputation).
@@ -91,25 +94,44 @@ def test_build_core_and_gloss_packs(seeded, tmp_path):
         assert keys == sorted(keys)
 
     # gloss pack rows join back onto core word ids: spot-check 食べる.
-    gloss = _connect(tmp_path, packs["gloss-en"]["file"])
+    gloss = _connect(tmp_path, packs["dict-locale-en"]["file"])
     word = Word.objects.get(forms__text="食べる")
     got = [
         text
         for (text,) in gloss.execute(
-            "SELECT text FROM glosses WHERE word_id = ? AND lang = 'en' ORDER BY ord", (word.id,)
+            "SELECT text FROM glosses WHERE word_id = ? AND language = 'en' ORDER BY ord",
+            (word.id,),
         )
     ]
     expected = list(
-        Gloss.objects.filter(sense__word=word, lang="en")
+        Gloss.objects.filter(sense__word=word, language="en")
         .order_by("sense__order", "order")
         .values_list("text", flat=True)
     )
     assert got == expected == ["to eat"]
 
 
+def test_build_french_mnemonic_pack_is_language_native(seeded, tmp_path):
+    _build(tmp_path, "--packs", "mnemonics-fr")
+    manifest = json.loads((tmp_path / "packs_manifest.json").read_text(encoding="utf-8"))
+    entry = manifest["packs"][0]
+    assert entry["id"] == "mnemonics-fr"
+    assert entry["languages"] == ["fr"]
+
+    conn = _connect(tmp_path, entry["file"])
+    rows = conn.execute(
+        "SELECT character, language, story FROM mnemonics ORDER BY id"
+    ).fetchall()
+    assert len(rows) == 92
+    assert {language for _, language, _ in rows} == {"fr"}
+    stories = {character: story for character, _, story in rows}
+    assert "quilles" in stories["き"]
+    assert stories["き"] != stories["キ"]
+
+
 def test_packs_manifest_and_file_endpoints(seeded, tmp_path, client, settings):
     _build(tmp_path / "packs", "--packs", "core")
-    settings.CONTENT_PACK_DIR = str(tmp_path)
+    settings.CONTENT_PACK_DIR = str(tmp_path / "packs")
 
     resp = client.get("/api/v1/content/packs/manifest")
     assert resp.status_code == 200
@@ -140,3 +162,24 @@ def test_packs_manifest_and_file_endpoints(seeded, tmp_path, client, settings):
     assert b"".join(weird.streaming_content) == blob
 
     assert client.get("/api/v1/content/packs/file/nope.db.gz").status_code == 404
+
+
+def test_invalid_manifest_is_not_served(tmp_path, client, settings):
+    packs = tmp_path / "packs"
+    packs.mkdir()
+    settings.CONTENT_PACK_DIR = str(packs)
+    (packs / "secret.db.gz").write_bytes(b"secret")
+    (packs / "packs_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema": "jibiki-packs/3",
+                "packs": [
+                    {"id": "unsafe", "file": "../secret.db.gz", "requires": []},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert client.get("/api/v1/content/packs/manifest").status_code == 503
+    assert client.get("/api/v1/content/packs/file/secret.db.gz").status_code == 404

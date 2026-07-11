@@ -15,7 +15,7 @@ import tempfile
 
 # Point media at a throwaway dir *before* settings.py computes MEDIA_ROOT, so the
 # file storage caches the temp location on its very first access - otherwise seed
-# art / upload tests leak WebP files into the repo's data/media tree.
+# art / upload tests leak WebP files into the repo's var/media tree.
 os.environ.setdefault("MEDIA_STORE", tempfile.mkdtemp(prefix="jibiki-test-media-"))
 
 from .settings import *  # noqa: F403

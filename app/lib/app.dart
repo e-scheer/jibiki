@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription;
+import 'dart:async' show StreamSubscription, unawaited;
 import 'dart:io' show Directory;
 
 import 'package:dio/dio.dart';
@@ -17,10 +17,10 @@ import 'core/api_config.dart';
 import 'core/db/user_db.dart';
 import 'core/session_store.dart';
 import 'core/speech.dart';
-import 'data/local/local_dictionary_data_source.dart';
-import 'data/local/local_study_store.dart';
-import 'data/packs/pack_manager.dart';
-import 'data/user_db_handle.dart';
+import 'infrastructure/local/local_dictionary_data_source.dart';
+import 'infrastructure/local/local_study_store.dart';
+import 'infrastructure/packs/pack_manager.dart';
+import 'infrastructure/user_db_handle.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/dictionary_repository.dart';
 import 'repositories/mnemonic_deck_repository.dart';
@@ -37,6 +37,7 @@ import 'services/sync_service.dart';
 import 'sync/sync_engine.dart';
 import 'theme/app_theme.dart';
 import 'viewmodels/app_state.dart';
+import 'views/widgets/sync_conflict_gate.dart';
 
 /// Composition root: wires SessionStore → ApiClient → services → repositories →
 /// AppState once, exposes the repositories + AppState via Provider, and hands the
@@ -57,8 +58,8 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
   late final PackManager? _packs = kIsWeb
       ? null
       : PackManager(
-          root: () async =>
-              Directory('${(await getApplicationSupportDirectory()).path}/packs'),
+          root: () async => Directory(
+              '${(await getApplicationSupportDirectory()).path}/packs'),
           dio: Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)),
           loadAsset: rootBundle.load,
         );
@@ -76,11 +77,12 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
   late final StudyService _studyService = StudyService(_api);
   late final UserDbHandle? _userDb = kIsWeb
       ? null
-      : UserDbHandle(() async =>
-          UserDb.open('${(await getApplicationSupportDirectory()).path}/user.db'));
+      : UserDbHandle(() async => UserDb.open(
+          '${(await getApplicationSupportDirectory()).path}/user.db'));
   late final SyncEngine? _sync = _userDb == null
       ? null
-      : SyncEngine(_userDb, SyncService(_api), canSync: () => _app.isAuthenticated);
+      : SyncEngine(_userDb, SyncService(_api),
+          canSync: () => _app.isAuthenticated);
   late final StudyRepository _studyRepo = _userDb == null
       ? StudyRepository(_studyService, _studyService)
       : StudyRepository(
@@ -96,7 +98,8 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
       MnemonicRepository(MnemonicService(_api), packs: _packs);
   late final MnemonicDeckRepository _mnemonicDeckRepo =
       MnemonicDeckRepository(MnemonicDeckService(_api));
-  late final AuthRepository _authRepo = AuthRepository(AuthService(_api), widget.session);
+  late final AuthRepository _authRepo =
+      AuthRepository(AuthService(_api), widget.session);
 
   late final AppState _app = AppState(_authRepo);
   late final GoRouter _router = buildRouter(_app);
@@ -115,7 +118,7 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
     // Resolve the session behind the held native splash, then reveal the app
     // straight onto its real first screen (no second splash, no flash). Runs
     // regardless of outcome - success, login, or the offline retry state.
-    _app.bootstrap().whenComplete(FlutterNativeSplash.remove);
+    final bootstrap = _app.bootstrap().whenComplete(FlutterNativeSplash.remove);
     // Install/refresh the bundled dictionary pack in the background; local
     // reads wait on readiness, and the HTTP fallback covers any failure.
     _packs?.ensureReady();
@@ -123,23 +126,28 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
     // regained, resume - plus the debounced poke after every local mutation.
     final sync = _sync;
     if (sync != null) {
-      sync.init().then((_) => sync.requestSync(debounce: const Duration(seconds: 2)));
       _app.addListener(_onAuthChanged);
+      sync.init().then((_) async {
+        final results = await Connectivity().checkConnectivity();
+        sync.setOnline(
+            results.any((result) => result != ConnectivityResult.none));
+        await bootstrap;
+        await sync.accountChanged(_app.user?.id);
+      });
       _connectivity = Connectivity().onConnectivityChanged.listen((results) {
-        if (results.any((r) => r != ConnectivityResult.none)) {
-          sync.requestSync(debounce: const Duration(seconds: 2));
-        }
+        sync.setOnline(
+            results.any((result) => result != ConnectivityResult.none));
       });
     }
     // Warm the TTS engine after the first frame so the first "play audio" tap
     // fires instantly instead of cold-starting the platform voice.
-    WidgetsBinding.instance.addPostFrameCallback((_) => Speech.instance.warmUp());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => Speech.instance.warmUp());
   }
 
   void _onAuthChanged() {
-    if (_app.isAuthenticated) {
-      _sync?.requestSync(debounce: const Duration(seconds: 2));
-    }
+    final sync = _sync;
+    if (sync != null) unawaited(sync.accountChanged(_app.user?.id));
   }
 
   @override
@@ -154,6 +162,10 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _connectivity?.cancel();
     _app.removeListener(_onAuthChanged);
+    final packs = _packs;
+    if (packs != null) unawaited(packs.close());
+    final userDb = _userDb;
+    if (userDb != null) unawaited(userDb.close());
     super.dispose();
   }
 
@@ -184,10 +196,13 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         // Premium touch: tapping anywhere outside a field dismisses the keyboard.
         // Translucent so empty space is captured while buttons/fields still win
         // their own taps.
-        builder: (context, child) => GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: child,
+        builder: (context, child) => SyncConflictGate(
+          sync: _sync,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child!,
+          ),
         ),
       ),
     );

@@ -1,7 +1,7 @@
 """Seed the bundled kanji READING mnemonics (kind='kanji_reading') from the
 generated reading briefs, one seed row per (kanji, reading, language).
 
-Each brief file ``content/kanji_reading_briefs.<level>.json`` holds entries
+Each source file ``content_sources/mnemonics/kanji_reading_briefs.<level>.json`` holds entries
 shaped ``{literal, reading, meaning, en, fr}``. Every non-empty language story
 becomes one seed ``Mnemonic`` with ``kind='kanji_reading'`` and ``reading`` set
 to the on-yomi it anchors: the ``en`` sentence under language='en', the ``fr``
@@ -32,9 +32,6 @@ from django.db import transaction
 from mnemonics.models import Mnemonic, MnemonicStatus
 
 ALL_LEVELS = ("n5", "n4", "n3", "n2", "n1")
-LANG_KEYS = ("en", "fr")
-
-
 class Command(BaseCommand):
     help = "Seed kanji reading mnemonics (kind='kanji_reading') from the content briefs."
 
@@ -43,20 +40,32 @@ class Command(BaseCommand):
         parser.add_argument("--dry-run", action="store_true")
 
     def _brief_path(self, level: str) -> Path:
-        return Path(settings.CONTENT_PACK_DIR) / f"kanji_reading_briefs.{level}.json"
+        return Path(settings.CONTENT_SOURCE_DIR) / "mnemonics" / (
+            f"kanji_reading_briefs.{level}.json"
+        )
 
-    def _load(self, level: str) -> list[dict]:
+    def _load(self, level: str) -> tuple[list[dict], tuple[str, ...]]:
         path = self._brief_path(level)
         doc = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(doc, dict) or doc.get("strategy") != "phonetic_reading":
+            raise CommandError(f"{path.name}: expected phonetic_reading strategy")
         entries = doc["kanji"] if isinstance(doc, dict) else doc
+        languages = tuple(doc.get("languages", ())) if isinstance(doc, dict) else ()
+        if not languages:
+            raise CommandError(f"{path.name}: missing languages list")
         for e in entries:
             if not e.get("literal") or not e.get("reading"):
                 raise CommandError(f"{path.name}: entry missing literal/reading: {e!r}")
-            for key in LANG_KEYS:
+            for key in languages:
                 story = e.get(key, "")
                 if story and ("—" in story or "–" in story):
                     raise CommandError(f"{path.name}: dash in {key} story for {e['literal']!r}")
-        return entries
+            stories = {e.get(key, "").strip() for key in languages if e.get(key, "").strip()}
+            if len(stories) != len(languages):
+                raise CommandError(
+                    f"{path.name}: missing or duplicated language story for {e['literal']!r}"
+                )
+        return entries, languages
 
     def handle(self, *args, **opts):
         levels = opts.get("levels") or [
@@ -64,7 +73,8 @@ class Command(BaseCommand):
         ]
         if not levels:
             raise CommandError(
-                f"No kanji_reading_briefs.<level>.json found in {settings.CONTENT_PACK_DIR}"
+                "No kanji reading sources found in "
+                f"{Path(settings.CONTENT_SOURCE_DIR) / 'mnemonics'}"
             )
 
         created = updated = unchanged = 0
@@ -73,9 +83,10 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             for level in levels:
-                for e in self._load(level):
+                entries, languages = self._load(level)
+                for e in entries:
                     char, reading = e["literal"], e["reading"]
-                    for lang in LANG_KEYS:
+                    for lang in languages:
                         story = (e.get(lang) or "").strip()
                         if not story:
                             continue

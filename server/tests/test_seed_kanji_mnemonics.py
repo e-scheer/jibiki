@@ -12,6 +12,8 @@ from mnemonics.models import Mnemonic, MnemonicStatus
 def _write_brief(content_dir, level, entries):
     doc = {
         "schema": "jibiki-kanji-meaning-briefs/1",
+        "strategy": "visual_meaning",
+        "languages": ["en", "fr"],
         "count": len(entries),
         "kanji": entries,
     }
@@ -22,8 +24,10 @@ def _write_brief(content_dir, level, entries):
 
 @pytest.fixture
 def brief_dir(tmp_path, settings):
-    settings.CONTENT_PACK_DIR = str(tmp_path)
-    return tmp_path
+    settings.CONTENT_SOURCE_DIR = tmp_path
+    path = tmp_path / "mnemonics"
+    path.mkdir()
+    return path
 
 
 def test_seeds_one_visible_row_per_language(db, brief_dir):

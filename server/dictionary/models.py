@@ -98,7 +98,6 @@ class Sense(models.Model):
     pos = models.JSONField(default=list, blank=True)  # ["n", "vs", ...]
     misc = models.JSONField(default=list, blank=True)  # ["uk", "col", ...]
     field = models.JSONField(default=list, blank=True)  # ["comp", "med", ...]
-    info = models.CharField(max_length=255, blank=True)
 
     class Meta:
         db_table = "dict_senses"
@@ -114,19 +113,44 @@ class Gloss(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     sense = models.ForeignKey(Sense, on_delete=models.CASCADE, related_name="glosses")
-    lang = models.CharField(max_length=8, default="en")
+    language = models.CharField(max_length=8, default="en")
     text = models.CharField(max_length=255)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         db_table = "dict_glosses"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["sense", "language", "order"], name="uq_gloss_language_order"
+            )
+        ]
         indexes = [
-            models.Index(fields=["lang", "text"]),
+            models.Index(
+                fields=["language", "text"], name="dict_glosse_lang_d7fe9f_idx"
+            ),
         ]
         ordering = ["sense", "order"]
 
     def __str__(self) -> str:
-        return f"[{self.lang}] {self.text}"
+        return f"[{self.language}] {self.text}"
+
+
+class SenseNote(models.Model):
+    """Localized usage or scope note attached to a dictionary sense."""
+
+    id = models.BigAutoField(primary_key=True)
+    sense = models.ForeignKey(Sense, on_delete=models.CASCADE, related_name="notes")
+    language = models.CharField(max_length=8, default="en")
+    text = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "dict_sense_notes"
+        constraints = [
+            models.UniqueConstraint(fields=["sense", "language"], name="uq_sense_note_language")
+        ]
+
+    def __str__(self) -> str:
+        return f"[{self.language}] {self.text}"
 
 
 # ── Kanji (KANJIDIC2 + KRADFILE) ───────────────────────────────────────────────
@@ -141,7 +165,6 @@ class Radical(models.Model):
     literal = models.CharField(max_length=4, unique=True)
     strokes = models.PositiveSmallIntegerField(default=0)
     reading = models.CharField(max_length=32, blank=True)  # kana name of the radical
-    meaning = models.CharField(max_length=64, blank=True)  # short keyword (EN)
 
     class Meta:
         db_table = "dict_radicals"
@@ -149,6 +172,29 @@ class Radical(models.Model):
 
     def __str__(self) -> str:
         return self.literal
+
+
+class RadicalMeaning(models.Model):
+    """A language-tagged display name for a radical or component."""
+
+    id = models.BigAutoField(primary_key=True)
+    radical = models.ForeignKey(Radical, on_delete=models.CASCADE, related_name="meanings")
+    language = models.CharField(max_length=8, default="en")
+    text = models.CharField(max_length=64)
+
+    class Meta:
+        db_table = "dict_radical_meanings"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["radical", "language"], name="uq_radical_meaning_language"
+            )
+        ]
+        indexes = [
+            models.Index(fields=["language", "text"], name="dict_radica_languag_8f2c77_idx")
+        ]
+
+    def __str__(self) -> str:
+        return f"[{self.language}] {self.text}"
 
 
 class Kanji(models.Model):
@@ -175,7 +221,6 @@ class Kanji(models.Model):
     # with ("phono-semantic", "ideogrammic", "pictogram", …); ``phonetic`` is the
     # 音符 (sound-carrying) component when the text names one - the keisei clue that
     # explains why a part is present even when it carries no meaning.
-    origin = models.TextField(blank=True)
     formation = models.CharField(max_length=32, blank=True)
     phonetic = models.CharField(max_length=8, blank=True)
 
@@ -201,26 +246,62 @@ class Kanji(models.Model):
 class KanjiMeaning(models.Model):
     id = models.BigAutoField(primary_key=True)
     kanji = models.ForeignKey(Kanji, on_delete=models.CASCADE, related_name="meanings")
-    lang = models.CharField(max_length=8, default="en")
+    language = models.CharField(max_length=8, default="en")
     text = models.CharField(max_length=128)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         db_table = "dict_kanji_meanings"
-        indexes = [models.Index(fields=["lang", "text"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kanji", "language", "order"],
+                name="uq_kanji_meaning_language_order",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=["language", "text"], name="dict_kanji__lang_53ea8b_idx"
+            )
+        ]
         ordering = ["kanji", "order"]
 
     def __str__(self) -> str:
-        return f"[{self.lang}] {self.text}"
+        return f"[{self.language}] {self.text}"
+
+
+class KanjiExplanation(models.Model):
+    """Localized prose about a kanji's glyph origin.
+
+    ``Kanji.formation`` and ``Kanji.phonetic`` remain language-neutral codes.
+    Only human-readable prose belongs here.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    kanji = models.ForeignKey(Kanji, on_delete=models.CASCADE, related_name="explanations")
+    language = models.CharField(max_length=8, default="en")
+    origin = models.TextField(blank=True)
+
+    class Meta:
+        db_table = "dict_kanji_explanations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kanji", "language"], name="uq_kanji_explanation_language"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.kanji.literal} [{self.language}]"
 
 
 # ── Kana (bundled) ──────────────────────────────────────────────────────────
 
 
 class Kana(models.Model):
-    """A single kana character. The mnemonic content (image + story) is NOT here -
-    it lives in the community `mnemonics` app keyed by (character, language), so a
-    kana can carry per-language mnemonics without touching this reference row."""
+    """A language-neutral kana character.
+
+    Explanations and grammatical content live in localized child rows. Mnemonics
+    remain separate, language-native community content in the ``mnemonics`` app.
+    """
 
     class Script(models.TextChoices):
         HIRAGANA = "hiragana", "Hiragana"
@@ -242,24 +323,8 @@ class Kana(models.Model):
 
     # Writing origin: the character this glyph was derived from - a man'yōgana kanji
     # for the base gojūon set (hiragana = its cursive whole, katakana = a fragment
-    # of it), or the base kana for dakuten/handakuten rows. ``origin_note`` is the
-    # short "how it got this shape" story shown on the kana detail screen.
+    # of it), or the base kana for dakuten/handakuten rows.
     origin = models.CharField(max_length=8, blank=True)
-    origin_note = models.CharField(max_length=255, blank=True)
-
-    # Grammatical job in a sentence, for the kana that double as particles (は topic,
-    # を object, の possessive, か question …) or carry a special role (ん). Only a
-    # handful of (hiragana) kana have one; the rest are purely phonetic and leave
-    # these blank. ``usage_label`` is the short role for a badge, ``usage`` the
-    # one-line explanation.
-    usage_label = models.CharField(max_length=48, blank=True)
-    usage = models.CharField(max_length=255, blank=True)
-
-    # Curated example sentences showing the particle at work. Each item keeps the
-    # particle as its own segment so the app can highlight it in place:
-    # {"before": …, "particle": …, "after": …, "romaji": …, "en": …}. Empty for
-    # kana with no grammatical role.
-    usage_examples = models.JSONField(default=list, blank=True)
 
     class Meta:
         db_table = "dict_kana"
@@ -270,22 +335,120 @@ class Kana(models.Model):
         return f"{self.char} ({self.romaji})"
 
 
+class KanaExplanation(models.Model):
+    """Localized explanation of how a kana acquired its shape."""
+
+    id = models.BigAutoField(primary_key=True)
+    kana = models.ForeignKey(Kana, on_delete=models.CASCADE, related_name="explanations")
+    language = models.CharField(max_length=8, default="en")
+    origin_note = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "dict_kana_explanations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["kana", "language"], name="uq_kana_explanation_language"
+            )
+        ]
+
+
+class KanaUsage(models.Model):
+    """A language-neutral grammatical role carried by a kana."""
+
+    id = models.BigAutoField(primary_key=True)
+    kana = models.OneToOneField(
+        Kana, on_delete=models.CASCADE, related_name="grammatical_usage"
+    )
+
+    class Meta:
+        db_table = "dict_kana_usages"
+
+
+class KanaUsageTranslation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    usage = models.ForeignKey(KanaUsage, on_delete=models.CASCADE, related_name="translations")
+    language = models.CharField(max_length=8, default="en")
+    label = models.CharField(max_length=48)
+    explanation = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "dict_kana_usage_translations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["usage", "language"], name="uq_kana_usage_translation_language"
+            )
+        ]
+
+
+class KanaUsageExample(models.Model):
+    """Japanese sentence segments are neutral; translations are separate rows."""
+
+    id = models.BigAutoField(primary_key=True)
+    usage = models.ForeignKey(KanaUsage, on_delete=models.CASCADE, related_name="examples")
+    order = models.PositiveSmallIntegerField(default=0)
+    before = models.TextField(blank=True)
+    particle = models.CharField(max_length=8)
+    after = models.TextField(blank=True)
+    pronunciation = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = "dict_kana_usage_examples"
+        ordering = ["usage", "order"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["usage", "order"], name="uq_kana_usage_example_order"
+            )
+        ]
+
+
+class KanaUsageExampleTranslation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    example = models.ForeignKey(
+        KanaUsageExample, on_delete=models.CASCADE, related_name="translations"
+    )
+    language = models.CharField(max_length=8, default="en")
+    text = models.TextField()
+
+    class Meta:
+        db_table = "dict_kana_usage_example_translations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["example", "language"], name="uq_kana_example_translation_language"
+            )
+        ]
+
+
 # ── Example sentences (Tanaka/Tatoeba corpus) ──────────────────────────────────
 
 
 class ExampleSentence(models.Model):
-    """A Japanese sentence with its English translation (Tanaka corpus). Shown on
-    word detail via a substring match on the headword (trigram-indexed on PG)."""
+    """A Japanese sentence. Language-specific translations are child rows."""
 
     id = models.BigAutoField(primary_key=True)
     japanese = models.TextField()
-    english = models.TextField(blank=True)
 
     class Meta:
         db_table = "dict_examples"
 
     def __str__(self) -> str:
         return self.japanese[:40]
+
+
+class ExampleTranslation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    example = models.ForeignKey(
+        ExampleSentence, on_delete=models.CASCADE, related_name="translations"
+    )
+    language = models.CharField(max_length=8, default="en")
+    text = models.TextField()
+
+    class Meta:
+        db_table = "dict_example_translations"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["example", "language"], name="uq_example_translation_language"
+            )
+        ]
 
 
 # ── Proper names (JMnedict) ────────────────────────────────────────────────────
@@ -299,7 +462,6 @@ class Name(models.Model):
     seq = models.BigIntegerField(unique=True, null=True, blank=True)
     kanji = models.CharField(max_length=64, blank=True)  # surface form (may be empty)
     reading = models.CharField(max_length=64)  # kana reading
-    translations = models.JSONField(default=list, blank=True)  # romanized/English readings
     name_types = models.JSONField(default=list, blank=True)  # ["place", "surname", …]
 
     class Meta:
@@ -311,3 +473,26 @@ class Name(models.Model):
 
     def __str__(self) -> str:
         return f"{self.kanji or self.reading} ({self.reading})"
+
+
+class NameTranslation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.ForeignKey(
+        Name, on_delete=models.CASCADE, related_name="localized_names"
+    )
+    language = models.CharField(max_length=8, default="en")
+    text = models.CharField(max_length=255)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        db_table = "dict_name_translations"
+        ordering = ["name", "language", "order"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "language", "order"],
+                name="uq_name_translation_language_order",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["language", "text"], name="dict_name_t_languag_f34c86_idx")
+        ]

@@ -1,6 +1,6 @@
 import '../core/languages.dart';
-import '../data/packs/pack_manager.dart';
-import '../data/packs/pack_manifest.dart';
+import '../infrastructure/packs/pack_manager.dart';
+import '../infrastructure/packs/pack_manifest.dart';
 import '../models/enums.dart';
 import 'app_state.dart';
 import 'base_view_model.dart';
@@ -73,12 +73,16 @@ class OnboardingViewModel extends BaseViewModel {
     }
     // A mnemonic language without a packaged dictionary (community language)
     // falls back to offering the English gloss pack.
-    var gloss = 'dict-gloss-$_language';
+    var gloss = 'dict-locale-$_language';
     if (manifest != null && manifest.byId(gloss) == null) {
-      gloss = 'dict-gloss-$fallbackLanguage';
+      gloss = 'dict-locale-$fallbackLanguage';
     }
     final core = manifest?.byId(corePackId);
     final glossInfo = manifest?.byId(gloss);
+    var examples = 'examples-$_language';
+    if (manifest != null && manifest.byId(examples) == null) {
+      examples = 'examples-$fallbackLanguage';
+    }
     // The core rides along with the first gloss pack; present them as one
     // "full dictionary" choice with the combined download size.
     final combined = glossInfo == null || core == null
@@ -95,7 +99,7 @@ class OnboardingViewModel extends BaseViewModel {
             sha256: glossInfo.sha256,
             sha256Db: glossInfo.sha256Db,
           );
-    final glossLang = gloss.substring('dict-gloss-'.length);
+    final glossLang = gloss.substring('dict-locale-'.length);
     _offers = [
       PackOffer(
         id: gloss,
@@ -107,10 +111,10 @@ class OnboardingViewModel extends BaseViewModel {
         info: combined,
       )..selected = true,
       PackOffer(
-        id: 'examples',
+        id: examples,
         title: 'Example sentences',
         blurb: 'Real sentences on word pages, offline.',
-        info: manifest?.byId('examples'),
+        info: manifest?.byId(examples),
       )..selected = _mode == AppMode.dictionary,
       PackOffer(
         id: 'names',

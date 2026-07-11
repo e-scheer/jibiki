@@ -13,10 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/core/api_client.dart';
 import 'package:jibiki/core/db/user_db.dart';
 import 'package:jibiki/core/session_store.dart';
-import 'package:jibiki/data/local/local_dictionary_data_source.dart';
-import 'package:jibiki/data/local/local_study_store.dart';
-import 'package:jibiki/data/packs/pack_manager.dart';
-import 'package:jibiki/data/user_db_handle.dart';
+import 'package:jibiki/infrastructure/local/local_dictionary_data_source.dart';
+import 'package:jibiki/infrastructure/local/local_study_store.dart';
+import 'package:jibiki/infrastructure/packs/pack_manager.dart';
+import 'package:jibiki/infrastructure/user_db_handle.dart';
 import 'package:jibiki/models/enums.dart';
 import 'package:jibiki/services/sync_service.dart';
 import 'package:jibiki/sync/sync_engine.dart';
@@ -31,11 +31,13 @@ class _FakeSyncService extends SyncService {
   @override
   Future<Map<String, dynamic>> sync({
     String? lastSyncedAt,
+    String mode = 'sync',
     List<Map<String, dynamic>> reviews = const [],
     List<Map<String, dynamic>> ops = const [],
   }) async {
     final request = {
       'last_synced_at': lastSyncedAt,
+      'mode': mode,
       'reviews': reviews,
       'ops': ops,
     };
@@ -46,7 +48,8 @@ class _FakeSyncService extends SyncService {
   static Map<String, dynamic> _ackAll(Map<String, dynamic> request) => {
         'synced_at': DateTime.now().toUtc().toIso8601String(),
         'applied_review_ids': [
-          for (final r in request['reviews'] as List) (r as Map)['client_review_id'],
+          for (final r in request['reviews'] as List)
+            (r as Map)['client_review_id'],
         ],
         'rejected': const [],
         'applied_op_ids': [
@@ -94,17 +97,28 @@ void main() {
   });
 
   setUp(() async {
-    user = UserDbHandle(
-        () => UserDb.open('${tmp.path}/user-${DateTime.now().microsecondsSinceEpoch}.db'));
-    store = LocalStudyStore(user, packs, dict, onLocalMutation: () => syncPokes++);
+    user = UserDbHandle(() => UserDb.open(
+        '${tmp.path}/user-${DateTime.now().microsecondsSinceEpoch}.db'));
+    store =
+        LocalStudyStore(user, packs, dict, onLocalMutation: () => syncPokes++);
     engine = SyncEngine(user, remote, canSync: () => true);
     await engine.init();
+    engine.setOnline(true);
+    await engine.accountChanged(1);
     remote.requests.clear();
     remote.handler = null;
     syncPokes = 0;
   });
 
-  tearDownAll(() => tmp.delete(recursive: true));
+  tearDown(() async {
+    engine.dispose();
+    await user.close();
+  });
+
+  tearDownAll(() async {
+    await packs.close();
+    await tmp.delete(recursive: true);
+  });
 
   test('add → new queue; review advances and fills the outbox', () async {
     final wordId = (await dict.search('食べる')).words.first.id;
@@ -138,7 +152,24 @@ void main() {
     expect(syncPokes, greaterThan(0));
   });
 
-  test('new-card order puts prerequisites first (kanji before its word)', () async {
+  test('automatic sync waits offline and drains when connectivity returns',
+      () async {
+    engine.setOnline(false);
+    await store.addCard(ItemType.kana, 'あ');
+    engine.requestSync(debounce: Duration.zero);
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(remote.requests, isEmpty);
+
+    engine.setOnline(true);
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+
+    expect(remote.requests, isNotEmpty);
+    expect(engine.pendingCount, 0);
+    expect(engine.lastSyncedAt, isNotNull);
+  });
+
+  test('new-card order puts prerequisites first (kanji before its word)',
+      () async {
     // 食べる (word) contains the kanji 食. Add the WORD first so the raw
     // created_at order is word-then-kanji; the prerequisite sort must still
     // surface the kanji ahead of the word it builds.
@@ -147,7 +178,9 @@ void main() {
     await store.addCard(ItemType.kanji, '食');
 
     final q = await store.queue(newLimit: 100);
-    final order = [for (final c in q.newCards) '${c.itemType.wire}:${c.itemRef}'];
+    final order = [
+      for (final c in q.newCards) '${c.itemType.wire}:${c.itemRef}'
+    ];
     final iKanji = order.indexOf('kanji:食');
     final iWord = order.indexOf('word:$wordId');
     expect(iKanji, greaterThanOrEqualTo(0));
@@ -155,7 +188,8 @@ void main() {
     expect(iKanji, lessThan(iWord), reason: 'kanji 食 must lead its word 食べる');
   });
 
-  test('new cards are a per-session batch, "Study more" pulls the rest', () async {
+  test('new cards are a per-session batch, "Study more" pulls the rest',
+      () async {
     await store.enrollDeck('hiragana');
     final deck = (await store.decks()).firstWhere((d) => d.id == 'hiragana');
     expect(deck.total, greaterThan(40));
@@ -173,7 +207,8 @@ void main() {
     expect(deckQueue.counts['new_available'], deck.total);
   });
 
-  test('set_status cycle: learning → known → none, mark-known has no log', () async {
+  test('set_status cycle: learning → known → none, mark-known has no log',
+      () async {
     await store.setStatus(ItemType.kana, 'い', 'learning');
     var states = await store.states(type: ItemType.kana);
     expect(states['い'], 0);
@@ -202,7 +237,9 @@ void main() {
 
   test('bulk add known seeds a whole set as mature', () async {
     final summary = await store.bulkAdd(
-      [for (final c in ['か', 'き', 'く']) (type: ItemType.kana, ref: c)],
+      [
+        for (final c in ['か', 'き', 'く']) (type: ItemType.kana, ref: c)
+      ],
       known: true,
     );
     expect(summary['resolved'], 3);
@@ -227,7 +264,8 @@ void main() {
     await store.addCard(ItemType.kana, 'た');
     final card = (await store.queue()).newCards.single;
     await store.setFavorite(card.id, true);
-    final favorites = (await store.decks()).firstWhere((d) => d.id == 'favorites');
+    final favorites =
+        (await store.decks()).firstWhere((d) => d.id == 'favorites');
     expect(favorites.enrolled, 1);
   });
 
@@ -265,7 +303,9 @@ void main() {
     expect(engine.pendingCount, 0);
 
     // Server state won: the card is now a mature review card with server_id.
-    final row = (await user.select('SELECT * FROM cards WHERE item_ref = ?', ['な'])).single;
+    final row =
+        (await user.select('SELECT * FROM cards WHERE item_ref = ?', ['な']))
+            .single;
     expect(row['server_id'], 991);
     expect(row['state'], 2);
     expect(row['reps'], 7);
@@ -273,6 +313,104 @@ void main() {
     // Profile cache drives the scheduler: next queue uses the server batch size.
     await store.enrollDeck('hiragana');
     expect((await store.queue()).newCards.length, 3);
+  });
+
+  test('guest progress and existing cloud progress require an explicit choice',
+      () async {
+    await store.addCard(ItemType.kana, 'な');
+    engine.dispose();
+    await user.execute('DELETE FROM kv WHERE key IN (?, ?)', [
+      'sync_owner',
+      'last_synced_at',
+    ]);
+    engine = SyncEngine(user, remote, canSync: () => true);
+    await engine.init();
+    engine.setOnline(true);
+    remote.requests.clear();
+    remote.handler = (request) async {
+      final response = _FakeSyncService._ackAll(request);
+      return {
+        ...response,
+        'cloud': {'cards': 8, 'reviews': 21},
+      };
+    };
+
+    await engine.accountChanged(7);
+
+    expect(engine.conflict, isNotNull);
+    expect(engine.conflict!.belongsToAnotherAccount, isFalse);
+    expect(engine.conflict!.localCards, 1);
+    expect(engine.conflict!.cloudCards, 8);
+    expect(remote.requests.map((request) => request['mode']), ['preview']);
+  });
+
+  test('keeping this device replaces cloud on the first upload', () async {
+    await store.addCard(ItemType.kana, 'に');
+    final card = (await store.queue()).newCards.single;
+    await store.review(card.id, Rating.good);
+    await engine.syncNow();
+    expect(
+      (await user.select('SELECT synced FROM review_log')).single['synced'],
+      1,
+    );
+    engine.dispose();
+    await user.execute('DELETE FROM kv WHERE key IN (?, ?)', [
+      'sync_owner',
+      'last_synced_at',
+    ]);
+    engine = SyncEngine(user, remote, canSync: () => true);
+    await engine.init();
+    engine.setOnline(true);
+    remote.requests.clear();
+    remote.handler = (request) async => {
+          ..._FakeSyncService._ackAll(request),
+          'cloud': {'cards': 3, 'reviews': 9},
+        };
+    await engine.accountChanged(9);
+
+    await engine.resolveConflict(SyncResolution.local);
+
+    expect(remote.requests.map((request) => request['mode']), [
+      'preview',
+      'replace_cloud',
+    ]);
+    expect(
+      (remote.requests.last['reviews'] as List),
+      hasLength(1),
+      reason:
+          'already-synced history is exported again before cloud replacement',
+    );
+    expect(engine.boundAccountId, 9);
+    expect(engine.pendingCount, 0);
+    expect(await user.select('SELECT * FROM cards WHERE item_ref = ?', ['に']),
+        isNotEmpty);
+  });
+
+  test('keeping cloud discards guest progress before the initial download',
+      () async {
+    await store.addCard(ItemType.kana, 'ぬ');
+    engine.dispose();
+    await user.execute('DELETE FROM kv WHERE key IN (?, ?)', [
+      'sync_owner',
+      'last_synced_at',
+    ]);
+    engine = SyncEngine(user, remote, canSync: () => true);
+    await engine.init();
+    engine.setOnline(true);
+    remote.requests.clear();
+    remote.handler = (request) async => {
+          ..._FakeSyncService._ackAll(request),
+          'cloud': {'cards': 4, 'reviews': 12},
+        };
+    await engine.accountChanged(11);
+
+    await engine.resolveConflict(SyncResolution.cloud);
+
+    expect(
+        remote.requests.map((request) => request['mode']), ['preview', 'sync']);
+    expect(engine.boundAccountId, 11);
+    expect(await user.select('SELECT * FROM cards'), isEmpty);
+    expect(await user.select('SELECT * FROM op_outbox'), isEmpty);
   });
 
   test('a rejected review is acked and its deleted card dropped', () async {
@@ -296,7 +434,8 @@ void main() {
     };
     await engine.syncNow();
     expect(engine.pendingCount, 0); // acked even though rejected
-    expect(await user.select('SELECT * FROM cards WHERE item_ref = ?', ['は']), isEmpty);
+    expect(await user.select('SELECT * FROM cards WHERE item_ref = ?', ['は']),
+        isEmpty);
   });
 
   test('in-flight reviews are never clobbered by the response', () async {
@@ -332,7 +471,9 @@ void main() {
     await engine.syncNow();
     // The stale server snapshot (reps 1, state 0) must not overwrite the
     // locally-newer card; the pending second review re-syncs next round.
-    final row = (await user.select('SELECT * FROM cards WHERE item_ref = ?', ['ま'])).single;
+    final row =
+        (await user.select('SELECT * FROM cards WHERE item_ref = ?', ['ま']))
+            .single;
     expect(row['reps'], 2);
   });
 }

@@ -42,7 +42,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/v1/auth/", include("accounts.urls")),  # domain profile (me)
     path("api/v1/dict/", include("dictionary.urls")),
-    path("api/v1/content/", include("dictionary.content_urls")),
+    path("api/v1/content/", include("contentpacks.urls")),
     path("api/v1/study/", include("srs.urls")),
     path("api/v1/mnemonics/", include("mnemonics.urls")),
     # Content correction reports (sign-in required) sit beside open feedback.

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/languages.dart';
-import '../data/packs/pack_manager.dart';
-import '../data/packs/pack_manifest.dart';
+import '../infrastructure/packs/pack_manager.dart';
+import '../infrastructure/packs/pack_manifest.dart';
 import '../sync/sync_engine.dart';
 
 /// One row on the Offline & storage screen: a pack the user can hold locally,
@@ -95,9 +95,9 @@ class StorageViewModel extends ChangeNotifier {
       basePackId => 'Essentials (built in)',
       corePackId => 'Dictionary core (Japanese data)',
       'names' => 'Proper names',
-      'examples' => 'Example sentences',
-      _ when id.startsWith('dict-gloss-') =>
-        'Definitions - ${mnemonicLanguageName(id.substring('dict-gloss-'.length))}',
+      _ when id.startsWith('examples-') => 'Example sentences',
+      _ when id.startsWith('dict-locale-') =>
+        'Definitions - ${mnemonicLanguageName(id.substring('dict-locale-'.length))}',
       _ when id.startsWith('mnemonics-') =>
         'Mnemonics - ${mnemonicLanguageName(id.substring('mnemonics-'.length))}',
       _ => id,

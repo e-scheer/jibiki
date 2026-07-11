@@ -63,7 +63,7 @@ def _gloss_word_ids(q: str, lang: str, limit: int) -> list[int]:
     # Whole-word-ish exact first (a gloss that IS the query), then contains.
     for lookup in ("iexact", "istartswith", "icontains"):
         qs = (
-            Gloss.objects.filter(lang__in=langs, **{f"text__{lookup}": q})
+            Gloss.objects.filter(language__in=langs, **{f"text__{lookup}": q})
             .select_related("sense")
             .order_by("sense__word__freq_rank")
             .values_list("sense__word_id", flat=True)[: limit * 6]
@@ -89,7 +89,7 @@ def search_words(q: str, *, lang: str = "en", limit: int = 25) -> list[Word]:
     )
     return list(
         Word.objects.filter(pk__in=ids)
-        .prefetch_related("forms", "senses__glosses")
+        .prefetch_related("forms", "senses__glosses", "senses__notes")
         .annotate(_rank=rank)
         .order_by("_rank")
     )

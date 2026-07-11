@@ -65,6 +65,7 @@ def create_mnemonic(
         author=user,
         status=initial_status(user),
     )
+    mnemonic.full_clean(exclude=["image"])
     if image_file is not None:
         content, name, w, h = process_upload(image_file)  # may raise ImageRejected
         mnemonic.image.save(name, content, save=False)
@@ -157,7 +158,7 @@ def active_for_many(user, characters, kind, language) -> dict:
     result: dict[str, Mnemonic] = {}
     if user and user.is_authenticated:
         choices = UserMnemonicChoice.objects.filter(
-            user=user, kind=kind, language=language, character__in=chars
+            user=user, kind=kind, language=language, reading="", character__in=chars
         ).select_related("mnemonic__author__profile")
         for c in choices:
             if c.mnemonic and c.mnemonic.status not in _MODERATED:
@@ -199,6 +200,7 @@ def set_choice(user, mnemonic: Mnemonic) -> UserMnemonicChoice:
         kind=mnemonic.kind,
         character=mnemonic.character,
         language=mnemonic.language,
+        reading=mnemonic.reading,
         defaults={"mnemonic": mnemonic},
     )
     return obj
@@ -218,6 +220,7 @@ def apply_pack(user, deck: MnemonicDeck) -> int:
             kind=m.kind,
             character=m.character,
             language=m.language,
+            reading=m.reading,
             defaults={"mnemonic": m},
         )
         n += 1
@@ -288,14 +291,28 @@ def set_deck_items(deck: MnemonicDeck, user, mnemonic_ids) -> int:
     order. Only the author's own drawings of the deck's kind are admitted (a pack
     is your own work), so passing someone else's id is silently ignored."""
     owned = {
-        m.id: m for m in Mnemonic.objects.filter(id__in=mnemonic_ids, author=user, kind=deck.kind)
+        m.id: m
+        for m in Mnemonic.objects.filter(
+            id__in=mnemonic_ids,
+            author=user,
+            kind=deck.kind,
+            language=deck.language,
+        )
     }
     deck.items.all().delete()
-    items = [
-        MnemonicDeckItem(deck=deck, mnemonic=owned[mid], position=pos)
-        for pos, mid in enumerate(mnemonic_ids)
-        if mid in owned
-    ]
+    items = []
+    targets = set()
+    for mid in mnemonic_ids:
+        mnemonic = owned.get(mid)
+        if mnemonic is None:
+            continue
+        target = (mnemonic.character, mnemonic.reading)
+        if target in targets:
+            continue
+        targets.add(target)
+        items.append(
+            MnemonicDeckItem(deck=deck, mnemonic=mnemonic, position=len(items))
+        )
     if items:
         MnemonicDeckItem.objects.bulk_create(items)
     return len(items)

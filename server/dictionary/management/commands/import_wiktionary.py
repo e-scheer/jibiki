@@ -32,7 +32,7 @@ import urllib.request
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
-from dictionary.models import Kanji
+from dictionary.models import Kanji, KanjiExplanation
 
 API = "https://en.wiktionary.org/w/api.php"
 # Wiktionary asks for a descriptive User-Agent identifying the tool + a contact.
@@ -115,7 +115,7 @@ class Command(BaseCommand):
         if not opts["all"]:
             qs = qs.filter(Q(jlpt__isnull=False) | Q(grade__lte=8))
         if not opts["force"]:
-            qs = qs.filter(origin="")
+            qs = qs.exclude(explanations__language="en")
         qs = qs.order_by("freq_rank", "stroke_count", "literal")
         if opts["limit"]:
             qs = qs[: opts["limit"]]
@@ -136,8 +136,12 @@ class Command(BaseCommand):
             if parsed is None:
                 continue
             origin, formation, phonetic = parsed
-            Kanji.objects.filter(literal=literal).update(
-                origin=origin, formation=formation, phonetic=phonetic
+            kanji = Kanji.objects.get(literal=literal)
+            Kanji.objects.filter(pk=kanji.pk).update(
+                formation=formation, phonetic=phonetic
+            )
+            KanjiExplanation.objects.update_or_create(
+                kanji=kanji, language="en", defaults={"origin": origin}
             )
             filled += 1
             if done % 100 == 0 or done == total:

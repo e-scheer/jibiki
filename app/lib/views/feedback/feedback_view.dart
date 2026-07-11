@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
-import '../../data/packs/pack_manager.dart';
+import '../../infrastructure/packs/pack_manager.dart';
 import '../../services/feedback_service.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';

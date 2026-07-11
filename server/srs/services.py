@@ -356,7 +356,7 @@ def _back(card, lang: str) -> str:
         meaning = next(iter(card.word.senses.all()), None)
         gloss = ""
         if meaning:
-            glosses = [g.text for g in meaning.glosses.all() if g.lang == lang] or [
+            glosses = [g.text for g in meaning.glosses.all() if g.language == lang] or [
                 g.text for g in meaning.glosses.all()
             ]
             gloss = "; ".join(glosses[:3])
@@ -364,7 +364,7 @@ def _back(card, lang: str) -> str:
     if card.kanji_id:
         readings = " ".join([*card.kanji.kun_readings, *card.kanji.on_readings][:4])
         meanings = "; ".join(
-            m.text for m in card.kanji.meanings.all() if m.lang == lang
+            m.text for m in card.kanji.meanings.all() if m.language == lang
         ) or "; ".join(m.text for m in card.kanji.meanings.all()[:3])
         return f"{readings} - {meanings}"
     return card.kana.romaji if card.kana_id else ""

@@ -84,12 +84,12 @@ def test_seed_and_serializer_expose_kana_usage(seeded, client):
     from dictionary.models import Kana
 
     ha = Kana.objects.get(char="は")
-    assert ha.usage_label == "Topic particle"
-    assert ha.usage
-    assert ha.usage_examples and ha.usage_examples[0]["particle"] == "は"
+    translated = ha.grammatical_usage.translations.get(language="en")
+    assert translated.label == "Topic particle"
+    assert translated.explanation
+    assert ha.grammatical_usage.examples.first().particle == "は"
     # purely phonetic kana carry nothing
-    assert Kana.objects.get(char="き").usage == ""
-    assert Kana.objects.get(char="き").usage_examples == []
+    assert not hasattr(Kana.objects.get(char="き"), "grammatical_usage")
 
     data = client.get("/api/v1/dict/kana/は").json()
     assert data["usage_label"] == "Topic particle"
@@ -102,7 +102,7 @@ def test_seed_populates_kana_origin_and_serializer(seeded, client):
 
     a = Kana.objects.get(char="あ")
     assert a.origin == "安"
-    assert a.origin_note
+    assert a.explanations.get(language="en").origin_note
 
     resp = client.get("/api/v1/dict/kana/あ")
     assert resp.status_code == 200
@@ -115,12 +115,17 @@ def test_seed_populates_kana_origin_and_serializer(seeded, client):
 
 
 def test_kanji_detail_exposes_origin_fields(seeded, client):
-    from dictionary.models import Kanji
+    from dictionary.models import Kanji, KanjiExplanation
 
-    Kanji.objects.filter(literal="語").update(
-        origin="Phono-semantic compound: semantic 言 + phonetic 吾.",
+    kanji = Kanji.objects.get(literal="語")
+    Kanji.objects.filter(pk=kanji.pk).update(
         formation="phono-semantic",
         phonetic="吾",
+    )
+    KanjiExplanation.objects.create(
+        kanji=kanji,
+        language="en",
+        origin="Phono-semantic compound: semantic 言 + phonetic 吾.",
     )
     data = client.get("/api/v1/dict/kanji/語").json()
     assert data["formation"] == "phono-semantic"

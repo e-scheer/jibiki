@@ -15,9 +15,11 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from dictionary.models import Name
+from dictionary.models import Name, NameTranslation
 
 _ENTITY_RE = re.compile(r'<!ENTITY\s+([\w-]+)\s+"[^"]*">')
+_ISO2 = {"eng": "en", "fre": "fr", "ger": "de", "dut": "nl", "spa": "es"}
+_XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 
 
 def _entity_map(path: Path) -> dict[str, str]:
@@ -49,7 +51,7 @@ class Command(BaseCommand):
         parser.entity.update(_entity_map(path))
 
         Name.objects.all().delete()
-        batch: list[Name] = []
+        batch: list[tuple[Name, list[tuple[str, str]]]] = []
         total = 0
         self.stdout.write(f"Importing {path.name} …")
         for _event, elem in ET.iterparse(str(path), events=("end",), parser=parser):
@@ -60,24 +62,30 @@ class Command(BaseCommand):
             kanji = elem.findtext("k_ele/keb") or ""
             reading = elem.findtext("r_ele/reb") or ""
             types: set[str] = set()
-            trans: list[str] = []
+            trans: list[tuple[str, str]] = []
             for t in elem.findall("trans"):
                 types.update(nt.text for nt in t.findall("name_type") if nt.text)
-                trans.extend(td.text for td in t.findall("trans_det") if td.text)
+                trans.extend(
+                    (
+                        _ISO2.get(td.get(_XML_LANG, "eng"), td.get(_XML_LANG, "eng")),
+                        td.text,
+                    )
+                    for td in t.findall("trans_det")
+                    if td.text
+                )
             elem.clear()
             if not (reading or kanji):
                 continue
             batch.append(
-                Name(
+                (Name(
                     seq=seq,
                     kanji=kanji,
                     reading=reading or kanji,
-                    translations=trans,
                     name_types=sorted(types),
-                )
+                ), trans)
             )
             if len(batch) >= 3000:
-                Name.objects.bulk_create(batch)
+                self._flush(batch)
                 total += len(batch)
                 batch = []
                 if total % 60000 == 0:
@@ -85,6 +93,17 @@ class Command(BaseCommand):
             if limit and total >= limit:
                 break
         if batch:
-            Name.objects.bulk_create(batch)
+            self._flush(batch)
             total += len(batch)
         self.stdout.write(self.style.SUCCESS(f"Done - {total} names imported."))
+
+    @staticmethod
+    def _flush(batch: list[tuple[Name, list[tuple[str, str]]]]) -> None:
+        names = Name.objects.bulk_create([name for name, _translations in batch])
+        rows = []
+        for name, (_source, translations) in zip(names, batch, strict=True):
+            rows.extend(
+                NameTranslation(name=name, language=language, text=text, order=order)
+                for order, (language, text) in enumerate(translations)
+            )
+        NameTranslation.objects.bulk_create(rows)

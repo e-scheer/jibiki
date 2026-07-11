@@ -1,0 +1,4048 @@
+{
+  "schema": "jibiki-kanji-meaning-briefs/1",
+  "strategy": "visual_meaning",
+  "languages": ["en", "fr"],
+  "generated": "2026-07-09",
+  "status": "Full JLPT N2 set for review, then seed as kind='kanji' mnemonics per language.",
+  "purpose": "Original meaning mnemonics for the N2 kanji, en + fr. Each story is grounded in the kanji's real components (KRADFILE) and Wiktionary etymology (both already in the DB), so it teaches accurately. Slots into the existing mnemonic schema (kind='kanji', keyed by language), no migration.",
+  "legal": "Original jibiki writing. Grounding facts from KRADFILE (CC BY-SA) and Wiktionary (CC BY-SA), already ingested. No third-party mnemonic text reused.",
+  "count": 367,
+  "kanji": [
+    {
+      "literal": "了",
+      "meaning": "finish",
+      "components": [
+        "一",
+        "亅"
+      ],
+      "kind": "pictogram",
+      "en": "A newborn swaddled so tight its arms vanish, its body a single line (一) ending in a hook (亅): all done, finished.",
+      "fr": "Un nourrisson emmailloté au point d'en perdre les bras, le corps réduit à un trait (一) terminé par un crochet (亅) : tout est achevé."
+    },
+    {
+      "literal": "丸",
+      "meaning": "round",
+      "components": [
+        "九",
+        "丶"
+      ],
+      "kind": "ideogram",
+      "en": "The number nine (九) rolled up snug around a single dot (丶): a round little ball.",
+      "fr": "Le chiffre neuf (九) enroulé bien serré autour d'un point (丶) : une boule toute ronde."
+    },
+    {
+      "literal": "久",
+      "meaning": "long time",
+      "components": [
+        "ノ",
+        "入"
+      ],
+      "kind": "pictogram",
+      "en": "A figure (入) with a long stroke (ノ) dragging at its back, held up and delayed on and on: a long time.",
+      "fr": "Une silhouette (入) qu'un long trait (ノ) retient par-derrière, retardée encore et encore : une longue durée."
+    },
+    {
+      "literal": "干",
+      "meaning": "dry",
+      "components": [
+        "干"
+      ],
+      "kind": "pictogram",
+      "en": "A forked shield (干) propped up and left out in the sun until it cracks bone-dry: dry, parched.",
+      "fr": "Un bouclier fourchu (干) laissé au soleil jusqu'à se fendre de sécheresse : sec, desséché."
+    },
+    {
+      "literal": "介",
+      "meaning": "jammed in between",
+      "components": [
+        "ハ",
+        "个"
+      ],
+      "kind": "compound",
+      "en": "A person (个) pinned between two flanking marks (ハ) on either side: wedged in between.",
+      "fr": "Une personne (个) coincée entre deux marques (ハ) de part et d'autre : intercalée, prise en sandwich."
+    },
+    {
+      "literal": "仏",
+      "meaning": "Buddha",
+      "components": [
+        "化",
+        "厶"
+      ],
+      "kind": "compound",
+      "en": "The self (厶) transformed (化) past death into the enlightened one: the Buddha.",
+      "fr": "Le moi (厶) transformé (化) au-delà de la mort : le Bouddha."
+    },
+    {
+      "literal": "匹",
+      "meaning": "equal",
+      "components": [
+        "儿",
+        "匚"
+      ],
+      "kind": "compound",
+      "en": "Legs (儿) folded neatly within a frame (匚), like a bolt of cloth matched fold against fold: equal, a match.",
+      "fr": "Des jambes (儿) repliées dans un cadre (匚), comme une étoffe pliée pli contre pli : l'égal, la paire."
+    },
+    {
+      "literal": "区",
+      "meaning": "ward, district",
+      "components": [
+        "匚",
+        "ノ"
+      ],
+      "kind": "compound",
+      "en": "A zone fenced inside a box (匚) with an X (ノ) slashed across to mark it off: a ward, a district.",
+      "fr": "Une zone enfermée dans une boîte (匚), barrée d'une croix (ノ) pour la délimiter : un quartier, un arrondissement."
+    },
+    {
+      "literal": "双",
+      "meaning": "pair",
+      "components": [
+        "又"
+      ],
+      "kind": "compound",
+      "en": "Two hands (又) set down side by side: a pair, a matched set.",
+      "fr": "Deux mains (又) posées côte à côte : une paire, un ensemble assorti."
+    },
+    {
+      "literal": "戸",
+      "meaning": "door",
+      "components": [
+        "戸"
+      ],
+      "kind": "pictogram",
+      "en": "A single hinged leaf swinging on its own, just half of a gate (戸): a door, and the one household behind it.",
+      "fr": "Un seul battant sur ses gonds, la moitié d'un portail (戸) : une porte, et le foyer qu'elle abrite."
+    },
+    {
+      "literal": "比",
+      "meaning": "compare",
+      "components": [
+        "比"
+      ],
+      "kind": "compound",
+      "en": "Two figures lined up side by side, matched back to back (比): to compare.",
+      "fr": "Deux silhouettes alignées côte à côte, dos à dos (比) : comparer."
+    },
+    {
+      "literal": "毛",
+      "meaning": "fur, hair",
+      "components": [
+        "毛"
+      ],
+      "kind": "pictogram",
+      "en": "A single tuft of feather or body hair drawn in one curling flourish (毛): fur, hair.",
+      "fr": "Une touffe de plume ou de poil tracée d'un seul trait recourbé (毛) : le poil, les cheveux."
+    },
+    {
+      "literal": "片",
+      "meaning": "one-sided",
+      "components": [
+        "片"
+      ],
+      "kind": "pictogram",
+      "en": "A thin sliver shown from only one edge, split cleanly off (片): one-sided, a flat slice.",
+      "fr": "Un mince éclat vu d'un seul côté, détaché net (片) : unilatéral, une lamelle plate."
+    },
+    {
+      "literal": "令",
+      "meaning": "orders",
+      "components": [
+        "个",
+        "卩"
+      ],
+      "kind": "compound",
+      "en": "A voice from above (个) coming down on a kneeling man (卩): an order, the law.",
+      "fr": "Une voix venue d'en haut (个) qui s'abat sur l'homme agenouillé (卩) : l'ordre, la loi."
+    },
+    {
+      "literal": "冊",
+      "meaning": "tome",
+      "components": [
+        "冊"
+      ],
+      "kind": "pictogram",
+      "en": "Bamboo writing slips lashed side by side on a single cord (冊): a bound book, a tome.",
+      "fr": "Des lamelles de bambou reliées côte à côte par une cordelette (冊) : un volume relié, un tome."
+    },
+    {
+      "literal": "刊",
+      "meaning": "publish",
+      "components": [
+        "刈",
+        "干"
+      ],
+      "kind": "compound",
+      "en": "A wooden tablet (干) put to the cutting blade (刈), carved out for all to read: to publish.",
+      "fr": "Une tablette de bois (干) livrée à la lame (刈), gravée pour tous : publier."
+    },
+    {
+      "literal": "包",
+      "meaning": "wrap",
+      "components": [
+        "勹",
+        "已"
+      ],
+      "kind": "pictogram",
+      "en": "An unborn child (已) curled inside the enfolding womb (勹): to wrap, to pack up.",
+      "fr": "Un enfant à naître (已) lové dans le ventre qui l'enveloppe (勹) : envelopper, empaqueter."
+    },
+    {
+      "literal": "占",
+      "meaning": "divination",
+      "components": [
+        "卜",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Reading the cracks of a heated bone (卜) and speaking the omen aloud (口): fortune-telling.",
+      "fr": "Lire les fissures d'un os brûlé (卜) et prononcer le présage à voix haute (口) : la divination."
+    },
+    {
+      "literal": "召",
+      "meaning": "summon",
+      "components": [
+        "口",
+        "刀"
+      ],
+      "kind": "compound",
+      "en": "A mouth (口) as sharp as a blade (刀) calling someone straight over: to summon, to beckon.",
+      "fr": "Une bouche (口) tranchante comme une lame (刀) qui hèle aussitôt quelqu'un : convoquer, appeler."
+    },
+    {
+      "literal": "史",
+      "meaning": "history",
+      "components": [
+        "ノ",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A steady hand (ノ) setting down every word spoken (口) all the way down the ages: history.",
+      "fr": "Une main ferme (ノ) qui consigne chaque parole prononcée (口) au fil des âges : l'histoire."
+    },
+    {
+      "literal": "圧",
+      "meaning": "pressure",
+      "components": [
+        "厂",
+        "土"
+      ],
+      "kind": "compound",
+      "en": "A cliff (厂) bearing down with all its weight on the earth (土) below: pressure.",
+      "fr": "Une falaise (厂) qui pèse de tout son poids sur la terre (土) en dessous : la pression."
+    },
+    {
+      "literal": "央",
+      "meaning": "center",
+      "components": [
+        "大",
+        "冖"
+      ],
+      "kind": "pictogram",
+      "en": "A big figure (大) held square in the middle under a crossbar (冖): the center, dead in the middle.",
+      "fr": "Un homme (大) planté au beau milieu, sous une barre (冖) : le centre, en plein cœur."
+    },
+    {
+      "literal": "巨",
+      "meaning": "gigantic",
+      "components": [
+        "巨"
+      ],
+      "kind": "pictogram",
+      "en": "A carpenter's set-square drawn so huge it could measure a giant (巨): gigantic, enormous.",
+      "fr": "Une équerre de charpentier si démesurée qu'elle toiserait un géant (巨) : gigantesque, énorme."
+    },
+    {
+      "literal": "布",
+      "meaning": "cloth",
+      "components": [
+        "ノ",
+        "巾"
+      ],
+      "kind": "compound",
+      "en": "A hand (ノ) smoothing a length of hanging cloth (巾) out flat: linen, spread wide.",
+      "fr": "Une main (ノ) qui étale à plat une pièce d'étoffe pendante (巾) : la toile de lin, déployée."
+    },
+    {
+      "literal": "幼",
+      "meaning": "infancy",
+      "components": [
+        "幺",
+        "力"
+      ],
+      "kind": "compound",
+      "en": "Just a thread (幺) of strength (力) to draw on so far: infancy, earliest childhood.",
+      "fr": "À peine un fil (幺) de force (力) pour l'instant : la prime enfance."
+    },
+    {
+      "literal": "庁",
+      "meaning": "government office",
+      "components": [
+        "广",
+        "亅"
+      ],
+      "kind": "compound",
+      "en": "A broad public hall under its lean-to roof (广), held up by one upright hooked post (亅): the government office.",
+      "fr": "Une vaste salle publique sous son toit en appentis (广), soutenue par un pilier crochu (亅) : l'administration."
+    },
+    {
+      "literal": "旧",
+      "meaning": "old times",
+      "components": [
+        "｜",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "One upright stroke (｜) beside the sun (日), all the days already piled up behind us: old times.",
+      "fr": "Un trait dressé (｜) contre le soleil (日), tous les jours déjà entassés derrière nous : le temps jadis."
+    },
+    {
+      "literal": "札",
+      "meaning": "tag",
+      "components": [
+        "木",
+        "乙"
+      ],
+      "kind": "compound",
+      "en": "A thin shaving of wood (木) curled at one end (乙) and inscribed: a tag, a banknote.",
+      "fr": "Un mince copeau de bois (木) recourbé au bout (乙) et gravé : une étiquette, un billet."
+    },
+    {
+      "literal": "氷",
+      "meaning": "ice",
+      "components": [
+        "水",
+        "丶"
+      ],
+      "kind": "compound",
+      "en": "Water (水) nipped by a single speck of frost (丶) until it freezes hard: ice, an icicle.",
+      "fr": "L'eau (水) saisie par un grain de gel (丶) jusqu'à durcir : la glace, le glaçon."
+    },
+    {
+      "literal": "永",
+      "meaning": "eternity",
+      "components": [
+        "水"
+      ],
+      "kind": "pictogram",
+      "en": "A long river (水) winding on with all its tributaries, flowing without end: eternity.",
+      "fr": "Un long fleuve (水) qui serpente avec tous ses affluents, coulant sans jamais finir : l'éternité."
+    },
+    {
+      "literal": "玉",
+      "meaning": "jewel, ball",
+      "components": [
+        "王",
+        "丶"
+      ],
+      "kind": "pictogram",
+      "en": "A king's stone (王) marked with one extra dot of jade (丶): a jewel, a ball.",
+      "fr": "La pierre du roi (王) rehaussée d'un point de jade (丶) : un joyau, une bille."
+    },
+    {
+      "literal": "甘",
+      "meaning": "sweet",
+      "components": [
+        "甘"
+      ],
+      "kind": "ideogram",
+      "en": "A tasty morsel held on the tongue inside an open mouth (甘): sweet.",
+      "fr": "Une bouchée savoureuse gardée dans la bouche ouverte (甘) : le sucré."
+    },
+    {
+      "literal": "皮",
+      "meaning": "pelt, skin",
+      "components": [
+        "皮",
+        "又"
+      ],
+      "kind": "pictogram",
+      "en": "A hand (又) peeling the hide off an animal: the pelt, the skin.",
+      "fr": "Une main (又) qui arrache la peau d'un animal : la fourrure, la peau."
+    },
+    {
+      "literal": "皿",
+      "meaning": "dish, a helping",
+      "components": [
+        "皿"
+      ],
+      "kind": "pictogram",
+      "en": "An open bowl resting on its foot (皿): a dish, a helping.",
+      "fr": "Un bol ouvert posé sur son pied (皿) : un plat, une portion."
+    },
+    {
+      "literal": "辺",
+      "meaning": "environs, boundary",
+      "components": [
+        "辶",
+        "刀"
+      ],
+      "kind": "compound",
+      "en": "The road (辶) that runs out to the sharp edge (刀) of the land: the border, the environs.",
+      "fr": "La route (辶) qui file jusqu'au tranchant (刀) du territoire : la limite, les alentours."
+    },
+    {
+      "literal": "仲",
+      "meaning": "go-between, relationship",
+      "components": [
+        "亻",
+        "中"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) standing right in the middle (中) between two sides: the go-between.",
+      "fr": "Une personne (亻) plantée au milieu (中) entre deux camps : l'intermédiaire."
+    },
+    {
+      "literal": "兆",
+      "meaning": "portent, trillion",
+      "components": [
+        "儿",
+        "冫"
+      ],
+      "kind": "compound",
+      "en": "Two people (儿) fleeing the rising flood (冫), a sign of disaster to come: a portent, and a trillion.",
+      "fr": "Deux personnes (儿) fuyant la crue (冫), signe du malheur à venir : un présage, et mille milliards."
+    },
+    {
+      "literal": "再",
+      "meaning": "again, twice",
+      "components": [
+        "一",
+        "冂"
+      ],
+      "kind": "abstract",
+      "en": "One more bar (一) stacked onto the frame (冂) to build it up once more: again, a second time.",
+      "fr": "Une barre de plus (一) empilée sur le cadre (冂) pour tout recommencer : de nouveau, une seconde fois."
+    },
+    {
+      "literal": "印",
+      "meaning": "stamp, seal",
+      "components": [
+        "卩"
+      ],
+      "kind": "compound",
+      "en": "A hand pressing a kneeling person (卩) down, the way a seal is pressed onto paper: a stamp, a seal.",
+      "fr": "Une main qui plaque au sol une personne agenouillée (卩), comme on presse un sceau : le tampon, le cachet."
+    },
+    {
+      "literal": "叫",
+      "meaning": "shout, exclaim",
+      "components": [
+        "口"
+      ],
+      "kind": "compound",
+      "en": "The mouth (口) wrenched wide open to let a cry burst out: a shout.",
+      "fr": "La bouche (口) grande ouverte d'où jaillit un cri : un hurlement."
+    },
+    {
+      "literal": "各",
+      "meaning": "each, every",
+      "components": [
+        "夂",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A foot (夂) arriving at one doorway (口) after another: each, every.",
+      "fr": "Un pied (夂) qui arrive à chaque seuil (口) l'un après l'autre : chacun, tous."
+    },
+    {
+      "literal": "団",
+      "meaning": "group, association",
+      "components": [
+        "囗",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "Many working hands (寸) gathered inside one enclosure (囗): a group, an association.",
+      "fr": "Des mains à l'ouvrage (寸) rassemblées dans une même enceinte (囗) : le groupe, l'association."
+    },
+    {
+      "literal": "宇",
+      "meaning": "eaves, roof",
+      "components": [
+        "宀",
+        "于"
+      ],
+      "kind": "compound",
+      "en": "A great roof (宀) whose eaves stretch out wide (于): the eaves, the vault of space.",
+      "fr": "Un grand toit (宀) dont l'avancée s'étire au loin (于) : l'auvent, la voûte de l'espace."
+    },
+    {
+      "literal": "寺",
+      "meaning": "Buddhist temple",
+      "components": [
+        "土",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "Ground (土) tended by a patient, steady hand (寸): the grounds of a Buddhist temple.",
+      "fr": "Un terrain (土) entretenu par une main patiente (寸) : l'enceinte d'un temple bouddhiste."
+    },
+    {
+      "literal": "州",
+      "meaning": "state, province",
+      "components": [
+        "川",
+        "丶"
+      ],
+      "kind": "pictogram",
+      "en": "Little islets (丶) dotting the flowing river (川): a province, a state.",
+      "fr": "De petits îlots (丶) parsèment le cours de la rivière (川) : une province, un État."
+    },
+    {
+      "literal": "机",
+      "meaning": "desk, table",
+      "components": [
+        "木",
+        "几"
+      ],
+      "kind": "compound",
+      "en": "A flat plank of wood (木) laid across a low stand (几): a desk, a table.",
+      "fr": "Une planche de bois (木) posée sur un support bas (几) : un bureau, une table."
+    },
+    {
+      "literal": "汗",
+      "meaning": "sweat, perspire",
+      "components": [
+        "氵",
+        "干"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) beading up on dry (干) skin: sweat.",
+      "fr": "De l'eau (氵) qui perle sur la peau sèche (干) : la sueur."
+    },
+    {
+      "literal": "汚",
+      "meaning": "dirty, pollute",
+      "components": [
+        "氵",
+        "勹"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) trapped and wrapped up (勹) with nowhere to flow, left to turn foul: dirty, polluted.",
+      "fr": "De l'eau (氵) enfermée (勹) sans écoulement, qui finit par croupir : sale, pollué."
+    },
+    {
+      "literal": "池",
+      "meaning": "pond, cistern",
+      "components": [
+        "氵",
+        "也"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) gathered and held in one spot (也): a pond, a cistern.",
+      "fr": "De l'eau (氵) retenue au même endroit (也) : un étang, une citerne."
+    },
+    {
+      "literal": "灯",
+      "meaning": "lamp, a light",
+      "components": [
+        "火",
+        "丁"
+      ],
+      "kind": "compound",
+      "en": "A flame (火) fixed on a nail-like stand (丁): a lamp, a light.",
+      "fr": "Une flamme (火) fixée sur un pied en forme de clou (丁) : une lampe, une lumière."
+    },
+    {
+      "literal": "灰",
+      "meaning": "ashes",
+      "components": [
+        "火",
+        "厂"
+      ],
+      "kind": "compound",
+      "en": "Fire (火) cooled under a sweeping hand (厂) until it can be gathered up: ashes.",
+      "fr": "Le feu (火) refroidi sous une main (厂) au point qu'on peut le ramasser : la cendre."
+    },
+    {
+      "literal": "竹",
+      "meaning": "bamboo",
+      "components": [
+        "竹"
+      ],
+      "kind": "pictogram",
+      "en": "Two slender stalks with their leaves drooping down (竹): bamboo.",
+      "fr": "Deux tiges élancées aux feuilles retombantes (竹) : le bambou."
+    },
+    {
+      "literal": "糸",
+      "meaning": "thread",
+      "components": [
+        "糸"
+      ],
+      "kind": "pictogram",
+      "en": "A twist of silk fibers wound into a fine skein (糸): thread.",
+      "fr": "Un écheveau de fibres de soie finement torsadées (糸) : le fil."
+    },
+    {
+      "literal": "缶",
+      "meaning": "tin can, container",
+      "components": [
+        "缶"
+      ],
+      "kind": "pictogram",
+      "en": "A lid clamped over an open earthenware jar (缶): a can, a container.",
+      "fr": "Un couvercle serré sur une jarre de terre ouverte (缶) : une boîte, un récipient."
+    },
+    {
+      "literal": "羽",
+      "meaning": "feathers",
+      "components": [
+        "羽"
+      ],
+      "kind": "pictogram",
+      "en": "A pair of wings with their feathers spread wide (羽): feathers, and the counter for birds.",
+      "fr": "Une paire d'ailes aux plumes déployées (羽) : les plumes, et le compteur d'oiseaux."
+    },
+    {
+      "literal": "肌",
+      "meaning": "texture, skin",
+      "components": [
+        "月",
+        "几"
+      ],
+      "kind": "compound",
+      "en": "Flesh (月) stretched taut over the body's frame (几): the skin, its texture.",
+      "fr": "La chair (月) tendue sur l'ossature du corps (几) : la peau, son grain."
+    },
+    {
+      "literal": "舟",
+      "meaning": "boat, ship",
+      "components": [
+        "舟"
+      ],
+      "kind": "pictogram",
+      "en": "A hollow hull gliding along on the water (舟): a boat, a ship.",
+      "fr": "Une coque creuse qui glisse sur l'eau (舟) : une barque, un navire."
+    },
+    {
+      "literal": "虫",
+      "meaning": "insect, bug",
+      "components": [
+        "虫"
+      ],
+      "kind": "pictogram",
+      "en": "A small coiled creature drawn from a snake (虫): an insect, a bug.",
+      "fr": "Une petite bête lovée, tirée d'un serpent (虫) : un insecte, une bestiole."
+    },
+    {
+      "literal": "血",
+      "meaning": "blood",
+      "components": [
+        "皿"
+      ],
+      "kind": "compound",
+      "en": "A single drop poised above the sacrificial dish (皿): blood.",
+      "fr": "Une seule goutte suspendue au-dessus de la coupe sacrificielle (皿) : le sang."
+    },
+    {
+      "literal": "衣",
+      "meaning": "garment, clothes",
+      "components": [
+        "亠",
+        "衣"
+      ],
+      "kind": "pictogram",
+      "en": "A collar (亠) above the crossed folds of a robe (衣): a garment, clothes.",
+      "fr": "Un col (亠) au-dessus des pans croisés d'une robe (衣) : un vêtement, des habits."
+    },
+    {
+      "literal": "乱",
+      "meaning": "riot, disorder",
+      "components": [
+        "舌",
+        "乙"
+      ],
+      "kind": "compound",
+      "en": "A wagging tongue (舌) and a twisting hook (乙) that no one can untangle: riot and disorder.",
+      "fr": "Une langue (舌) qui s'emballe et un crochet (乙) impossible à démêler : l'émeute, le désordre."
+    },
+    {
+      "literal": "伸",
+      "meaning": "stretch, expand",
+      "components": [
+        "亻",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) drawing themselves out long as a bolt across the field (田): to stretch, to expand.",
+      "fr": "Une personne (亻) qui s'allonge comme un éclair traversant le champ (田) : s'étirer, s'étendre."
+    },
+    {
+      "literal": "伺",
+      "meaning": "pay respects, visit",
+      "components": [
+        "亻",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) waiting by the door, mouth (口) quiet, watching for the moment to call: to attend, to pay respects.",
+      "fr": "Une personne (亻) qui patiente près de la porte, la bouche (口) close, guettant le bon moment : rendre visite, présenter ses respects."
+    },
+    {
+      "literal": "低",
+      "meaning": "low, lower",
+      "components": [
+        "亻",
+        "氏",
+        "一"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) stooping to the base line (一) beneath the clan mark (氏): low, to lower.",
+      "fr": "Une personne (亻) qui se courbe jusqu'au trait de base (一) sous le signe du clan (氏) : bas, abaisser."
+    },
+    {
+      "literal": "児",
+      "meaning": "newborn child",
+      "components": [
+        "日",
+        "儿"
+      ],
+      "kind": "pictogram",
+      "en": "A soft little skull (日) balanced on two small legs (儿): a newborn babe.",
+      "fr": "Un petit crâne encore tendre (日) posé sur deux petites jambes (儿) : le nouveau-né."
+    },
+    {
+      "literal": "兵",
+      "meaning": "soldier",
+      "components": [
+        "斤",
+        "ハ"
+      ],
+      "kind": "compound",
+      "en": "Two hands (ハ) hoisting a short axe (斤): a soldier ready for war.",
+      "fr": "Deux mains (ハ) qui brandissent une hache courte (斤) : le soldat."
+    },
+    {
+      "literal": "卵",
+      "meaning": "egg, ovum",
+      "components": [
+        "丶"
+      ],
+      "kind": "pictogram",
+      "en": "Two sacs hanging side by side, each cradling a speck of yolk (丶): eggs, spawn.",
+      "fr": "Deux poches suspendues côte à côte, chacune abritant son point de jaune (丶) : les œufs, le frai."
+    },
+    {
+      "literal": "含",
+      "meaning": "contain, hold in",
+      "components": [
+        "口",
+        "个"
+      ],
+      "kind": "compound",
+      "en": "A mouth (口) shut like a lid (个) over what it keeps inside: to contain, to hold in.",
+      "fr": "Une bouche (口) refermée comme un couvercle (个) sur ce qu'elle garde : contenir, renfermer."
+    },
+    {
+      "literal": "囲",
+      "meaning": "surround, besiege",
+      "components": [
+        "囗",
+        "井"
+      ],
+      "kind": "compound",
+      "en": "A wall (囗) closed all around the village well (井): to surround, to besiege.",
+      "fr": "Une muraille (囗) refermée autour du puits (井) : encercler, assiéger."
+    },
+    {
+      "literal": "坂",
+      "meaning": "slope, incline",
+      "components": [
+        "土",
+        "厂"
+      ],
+      "kind": "compound",
+      "en": "Earth (土) banked up against a cliff face (厂): a slope, an incline.",
+      "fr": "De la terre (土) adossée à une falaise (厂) : la pente, le versant."
+    },
+    {
+      "literal": "均",
+      "meaning": "level, average",
+      "components": [
+        "土",
+        "勹",
+        "二"
+      ],
+      "kind": "compound",
+      "en": "Earth (土) wrapped up (勹) and spread into two equal shares (二): level, even, average.",
+      "fr": "De la terre (土) enveloppée (勹) et répartie en deux parts égales (二) : nivelé, moyen."
+    },
+    {
+      "literal": "希",
+      "meaning": "hope, wish for",
+      "components": [
+        "巾"
+      ],
+      "kind": "compound",
+      "en": "A cloth (巾) woven so sparse and thin it is rare: what you can only hope and beg for.",
+      "fr": "Une étoffe (巾) au tissage si clairsemé qu'elle en est rare : ce que l'on ne peut qu'espérer."
+    },
+    {
+      "literal": "床",
+      "meaning": "bed, floor",
+      "components": [
+        "广",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "A wooden (木) frame laid under the roof (广): a bed, a raised floor.",
+      "fr": "Un cadre de bois (木) posé sous le toit (广) : le lit, le plancher."
+    },
+    {
+      "literal": "快",
+      "meaning": "cheerful, pleasant",
+      "components": [
+        "忄",
+        "大"
+      ],
+      "kind": "compound",
+      "en": "A heart (忄) thrown wide open (大), light and unclenched: cheerful, pleasant.",
+      "fr": "Un cœur (忄) grand ouvert (大), léger et détendu : joyeux, agréable."
+    },
+    {
+      "literal": "技",
+      "meaning": "skill, craft",
+      "components": [
+        "扌",
+        "支"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) that handles a branch (支) with practiced control: skill, craft.",
+      "fr": "Une main (扌) qui manie une branche (支) avec maîtrise : le savoir-faire, l'art."
+    },
+    {
+      "literal": "改",
+      "meaning": "reform, change",
+      "components": [
+        "已",
+        "攵"
+      ],
+      "kind": "compound",
+      "en": "A hand with a switch (攵) held over the kneeling child (已) to set things straight: to reform, to change.",
+      "fr": "Une baguette (攵) brandie près de l'enfant agenouillé (已) pour le corriger : réformer, changer."
+    },
+    {
+      "literal": "材",
+      "meaning": "lumber, timber",
+      "components": [
+        "木",
+        "才"
+      ],
+      "kind": "compound",
+      "en": "Raw wood (木) that holds the makings (才) of something useful: timber, material.",
+      "fr": "Du bois brut (木) qui recèle l'étoffe (才) d'une chose utile : le bois d'œuvre, le matériau."
+    },
+    {
+      "literal": "村",
+      "meaning": "village",
+      "components": [
+        "木",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "Trees (木) gathered within a hand's span (寸) of one another: a village.",
+      "fr": "Des arbres (木) rassemblés à quelques doigts (寸) les uns des autres : le village."
+    },
+    {
+      "literal": "沈",
+      "meaning": "sink, submerge",
+      "components": [
+        "氵",
+        "尢"
+      ],
+      "kind": "compound",
+      "en": "A body (尢) dragged down under the water (氵) until it goes under: to sink, to submerge.",
+      "fr": "Un corps (尢) entraîné sous l'eau (氵) jusqu'à disparaître : sombrer, s'enfoncer."
+    },
+    {
+      "literal": "臣",
+      "meaning": "retainer, subject",
+      "components": [
+        "臣"
+      ],
+      "kind": "pictogram",
+      "en": "An eye drawn upright and lowered before the lord: the loyal retainer, the subject.",
+      "fr": "Un œil dressé à la verticale, baissé devant le seigneur : le vassal, le sujet."
+    },
+    {
+      "literal": "芸",
+      "meaning": "art, technique",
+      "components": [
+        "艾"
+      ],
+      "kind": "compound",
+      "en": "The trained hand that raises the plants (艾) just so: cultivation grown into technique and art.",
+      "fr": "La main experte qui cultive les plantes (艾) avec justesse : la culture devenue technique et art."
+    },
+    {
+      "literal": "角",
+      "meaning": "angle, horn",
+      "components": [
+        "月",
+        "｜"
+      ],
+      "kind": "pictogram",
+      "en": "A ridged animal horn (月) tapering to its sharp tip (｜): a horn, and the angle it cuts.",
+      "fr": "Une corne d'animal striée (月) qui s'effile en pointe (｜) : la corne, et l'angle qu'elle forme."
+    },
+    {
+      "literal": "谷",
+      "meaning": "valley",
+      "components": [
+        "口",
+        "ハ"
+      ],
+      "kind": "pictogram",
+      "en": "An open mouth (口) set between two sloping mountain walls (ハ): a valley.",
+      "fr": "Une ouverture béante (口) entre deux parois de montagne (ハ) : la vallée."
+    },
+    {
+      "literal": "貝",
+      "meaning": "shellfish, cowrie",
+      "components": [
+        "ハ"
+      ],
+      "kind": "pictogram",
+      "en": "A cowrie shell with its two little legs (ハ) trailing beneath: a shellfish, once used as money.",
+      "fr": "Un coquillage cauri avec ses deux petites pattes (ハ) qui pendent dessous : le coquillage, jadis monnaie."
+    },
+    {
+      "literal": "辛",
+      "meaning": "spicy, bitter",
+      "components": [
+        "十"
+      ],
+      "kind": "pictogram",
+      "en": "A sharp branding needle (十) pressed down hard: its sting is spicy, its memory bitter.",
+      "fr": "Une aiguille à marquer (十) enfoncée dans la peau : sa brûlure, piquante et amère."
+    },
+    {
+      "literal": "防",
+      "meaning": "defend, ward off",
+      "components": [
+        "阝",
+        "方"
+      ],
+      "kind": "compound",
+      "en": "An earthen mound (阝) raised on the exposed side (方) to hold the enemy back: to defend, to ward off.",
+      "fr": "Une levée de terre (阝) dressée du côté (方) exposé pour repousser l'ennemi : défendre, prémunir."
+    },
+    {
+      "literal": "麦",
+      "meaning": "wheat, barley",
+      "components": [
+        "夂"
+      ],
+      "kind": "compound",
+      "en": "A ripe grain head crowning slow roots that trail like feet (夂): barley and wheat.",
+      "fr": "Un épi mûr couronnant des racines qui traînent comme des pieds (夂) : l'orge et le blé."
+    },
+    {
+      "literal": "並",
+      "meaning": "row, line up",
+      "components": [
+        "并",
+        "一"
+      ],
+      "kind": "compound",
+      "en": "Two figures set side by side (并) on one level line (一): lined up in a row, side by side.",
+      "fr": "Deux silhouettes placées côte à côte (并) sur une même ligne (一) : alignées en rang."
+    },
+    {
+      "literal": "乳",
+      "meaning": "milk, breast",
+      "components": [
+        "爪",
+        "子",
+        "乙"
+      ],
+      "kind": "pictogram",
+      "en": "A hand (爪) drawing a child (子) to the breast (乙) to nurse: milk.",
+      "fr": "Une main (爪) qui serre l'enfant (子) contre le sein (乙) pour l'allaiter : le lait."
+    },
+    {
+      "literal": "依",
+      "meaning": "depend on, rely",
+      "components": [
+        "亻",
+        "衣"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) wrapped snug in the garment (衣) they lean on: to rely, to depend.",
+      "fr": "Une personne (亻) blottie dans le vêtement (衣) sur lequel elle s'appuie : dépendre, compter sur."
+    },
+    {
+      "literal": "刷",
+      "meaning": "printing, print",
+      "components": [
+        "巾",
+        "刈"
+      ],
+      "kind": "compound",
+      "en": "A cloth (巾) inked and then pressed flat under the blade (刈): printing.",
+      "fr": "Un tissu (巾) encré, puis pressé et lissé sous la lame (刈) : l'impression."
+    },
+    {
+      "literal": "券",
+      "meaning": "ticket",
+      "components": [
+        "刀"
+      ],
+      "kind": "compound",
+      "en": "An old contract split in two by the knife (刀), each half a token: a ticket.",
+      "fr": "Un vieux contrat coupé en deux par le couteau (刀), chaque moitié un jeton : le billet."
+    },
+    {
+      "literal": "刺",
+      "meaning": "thorn, pierce",
+      "components": [
+        "木",
+        "刈"
+      ],
+      "kind": "compound",
+      "en": "A thorn on the tree (木), sharp as the blade (刈): to pierce, a sting.",
+      "fr": "Une épine sur l'arbre (木), aiguisée comme la lame (刈) : piquer, transpercer."
+    },
+    {
+      "literal": "効",
+      "meaning": "merit, efficacy",
+      "components": [
+        "力"
+      ],
+      "kind": "compound",
+      "en": "Strength (力) that actually crosses over into a result: merit, efficacy.",
+      "fr": "La force (力) qui porte vraiment ses fruits : le mérite, l'efficacité."
+    },
+    {
+      "literal": "卒",
+      "meaning": "soldier, graduate",
+      "components": [
+        "十",
+        "人"
+      ],
+      "kind": "compound",
+      "en": "Men (人) in matching uniforms drawn up by the ten (十): foot soldiers, and those who finish the ranks: graduates.",
+      "fr": "Des hommes (人) en uniforme rangés par dix (十) : les soldats, et ceux qui bouclent le rang : les diplômés."
+    },
+    {
+      "literal": "協",
+      "meaning": "cooperation",
+      "components": [
+        "十",
+        "力"
+      ],
+      "kind": "compound",
+      "en": "Many hands of strength (力) pulling as one under the ten (十): cooperation.",
+      "fr": "Plusieurs forces (力) qui tirent ensemble sous le dix (十) : la coopération."
+    },
+    {
+      "literal": "周",
+      "meaning": "circumference, circuit",
+      "components": [
+        "冂",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Every corner filled inside the border (冂), right down to the mouth (口): all the way around, a full circuit.",
+      "fr": "Chaque recoin rempli à l'intérieur du cadre (冂), jusqu'à la bouche (口) : tout le tour, le circuit."
+    },
+    {
+      "literal": "固",
+      "meaning": "harden, set",
+      "components": [
+        "囗",
+        "十",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Something old (十 and 口) sealed inside four walls (囗) and never moving: hardened, firm.",
+      "fr": "Du vieux (十 et 口) enfermé entre quatre murs (囗), immobile à jamais : durci, ferme."
+    },
+    {
+      "literal": "姓",
+      "meaning": "surname",
+      "components": [
+        "女",
+        "生"
+      ],
+      "kind": "compound",
+      "en": "The name a woman (女) passes on at the birth (生) of a child: the family surname.",
+      "fr": "Le nom qu'une femme (女) transmet à la naissance (生) : le nom de famille."
+    },
+    {
+      "literal": "委",
+      "meaning": "entrust, committee",
+      "components": [
+        "禾",
+        "女"
+      ],
+      "kind": "compound",
+      "en": "A woman (女) bowing supple as ripe grain (禾), leaving the matter to another: to entrust.",
+      "fr": "Une femme (女) qui ploie, souple comme l'épi (禾), et s'en remet à un autre : confier."
+    },
+    {
+      "literal": "季",
+      "meaning": "season",
+      "components": [
+        "禾",
+        "子"
+      ],
+      "kind": "compound",
+      "en": "Young grain (禾) growing like a child (子), ripening bit by bit: the seasons.",
+      "fr": "Le jeune blé (禾) qui grandit comme un enfant (子), mûrissant peu à peu : la saison."
+    },
+    {
+      "literal": "宝",
+      "meaning": "treasure",
+      "components": [
+        "宀",
+        "王",
+        "丶"
+      ],
+      "kind": "compound",
+      "en": "A piece of jade (王 with its dot 丶) locked safe under the roof (宀): a treasure.",
+      "fr": "Un morceau de jade (王 et son point 丶) gardé en sûreté sous le toit (宀) : un trésor."
+    },
+    {
+      "literal": "届",
+      "meaning": "deliver, reach",
+      "components": [
+        "尸",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A bent figure (尸) stooping to pass a parcel out over the field (田): to deliver, to reach.",
+      "fr": "Une silhouette courbée (尸) qui se penche pour tendre un colis par-dessus le champ (田) : livrer, parvenir."
+    },
+    {
+      "literal": "岩",
+      "meaning": "rock, boulder",
+      "components": [
+        "山",
+        "石"
+      ],
+      "kind": "compound",
+      "en": "A great rock (石) sitting on the mountain (山): a boulder, a crag.",
+      "fr": "Un gros rocher (石) posé sur la montagne (山) : le roc, la falaise."
+    },
+    {
+      "literal": "岸",
+      "meaning": "shore, bank",
+      "components": [
+        "山",
+        "厂",
+        "干"
+      ],
+      "kind": "compound",
+      "en": "The mountain (山) falling as a cliff (厂) to the dry edge (干) of the water: the shore, the bank.",
+      "fr": "La montagne (山) qui tombe en falaise (厂) jusqu'au bord sec (干) de l'eau : la rive, le rivage."
+    },
+    {
+      "literal": "底",
+      "meaning": "bottom, base",
+      "components": [
+        "广",
+        "氏"
+      ],
+      "kind": "compound",
+      "en": "The very base (氏) that a whole building (广) rests on: the bottom, the underside.",
+      "fr": "La base même (氏) sur laquelle repose tout un bâtiment (广) : le fond, le dessous."
+    },
+    {
+      "literal": "府",
+      "meaning": "urban prefecture, office",
+      "components": [
+        "广",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "The building (广) where an official hand (寸) receives and files the records: the government seat, the prefecture.",
+      "fr": "Le bâtiment (广) où une main officielle (寸) reçoit et classe les archives : le siège administratif, la préfecture."
+    },
+    {
+      "literal": "延",
+      "meaning": "prolong, stretch",
+      "components": [
+        "止",
+        "廴"
+      ],
+      "kind": "compound",
+      "en": "A foot (止) drawn out along a long, winding stride (廴): to stretch, to prolong.",
+      "fr": "Un pied (止) qui s'étire sur une longue foulée sinueuse (廴) : allonger, prolonger."
+    },
+    {
+      "literal": "承",
+      "meaning": "receive, consent",
+      "components": [
+        "手"
+      ],
+      "kind": "compound",
+      "en": "Hands (手) raised to catch and hold what is passed down from above: to receive, to consent.",
+      "fr": "Des mains (手) levées pour recueillir ce qui est transmis d'en haut : recevoir, consentir."
+    },
+    {
+      "literal": "担",
+      "meaning": "shoulder, carry",
+      "components": [
+        "扎",
+        "日",
+        "一"
+      ],
+      "kind": "compound",
+      "en": "A hand (扎) hoisting a load as the sun (日) clears the horizon (一): to shoulder, to carry.",
+      "fr": "Une main (扎) qui hisse un fardeau quand le soleil (日) passe l'horizon (一) : porter sur l'épaule, assumer."
+    },
+    {
+      "literal": "拝",
+      "meaning": "worship, bow",
+      "components": [
+        "扎",
+        "干"
+      ],
+      "kind": "compound",
+      "en": "Hands (扎) lowered and held out straight (干) in a deep bow: to worship, to revere.",
+      "fr": "Des mains (扎) abaissées et tendues bien droit (干) en une profonde révérence : adorer, vénérer."
+    },
+    {
+      "literal": "昇",
+      "meaning": "rise, ascend",
+      "components": [
+        "日",
+        "廾"
+      ],
+      "kind": "compound",
+      "en": "The sun (日) hoisted higher and higher by uplifted hands (廾): to rise, to ascend.",
+      "fr": "Le soleil (日) hissé toujours plus haut par des mains tendues (廾) : monter, s'élever."
+    },
+    {
+      "literal": "板",
+      "meaning": "plank, board",
+      "components": [
+        "木",
+        "又",
+        "厂"
+      ],
+      "kind": "compound",
+      "en": "Wood (木) split and turned flat by the hand (又) at the cliff face (厂): a plank, a board.",
+      "fr": "Du bois (木) fendu et retourné à plat par la main (又) au pied de la falaise (厂) : la planche."
+    },
+    {
+      "literal": "林",
+      "meaning": "grove, woods",
+      "components": [
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Two trees (木) standing side by side: a grove, a wood.",
+      "fr": "Deux arbres (木) côte à côte : un bosquet, un bois."
+    },
+    {
+      "literal": "枚",
+      "meaning": "counter for flat thin objects",
+      "components": [
+        "木",
+        "攵"
+      ],
+      "kind": "compound",
+      "en": "A hand with a stick (攵) trimming a tree (木) into tally pieces: a counter for flat, thin things.",
+      "fr": "Une main armée d'un bâton (攵) qui débite l'arbre (木) en jetons à compter : un compteur pour objets plats et minces."
+    },
+    {
+      "literal": "枝",
+      "meaning": "branch, bough",
+      "components": [
+        "木",
+        "支",
+        "又"
+      ],
+      "kind": "compound",
+      "en": "A hand (又) holding a twig snapped off the tree (木): a branch, a bough.",
+      "fr": "Une main (又) qui tient un rameau cassé de l'arbre (木) : la branche, le rameau."
+    },
+    {
+      "literal": "欧",
+      "meaning": "Europe",
+      "components": [
+        "欠",
+        "匚"
+      ],
+      "kind": "abstract",
+      "en": "A wide open mouth (欠) beside a boxed-in ward (匚), a borrowed sound that came to name Europe.",
+      "fr": "Une bouche grande ouverte (欠) à côté d'un quartier encaissé (匚), un son emprunté pour dire l'Europe."
+    },
+    {
+      "literal": "武",
+      "meaning": "warrior, military",
+      "components": [
+        "止",
+        "弋"
+      ],
+      "kind": "compound",
+      "en": "A foot (止) marching out behind the dagger-axe (弋): the warrior, the military.",
+      "fr": "Un pied (止) qui marche derrière la hallebarde (弋) : le guerrier, le militaire."
+    },
+    {
+      "literal": "毒",
+      "meaning": "poison",
+      "components": [
+        "土",
+        "母"
+      ],
+      "kind": "compound",
+      "en": "Rank growth sprouting from the earth (土) over the mother (母), lush but deadly: poison.",
+      "fr": "Une végétation drue jaillie de la terre (土) par-dessus la mère (母), luxuriante mais mortelle : le poison."
+    },
+    {
+      "literal": "河",
+      "meaning": "river",
+      "components": [
+        "汁",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) winding on and on past every mouth (口) that calls to it: a great river.",
+      "fr": "L'eau (氵) qui serpente sans fin devant chaque bouche (口) qui l'appelle : le grand fleuve."
+    },
+    {
+      "literal": "沸",
+      "meaning": "boil",
+      "components": [
+        "氵"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) whipped into a storm of bubbles over the flame: it seethes and boils.",
+      "fr": "L'eau (氵) prise d'une tempête de bulles au-dessus du feu : elle bout et bouillonne."
+    },
+    {
+      "literal": "油",
+      "meaning": "oil",
+      "components": [
+        "氵",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A slippery liquid (氵) pressed from what ripens in the field (田): oil.",
+      "fr": "Un liquide (氵) glissant, tiré de ce qui mûrit dans les champs (田) : l'huile."
+    },
+    {
+      "literal": "況",
+      "meaning": "situation",
+      "components": [
+        "氵",
+        "口",
+        "儿"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) creeping up around a big-mouthed (口) figure on two legs (儿) who must judge how bad it is: the situation.",
+      "fr": "L'eau (氵) qui monte autour d'un personnage à grande bouche (口) sur deux jambes (儿), forcé d'évaluer l'ampleur : la situation."
+    },
+    {
+      "literal": "泊",
+      "meaning": "overnight stay",
+      "components": [
+        "氵",
+        "白"
+      ],
+      "kind": "compound",
+      "en": "A boat lying still on the pale (白) shallow water (氵) for the night: to put up, to stay over.",
+      "fr": "Une barque immobile sur l'eau (氵) claire et peu profonde (白) pour la nuit : faire étape, passer la nuit."
+    },
+    {
+      "literal": "波",
+      "meaning": "waves",
+      "components": [
+        "氵",
+        "皮"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) rippling and stretching like a taut skin (皮): waves and billows.",
+      "fr": "L'eau (氵) qui ondule et se tend comme une peau (皮) : les vagues et les flots."
+    },
+    {
+      "literal": "泥",
+      "meaning": "mud",
+      "components": [
+        "氵",
+        "尸"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) worked into the ground until a crouching figure (尸) sinks in: mud and mire.",
+      "fr": "L'eau (氵) pétrie dans la terre au point qu'une silhouette accroupie (尸) s'y enfonce : la boue, la fange."
+    },
+    {
+      "literal": "版",
+      "meaning": "printing block",
+      "components": [
+        "片",
+        "又"
+      ],
+      "kind": "compound",
+      "en": "A flat wooden slab (片) turned over by the hand (又) to stamp each sheet: a printing block.",
+      "fr": "Une plaque de bois plate (片) retournée à la main (又) pour imprimer chaque feuille : une planche d'impression."
+    },
+    {
+      "literal": "祈",
+      "meaning": "pray",
+      "components": [
+        "礻",
+        "斤"
+      ],
+      "kind": "compound",
+      "en": "At the altar (礻) you throw your whole heart like the swing of an axe (斤): to pray, to wish.",
+      "fr": "Devant l'autel (礻), on jette tout son cœur comme on lève une hache (斤) : prier, implorer."
+    },
+    {
+      "literal": "肩",
+      "meaning": "shoulder",
+      "components": [
+        "月",
+        "戸"
+      ],
+      "kind": "compound",
+      "en": "A broad plate of flesh (月) hung like a door (戸) at the top of the arm: the shoulder.",
+      "fr": "Une large plaque de chair (月) accrochée comme une porte (戸) en haut du bras : l'épaule."
+    },
+    {
+      "literal": "肯",
+      "meaning": "consent",
+      "components": [
+        "月",
+        "止"
+      ],
+      "kind": "compound",
+      "en": "Flesh (月) that willingly clings to the bone, its top now read as a foot (止): to consent, to agree.",
+      "fr": "La chair (月) qui accepte de tenir à l'os, son sommet devenu un pied (止) : consentir, être d'accord."
+    },
+    {
+      "literal": "述",
+      "meaning": "state, mention",
+      "components": [
+        "辶",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Following the road (辶) and setting each point down like a sprig of grain (木): to state, to mention.",
+      "fr": "Suivre la route (辶) en posant chaque idée comme un brin de céréale (木) : exposer, énoncer."
+    },
+    {
+      "literal": "門",
+      "meaning": "gate",
+      "components": [
+        "門"
+      ],
+      "kind": "pictogram",
+      "en": "Two tall doors (門) swinging together on their posts: a gate.",
+      "fr": "Deux hauts battants (門) qui pivotent ensemble sur leurs gonds : un portail."
+    },
+    {
+      "literal": "則",
+      "meaning": "rule, law",
+      "components": [
+        "貝",
+        "刂"
+      ],
+      "kind": "compound",
+      "en": "A knife (刂) carving the standard onto a heavy bronze vessel (貝, once a cauldron): a rule, a law.",
+      "fr": "Un couteau (刂) qui grave la norme sur un lourd vase de bronze (貝, jadis un chaudron) : la règle, la loi."
+    },
+    {
+      "literal": "勇",
+      "meaning": "courage",
+      "components": [
+        "力",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "Raw strength (力) welling up and bursting over the field (田): the courage that lifts the heart.",
+      "fr": "La force (力) brute qui jaillit et déborde sur le champ (田) : le courage qui ranime."
+    },
+    {
+      "literal": "厚",
+      "meaning": "thick",
+      "components": [
+        "厂",
+        "日",
+        "子"
+      ],
+      "kind": "compound",
+      "en": "The deep overhang of a cliff (厂) piled thick above sun (日) and child (子): thick and heavy.",
+      "fr": "Le surplomb profond d'une falaise (厂), épais, empilé au-dessus du soleil (日) et de l'enfant (子) : épais et lourd."
+    },
+    {
+      "literal": "咲",
+      "meaning": "bloom",
+      "components": [
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A mouth (口) splitting open with laughter, and so the flower splits open too: to blossom, to bloom.",
+      "fr": "Une bouche (口) qui s'ouvre dans un rire, et la fleur s'ouvre de même : éclore, fleurir."
+    },
+    {
+      "literal": "型",
+      "meaning": "mould",
+      "components": [
+        "土",
+        "刂"
+      ],
+      "kind": "compound",
+      "en": "Earth (土) pressed into a rigid frame edged with a blade (刂): a mould, a type.",
+      "fr": "De la terre (土) tassée dans un cadre rigide bordé d'une lame (刂) : un moule, un modèle."
+    },
+    {
+      "literal": "城",
+      "meaning": "castle",
+      "components": [
+        "土",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "Walls of stamped earth (土) held with a halberd (戈): a castle.",
+      "fr": "Des murs de terre battue (土) défendus par une hallebarde (戈) : un château."
+    },
+    {
+      "literal": "封",
+      "meaning": "seal",
+      "components": [
+        "寸",
+        "土"
+      ],
+      "kind": "compound",
+      "en": "A hand (寸) heaping earth (土) to mark a border and shut it off: to seal.",
+      "fr": "Une main (寸) qui entasse la terre (土) pour marquer une limite et la fermer : sceller, clore."
+    },
+    {
+      "literal": "専",
+      "meaning": "exclusive",
+      "components": [
+        "寸",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A hand (寸) turning a single spindle above the field (田) with total focus: specialty, the exclusive.",
+      "fr": "Une main (寸) qui fait tourner un seul fuseau au-dessus du champ (田), tout entière à sa tâche : la spécialité, l'exclusif."
+    },
+    {
+      "literal": "巻",
+      "meaning": "scroll, volume",
+      "components": [
+        "已"
+      ],
+      "kind": "compound",
+      "en": "Paper wound tight into a coil curled back on itself (已): a scroll, a single volume.",
+      "fr": "Du papier enroulé serré, replié sur lui-même (已) : un rouleau, un volume."
+    },
+    {
+      "literal": "律",
+      "meaning": "law, rhythm",
+      "components": [
+        "彳",
+        "聿"
+      ],
+      "kind": "compound",
+      "en": "Stepping down the road (彳) to the beat set by the writing brush (聿): rhythm, and law.",
+      "fr": "Avancer sur la route (彳) au rythme fixé par le pinceau (聿) : la cadence, et la loi."
+    },
+    {
+      "literal": "拾",
+      "meaning": "pick up",
+      "components": [
+        "扌"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) reaching down to gather scattered things into one: to pick up, to collect.",
+      "fr": "Une main (扌) qui se penche pour rassembler ce qui traîne : ramasser, recueillir."
+    },
+    {
+      "literal": "挟",
+      "meaning": "pinch, hold between",
+      "components": [
+        "扌",
+        "大",
+        "人"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌), and a big figure (大) tucking two people (人) under the arms: to pinch, to hold between.",
+      "fr": "Une main (扌), et un grand personnage (大) qui serre deux gens (人) sous ses bras : pincer, tenir entre."
+    },
+    {
+      "literal": "星",
+      "meaning": "star",
+      "components": [
+        "日",
+        "生"
+      ],
+      "kind": "compound",
+      "en": "A tiny sun (日) born (生) far off in the night: a star, a bright spot.",
+      "fr": "Un petit soleil (日) qui naît (生) au loin dans la nuit : une étoile, un point brillant."
+    },
+    {
+      "literal": "枯",
+      "meaning": "wither",
+      "components": [
+        "木",
+        "十",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A tree (木) as old (古) as ten (十) mouths (口) of passed seasons, now dried to a husk: to wither and die.",
+      "fr": "Un arbre (木) aussi vieux (古) que dix (十) bouches (口) de saisons révolues, réduit à une écorce sèche : se faner, dépérir."
+    },
+    {
+      "literal": "柔",
+      "meaning": "tender",
+      "components": [
+        "矛",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Wood (木) supple enough for a lance (矛) to slip clean through: tender, soft, weak.",
+      "fr": "Un bois (木) assez souple pour qu'une lance (矛) le traverse net : tendre, souple, faible."
+    },
+    {
+      "literal": "柱",
+      "meaning": "pillar",
+      "components": [
+        "木",
+        "王",
+        "丶"
+      ],
+      "kind": "compound",
+      "en": "A wooden (木) beam standing like a king (王) crowned with a dot (丶) to hold the whole roof up: a pillar, a post.",
+      "fr": "Une poutre de bois (木) dressée comme un roi (王) coiffé d'un point (丶), pour tenir tout le toit : un pilier, un poteau."
+    },
+    {
+      "literal": "査",
+      "meaning": "investigate",
+      "components": [
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Planks of wood (木) laid out on a stand and looked over one by one: to investigate.",
+      "fr": "Des planches de bois (木) alignées sur un support et examinées une à une : enquêter, inspecter."
+    },
+    {
+      "literal": "栄",
+      "meaning": "flourish",
+      "components": [
+        "木",
+        "冖"
+      ],
+      "kind": "compound",
+      "en": "A tree (木) crowned with a blaze of blossoms under a cap (冖): to flourish, prosperity.",
+      "fr": "Un arbre (木) couronné d'un embrasement de fleurs sous un capuchon (冖) : prospérer, l'éclat."
+    },
+    {
+      "literal": "泉",
+      "meaning": "spring, fountain",
+      "components": [
+        "水",
+        "白"
+      ],
+      "kind": "compound",
+      "en": "Clear water (水) welling up from a white (白) rock mouth: a spring.",
+      "fr": "De l'eau claire (水) qui jaillit d'une bouche de roche blanche (白) : une source."
+    },
+    {
+      "literal": "浅",
+      "meaning": "shallow",
+      "components": [
+        "水",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "Water (水) worn down thin by cutting blades (戈): shallow.",
+      "fr": "De l'eau (水) amincie par le tranchant des lames (戈) : peu profond."
+    },
+    {
+      "literal": "炭",
+      "meaning": "charcoal",
+      "components": [
+        "火",
+        "山",
+        "厂"
+      ],
+      "kind": "compound",
+      "en": "Fire (火) banked under the cliff (厂) of a mountain (山): charcoal.",
+      "fr": "Du feu (火) couvé sous la falaise (厂) d'une montagne (山) : le charbon de bois."
+    },
+    {
+      "literal": "珍",
+      "meaning": "rare, precious",
+      "components": [
+        "王",
+        "彡"
+      ],
+      "kind": "compound",
+      "en": "A piece of jade (王) throwing off a rare shimmer of fine lines (彡): precious and rare.",
+      "fr": "Un jade (王) qui jette un éclat rare de fines stries (彡) : précieux et rare."
+    },
+    {
+      "literal": "省",
+      "meaning": "ministry, to inspect",
+      "components": [
+        "小",
+        "目"
+      ],
+      "kind": "compound",
+      "en": "A narrowed eye (目) peering at the smallest (小) details: to inspect, hence a ministry and to economize.",
+      "fr": "Un œil (目) plissé sur les moindres (小) détails : inspecter, d'où le ministère et l'idée d'économiser."
+    },
+    {
+      "literal": "県",
+      "meaning": "prefecture",
+      "components": [
+        "小",
+        "目"
+      ],
+      "kind": "compound",
+      "en": "An eye (目) hung sideways over a small (小) cord, a district dangling under the capital: a prefecture.",
+      "fr": "Un œil (目) suspendu de travers sur un petit (小) cordon, un district rattaché à la capitale : la préfecture."
+    },
+    {
+      "literal": "砂",
+      "meaning": "sand",
+      "components": [
+        "石",
+        "小"
+      ],
+      "kind": "compound",
+      "en": "Stone (石) ground down into tiny (小) grains: sand.",
+      "fr": "La pierre (石) réduite en fins grains (小) : le sable."
+    },
+    {
+      "literal": "祝",
+      "meaning": "celebrate",
+      "components": [
+        "口",
+        "礼",
+        "儿"
+      ],
+      "kind": "compound",
+      "en": "A kneeling man (儿) speaking with open mouth (口) before the altar (礼): to bless and celebrate.",
+      "fr": "Un homme agenouillé (儿) qui parle à voix haute (口) devant l'autel (礼) : bénir et célébrer."
+    },
+    {
+      "literal": "秒",
+      "meaning": "second (of time)",
+      "components": [
+        "禾",
+        "小"
+      ],
+      "kind": "compound",
+      "en": "The tiniest (小) whisker on a stalk of grain (禾): a second of time.",
+      "fr": "La plus fine (小) barbe d'un épi de céréale (禾) : une seconde."
+    },
+    {
+      "literal": "紅",
+      "meaning": "crimson",
+      "components": [
+        "糸",
+        "工"
+      ],
+      "kind": "compound",
+      "en": "Silk thread (糸) worked (工) through the dye vat into deep red: crimson.",
+      "fr": "Un fil de soie (糸) travaillé (工) dans la cuve de teinture jusqu'au rouge profond : le cramoisi."
+    },
+    {
+      "literal": "胃",
+      "meaning": "stomach",
+      "components": [
+        "月",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A pouch of flesh (月) packed with food like a full field (田): the stomach.",
+      "fr": "Une poche de chair (月) remplie de nourriture comme un champ (田) : l'estomac."
+    },
+    {
+      "literal": "荒",
+      "meaning": "laid waste, wild",
+      "components": [
+        "艹",
+        "川",
+        "亡"
+      ],
+      "kind": "compound",
+      "en": "Weeds (艹) taking over where the river (川) flooded and all is lost (亡): laid waste and wild.",
+      "fr": "Les herbes folles (艹) envahissent là où le fleuve (川) a tout emporté (亡) : dévasté et sauvage."
+    },
+    {
+      "literal": "軍",
+      "meaning": "army",
+      "components": [
+        "車",
+        "冖"
+      ],
+      "kind": "compound",
+      "en": "War chariots (車) drawn up in a ring under one cover (冖): an army encamped.",
+      "fr": "Des chars (車) rangés en cercle sous une même bâche (冖) : l'armée en campagne."
+    },
+    {
+      "literal": "逆",
+      "meaning": "reverse, contrary",
+      "components": [
+        "辶",
+        "屮"
+      ],
+      "kind": "compound",
+      "en": "Advancing (辶) toward a sprout (屮) growing the wrong way up: reversed, contrary.",
+      "fr": "Avancer (辶) vers une pousse (屮) qui monte à l'envers : inversé, à rebours."
+    },
+    {
+      "literal": "郊",
+      "meaning": "outskirts",
+      "components": [
+        "交",
+        "阝"
+      ],
+      "kind": "compound",
+      "en": "Where the roads cross (交) at the rim of the village (阝): the outskirts.",
+      "fr": "Là où les chemins se croisent (交) à la lisière du village (阝) : la banlieue."
+    },
+    {
+      "literal": "革",
+      "meaning": "leather",
+      "components": [
+        "革"
+      ],
+      "kind": "pictogram",
+      "en": "A whole animal hide stretched taut to dry, head above and legs below (革): leather.",
+      "fr": "Une peau de bête tendue pour sécher, tête en haut, pattes en bas (革) : le cuir."
+    },
+    {
+      "literal": "香",
+      "meaning": "fragrance",
+      "components": [
+        "禾",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Ripe grain (禾) warming in the sun (日) and giving off a sweet scent: fragrance.",
+      "fr": "Le grain mûr (禾) qui chauffe au soleil (日) et exhale une senteur sucrée : le parfum."
+    },
+    {
+      "literal": "個",
+      "meaning": "individual, item",
+      "components": [
+        "亻",
+        "囗"
+      ],
+      "kind": "compound",
+      "en": "One person (亻) boxed off (囗) and counted on their own: an individual, a single item.",
+      "fr": "Une personne (亻) mise dans sa case (囗) et comptée à part : un individu, une unité."
+    },
+    {
+      "literal": "倍",
+      "meaning": "double",
+      "components": [
+        "亻",
+        "立",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) standing (立) where one mouthful (口) splits into two: double, twice as much.",
+      "fr": "Une personne (亻) debout (立) là où une bouchée (口) se dédouble : le double."
+    },
+    {
+      "literal": "党",
+      "meaning": "party, faction",
+      "components": [
+        "儿",
+        "尚"
+      ],
+      "kind": "compound",
+      "en": "People (儿) gathered under one esteemed banner (尚): a party, a faction.",
+      "fr": "Des gens (儿) rassemblés sous une même bannière prisée (尚) : un parti, une faction."
+    },
+    {
+      "literal": "凍",
+      "meaning": "frozen",
+      "components": [
+        "冫",
+        "日",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Ice (冫) hardening in the cold eastern dawn, the sun (日) caught behind a tree (木): frozen.",
+      "fr": "La glace (冫) qui prend dans le froid de l'aube, le soleil (日) pris derrière l'arbre (木) : gelé."
+    },
+    {
+      "literal": "埋",
+      "meaning": "bury",
+      "components": [
+        "土",
+        "里"
+      ],
+      "kind": "compound",
+      "en": "Piling earth (土) over something until it lies under a whole village's fields (里): to bury.",
+      "fr": "Entasser de la terre (土) sur une chose jusqu'à la cacher sous les champs du village (里) : enterrer."
+    },
+    {
+      "literal": "孫",
+      "meaning": "grandchild",
+      "components": [
+        "子",
+        "糸"
+      ],
+      "kind": "compound",
+      "en": "A child (子) tied by an unbroken thread (糸) to the family line: a grandchild, the line going on.",
+      "fr": "Un enfant (子) relié par un fil (糸) ininterrompu à la lignée : un petit-enfant, la descendance."
+    },
+    {
+      "literal": "将",
+      "meaning": "commander",
+      "components": [
+        "爪",
+        "寸",
+        "爿"
+      ],
+      "kind": "compound",
+      "en": "Hands (爪) and (寸) presenting the offering at the altar table (爿): the commander who leads.",
+      "fr": "Des mains (爪, 寸) qui présentent l'offrande sur la table d'autel (爿) : le chef, le général."
+    },
+    {
+      "literal": "島",
+      "meaning": "island",
+      "components": [
+        "山",
+        "鳥"
+      ],
+      "kind": "compound",
+      "en": "A lone mountain (山) out at sea where birds (鳥) land to rest: an island.",
+      "fr": "Une montagne (山) isolée en mer où les oiseaux (鳥) se posent : une île."
+    },
+    {
+      "literal": "帯",
+      "meaning": "sash, belt",
+      "components": [
+        "巾"
+      ],
+      "kind": "pictogram",
+      "en": "A cloth (巾) band hung with dangling ornaments, wound around the waist: a sash.",
+      "fr": "Une bande de tissu (巾) garnie de pendeloques, nouée à la taille : la ceinture."
+    },
+    {
+      "literal": "庫",
+      "meaning": "warehouse",
+      "components": [
+        "广",
+        "車"
+      ],
+      "kind": "compound",
+      "en": "A roofed building (广) where the carts (車) are parked and stored: a warehouse.",
+      "fr": "Un bâtiment couvert (广) où l'on remise les chars (車) : l'entrepôt."
+    },
+    {
+      "literal": "弱",
+      "meaning": "weak",
+      "components": [
+        "弓",
+        "冫"
+      ],
+      "kind": "compound",
+      "en": "Two ornamental bows (弓) drooping with limp feathers (冫), too soft to shoot: weak.",
+      "fr": "Deux arcs (弓) d'ornement aux plumes molles (冫), trop tendres pour tirer : faible."
+    },
+    {
+      "literal": "恋",
+      "meaning": "romantic love",
+      "components": [
+        "心",
+        "ハ",
+        "亠"
+      ],
+      "kind": "compound",
+      "en": "A heart (心) tangled and tugged two ways (ハ) beneath the surface (亠): romantic love and longing.",
+      "fr": "Un cœur (心) noué, tiraillé des deux côtés (ハ) sous la surface (亠) : l'amour et le désir."
+    },
+    {
+      "literal": "悩",
+      "meaning": "worry",
+      "components": [
+        "忄",
+        "凵"
+      ],
+      "kind": "compound",
+      "en": "The heart (忄) knotting up over a skull (凵) crammed with tangled thoughts: to worry, to be troubled.",
+      "fr": "Le cœur (忄) qui se noue devant un crâne (凵) plein de pensées emmêlées : le tourment, le souci."
+    },
+    {
+      "literal": "捜",
+      "meaning": "search, look for",
+      "components": [
+        "扌",
+        "又"
+      ],
+      "kind": "compound",
+      "en": "Two hands (扌 and 又) feeling through the dark for something lost: to search.",
+      "fr": "Deux mains (扌 et 又) qui tâtonnent dans le noir à la recherche d'un objet perdu : chercher."
+    },
+    {
+      "literal": "根",
+      "meaning": "root",
+      "components": [
+        "木",
+        "艮"
+      ],
+      "kind": "compound",
+      "en": "The part of the tree (木) that clings stubbornly (艮) to the soil and refuses to move: the root.",
+      "fr": "La partie de l'arbre (木) qui s'accroche obstinément (艮) au sol et refuse de bouger : la racine."
+    },
+    {
+      "literal": "浴",
+      "meaning": "bathe",
+      "components": [
+        "氵",
+        "谷"
+      ],
+      "kind": "compound",
+      "en": "Standing in a valley (谷) and letting the water (氵) run all over you: to bathe.",
+      "fr": "Se tenir dans un vallon (谷) et se laisser ruisseler l'eau (氵) sur tout le corps : se baigner."
+    },
+    {
+      "literal": "涙",
+      "meaning": "tears",
+      "components": [
+        "氵",
+        "戸"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) welling up behind the closed door (戸) of the eye: tears.",
+      "fr": "L'eau (氵) qui monte derrière la porte close (戸) de l'œil : les larmes."
+    },
+    {
+      "literal": "畜",
+      "meaning": "livestock",
+      "components": [
+        "玄",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "Animals roped (玄) into a pen and field (田) and kept fed: livestock.",
+      "fr": "Des bêtes attachées par une corde (玄) dans un enclos (田) et nourries sur place : le bétail."
+    },
+    {
+      "literal": "粉",
+      "meaning": "powder, flour",
+      "components": [
+        "米",
+        "刀",
+        "ハ"
+      ],
+      "kind": "compound",
+      "en": "Rice (米) cut by a blade (刀) and split (ハ) into the finest dust: powder, flour.",
+      "fr": "Du riz (米) tranché par une lame (刀) et fendu (ハ) en poussière très fine : la poudre, la farine."
+    },
+    {
+      "literal": "純",
+      "meaning": "pure, genuine",
+      "components": [
+        "糸",
+        "屯"
+      ],
+      "kind": "compound",
+      "en": "Raw thread (糸) gathered in a bundle (屯), undyed and with nothing mixed in: pure, genuine.",
+      "fr": "Un fil brut (糸) réuni en botte (屯), non teint et sans le moindre mélange : pur, authentique."
+    },
+    {
+      "literal": "耕",
+      "meaning": "till, plow",
+      "components": [
+        "耒",
+        "井"
+      ],
+      "kind": "compound",
+      "en": "Dragging the plow (耒) across a field laid out in a neat grid (井): to till, to plow.",
+      "fr": "Traîner l'araire (耒) à travers un champ quadrillé comme un damier (井) : labourer."
+    },
+    {
+      "literal": "胸",
+      "meaning": "chest, bosom",
+      "components": [
+        "月",
+        "勹"
+      ],
+      "kind": "compound",
+      "en": "The flesh (月) that wraps (勹) around and shields the pounding heart: the chest, the bosom.",
+      "fr": "La chair (月) qui enveloppe (勹) et protège le cœur battant : la poitrine."
+    },
+    {
+      "literal": "脂",
+      "meaning": "fat, grease",
+      "components": [
+        "月",
+        "匕",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "The layer of meat (月) a spoon (匕) skims for its sweet (日) richness: fat, grease.",
+      "fr": "La couche de viande (月) qu'une cuillère (匕) écume pour sa richesse savoureuse (日) : le gras, la graisse."
+    },
+    {
+      "literal": "航",
+      "meaning": "navigate, sail",
+      "components": [
+        "舟",
+        "几"
+      ],
+      "kind": "compound",
+      "en": "A boat (舟) whose flat deck (几) skims straight across the open sea: to sail, to navigate.",
+      "fr": "Un bateau (舟) au pont plat (几) qui file tout droit sur la mer : naviguer."
+    },
+    {
+      "literal": "般",
+      "meaning": "carry, convey",
+      "components": [
+        "舟",
+        "殳"
+      ],
+      "kind": "compound",
+      "en": "A pole (殳) swinging a boat (舟) around to ferry loads across: to carry, to convey.",
+      "fr": "Une perche (殳) qui fait pivoter la barque (舟) pour transporter les charges : porter, convoyer."
+    },
+    {
+      "literal": "荷",
+      "meaning": "baggage, load",
+      "components": [
+        "艹"
+      ],
+      "kind": "compound",
+      "en": "A broad plant leaf (艹) borrowed for the image of a load hoisted onto the shoulder: baggage, a burden.",
+      "fr": "Une large feuille de plante (艹) dont le nom a servi à dire la charge que l'on hisse sur l'épaule : les bagages, le fardeau."
+    },
+    {
+      "literal": "被",
+      "meaning": "incur, cover",
+      "components": [
+        "衤",
+        "皮"
+      ],
+      "kind": "compound",
+      "en": "A garment (衤) draped over you like a second skin (皮): to cover, and so to incur.",
+      "fr": "Un vêtement (衤) posé sur soi comme une seconde peau (皮) : couvrir, et donc subir."
+    },
+    {
+      "literal": "訓",
+      "meaning": "instruction",
+      "components": [
+        "言",
+        "川"
+      ],
+      "kind": "compound",
+      "en": "Words (言) flowing steadily like a river (川) to guide the pupil: instruction.",
+      "fr": "Des paroles (言) qui coulent sans cesse comme une rivière (川) pour guider l'élève : l'instruction."
+    },
+    {
+      "literal": "軒",
+      "meaning": "counter for houses",
+      "components": [
+        "車",
+        "干"
+      ],
+      "kind": "compound",
+      "en": "A carriage (車) with its shaft (干) curving up high like an eave: hence the counter for houses.",
+      "fr": "Une voiture (車) au brancard (干) relevé bien haut comme un auvent : d'où le compteur de maisons."
+    },
+    {
+      "literal": "造",
+      "meaning": "create, make",
+      "components": [
+        "辶",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Setting out on the road (辶) and speaking (口) a thing into existence: to make, to create.",
+      "fr": "Se mettre en route (辶) et faire naître la chose par la parole (口) : créer, fabriquer."
+    },
+    {
+      "literal": "針",
+      "meaning": "needle",
+      "components": [
+        "金",
+        "十"
+      ],
+      "kind": "compound",
+      "en": "A sliver of metal (金) drawn to a fine point like a crossed ten (十): a needle.",
+      "fr": "Un éclat de métal (金) affûté en pointe comme un dix croisé (十) : l'aiguille."
+    },
+    {
+      "literal": "隻",
+      "meaning": "counter for ships",
+      "components": [
+        "隹",
+        "又"
+      ],
+      "kind": "compound",
+      "en": "A single short-tailed bird (隹) gripped in one hand (又): one alone, the counter for ships.",
+      "fr": "Un seul oiseau (隹) tenu au creux de la main (又) : l'unité, le compteur des navires."
+    },
+    {
+      "literal": "骨",
+      "meaning": "bone, skeleton",
+      "components": [
+        "月",
+        "冖"
+      ],
+      "kind": "compound",
+      "en": "A hard, jointed frame (冖) wrapped in flesh (月): bone, the skeleton.",
+      "fr": "Une charpente dure et articulée (冖) enveloppée de chair (月) : l'os, le squelette."
+    },
+    {
+      "literal": "乾",
+      "meaning": "dry, drought",
+      "components": [
+        "日",
+        "乙"
+      ],
+      "kind": "compound",
+      "en": "The rising sun (日) drawing every last drop of moisture up into the air (乙): dry, drought.",
+      "fr": "Le soleil levant (日) qui aspire jusqu'à la dernière goutte d'humidité vers le ciel (乙) : sec, la sécheresse."
+    },
+    {
+      "literal": "停",
+      "meaning": "halt, stop",
+      "components": [
+        "亻",
+        "亠"
+      ],
+      "kind": "compound",
+      "en": "A traveler (亻) pausing to rest under the roof (亠) of a roadside pavilion: to halt, to stop.",
+      "fr": "Un voyageur (亻) qui s'arrête pour souffler sous le toit (亠) d'un pavillon au bord de la route : faire halte."
+    },
+    {
+      "literal": "副",
+      "meaning": "vice-, assistant",
+      "components": [
+        "刂",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A blade (刂) splitting a brimming jar (田) into a matching double: the second, the vice-, the assistant.",
+      "fr": "Une lame (刂) qui partage une jarre pleine (田) en un double identique : le second, l'adjoint."
+    },
+    {
+      "literal": "域",
+      "meaning": "region, range",
+      "components": [
+        "土",
+        "口",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "Land (土) fenced around a settlement (口) and guarded with a spear (戈): a region, a range.",
+      "fr": "Une terre (土) clôturée autour d'un bourg (口) et gardée par une lance (戈) : la région."
+    },
+    {
+      "literal": "患",
+      "meaning": "afflicted, disease",
+      "components": [
+        "口",
+        "｜",
+        "心"
+      ],
+      "kind": "compound",
+      "en": "Worries strung on a skewer (口 pierced by ｜) driven straight through the heart (心): affliction, illness.",
+      "fr": "Des soucis enfilés sur une broche (口 transpercé par ｜) plantée en plein cœur (心) : le mal, la maladie."
+    },
+    {
+      "literal": "捨",
+      "meaning": "discard, throw away",
+      "components": [
+        "扌",
+        "个",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) that lets its load drop like a guest quitting a roofed (个) lodge (口): to discard, to throw away.",
+      "fr": "Une main (扌) qui lâche son fardeau comme un hôte quitte l'auberge (个, 口) : jeter, abandonner."
+    },
+    {
+      "literal": "掃",
+      "meaning": "sweep",
+      "components": [
+        "扌",
+        "巾",
+        "ヨ"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) working a broom of bound cloth (巾), gripped tight (ヨ), across the floor: to sweep.",
+      "fr": "Une main (扌) qui manie un balai de chiffon (巾) bien empoigné (ヨ) sur le sol : balayer."
+    },
+    {
+      "literal": "掘",
+      "meaning": "dig, delve",
+      "components": [
+        "扌",
+        "尸",
+        "山"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) crouching low (尸) to scoop a hollow pit out of the earth (山): to dig, to delve.",
+      "fr": "Une main (扌) qui se plie tout en bas (尸) pour creuser un trou dans la terre (山) : creuser."
+    },
+    {
+      "literal": "採",
+      "meaning": "pick, gather",
+      "components": [
+        "爪",
+        "木",
+        "扌"
+      ],
+      "kind": "compound",
+      "en": "Fingers (爪) reaching into a tree (木), a hand (扌) plucking the ripe fruit: to pick, to gather.",
+      "fr": "Des doigts (爪) tendus vers l'arbre (木), la main (扌) qui cueille le fruit mûr : cueillir, prélever."
+    },
+    {
+      "literal": "接",
+      "meaning": "touch, contact",
+      "components": [
+        "扌",
+        "女",
+        "立"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) reaching out to a woman (女) standing (立) close by to make contact: to touch, to join.",
+      "fr": "Une main (扌) tendue vers une femme (女) debout (立) tout près pour entrer en contact : toucher, joindre."
+    },
+    {
+      "literal": "械",
+      "meaning": "contraption, fetter",
+      "components": [
+        "木",
+        "廾",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "Two hands (廾) clamped into wooden (木) stocks with a halberd (戈) standing guard: a fetter, a rough contraption.",
+      "fr": "Deux mains (廾) prises dans des entraves de bois (木), une hallebarde (戈) montant la garde : un carcan, un engin."
+    },
+    {
+      "literal": "液",
+      "meaning": "liquid, fluid",
+      "components": [
+        "氵",
+        "夕"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) that keeps trickling on into the evening (夕): a fluid, a liquid.",
+      "fr": "De l'eau (氵) qui continue de couler jusque tard dans la soirée (夕) : un fluide, un liquide."
+    },
+    {
+      "literal": "涼",
+      "meaning": "refreshing, cool",
+      "components": [
+        "氵",
+        "小"
+      ],
+      "kind": "compound",
+      "en": "A slim (小) run of water (氵) breathing cool over the skin: refreshing, nice and cool.",
+      "fr": "Un mince (小) filet d'eau (氵) qui souffle sa fraîcheur sur la peau : frais et revigorant."
+    },
+    {
+      "literal": "混",
+      "meaning": "mix, blend",
+      "components": [
+        "氵",
+        "日",
+        "比"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) where the sun (日) and a jostling crowd (比) all swirl together: to mix, to blend.",
+      "fr": "De l'eau (氵) où le soleil (日) et une foule serrée (比) tourbillonnent ensemble : mélanger, mêler."
+    },
+    {
+      "literal": "清",
+      "meaning": "pure, purify",
+      "components": [
+        "氵",
+        "青"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) as clear and fresh as a blue-green (青) sky: pure, to purify.",
+      "fr": "De l'eau (氵) aussi claire et fraîche qu'un ciel bleu-vert (青) : pur, purifier."
+    },
+    {
+      "literal": "瓶",
+      "meaning": "bottle, vial",
+      "components": [
+        "瓦",
+        "并"
+      ],
+      "kind": "compound",
+      "en": "Fired earthenware (瓦) shaped and joined (并) into a slender vessel: a bottle, a vial.",
+      "fr": "De la terre cuite (瓦) façonnée et assemblée (并) en récipient élancé : une bouteille, une fiole."
+    },
+    {
+      "literal": "略",
+      "meaning": "abbreviation, omission",
+      "components": [
+        "田",
+        "夂"
+      ],
+      "kind": "compound",
+      "en": "Walking the edge (夂) of a field (田) to trace only its outline: an abbreviation, an omission.",
+      "fr": "Faire le tour à pied (夂) d'un champ (田) pour n'en tracer que le contour : un abrégé, une omission."
+    },
+    {
+      "literal": "祭",
+      "meaning": "ritual, festival",
+      "components": [
+        "示",
+        "癶"
+      ],
+      "kind": "compound",
+      "en": "Two hands (癶) laying a cut of meat upon the altar (示): a rite, offering prayers.",
+      "fr": "Deux mains (癶) déposant un morceau de viande sur l'autel (示) : un rite, une offrande."
+    },
+    {
+      "literal": "移",
+      "meaning": "shift, move",
+      "components": [
+        "禾",
+        "夕"
+      ],
+      "kind": "compound",
+      "en": "Grain stalks (禾) lifted and replanted evening after evening (夕): to shift, to move.",
+      "fr": "Des tiges de céréales (禾) arrachées et repiquées soir (夕) après soir : déplacer, transférer."
+    },
+    {
+      "literal": "章",
+      "meaning": "chapter, badge",
+      "components": [
+        "音",
+        "十"
+      ],
+      "kind": "compound",
+      "en": "A run of sound (音) divided into ten (十) measured parts: a chapter, and the badge that seals it.",
+      "fr": "Une suite de sons (音) découpée en dix (十) parties mesurées : un chapitre, et l'insigne qui le scelle."
+    },
+    {
+      "literal": "符",
+      "meaning": "token, sign",
+      "components": [
+        "竹",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "A split strip of bamboo (竹) handed over (寸) as a matching proof: a token, a sign.",
+      "fr": "Une lamelle de bambou (竹) fendue et remise en main (寸) comme preuve : un jeton, un signe."
+    },
+    {
+      "literal": "粒",
+      "meaning": "grain, drop",
+      "components": [
+        "米",
+        "立"
+      ],
+      "kind": "compound",
+      "en": "A single kernel of rice (米) standing (立) all on its own: a grain, a drop.",
+      "fr": "Un unique grain de riz (米) qui tient debout (立) tout seul : un grain, une goutte."
+    },
+    {
+      "literal": "細",
+      "meaning": "slender, fine",
+      "components": [
+        "糸",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A thread (糸) spun as fine as the ridges of a field (田): slender, dainty, and minutely detailed.",
+      "fr": "Un fil (糸) filé aussi ténu que les sillons d'un champ (田) : fin, délié, minutieux."
+    },
+    {
+      "literal": "紹",
+      "meaning": "introduce",
+      "components": [
+        "糸",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A thread (糸) knotting one person to another at a word of welcome (口): to introduce, to hand on.",
+      "fr": "Un fil (糸) qui noue une personne à une autre sur un mot d'accueil (口) : présenter, transmettre."
+    },
+    {
+      "literal": "翌",
+      "meaning": "the following, next",
+      "components": [
+        "羽",
+        "立"
+      ],
+      "kind": "compound",
+      "en": "Wings (羽) poised upright (立) for the dawn still to come: the following day, the next.",
+      "fr": "Des ailes (羽) dressées (立) vers l'aube encore à venir : le lendemain, le jour suivant."
+    },
+    {
+      "literal": "脳",
+      "meaning": "brain",
+      "components": [
+        "月",
+        "凵"
+      ],
+      "kind": "compound",
+      "en": "Soft flesh (月) cradled in the bowl of the skull (凵): the brain, the seat of memory.",
+      "fr": "De la chair molle (月) logée dans la coupe du crâne (凵) : le cerveau, siège de la mémoire."
+    },
+    {
+      "literal": "菓",
+      "meaning": "candy, cakes",
+      "components": [
+        "艹",
+        "木",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "The fruit of a plant (艹), a swelling bud (田) on its tree (木), sweetened into a treat: candy and cakes.",
+      "fr": "Le fruit d'une plante (艹), une boule gonflée (田) sur son arbre (木), changée en douceur : bonbons et gâteaux."
+    },
+    {
+      "literal": "菜",
+      "meaning": "vegetable",
+      "components": [
+        "艹",
+        "爪",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "A hand (爪) plucking leafy greens from a plant (艹) growing like a tree (木): a vegetable, a side dish.",
+      "fr": "Une main (爪) cueillant des feuilles vertes sur une plante (艹) dressée comme un arbre (木) : un légume, un accompagnement."
+    },
+    {
+      "literal": "著",
+      "meaning": "renowned, publish",
+      "components": [
+        "艹",
+        "老",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "The name of the elder (老) set down day after day (日) beneath the reeds (艹): published, and so renowned.",
+      "fr": "Le nom de l'ancien (老) couché jour après jour (日) sous les roseaux (艹) : publié, et par là célèbre."
+    },
+    {
+      "literal": "袋",
+      "meaning": "sack, bag",
+      "components": [
+        "衣",
+        "弋"
+      ],
+      "kind": "compound",
+      "en": "Cloth (衣) gathered up around a stake (弋) into a hanging pouch: a sack, a bag.",
+      "fr": "Du tissu (衣) ramassé autour d'un piquet (弋) en une poche pendante : un sac, une besace."
+    },
+    {
+      "literal": "設",
+      "meaning": "establish, set up",
+      "components": [
+        "言",
+        "殳"
+      ],
+      "kind": "compound",
+      "en": "Words of command (言) carried out by a hand swinging a tool (殳): to set up, to establish.",
+      "fr": "Un ordre prononcé (言) qu'exécute une main armée d'un outil (殳) : installer, établir."
+    },
+    {
+      "literal": "貨",
+      "meaning": "goods, freight",
+      "components": [
+        "化",
+        "貝"
+      ],
+      "kind": "compound",
+      "en": "What shell-money (貝) transforms into (化) as it changes hands: goods, freight.",
+      "fr": "Ce en quoi l'argent-coquillage (貝) se transforme (化) en changeant de mains : des marchandises, du fret."
+    },
+    {
+      "literal": "販",
+      "meaning": "sell, marketing",
+      "components": [
+        "貝",
+        "又"
+      ],
+      "kind": "compound",
+      "en": "Coins of shell-money (貝) flipped over by hand (又) time and again for a gain: to sell, to market.",
+      "fr": "Des piécettes d'argent-coquillage (貝) retournées à la main (又) encore et encore pour un gain : vendre, écouler."
+    },
+    {
+      "literal": "軟",
+      "meaning": "soft",
+      "components": [
+        "車",
+        "欠"
+      ],
+      "kind": "compound",
+      "en": "A cart (車) whose frame sags and yawns (欠) at every jolt: soft, pliant.",
+      "fr": "Une charrette (車) dont le châssis fléchit et bâille (欠) à chaque cahot : mou, souple."
+    },
+    {
+      "literal": "郵",
+      "meaning": "mail, post",
+      "components": [
+        "阝"
+      ],
+      "kind": "compound",
+      "en": "A relay village (阝) posted at the far drooping edge of the realm: a stagecoach stop, and the mail it carries.",
+      "fr": "Un village-relais (阝) posté à la lisière la plus reculée du royaume : une étape de poste, et le courrier qu'elle achemine."
+    },
+    {
+      "literal": "陸",
+      "meaning": "land",
+      "components": [
+        "阝",
+        "土"
+      ],
+      "kind": "compound",
+      "en": "Hillsides (阝) heaped with mound after mound of piled earth (土): dry land, the mainland.",
+      "fr": "Des versants (阝) couverts de tertres de terre (土) empilés : la terre ferme, le continent."
+    },
+    {
+      "literal": "黄",
+      "meaning": "yellow",
+      "components": [
+        "田"
+      ],
+      "kind": "abstract",
+      "en": "The warm gold of broad ripe fields (田) baking under the summer sun: yellow.",
+      "fr": "L'or chaud des vastes champs (田) mûrs qui cuisent au soleil d'été : le jaune."
+    },
+    {
+      "literal": "募",
+      "meaning": "recruit, campaign",
+      "components": [
+        "艹",
+        "日",
+        "力"
+      ],
+      "kind": "compound",
+      "en": "Gathering every arm's strength (力) until the sun (日) sinks behind the grass (艹): to recruit, to raise a campaign.",
+      "fr": "Rassembler toutes les forces (力) possibles jusqu'à ce que le soleil (日) plonge derrière l'herbe (艹) : recruter, lever une campagne."
+    },
+    {
+      "literal": "喫",
+      "meaning": "consume, eat",
+      "components": [
+        "口",
+        "刀"
+      ],
+      "kind": "compound",
+      "en": "Carrying to the mouth (口) whatever the knife (刀) has cut and portioned: to eat, to consume.",
+      "fr": "Porter à la bouche (口) ce que le couteau (刀) a tranché et partagé : manger, consommer."
+    },
+    {
+      "literal": "営",
+      "meaning": "camp, manage",
+      "components": [
+        "口",
+        "冖"
+      ],
+      "kind": "compound",
+      "en": "Rows of rooms and tents (口) gathered under a single roof (冖): a camp, and the work of running it.",
+      "fr": "Des rangées de chambres et de tentes (口) réunies sous un même toit (冖) : un camp, et sa gestion."
+    },
+    {
+      "literal": "塔",
+      "meaning": "pagoda, tower",
+      "components": [
+        "土",
+        "艾"
+      ],
+      "kind": "compound",
+      "en": "A mound of earth (土) heaped ever higher beneath the reaching grass (艾): a pagoda, a tower.",
+      "fr": "Un monticule de terre (土) empilé toujours plus haut sous les herbes qui montent (艾) : une pagode, une tour."
+    },
+    {
+      "literal": "奥",
+      "meaning": "interior, heart",
+      "components": [
+        "冂",
+        "米",
+        "大"
+      ],
+      "kind": "compound",
+      "en": "A big figure (大) tucked far behind the walls (冂) guarding the stored grain (米): the innermost interior, the heart.",
+      "fr": "Une grande silhouette (大) blottie loin derrière les murs (冂) à garder le grain (米) : le tréfonds, le coeur."
+    },
+    {
+      "literal": "尊",
+      "meaning": "revered, precious",
+      "components": [
+        "寸",
+        "酉"
+      ],
+      "kind": "compound",
+      "en": "A hand (寸) raising a vessel of wine (酉) in offering: revered, precious.",
+      "fr": "Une main (寸) qui élève une jarre de vin (酉) en offrande : vénéré, précieux."
+    },
+    {
+      "literal": "帽",
+      "meaning": "cap, headgear",
+      "components": [
+        "巾",
+        "目",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "A cloth (巾) drawn down over the eyes (目) to block the sun (日): a cap.",
+      "fr": "Un tissu (巾) rabattu sur les yeux (目) pour se couvrir du soleil (日) : une casquette."
+    },
+    {
+      "literal": "幅",
+      "meaning": "width, hanging scroll",
+      "components": [
+        "巾",
+        "田"
+      ],
+      "kind": "compound",
+      "en": "A cloth (巾) stretched out full and wide as a field (田): its width, a hanging scroll.",
+      "fr": "Une étoffe (巾) tendue, aussi large qu'un champ (田) : la largeur, un rouleau suspendu."
+    },
+    {
+      "literal": "復",
+      "meaning": "return, restore",
+      "components": [
+        "彳",
+        "夂"
+      ],
+      "kind": "compound",
+      "en": "Stepping (彳) back down the road you came, retracing your feet (夂): to return, to restore.",
+      "fr": "Refaire ses pas (彳) sur le chemin parcouru, en revenant sur ses pieds (夂) : revenir, rétablir."
+    },
+    {
+      "literal": "換",
+      "meaning": "interchange, exchange",
+      "components": [
+        "大",
+        "勹"
+      ],
+      "kind": "compound",
+      "en": "One big bundle (大) wrapped up (勹) and traded for another: to interchange, to swap.",
+      "fr": "Un grand paquet (大) enveloppé (勹) puis troqué contre un autre : échanger, permuter."
+    },
+    {
+      "literal": "敬",
+      "meaning": "awe, respect",
+      "components": [
+        "攵",
+        "勹"
+      ],
+      "kind": "compound",
+      "en": "A stick of authority (攵) held over a bent, kneeling figure (勹): awe and respect.",
+      "fr": "Le bâton de l'autorité (攵) au-dessus d'une silhouette courbée (勹) : crainte et respect."
+    },
+    {
+      "literal": "普",
+      "meaning": "universal, widely",
+      "components": [
+        "日",
+        "并"
+      ],
+      "kind": "compound",
+      "en": "The sun (日) shedding its light on everything side by side (并): universal, everywhere.",
+      "fr": "Le soleil (日) qui éclaire toute chose côte à côte (并) : universel, partout."
+    },
+    {
+      "literal": "替",
+      "meaning": "exchange, spare",
+      "components": [
+        "大",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Two big figures (大) swapping their spots above the record (日): to exchange, a stand-in.",
+      "fr": "Deux grandes silhouettes (大) qui échangent leurs places au-dessus du registre (日) : remplacer, la doublure."
+    },
+    {
+      "literal": "棒",
+      "meaning": "rod, stick",
+      "components": [
+        "木",
+        "人"
+      ],
+      "kind": "compound",
+      "en": "A person (人) gripping a stout length of wood (木): a rod, a stick.",
+      "fr": "Une personne (人) empoignant un solide bout de bois (木) : une trique, un bâton."
+    },
+    {
+      "literal": "森",
+      "meaning": "forest, woods",
+      "components": [
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Three trees (木) crowded close together: a forest, the deep woods.",
+      "fr": "Trois arbres (木) serrés les uns contre les autres : une forêt, les grands bois."
+    },
+    {
+      "literal": "植",
+      "meaning": "to plant",
+      "components": [
+        "木",
+        "目"
+      ],
+      "kind": "compound",
+      "en": "A tree (木) set straight upright under a watchful eye (目): to plant.",
+      "fr": "Un arbre (木) planté bien droit sous l'oeil (目) attentif : planter."
+    },
+    {
+      "literal": "極",
+      "meaning": "extreme, pole",
+      "components": [
+        "木"
+      ],
+      "kind": "compound",
+      "en": "The topmost wooden (木) ridgebeam of the roof, as high as building goes: the extreme, the pole.",
+      "fr": "La poutre de bois (木) tout en haut du toit, au point le plus élevé : l'extrême, le pôle."
+    },
+    {
+      "literal": "減",
+      "meaning": "decrease, dwindle",
+      "components": [
+        "汁",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "A blade (戈) sealing off the flow of water (氵) so it dwindles: to decrease.",
+      "fr": "Une lame (戈) qui coupe le cours de l'eau (氵) pour qu'il s'amenuise : diminuer."
+    },
+    {
+      "literal": "温",
+      "meaning": "warm",
+      "components": [
+        "汁",
+        "皿",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) heated in a dish (皿) under the sun (日): warm.",
+      "fr": "De l'eau (氵) qui chauffe dans un plat (皿) au soleil (日) : tiède, chaleureux."
+    },
+    {
+      "literal": "測",
+      "meaning": "to fathom, to gauge",
+      "components": [
+        "汁",
+        "貝",
+        "刈"
+      ],
+      "kind": "compound",
+      "en": "Gauging the depth of water (氵) by a rule cut with a blade (刂) on a shell (貝): to fathom, to measure.",
+      "fr": "Jauger la profondeur de l'eau (氵) selon une règle gravée à la lame (刂) sur un coquillage (貝) : sonder, mesurer."
+    },
+    {
+      "literal": "湖",
+      "meaning": "lake",
+      "components": [
+        "汁",
+        "月"
+      ],
+      "kind": "compound",
+      "en": "A wide, still stretch of water (氵) that mirrors the moon (月): a lake.",
+      "fr": "Une large étendue d'eau (氵) calme où se mire la lune (月) : un lac."
+    },
+    {
+      "literal": "湯",
+      "meaning": "hot water, bath",
+      "components": [
+        "汁",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) warmed by the rising sun (日): hot water, a bath.",
+      "fr": "De l'eau (氵) réchauffée par le soleil levant (日) : l'eau chaude, le bain."
+    },
+    {
+      "literal": "湾",
+      "meaning": "gulf, bay",
+      "components": [
+        "汁",
+        "弓"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) curving inland in the shape of a drawn bow (弓): a gulf, a bay.",
+      "fr": "L'eau (氵) qui s'incurve dans les terres comme un arc bandé (弓) : un golfe, une baie."
+    },
+    {
+      "literal": "湿",
+      "meaning": "damp, wet",
+      "components": [
+        "汁",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) left glistening on the ground in the sun (日): damp, wet.",
+      "fr": "De l'eau (氵) qui luit encore sur le sol au soleil (日) : humide, mouillé."
+    },
+    {
+      "literal": "焼",
+      "meaning": "to bake, to burn",
+      "components": [
+        "火",
+        "儿"
+      ],
+      "kind": "compound",
+      "en": "Flames (火) leaping up high beneath a standing figure (儿): to bake, to burn.",
+      "fr": "Les flammes (火) qui montent haut sous une silhouette dressée (儿) : cuire, brûler."
+    },
+    {
+      "literal": "畳",
+      "meaning": "tatami mat",
+      "components": [
+        "田",
+        "冖"
+      ],
+      "kind": "compound",
+      "en": "Woven panels stacked like fields (田) piled up neatly under a cover (冖): a tatami mat.",
+      "fr": "Des nattes empilées comme des champs (田) rangés sous une housse (冖) : un tatami."
+    },
+    {
+      "literal": "短",
+      "meaning": "short, brief",
+      "components": [
+        "矢",
+        "豆"
+      ],
+      "kind": "compound",
+      "en": "An arrow (矢) laid against a stubby bean pot (豆), both handy for gauging little lengths: short.",
+      "fr": "Une flèche (矢) posée contre un petit pot trapu (豆), toutes deux bonnes à mesurer le peu : court, bref."
+    },
+    {
+      "literal": "硬",
+      "meaning": "hard, stiff",
+      "components": [
+        "石"
+      ],
+      "kind": "compound",
+      "en": "Hard as the solid rock of a stone (石) that never gives way: stiff, unyielding.",
+      "fr": "Dur comme le roc de la pierre (石) qui ne cède jamais : rigide, dur."
+    },
+    {
+      "literal": "税",
+      "meaning": "tax, duty",
+      "components": [
+        "禾",
+        "ハ"
+      ],
+      "kind": "compound",
+      "en": "A share split off (ハ) from the grain harvest (禾) and handed to the lord: a tax, a duty.",
+      "fr": "Une part détachée (ハ) de la récolte de grain (禾) et remise au seigneur : l'impôt, la taxe."
+    },
+    {
+      "literal": "童",
+      "meaning": "child, juvenile",
+      "components": [
+        "立",
+        "里"
+      ],
+      "kind": "compound",
+      "en": "A youngster standing (立) in the middle of the village (里): a child, a juvenile.",
+      "fr": "Un gamin debout (立) au milieu du village (里) : un enfant, un jeune."
+    },
+    {
+      "literal": "筆",
+      "meaning": "writing brush",
+      "components": [
+        "竹",
+        "聿"
+      ],
+      "kind": "compound",
+      "en": "A hand-held brush (聿) fitted with a bamboo (竹) handle: a writing brush.",
+      "fr": "Un pinceau tenu à la main (聿), monté sur une tige de bambou (竹) : le pinceau à écrire."
+    },
+    {
+      "literal": "筒",
+      "meaning": "cylinder, pipe",
+      "components": [
+        "竹",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "A length of bamboo (竹) open at the mouth (口) and hollow right through: a cylinder, a pipe.",
+      "fr": "Un tronçon de bambou (竹) ouvert à la bouche (口) et creux de part en part : un cylindre, un tuyau."
+    },
+    {
+      "literal": "絡",
+      "meaning": "entwine, coil around",
+      "components": [
+        "糸",
+        "夂"
+      ],
+      "kind": "compound",
+      "en": "Fine thread (糸) wound coil upon coil, twining its way around (夂) until it binds fast: to entwine.",
+      "fr": "Un fil fin (糸) enroulé spire après spire, cheminant tout autour (夂) jusqu'à tout ligoter : enlacer, s'enrouler."
+    },
+    {
+      "literal": "腕",
+      "meaning": "arm",
+      "components": [
+        "月"
+      ],
+      "kind": "compound",
+      "en": "The flesh (月) that bends and curls at the joint to reach and grasp: the arm, and the ability in its hold.",
+      "fr": "La chair (月) qui se plie et s'enroule à l'articulation pour saisir : le bras, et l'habileté qu'on y met."
+    },
+    {
+      "literal": "装",
+      "meaning": "attire",
+      "components": [
+        "衣",
+        "士"
+      ],
+      "kind": "compound",
+      "en": "A sturdy man (士) pulling on his robe (衣): getting dressed, one's attire.",
+      "fr": "Un homme robuste (士) qui enfile sa tunique (衣) : la tenue, s'habiller."
+    },
+    {
+      "literal": "補",
+      "meaning": "supplement",
+      "components": [
+        "衤"
+      ],
+      "kind": "compound",
+      "en": "Stitching a patch onto worn cloth (衤) to make it whole again: to mend, to supplement what is missing.",
+      "fr": "Une pièce cousue sur un vêtement usé (衤) pour le rendre entier : réparer, compléter ce qui manque."
+    },
+    {
+      "literal": "詞",
+      "meaning": "part of speech",
+      "components": [
+        "言",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Speech (言) that the mouth (口) sorts and orders into neat units: words, the parts of speech.",
+      "fr": "La parole (言) que la bouche (口) trie et ordonne en unités : les mots, les parties du discours."
+    },
+    {
+      "literal": "象",
+      "meaning": "elephant",
+      "components": [
+        "豕"
+      ],
+      "kind": "pictogram",
+      "en": "One drawing of a long trunk and a great body like a huge hog (豕): the elephant, and the very image one patterns after.",
+      "fr": "Un seul dessin : une longue trompe et un corps massif de sanglier géant (豕) : l'éléphant, et l'image même que l'on imite."
+    },
+    {
+      "literal": "貯",
+      "meaning": "savings",
+      "components": [
+        "貝",
+        "宀"
+      ],
+      "kind": "compound",
+      "en": "Cowrie money (貝) tucked safely under a roof (宀) in a strongbox: savings, to store up.",
+      "fr": "Des coquillages-monnaie (貝) rangés à l'abri sous un toit (宀) dans un coffre : l'épargne, thésauriser."
+    },
+    {
+      "literal": "貿",
+      "meaning": "trade",
+      "components": [
+        "貝",
+        "刀"
+      ],
+      "kind": "compound",
+      "en": "Cowrie money (貝) split by the blade (刀) of a bargain and passed across: trade, the goods exchanged.",
+      "fr": "La monnaie de cauris (貝) tranchée par le couteau (刀) du marchandage et échangée : le commerce, le troc."
+    },
+    {
+      "literal": "超",
+      "meaning": "transcend",
+      "components": [
+        "走",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Running (走) so hard that you shoot right past the point where you were merely called (口): to exceed, to transcend.",
+      "fr": "Courir (走) si fort qu'on file bien au-delà du point où l'on vous appelait (口) : dépasser, transcender."
+    },
+    {
+      "literal": "軽",
+      "meaning": "light",
+      "components": [
+        "車"
+      ],
+      "kind": "compound",
+      "en": "A cart (車) so unladen it rolls away swift and smooth: light in weight, and trifling.",
+      "fr": "Une charrette (車) si peu chargée qu'elle file toute légère : léger, et sans importance."
+    },
+    {
+      "literal": "量",
+      "meaning": "quantity",
+      "components": [
+        "日",
+        "里"
+      ],
+      "kind": "ideogram",
+      "en": "Weighing out the day's (日) grain gathered from the village fields (里): a quantity, to measure.",
+      "fr": "Peser le grain du jour (日) récolté dans les champs du village (里) : la quantité, mesurer."
+    },
+    {
+      "literal": "鈍",
+      "meaning": "dull",
+      "components": [
+        "金",
+        "屯"
+      ],
+      "kind": "compound",
+      "en": "A blade of metal (金) whose edge has thickened and gone slack (屯): dull, blunt, slow.",
+      "fr": "Une lame de métal (金) dont le fil s'est épaissi et alourdi (屯) : émoussé, lent, obtus."
+    },
+    {
+      "literal": "隅",
+      "meaning": "corner",
+      "components": [
+        "阝"
+      ],
+      "kind": "compound",
+      "en": "The tucked-away angle where the hillside mound (阝) folds back on itself: a corner, a nook.",
+      "fr": "Le renfoncement où le talus de la colline (阝) se replie : un coin, un recoin."
+    },
+    {
+      "literal": "階",
+      "meaning": "storey, stair",
+      "components": [
+        "阝",
+        "比"
+      ],
+      "kind": "compound",
+      "en": "Steps ranked side by side (比) climbing the hillside mound (阝): a staircase, a storey.",
+      "fr": "Des marches alignées côte à côte (比) gravissant le talus (阝) : l'escalier, l'étage."
+    },
+    {
+      "literal": "雇",
+      "meaning": "employ, hire",
+      "components": [
+        "戸",
+        "隹"
+      ],
+      "kind": "compound",
+      "en": "A bird (隹) that returns to your door (戸) each season, taken on to work: to hire, to employ.",
+      "fr": "Un oiseau (隹) qui revient chaque saison à votre porte (戸), engagé pour la tâche : embaucher."
+    },
+    {
+      "literal": "雲",
+      "meaning": "cloud",
+      "components": [
+        "雨",
+        "厶"
+      ],
+      "kind": "compound",
+      "en": "A coil of swirling vapour (厶) massing beneath the rain (雨): a cloud.",
+      "fr": "Une volute de vapeur qui s'enroule (厶) sous la pluie (雨) : le nuage."
+    },
+    {
+      "literal": "順",
+      "meaning": "obey",
+      "components": [
+        "川",
+        "頁"
+      ],
+      "kind": "compound",
+      "en": "A head (頁) bowing to flow along with the river's (川) current: to obey, to follow in order.",
+      "fr": "Une tête (頁) qui s'incline pour suivre le courant du fleuve (川) : obéir, suivre l'ordre."
+    },
+    {
+      "literal": "傾",
+      "meaning": "lean, incline",
+      "components": [
+        "亻",
+        "頁"
+      ],
+      "kind": "compound",
+      "en": "A person (亻) with their head (頁) tipped over to one side: to lean, to incline.",
+      "fr": "Une personne (亻) qui penche la tête (頁) sur le côté : s'incliner, pencher."
+    },
+    {
+      "literal": "勢",
+      "meaning": "force, energy",
+      "components": [
+        "土",
+        "力"
+      ],
+      "kind": "compound",
+      "en": "The strength (力) of a seedling driven into the earth (土) and bursting upward: force, momentum, energy.",
+      "fr": "La force (力) d'un plant enfoncé dans la terre (土) qui jaillit vers le haut : l'élan, l'énergie."
+    },
+    {
+      "literal": "塗",
+      "meaning": "paint",
+      "components": [
+        "土",
+        "氵"
+      ],
+      "kind": "compound",
+      "en": "Earth (土) worked with water (氵) into a smooth mud and spread over the wall: to plaster, to paint.",
+      "fr": "De la terre (土) délayée à l'eau (氵) en boue lisse et étalée sur le mur : enduire, peindre."
+    },
+    {
+      "literal": "塩",
+      "meaning": "salt",
+      "components": [
+        "土",
+        "皿"
+      ],
+      "kind": "compound",
+      "en": "Salt-earth (土) boiled down to crystals in a shallow dish (皿): salt.",
+      "fr": "La terre salée (土) réduite en cristaux dans un plat (皿) : le sel."
+    },
+    {
+      "literal": "損",
+      "meaning": "damage, loss",
+      "components": [
+        "扌",
+        "貝"
+      ],
+      "kind": "compound",
+      "en": "A hand (扌) that strikes and chips shell-money (貝) off the tally: damage, and loss.",
+      "fr": "Une main (扌) qui heurte et retranche des coquillages-monnaie (貝) du compte : le dommage, la perte."
+    },
+    {
+      "literal": "殿",
+      "meaning": "hall, Mr.",
+      "components": [
+        "尸",
+        "殳"
+      ],
+      "kind": "compound",
+      "en": "A weapon-bearing hand (殳) guarding the great rear hall where a lord (尸) sits: a palace, and the honorific for its master.",
+      "fr": "Une main armée (殳) qui garde la grande salle du fond où siège le seigneur (尸) : le palais, et le titre de « monsieur »."
+    },
+    {
+      "literal": "準",
+      "meaning": "standard, level",
+      "components": [
+        "氵",
+        "隹"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) settling to a perfectly flat level, true as a falcon's (隹) plumb dive: the standard one measures against, semi-.",
+      "fr": "L'eau (氵) qui trouve toujours son niveau bien plat, droite comme le plongeon du faucon (隹) : l'étalon, le niveau."
+    },
+    {
+      "literal": "溶",
+      "meaning": "melt, dissolve",
+      "components": [
+        "氵",
+        "谷"
+      ],
+      "kind": "compound",
+      "en": "A solid dropped into water (氵) filling a valley (谷) basin until it spreads and melts away: to dissolve.",
+      "fr": "Un solide plongé dans l'eau (氵) qui emplit une cuvette de vallée (谷) jusqu'à s'y fondre : dissoudre."
+    },
+    {
+      "literal": "照",
+      "meaning": "illuminate, shine",
+      "components": [
+        "日",
+        "灬"
+      ],
+      "kind": "compound",
+      "en": "The bright sun (日) above and a fire (灬) below, both throwing their light: to illuminate, to shine.",
+      "fr": "Le soleil éclatant (日) au-dessus et un feu (灬) en dessous, jetant tous deux leur lumière : illuminer, briller."
+    },
+    {
+      "literal": "禁",
+      "meaning": "prohibition, ban",
+      "components": [
+        "木",
+        "示"
+      ],
+      "kind": "compound",
+      "en": "A grove of trees (木木) ringing a sacred altar (示), closed to all who would enter: a prohibition, a ban.",
+      "fr": "Un bois d'arbres (木木) autour d'un autel sacré (示), interdit à quiconque voudrait y entrer : l'interdiction."
+    },
+    {
+      "literal": "署",
+      "meaning": "government office",
+      "components": [
+        "罒",
+        "者"
+      ],
+      "kind": "compound",
+      "en": "A net (罒) cast over the assigned people (者) to fix each in a post: a government office, and the signature that seals it.",
+      "fr": "Un filet (罒) jeté sur les gens (者) pour assigner à chacun son poste : le bureau administratif, et la signature qui l'entérine."
+    },
+    {
+      "literal": "群",
+      "meaning": "flock, group",
+      "components": [
+        "羊",
+        "君"
+      ],
+      "kind": "compound",
+      "en": "Sheep (羊) massed together under a single commanding shepherd (君): a flock, a group.",
+      "fr": "Des moutons (羊) rassemblés sous la houlette d'un seul maître (君) : le troupeau, le groupe."
+    },
+    {
+      "literal": "腰",
+      "meaning": "loins, hips",
+      "components": [
+        "月",
+        "女"
+      ],
+      "kind": "compound",
+      "en": "The flesh (月) at the body's essential middle, where a woman (女) rests her hands: the waist, the hips.",
+      "fr": "La chair (月) au centre vital du corps, là où une femme (女) pose les mains : la taille, les hanches."
+    },
+    {
+      "literal": "蒸",
+      "meaning": "steam",
+      "components": [
+        "艹",
+        "灬"
+      ],
+      "kind": "compound",
+      "en": "Bundled stalks (艹) held over a fire (灬) until the vapour rises off them: to steam, to heat.",
+      "fr": "Des tiges liées (艹) tenues au-dessus d'un feu (灬) jusqu'à ce que la vapeur s'en élève : cuire à la vapeur, chauffer."
+    },
+    {
+      "literal": "裏",
+      "meaning": "back, reverse side",
+      "components": [
+        "衣",
+        "里"
+      ],
+      "kind": "compound",
+      "en": "The village (里) tucked away inside the folds of a garment (衣), the side you never show: the back, the reverse.",
+      "fr": "Le village (里) caché dans les replis d'un habit (衣), la face qu'on ne montre jamais : l'envers, le dos."
+    },
+    {
+      "literal": "触",
+      "meaning": "touch, contact",
+      "components": [
+        "角",
+        "虫"
+      ],
+      "kind": "compound",
+      "en": "A little bug (虫) reaching out with its horn (角) to feel its way forward: contact, touch.",
+      "fr": "Un petit insecte (虫) qui tend sa corne (角) pour tâter le chemin : le contact, le toucher."
+    },
+    {
+      "literal": "詰",
+      "meaning": "packed, pressed",
+      "components": [
+        "言",
+        "士",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Words (言) heaping up as a scholar (士) presses a mouth (口) with question after question: packed tight, pressed close.",
+      "fr": "Les mots (言) s'entassent quand le lettré (士) presse une bouche (口) de questions : serré, tassé."
+    },
+    {
+      "literal": "豊",
+      "meaning": "bountiful, abundant",
+      "components": [
+        "豆"
+      ],
+      "kind": "compound",
+      "en": "A ritual vessel (豆) heaped high with grain and jade for the harvest feast: bountiful, abundant.",
+      "fr": "Un vase rituel (豆) débordant de grains et de jade pour la fête des récoltes : abondant, généreux."
+    },
+    {
+      "literal": "跡",
+      "meaning": "tracks, mark",
+      "components": [
+        "足",
+        "赤"
+      ],
+      "kind": "compound",
+      "en": "A foot (足) leaving a bright red (赤) trail behind it: tracks, a mark left in passing.",
+      "fr": "Un pied (足) qui laisse derrière lui une traînée rouge (赤) : des traces, une empreinte."
+    },
+    {
+      "literal": "農",
+      "meaning": "agriculture, farming",
+      "components": [
+        "辰",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Working the land from the first light of day (日) with a shell-bladed hoe (辰) to clear the weeds: agriculture, farming.",
+      "fr": "Travailler la terre dès le lever du jour (日), la houe de coquillage (辰) à la main pour arracher les herbes : l'agriculture."
+    },
+    {
+      "literal": "鉄",
+      "meaning": "iron",
+      "components": [
+        "金",
+        "矢"
+      ],
+      "kind": "compound",
+      "en": "The common metal (金) forged into the hard tip of an arrow (矢): iron.",
+      "fr": "Le métal (金) ordinaire que l'on forge en pointe de flèche (矢) : le fer."
+    },
+    {
+      "literal": "鉱",
+      "meaning": "ore, mineral",
+      "components": [
+        "金",
+        "广"
+      ],
+      "kind": "compound",
+      "en": "Metal (金) hauled from a wide seam of rock beneath the mine's lean-to roof (广): mineral ore.",
+      "fr": "Le métal (金) tiré d'un large filon de roche sous l'auvent (广) de la mine : le minerai."
+    },
+    {
+      "literal": "零",
+      "meaning": "zero, to spill",
+      "components": [
+        "雨"
+      ],
+      "kind": "compound",
+      "en": "Fat raindrops spilling out of the rain cloud (雨) one by one until nothing is left: zero, to spill.",
+      "fr": "De grosses gouttes se déversent du nuage de pluie (雨) une à une jusqu'à ce qu'il ne reste rien : zéro, se répandre."
+    },
+    {
+      "literal": "預",
+      "meaning": "deposit, custody",
+      "components": [
+        "頁"
+      ],
+      "kind": "compound",
+      "en": "Handing your goods over in advance to a trusted head (頁) of the house to hold safe: a deposit left in custody.",
+      "fr": "Confier ses biens d'avance à un responsable (頁) qui les gardera pour vous : un dépôt, une consigne."
+    },
+    {
+      "literal": "像",
+      "meaning": "statue, image",
+      "components": [
+        "化",
+        "豕"
+      ],
+      "kind": "compound",
+      "en": "A sculptor shaping and reshaping (化) clay into the great beast (豕) once glimpsed: a statue, a likeness.",
+      "fr": "Un sculpteur modèle et remodèle (化) l'argile jusqu'à retrouver la grande bête (豕) entrevue jadis : une statue, une image."
+    },
+    {
+      "literal": "境",
+      "meaning": "boundary, border",
+      "components": [
+        "土",
+        "音"
+      ],
+      "kind": "compound",
+      "en": "The strip of earth (土) where one realm's voice (音) finally stops carrying: a boundary, a border.",
+      "fr": "La bande de terre (土) où la voix (音) d'un royaume cesse enfin de porter : une frontière, une limite."
+    },
+    {
+      "literal": "層",
+      "meaning": "stratum, layer",
+      "components": [
+        "尸",
+        "田",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Floor stacked upon floor, field (田) over day (日), all under one long roof (尸): a stratum, a social layer.",
+      "fr": "Niveau empilé sur niveau, champ (田) sur jour (日), sous une même longue toiture (尸) : une strate, une couche sociale."
+    },
+    {
+      "literal": "憎",
+      "meaning": "hate, detest",
+      "components": [
+        "忄",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Bitterness piling up layer on layer, day (日) after day, in the heart (忄): to hate, to detest.",
+      "fr": "L'amertume qui s'accumule couche après couche, jour (日) après jour, dans le cœur (忄) : haïr, détester."
+    },
+    {
+      "literal": "歴",
+      "meaning": "history, course",
+      "components": [
+        "止",
+        "木",
+        "厂"
+      ],
+      "kind": "compound",
+      "en": "A foot (止) tramping past rows of trees (木) beneath a long cliff (厂), step after step: the whole course one has walked, a history.",
+      "fr": "Le pied (止) qui foule rangée après rangée d'arbres (木) sous une longue falaise (厂) : le chemin parcouru, l'historique."
+    },
+    {
+      "literal": "滴",
+      "meaning": "drop, drip",
+      "components": [
+        "氵",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) narrowing to a single bead at the mouth (口) of a spout before it lets go: a drip, a droplet.",
+      "fr": "L'eau (氵) se resserre en une seule perle à l'embouchure (口) d'un bec avant de lâcher : une goutte qui tombe."
+    },
+    {
+      "literal": "漁",
+      "meaning": "fishing, fishery",
+      "components": [
+        "魚",
+        "氵"
+      ],
+      "kind": "compound",
+      "en": "Chasing fish (魚) through the water (氵) to haul in the day's catch: fishing, the fishery.",
+      "fr": "Traquer le poisson (魚) dans l'eau (氵) pour ramener la prise du jour : la pêche."
+    },
+    {
+      "literal": "算",
+      "meaning": "calculate, reckon",
+      "components": [
+        "竹",
+        "目",
+        "廾"
+      ],
+      "kind": "compound",
+      "en": "Bamboo (竹) counting rods lined up before the eye (目) and worked by both hands (廾): to calculate.",
+      "fr": "Des baguettes de bambou (竹) alignées sous l'œil (目) et manœuvrées à deux mains (廾) : calculer."
+    },
+    {
+      "literal": "管",
+      "meaning": "pipe, tube",
+      "components": [
+        "竹",
+        "宀"
+      ],
+      "kind": "compound",
+      "en": "A hollow stalk of bamboo (竹) running under the roof (宀) to carry water through: a pipe, a tube.",
+      "fr": "Une tige creuse de bambou (竹) courant sous le toit (宀) pour conduire l'eau : un tuyau, un tube."
+    },
+    {
+      "literal": "綿",
+      "meaning": "cotton",
+      "components": [
+        "糸",
+        "白",
+        "巾"
+      ],
+      "kind": "compound",
+      "en": "Fine threads (糸) fluffed up into soft white (白) cloth (巾): cotton.",
+      "fr": "Des fils (糸) foisonnés en une étoffe (巾) toute blanche (白) et moelleuse : le coton."
+    },
+    {
+      "literal": "総",
+      "meaning": "general, whole",
+      "components": [
+        "糸",
+        "心"
+      ],
+      "kind": "compound",
+      "en": "All the loose threads (糸) gathered together with a single mind (心): the general sum, the whole.",
+      "fr": "Tous les fils épars (糸) rassemblés d'un même cœur (心) : le total, l'ensemble."
+    },
+    {
+      "literal": "緑",
+      "meaning": "green",
+      "components": [
+        "糸",
+        "水"
+      ],
+      "kind": "compound",
+      "en": "Silk thread (糸) steeped in dye water (水) until it drinks the color of young leaves: green.",
+      "fr": "Le fil de soie (糸) trempé dans l'eau (水) teintée jusqu'à boire la couleur des jeunes feuilles : le vert."
+    },
+    {
+      "literal": "練",
+      "meaning": "practice, train",
+      "components": [
+        "糸",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Refining raw silk thread (糸) over and over, day (日) after day, until it comes out smooth: to practice, to train.",
+      "fr": "Affiner le fil de soie (糸) brut encore et encore, jour (日) après jour, jusqu'à ce qu'il devienne lisse : s'exercer, s'entraîner."
+    },
+    {
+      "literal": "複",
+      "meaning": "duplicate, double",
+      "components": [
+        "衤",
+        "夂"
+      ],
+      "kind": "compound",
+      "en": "A garment (衤) given a second lining that folds back (夂) over the first: doubled, duplicated.",
+      "fr": "Un vêtement (衤) doublé d'une seconde épaisseur qui revient (夂) sur la première : double, dupliqué."
+    },
+    {
+      "literal": "誌",
+      "meaning": "records, document",
+      "components": [
+        "言",
+        "士",
+        "心"
+      ],
+      "kind": "compound",
+      "en": "Words (言) written down to keep a scholar's (士) heart (心) and will from fading: a document, records.",
+      "fr": "Des mots (言) couchés par écrit pour empêcher la volonté d'un lettré (士), tout son cœur (心), de s'effacer : un document, des archives."
+    },
+    {
+      "literal": "踊",
+      "meaning": "dance, leap",
+      "components": [
+        "足",
+        "用"
+      ],
+      "kind": "compound",
+      "en": "Feet (足) springing up again and again to a steady beat (用): to jump, to dance.",
+      "fr": "Les pieds (足) qui rebondissent sans cesse sur un rythme régulier (用) : sauter, danser."
+    },
+    {
+      "literal": "銅",
+      "meaning": "copper",
+      "components": [
+        "金",
+        "口"
+      ],
+      "kind": "compound",
+      "en": "Metal (金) poured through the mold's mouth (口) just like gold, only far cheaper: copper.",
+      "fr": "Le métal (金) coulé par la bouche (口) du moule tout comme l'or, mais bien moins cher : le cuivre."
+    },
+    {
+      "literal": "領",
+      "meaning": "dominion, jurisdiction",
+      "components": [
+        "頁",
+        "卩"
+      ],
+      "kind": "compound",
+      "en": "The head (頁) that stamps its seal (卩) of command over a whole territory: jurisdiction, dominion.",
+      "fr": "La tête (頁) qui appose son sceau (卩) de commandement sur tout un territoire : la juridiction, le domaine."
+    },
+    {
+      "literal": "鼻",
+      "meaning": "nose",
+      "components": [
+        "自",
+        "田",
+        "廾"
+      ],
+      "kind": "compound",
+      "en": "The old drawing of a nose (自) drifted off to mean 'self,' so it was propped back up over a field (田) and two hands (廾) to name the organ once more: the nose.",
+      "fr": "Le vieux dessin d'un nez (自) ayant glissé vers le sens de « soi », on l'a remonté au-dessus d'un champ (田) et de deux mains (廾) pour redire l'organe : le nez."
+    },
+    {
+      "literal": "億",
+      "meaning": "hundred million",
+      "components": [
+        "亻",
+        "音",
+        "心"
+      ],
+      "kind": "compound",
+      "en": "So vast a count that a person (亻), every thought (音) and feeling (心) straining, can barely hold it: a hundred million.",
+      "fr": "Un compte si immense qu'un homme (亻), pensée (音) et cœur (心) tendus, peine à l'embrasser : cent millions."
+    },
+    {
+      "literal": "劇",
+      "meaning": "drama",
+      "components": [
+        "虍",
+        "豕",
+        "刈"
+      ],
+      "kind": "compound",
+      "en": "A tiger (虍) and a boar (豕) locked in a blade (刈) fight staged for the crowd: drama.",
+      "fr": "Un tigre (虍) et un sanglier (豕) qui s'affrontent, lame (刈) au poing, sur scène : le théâtre."
+    },
+    {
+      "literal": "導",
+      "meaning": "guidance",
+      "components": [
+        "首",
+        "寸"
+      ],
+      "kind": "compound",
+      "en": "A hand (寸) taking someone by the head (首) to show the way forward: guidance.",
+      "fr": "Une main (寸) qui prend l'autre par la tête (首) pour lui montrer le chemin : guider."
+    },
+    {
+      "literal": "暴",
+      "meaning": "outburst",
+      "components": [
+        "日",
+        "水"
+      ],
+      "kind": "compound",
+      "en": "The sun (日) blazing down until everything below boils over (水): a violent outburst.",
+      "fr": "Le soleil (日) qui cogne jusqu'à ce que tout déborde (水) en dessous : l'accès de violence."
+    },
+    {
+      "literal": "線",
+      "meaning": "line",
+      "components": [
+        "糸",
+        "水",
+        "白"
+      ],
+      "kind": "compound",
+      "en": "A thread (糸) pulled out long, as steady as water (水) welling white (白) from a spring: a line.",
+      "fr": "Un fil (糸) tiré tout en longueur, comme l'eau (水) qui sourd, blanche (白), d'une source : la ligne."
+    },
+    {
+      "literal": "編",
+      "meaning": "compilation",
+      "components": [
+        "糸",
+        "冊"
+      ],
+      "kind": "compound",
+      "en": "Thread (糸) lacing bamboo strips (冊) into a single book: to knit together, to compile.",
+      "fr": "Du fil (糸) qui relie les lamelles (冊) en un seul livre : tricoter, compiler."
+    },
+    {
+      "literal": "膚",
+      "meaning": "skin",
+      "components": [
+        "虍",
+        "月"
+      ],
+      "kind": "compound",
+      "en": "The tiger's hide (虍) stretched over the flesh (月): skin.",
+      "fr": "La peau du tigre (虍) tendue sur la chair (月) : l'épiderme."
+    },
+    {
+      "literal": "蔵",
+      "meaning": "storehouse",
+      "components": [
+        "艹",
+        "臣",
+        "戈"
+      ],
+      "kind": "compound",
+      "en": "Grass (艹) hiding a retainer (臣) and his halberd (戈) out of sight: a storehouse.",
+      "fr": "L'herbe (艹) qui dissimule un vassal (臣) et sa hallebarde (戈) : l'entrepôt où l'on cache."
+    },
+    {
+      "literal": "課",
+      "meaning": "lesson",
+      "components": [
+        "言",
+        "田",
+        "木"
+      ],
+      "kind": "compound",
+      "en": "Words (言) that quiz you on the fruit grown on the tree (木) in the field (田): a lesson, a chapter.",
+      "fr": "La parole (言) qui interroge sur les fruits mûris à l'arbre (木) dans le champ (田) : la leçon, le chapitre."
+    },
+    {
+      "literal": "諸",
+      "meaning": "various",
+      "components": [
+        "言",
+        "老",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Words (言) about the elders (老) and all their days (日), name upon name: the various, the many.",
+      "fr": "Les paroles (言) sur les anciens (老) et tous leurs jours (日), nom après nom : les divers, les multiples."
+    },
+    {
+      "literal": "賞",
+      "meaning": "prize",
+      "components": [
+        "貝",
+        "尚"
+      ],
+      "kind": "compound",
+      "en": "Cowry money (貝) handed out for what is most esteemed (尚): a prize, a reward.",
+      "fr": "Des cauris (貝) remis pour ce qu'on estime (尚) le plus : la récompense."
+    },
+    {
+      "literal": "輪",
+      "meaning": "wheel",
+      "components": [
+        "車"
+      ],
+      "kind": "compound",
+      "en": "The round part turning without end under the cart (車): a wheel, a ring.",
+      "fr": "La partie ronde qui tourne sans fin sous le chariot (車) : la roue, l'anneau."
+    },
+    {
+      "literal": "鋭",
+      "meaning": "sharp",
+      "components": [
+        "金"
+      ],
+      "kind": "compound",
+      "en": "Metal (金) ground down to a fine point: sharp, pointed.",
+      "fr": "Le métal (金) affûté jusqu'à la pointe : tranchant, aigu."
+    },
+    {
+      "literal": "震",
+      "meaning": "quake",
+      "components": [
+        "雨",
+        "辰"
+      ],
+      "kind": "compound",
+      "en": "Rain (雨) and rolling thunder (辰) that shake the ground: a quake.",
+      "fr": "La pluie (雨) et le tonnerre (辰) qui font trembler le sol : le séisme."
+    },
+    {
+      "literal": "駐",
+      "meaning": "stop-over",
+      "components": [
+        "馬",
+        "王"
+      ],
+      "kind": "compound",
+      "en": "A horse (馬) reined in where its lord (王) settles: a stop-over, to reside.",
+      "fr": "Le cheval (馬) qu'on arrête là où réside son seigneur (王) : l'étape, le séjour."
+    },
+    {
+      "literal": "曇",
+      "meaning": "cloudy",
+      "components": [
+        "日",
+        "雨"
+      ],
+      "kind": "compound",
+      "en": "The sun (日) tucked away behind the rain clouds (雨): cloudy weather.",
+      "fr": "Le soleil (日) glissé derrière les nuages de pluie (雨) : le temps couvert."
+    },
+    {
+      "literal": "橋",
+      "meaning": "bridge",
+      "components": [
+        "木",
+        "冂"
+      ],
+      "kind": "compound",
+      "en": "Timber (木) bent into a tall arch (冂) over the water: a bridge.",
+      "fr": "Le bois (木) courbé en haute arche (冂) au-dessus de l'eau : le pont."
+    },
+    {
+      "literal": "濃",
+      "meaning": "concentrated",
+      "components": [
+        "氵",
+        "辰"
+      ],
+      "kind": "compound",
+      "en": "Water (氵) steeped as rich as the farmer's (辰) soil until it runs thick: concentrated, dense.",
+      "fr": "L'eau (氵) épaissie, aussi grasse que la terre du paysan (辰) : concentré, dense."
+    },
+    {
+      "literal": "燃",
+      "meaning": "burn",
+      "components": [
+        "火",
+        "犬"
+      ],
+      "kind": "compound",
+      "en": "Fire (火) heaped under the dog-meat (犬) already roasting until it bursts into flame: to burn, to blaze.",
+      "fr": "Le feu (火) attisé sous la viande du chien (犬) qui rôtit déjà : brûler, s'embraser."
+    },
+    {
+      "literal": "磨",
+      "meaning": "grind",
+      "components": [
+        "石",
+        "麻"
+      ],
+      "kind": "compound",
+      "en": "A stone (石) rubbed beneath the hemp shed (麻) until it shines: to grind, to polish.",
+      "fr": "La pierre (石) frottée sous l'auvent de chanvre (麻) jusqu'à briller : broyer, polir."
+    },
+    {
+      "literal": "築",
+      "meaning": "build",
+      "components": [
+        "竹",
+        "木",
+        "工"
+      ],
+      "kind": "compound",
+      "en": "Bamboo (竹) and timber (木) worked (工) together into a standing frame: to build.",
+      "fr": "Le bambou (竹) et le bois (木) façonnés par le travail (工) en charpente : bâtir."
+    },
+    {
+      "literal": "薄",
+      "meaning": "thin",
+      "components": [
+        "艹",
+        "氵"
+      ],
+      "kind": "compound",
+      "en": "Grass (艹) spread so sparse, and watered (氵) so much, you can see right through it: thin, dilute.",
+      "fr": "L'herbe (艹) étalée si clairsemée, l'eau (氵) si abondante, qu'on voit au travers : mince, dilué."
+    },
+    {
+      "literal": "賢",
+      "meaning": "wise",
+      "components": [
+        "又",
+        "臣",
+        "貝"
+      ],
+      "kind": "compound",
+      "en": "A steady hand (又) and a watchful eye (臣) managing the money (貝): wise and capable.",
+      "fr": "Une main (又) sûre et un œil (臣) attentif sur l'argent (貝) : sage et avisé."
+    },
+    {
+      "literal": "輸",
+      "meaning": "transport",
+      "components": [
+        "車"
+      ],
+      "kind": "compound",
+      "en": "A cart (車) hauling its load off down the road: to transport, to send.",
+      "fr": "Le chariot (車) qui emporte sa charge au loin : transporter, expédier."
+    },
+    {
+      "literal": "録",
+      "meaning": "record",
+      "components": [
+        "金"
+      ],
+      "kind": "compound",
+      "en": "Words scratched into metal (金) so they last for good: a record.",
+      "fr": "Les mots gravés dans le métal (金) pour qu'ils durent : consigner, le registre."
+    },
+    {
+      "literal": "濯",
+      "meaning": "wash",
+      "components": [
+        "氵",
+        "隹"
+      ],
+      "kind": "compound",
+      "en": "A bird (隹) beating water (氵) through its feathers to clean them: to wash, laundry.",
+      "fr": "L'oiseau (隹) qui bat de l'eau (氵) dans ses plumes pour les nettoyer : la lessive, laver."
+    },
+    {
+      "literal": "燥",
+      "meaning": "dry up",
+      "components": [
+        "火",
+        "木",
+        "品"
+      ],
+      "kind": "compound",
+      "en": "Fire (火) under a tree (木) full of chattering mouths (品) until every drop is gone: to parch, to dry up.",
+      "fr": "Le feu (火) sous l'arbre (木) aux mille bouches (品) jusqu'à la dernière goutte : dessécher."
+    },
+    {
+      "literal": "療",
+      "meaning": "heal",
+      "components": [
+        "疒"
+      ],
+      "kind": "compound",
+      "en": "The sickbed frame (疒) tended with steady care until the illness lifts: to heal, to cure.",
+      "fr": "Le cadre du lit de malade (疒) soigné patiemment jusqu'à ce que le mal s'en aille : guérir."
+    },
+    {
+      "literal": "績",
+      "meaning": "achievements",
+      "components": [
+        "糸",
+        "貝"
+      ],
+      "kind": "compound",
+      "en": "Thread (糸) spun steadily, coil after coil, until it amounts to something of worth (貝): achievements, exploits.",
+      "fr": "Le fil (糸) filé sans relâche, tour après tour, jusqu'à peser son poids (貝) : les accomplissements."
+    },
+    {
+      "literal": "講",
+      "meaning": "lecture",
+      "components": [
+        "言"
+      ],
+      "kind": "compound",
+      "en": "Words (言) stacked and interlocked in order like joined timber: a lecture, a study club.",
+      "fr": "Les paroles (言) empilées et emboîtées comme une charpente : la conférence, le cercle d'étude."
+    },
+    {
+      "literal": "齢",
+      "meaning": "age",
+      "components": [
+        "歯"
+      ],
+      "kind": "compound",
+      "en": "Read off someone's years from their teeth (歯): age.",
+      "fr": "On lit les années aux dents (歯) : l'âge."
+    },
+    {
+      "literal": "簡",
+      "meaning": "simplicity, brevity",
+      "components": [
+        "竹",
+        "日",
+        "門"
+      ],
+      "kind": "compound",
+      "en": "Slim bamboo (竹) writing-slips, sun (日) slipping through a gate (門), kept short: brevity.",
+      "fr": "De fines lamelles de bambou (竹), le soleil (日) filant par un portail (門), tenues au plus court : la brièveté."
+    },
+    {
+      "literal": "贈",
+      "meaning": "present, to send",
+      "components": [
+        "貝"
+      ],
+      "kind": "compound",
+      "en": "A gift of shell-money (貝) wrapped up and passed across the room: a present, sent.",
+      "fr": "Un présent de monnaie-coquillage (貝), emballé et tendu à l'autre : le cadeau que l'on offre."
+    },
+    {
+      "literal": "額",
+      "meaning": "forehead, framed tablet",
+      "components": [
+        "頁",
+        "宀"
+      ],
+      "kind": "compound",
+      "en": "The head's (頁) high front, under its own little roof (宀), where every guest looks first: the forehead, and the framed tablet.",
+      "fr": "Le haut du visage, sous son petit toit (宀), tout en haut de la tête (頁), là où se pose le premier regard : le front, et la plaque encadrée."
+    },
+    {
+      "literal": "爆",
+      "meaning": "to burst open, bomb",
+      "components": [
+        "火",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Fire (火) let loose with sudden violence beneath a blazing sun (日): it bursts open, a bomb.",
+      "fr": "Le feu (火) déchaîné avec une violence soudaine sous un soleil (日) brûlant : il éclate, la bombe."
+    },
+    {
+      "literal": "臓",
+      "meaning": "entrails, viscera",
+      "components": [
+        "月",
+        "臣",
+        "艾"
+      ],
+      "kind": "compound",
+      "en": "Organs kept deep in the body (月) like grain guarded (臣) beneath a grassy (艾) storehouse roof: the viscera.",
+      "fr": "Les organes enfouis dans le corps (月) comme des réserves gardées (臣) sous un toit d'herbes (艾) : les viscères."
+    },
+    {
+      "literal": "競",
+      "meaning": "to compete",
+      "components": [
+        "立",
+        "口",
+        "儿"
+      ],
+      "kind": "compound",
+      "en": "Two people standing tall (立), mouths (口) shouting, legs (儿) racing neck and neck: they compete.",
+      "fr": "Deux personnes bien droites (立), la bouche (口) criant, les jambes (儿) au coude à coude : elles rivalisent."
+    },
+    {
+      "literal": "籍",
+      "meaning": "register, to enroll",
+      "components": [
+        "竹",
+        "耒",
+        "日"
+      ],
+      "kind": "compound",
+      "en": "Bamboo (竹) slips where a plow (耒) furrows each name into the record, day (日) after day: the census register.",
+      "fr": "Des lamelles de bambou (竹) où la charrue (耒) grave chaque nom, jour (日) après jour : le registre d'état civil."
+    }
+  ]
+}

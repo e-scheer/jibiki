@@ -43,7 +43,7 @@ class KanjiEntry {
   final List<String> kunReadings;
   final List<String> nanori;
   final List<String> components;
-  final List<Map<String, String>> meanings; // {lang, text}
+  final List<Map<String, String>> meanings; // {language, text}
   final String origin; // Wiktionary "Glyph origin" prose (CC BY-SA); '' if unknown
   final String formation; // phono-semantic | ideogrammic | pictogram | simplified | …
   final String phonetic; // 音符: the sound-carrying component, when phono-semantic
@@ -56,9 +56,9 @@ class KanjiEntry {
   bool get hasOrigin => origin.isNotEmpty;
 
   List<String> meaningsFor(String lang) {
-    final wanted = meanings.where((m) => m['lang'] == lang).map((m) => m['text'] ?? '').toList();
+    final wanted = meanings.where((m) => m['language'] == lang).map((m) => m['text'] ?? '').toList();
     if (wanted.isNotEmpty) return wanted;
-    final en = meanings.where((m) => m['lang'] == 'en').map((m) => m['text'] ?? '').toList();
+    final en = meanings.where((m) => m['language'] == 'en').map((m) => m['text'] ?? '').toList();
     return en.isNotEmpty ? en : meanings.map((m) => m['text'] ?? '').toList();
   }
 
@@ -80,7 +80,7 @@ class KanjiEntry {
         phonetic: j['phonetic'] as String? ?? '',
         meanings: ((j['meanings'] as List?) ?? const [])
             .map((e) => {
-                  'lang': (e as Map)['lang']?.toString() ?? 'en',
+                  'language': (e as Map)['language']?.toString() ?? 'en',
                   'text': e['text']?.toString() ?? '',
                 })
             .toList(),

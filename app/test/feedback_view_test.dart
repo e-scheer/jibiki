@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/core/api_client.dart';
 import 'package:jibiki/core/session_store.dart';
-import 'package:jibiki/data/packs/pack_manager.dart';
+import 'package:jibiki/infrastructure/packs/pack_manager.dart';
 import 'package:jibiki/repositories/auth_repository.dart';
 import 'package:jibiki/services/auth_service.dart';
 import 'package:jibiki/services/feedback_service.dart';

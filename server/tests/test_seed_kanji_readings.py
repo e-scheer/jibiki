@@ -10,7 +10,13 @@ from mnemonics.models import Mnemonic, MnemonicStatus
 
 
 def _write_brief(content_dir, level, entries):
-    doc = {"schema": "jibiki-kanji-reading-briefs/1", "count": len(entries), "kanji": entries}
+    doc = {
+        "schema": "jibiki-kanji-reading-briefs/1",
+        "strategy": "phonetic_reading",
+        "languages": ["en", "fr"],
+        "count": len(entries),
+        "kanji": entries,
+    }
     (content_dir / f"kanji_reading_briefs.{level}.json").write_text(
         json.dumps(doc, ensure_ascii=False), encoding="utf-8"
     )
@@ -18,8 +24,10 @@ def _write_brief(content_dir, level, entries):
 
 @pytest.fixture
 def brief_dir(tmp_path, settings):
-    settings.CONTENT_PACK_DIR = str(tmp_path)
-    return tmp_path
+    settings.CONTENT_SOURCE_DIR = tmp_path
+    path = tmp_path / "mnemonics"
+    path.mkdir()
+    return path
 
 
 def test_seeds_reading_rows_with_reading_field(db, brief_dir):

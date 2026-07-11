@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/languages.dart';
-import '../../data/packs/pack_manager.dart';
+import '../../infrastructure/packs/pack_manager.dart';
 import '../../models/enums.dart';
 import '../widgets/language_picker.dart';
 import '../../theme/app_theme.dart';

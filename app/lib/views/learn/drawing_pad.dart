@@ -15,6 +15,22 @@ import '../../theme/app_theme.dart';
 ///   • spray       a scattered airbrush of dots
 enum Brush { pen, calligraphy, marker, pencil, neon, spray }
 
+/// The guide sits between two independent drawing layers. A stroke keeps the
+/// layer selected when it starts, just like it keeps its brush and colour.
+enum DrawingLayer { below, above }
+
+extension DrawingLayerMeta on DrawingLayer {
+  String get label => switch (this) {
+        DrawingLayer.below => 'Behind',
+        DrawingLayer.above => 'Front',
+      };
+
+  IconData get icon => switch (this) {
+        DrawingLayer.below => Icons.flip_to_back_outlined,
+        DrawingLayer.above => Icons.flip_to_front_outlined,
+      };
+}
+
 extension BrushMeta on Brush {
   String get label => switch (this) {
         Brush.pen => 'Pen',
@@ -49,6 +65,7 @@ extension BrushMeta on Brush {
 /// layer (BlendMode.clear); every other brush reads its own `brush`.
 class Stroke {
   Stroke({
+    required this.layer,
     required this.brush,
     required this.color,
     required this.width,
@@ -57,6 +74,7 @@ class Stroke {
   });
 
   final List<Offset> points = [];
+  final DrawingLayer layer;
   final Brush brush;
   final Color color;
   final double width;
@@ -68,7 +86,8 @@ class Stroke {
 /// and the current tool (brush, colour, width, opacity, eraser). A
 /// ChangeNotifier so the canvas and toolbar rebuild reactively.
 class PaintController extends ChangeNotifier {
-  PaintController({Color initialColor = const Color(0xFF0F0F0F)}) : color = initialColor;
+  PaintController({Color initialColor = const Color(0xFF0F0F0F)})
+      : color = initialColor;
 
   final List<Stroke> _strokes = [];
   final List<Stroke> _redo = [];
@@ -78,6 +97,7 @@ class PaintController extends ChangeNotifier {
   double width = 6;
   double opacity = 1;
   Brush brush = Brush.pen;
+  DrawingLayer layer = DrawingLayer.above;
   bool erasing = false;
 
   List<Stroke> get strokes => _strokes;
@@ -107,6 +127,11 @@ class PaintController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setLayer(DrawingLayer value) {
+    layer = value;
+    notifyListeners();
+  }
+
   void setErasing(bool v) {
     erasing = v;
     notifyListeners();
@@ -115,6 +140,7 @@ class PaintController extends ChangeNotifier {
   void start(Offset p) {
     _redo.clear();
     _active = Stroke(
+      layer: layer,
       brush: brush,
       color: color,
       width: erasing ? width * 1.8 : width,
@@ -157,7 +183,7 @@ class PaintController extends ChangeNotifier {
   }
 }
 
-/// The canvas: a faint reference glyph behind a transparent drawing layer.
+/// The canvas: a faint reference glyph between two transparent drawing layers.
 class DrawingPad extends StatelessWidget {
   const DrawingPad({
     super.key,
@@ -183,8 +209,19 @@ class DrawingPad extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          RepaintBoundary(
+            child: ListenableBuilder(
+              listenable: controller,
+              builder: (_, __) => CustomPaint(
+                key: const ValueKey('drawing-layer-below'),
+                painter: _PadPainter(controller.strokes, DrawingLayer.below),
+                size: Size.infinite,
+              ),
+            ),
+          ),
           if (showGuide)
             Center(
+              key: const ValueKey('drawing-guide'),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Padding(
@@ -201,6 +238,7 @@ class DrawingPad extends StatelessWidget {
               ),
             ),
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onPanStart: (d) => controller.start(d.localPosition),
             onPanUpdate: (d) => controller.extend(d.localPosition),
             onPanEnd: (_) => controller.end(),
@@ -208,7 +246,8 @@ class DrawingPad extends StatelessWidget {
               child: ListenableBuilder(
                 listenable: controller,
                 builder: (_, __) => CustomPaint(
-                  painter: _PadPainter(controller.strokes),
+                  key: const ValueKey('drawing-layer-above'),
+                  painter: _PadPainter(controller.strokes, DrawingLayer.above),
                   size: Size.infinite,
                 ),
               ),
@@ -221,8 +260,9 @@ class DrawingPad extends StatelessWidget {
 }
 
 class _PadPainter extends CustomPainter {
-  _PadPainter(this.strokes);
+  _PadPainter(this.strokes, this.layer);
   final List<Stroke> strokes;
+  final DrawingLayer layer;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -230,6 +270,7 @@ class _PadPainter extends CustomPainter {
     // through to reveal the glyph/surface below instead of painting a colour.
     canvas.saveLayer(Offset.zero & size, Paint());
     for (final s in strokes) {
+      if (s.layer != layer) continue;
       if (s.points.isEmpty) continue;
       if (s.erase) {
         _paintErase(canvas, s);
@@ -254,14 +295,19 @@ class _PadPainter extends CustomPainter {
   }
 
   /// The stroke colour at its effective alpha (opacity slider × medium alpha).
-  Color _c(Stroke s, {double mul = 1}) =>
-      s.color.withValues(alpha: (s.opacity * s.brush.baseAlpha * mul).clamp(0.0, 1.0));
+  Color _c(Stroke s, {double mul = 1}) => s.color
+      .withValues(alpha: (s.opacity * s.brush.baseAlpha * mul).clamp(0.0, 1.0));
 
   // ── Pen ─────────────────────────────────────────────────────────────────
   void _paintPen(Canvas c, Stroke s) {
     final ink = _c(s);
     if (s.points.length == 1) {
-      c.drawCircle(s.points.first, s.width / 2, Paint()..color = ink..isAntiAlias = true);
+      c.drawCircle(
+          s.points.first,
+          s.width / 2,
+          Paint()
+            ..color = ink
+            ..isAntiAlias = true);
       return;
     }
     c.drawPath(
@@ -281,7 +327,12 @@ class _PadPainter extends CustomPainter {
     final ink = _c(s);
     final w = s.width * 2.4;
     if (s.points.length == 1) {
-      c.drawCircle(s.points.first, w / 2, Paint()..color = ink..isAntiAlias = true);
+      c.drawCircle(
+          s.points.first,
+          w / 2,
+          Paint()
+            ..color = ink
+            ..isAntiAlias = true);
       return;
     }
     // A single path (not per-segment) so the stroke keeps a uniform alpha
@@ -309,7 +360,8 @@ class _PadPainter extends CustomPainter {
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, s.width)
       ..isAntiAlias = true;
     final core = Paint()
-      ..color = Color.lerp(s.color, Colors.white, 0.65)!.withValues(alpha: s.opacity.clamp(0.0, 1.0))
+      ..color = Color.lerp(s.color, Colors.white, 0.65)!
+          .withValues(alpha: s.opacity.clamp(0.0, 1.0))
       ..style = PaintingStyle.stroke
       ..strokeWidth = s.width * 0.6
       ..strokeCap = StrokeCap.round
@@ -348,7 +400,10 @@ class _PadPainter extends CustomPainter {
     // …with deterministic, jittered dabs over it for the graphite texture.
     final pts = _resample(s.points, math.max(1.0, s.width * 0.45));
     for (var i = 0; i < pts.length; i++) {
-      final jitter = Offset(_rand(pts[i], i * 2 + 1) - 0.5, _rand(pts[i], i * 2 + 2) - 0.5) * s.width * 0.7;
+      final jitter = Offset(
+              _rand(pts[i], i * 2 + 1) - 0.5, _rand(pts[i], i * 2 + 2) - 0.5) *
+          s.width *
+          0.7;
       final radius = s.width * (0.10 + 0.16 * _rand(pts[i], i + 17));
       c.drawCircle(pts[i] + jitter, radius, grain);
     }
@@ -416,7 +471,9 @@ class _PadPainter extends CustomPainter {
 
     double halfWidth(int i) {
       final t = (sm[i] / refSpeed).clamp(0.0, 1.0);
-      final w = maxHw + (minHw - maxHw) * Curves.easeOut.transform(t); // slow→thick, fast→thin
+      final w = maxHw +
+          (minHw - maxHw) *
+              Curves.easeOut.transform(t); // slow→thick, fast→thin
       final head = (i / taper).clamp(0.0, 1.0);
       final tail = ((n - 1 - i) / taper).clamp(0.0, 1.0);
       return w * head * tail;
@@ -455,7 +512,8 @@ class _PadPainter extends CustomPainter {
   // ── Eraser ────────────────────────────────────────────────────────────────
   void _paintErase(Canvas c, Stroke s) {
     if (s.points.length == 1) {
-      c.drawCircle(s.points.first, s.width / 2, Paint()..blendMode = BlendMode.clear);
+      c.drawCircle(
+          s.points.first, s.width / 2, Paint()..blendMode = BlendMode.clear);
       return;
     }
     c.drawPath(
@@ -473,7 +531,8 @@ class _PadPainter extends CustomPainter {
   Path _smooth(List<Offset> pts) {
     final path = Path()..moveTo(pts.first.dx, pts.first.dy);
     for (var i = 1; i < pts.length - 1; i++) {
-      final mid = Offset((pts[i].dx + pts[i + 1].dx) / 2, (pts[i].dy + pts[i + 1].dy) / 2);
+      final mid = Offset(
+          (pts[i].dx + pts[i + 1].dx) / 2, (pts[i].dy + pts[i + 1].dy) / 2);
       path.quadraticBezierTo(pts[i].dx, pts[i].dy, mid.dx, mid.dy);
     }
     path.lineTo(pts.last.dx, pts.last.dy);
@@ -498,7 +557,8 @@ class _PadPainter extends CustomPainter {
       }
       if (dist + d >= step) {
         final t = (step - dist) / d;
-        final q = Offset(prev.dx + (curr.dx - prev.dx) * t, prev.dy + (curr.dy - prev.dy) * t);
+        final q = Offset(prev.dx + (curr.dx - prev.dx) * t,
+            prev.dy + (curr.dy - prev.dy) * t);
         out.add(q);
         prev = q;
         dist = 0;
@@ -515,7 +575,9 @@ class _PadPainter extends CustomPainter {
   /// across repaints so the pencil/spray texture doesn't shimmer while the
   /// canvas rebuilds on every added point.
   double _rand(Offset p, int salt) {
-    var h = salt * 374761393 + (p.dx * 1000).round() * 668265263 + (p.dy * 1000).round() * 2246822519;
+    var h = salt * 374761393 +
+        (p.dx * 1000).round() * 668265263 +
+        (p.dy * 1000).round() * 2246822519;
     h = (h ^ (h >> 13)) * 1274126177;
     h ^= h >> 16;
     return (h & 0x7fffffff) / 0x7fffffff;

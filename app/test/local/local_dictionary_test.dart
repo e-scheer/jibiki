@@ -12,8 +12,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart' show ByteData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/core/japanese_text.dart';
-import 'package:jibiki/data/local/local_dictionary_data_source.dart';
-import 'package:jibiki/data/packs/pack_manager.dart';
+import 'package:jibiki/infrastructure/local/local_dictionary_data_source.dart';
+import 'package:jibiki/infrastructure/packs/pack_manager.dart';
 
 void main() {
   late Directory tmp;
@@ -40,7 +40,10 @@ void main() {
     dict = LocalDictionaryDataSource(packs);
   });
 
-  tearDownAll(() => tmp.delete(recursive: true));
+  tearDownAll(() async {
+    await packs.close();
+    await tmp.delete(recursive: true);
+  });
 
   group('search', () {
     test('japanese exact beats prefix beats contains', () async {

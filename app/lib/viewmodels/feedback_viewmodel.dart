@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../data/packs/pack_manager.dart';
+import '../infrastructure/packs/pack_manager.dart';
 import '../services/feedback_service.dart';
 import 'app_state.dart';
 import 'base_view_model.dart';

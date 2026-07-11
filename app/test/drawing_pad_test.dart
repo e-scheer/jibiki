@@ -24,7 +24,8 @@ Future<void> _drawStroke(WidgetTester tester) async {
   await tester.pump();
   await g.moveBy(const Offset(20, 10));
   await tester.pump();
-  await g.moveBy(const Offset(25, 30)); // a fast segment (calligraphy thins here)
+  await g
+      .moveBy(const Offset(25, 30)); // a fast segment (calligraphy thins here)
   await tester.pump();
   await g.moveBy(const Offset(5, 5)); // a slow segment
   await tester.pump();
@@ -33,7 +34,8 @@ Future<void> _drawStroke(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('every brush paints a dragged stroke without throwing', (tester) async {
+  testWidgets('every brush paints a dragged stroke without throwing',
+      (tester) async {
     final c = PaintController();
     await tester.pumpWidget(_host(c));
 
@@ -49,7 +51,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a single tap paints a dot for every brush + eraser', (tester) async {
+  testWidgets('a single tap paints a dot for every brush + eraser',
+      (tester) async {
     final c = PaintController();
     await tester.pumpWidget(_host(c));
 
@@ -67,7 +70,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('eraser punches through and undo/redo/clear track history', (tester) async {
+  testWidgets('eraser punches through and undo/redo/clear track history',
+      (tester) async {
     final c = PaintController();
     await tester.pumpWidget(_host(c));
 
@@ -90,7 +94,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('width + opacity are captured per stroke at creation time', (tester) async {
+  testWidgets('width + opacity are captured per stroke at creation time',
+      (tester) async {
     final c = PaintController();
     await tester.pumpWidget(_host(c));
 
@@ -103,6 +108,7 @@ void main() {
     expect(s.width, 20);
     expect(s.opacity, 0.3);
     expect(s.brush, Brush.marker);
+    expect(s.layer, DrawingLayer.above);
 
     // Opacity is clamped to [0,1].
     c.setOpacity(5);
@@ -111,7 +117,48 @@ void main() {
     expect(c.opacity, 0.0);
   });
 
-  testWidgets('calligraphy tolerates duplicate / near-coincident points', (tester) async {
+  testWidgets(
+      'strokes keep their selected layer and history stays chronological',
+      (tester) async {
+    final c = PaintController();
+    await tester.pumpWidget(_host(c));
+
+    c.setLayer(DrawingLayer.below);
+    await _drawStroke(tester);
+    c.setLayer(DrawingLayer.above);
+    await _drawStroke(tester);
+
+    expect(c.strokes.map((stroke) => stroke.layer),
+        [DrawingLayer.below, DrawingLayer.above]);
+    c.undo();
+    expect(c.strokes.single.layer, DrawingLayer.below);
+    c.redo();
+    expect(c.strokes.last.layer, DrawingLayer.above);
+  });
+
+  testWidgets('the guide is rendered between the two drawing layers',
+      (tester) async {
+    final c = PaintController();
+    await tester.pumpWidget(_host(c));
+
+    final below =
+        tester.getTopLeft(find.byKey(const ValueKey('drawing-layer-below')));
+    final guide =
+        tester.getTopLeft(find.byKey(const ValueKey('drawing-guide')));
+    final above =
+        tester.getTopLeft(find.byKey(const ValueKey('drawing-layer-above')));
+    expect(below, guide);
+    expect(guide, above);
+
+    final stack = tester.widget<Stack>(
+      find.descendant(
+          of: find.byType(DrawingPad), matching: find.byType(Stack)),
+    );
+    expect(stack.children.length, 3);
+  });
+
+  testWidgets('calligraphy tolerates duplicate / near-coincident points',
+      (tester) async {
     final c = PaintController()..setBrush(Brush.calligraphy);
     await tester.pumpWidget(_host(c));
 

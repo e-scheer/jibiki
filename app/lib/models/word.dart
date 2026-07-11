@@ -14,12 +14,12 @@ class WordFormItem {
 }
 
 class ExampleItem {
-  ExampleItem({required this.japanese, required this.english});
+  ExampleItem({required this.japanese, required this.translation});
   final String japanese;
-  final String english;
+  final String translation;
 
   factory ExampleItem.fromJson(Map<String, dynamic> j) =>
-      ExampleItem(japanese: j['japanese'] as String? ?? '', english: j['english'] as String? ?? '');
+      ExampleItem(japanese: j['japanese'] as String? ?? '', translation: j['translation'] as String? ?? '');
 }
 
 /// A JMnedict proper name (place, surname, company, …) returned alongside a search.
@@ -35,7 +35,11 @@ class NameItem {
   factory NameItem.fromJson(Map<String, dynamic> j) => NameItem(
         kanji: j['kanji'] as String? ?? '',
         reading: j['reading'] as String? ?? '',
-        translations: ((j['translations'] as List?) ?? const []).map((e) => e.toString()).toList(),
+        translations: ((j['translations'] as List?) ?? const [])
+            .whereType<Map>()
+            .map((e) => e['text']?.toString() ?? '')
+            .where((text) => text.isNotEmpty)
+            .toList(),
         types: ((j['name_types'] as List?) ?? const []).map((e) => e.toString()).toList(),
       );
 }
@@ -50,12 +54,12 @@ class SearchResults {
 }
 
 class GlossItem {
-  GlossItem({required this.lang, required this.text});
-  final String lang;
+  GlossItem({required this.language, required this.text});
+  final String language;
   final String text;
 
   factory GlossItem.fromJson(Map<String, dynamic> j) =>
-      GlossItem(lang: j['lang'] as String? ?? 'en', text: j['text'] as String? ?? '');
+      GlossItem(language: j['language'] as String? ?? 'en', text: j['text'] as String? ?? '');
 }
 
 class Sense {
@@ -72,9 +76,9 @@ class Sense {
 
   /// Glosses in the requested language, falling back to English then to all.
   List<String> glossesFor(String lang) {
-    final wanted = glosses.where((g) => g.lang == lang).map((g) => g.text).toList();
+    final wanted = glosses.where((g) => g.language == lang).map((g) => g.text).toList();
     if (wanted.isNotEmpty) return wanted;
-    final en = glosses.where((g) => g.lang == 'en').map((g) => g.text).toList();
+    final en = glosses.where((g) => g.language == 'en').map((g) => g.text).toList();
     return en.isNotEmpty ? en : glosses.map((g) => g.text).toList();
   }
 }

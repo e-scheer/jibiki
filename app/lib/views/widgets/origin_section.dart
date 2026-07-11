@@ -289,11 +289,11 @@ class _UsageExampleRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(example.romaji,
+                Text(example.pronunciation,
                     style: TextStyle(
                         color: jc.muted, fontSize: 12.5, fontStyle: FontStyle.italic, height: 1.3)),
                 const SizedBox(height: 2),
-                Text(example.en, style: TextStyle(color: jc.body, fontSize: 13.5, height: 1.35)),
+                Text(example.translation, style: TextStyle(color: jc.body, fontSize: 13.5, height: 1.35)),
               ],
             ),
           ),

@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import Gloss, Kana, Kanji, KanjiMeaning, Radical, Sense, Word, WordForm
+from .models import (
+    Gloss,
+    Kana,
+    Kanji,
+    KanjiExplanation,
+    KanjiMeaning,
+    Radical,
+    RadicalMeaning,
+    Sense,
+    SenseNote,
+    Word,
+    WordForm,
+)
 
 
 class WordFormInline(admin.TabularInline):
@@ -26,13 +38,23 @@ class GlossInline(admin.TabularInline):
     extra = 0
 
 
+class SenseNoteInline(admin.TabularInline):
+    model = SenseNote
+    extra = 0
+
+
 @admin.register(Sense)
 class SenseAdmin(admin.ModelAdmin):
-    inlines = [GlossInline]
+    inlines = [GlossInline, SenseNoteInline]
 
 
 class KanjiMeaningInline(admin.TabularInline):
     model = KanjiMeaning
+    extra = 0
+
+
+class KanjiExplanationInline(admin.TabularInline):
+    model = KanjiExplanation
     extra = 0
 
 
@@ -41,7 +63,7 @@ class KanjiAdmin(admin.ModelAdmin):
     list_display = ["literal", "grade", "jlpt", "stroke_count", "freq_rank"]
     list_filter = ["jlpt", "grade"]
     search_fields = ["literal", "meanings__text"]
-    inlines = [KanjiMeaningInline]
+    inlines = [KanjiMeaningInline, KanjiExplanationInline]
 
 
 @admin.register(Kana)
@@ -52,4 +74,10 @@ class KanaAdmin(admin.ModelAdmin):
 
 @admin.register(Radical)
 class RadicalAdmin(admin.ModelAdmin):
-    list_display = ["literal", "strokes", "reading", "meaning"]
+    list_display = ["literal", "strokes", "reading"]
+
+
+@admin.register(RadicalMeaning)
+class RadicalMeaningAdmin(admin.ModelAdmin):
+    list_display = ["radical", "language", "text"]
+    list_filter = ["language"]

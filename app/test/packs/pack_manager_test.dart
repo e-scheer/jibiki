@@ -9,23 +9,28 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jibiki/data/packs/pack_manager.dart';
-import 'package:jibiki/data/packs/pack_manifest.dart';
+import 'package:jibiki/infrastructure/packs/pack_manager.dart';
+import 'package:jibiki/infrastructure/packs/pack_manifest.dart';
 import 'package:sqlite3/sqlite3.dart' as sq;
 
 void main() {
   late Directory tmp;
   late Map<String, List<int>> assets;
+  final managers = <PackManager>[];
 
-  PackManager manager() => PackManager(
-        root: () async => Directory('${tmp.path}/packs'),
-        dio: Dio(), // never reached in these tests
-        loadAsset: (key) async {
-          final bytes = assets[key];
-          if (bytes == null) throw StateError('missing asset $key');
-          return ByteData.sublistView(Uint8List.fromList(bytes));
-        },
-      );
+  PackManager manager() {
+    final value = PackManager(
+      root: () async => Directory('${tmp.path}/packs'),
+      dio: Dio(), // never reached in these tests
+      loadAsset: (key) async {
+        final bytes = assets[key];
+        if (bytes == null) throw StateError('missing asset $key');
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      },
+    );
+    managers.add(value);
+    return value;
+  }
 
   /// A minimal but schema-plausible base pack: enough for topology to open.
   List<int> buildTinyPack() {
@@ -36,6 +41,7 @@ void main() {
       CREATE TABLE kana("char" TEXT PRIMARY KEY, romaji TEXT, script TEXT,
         kind TEXT, "row" TEXT, ord INTEGER);
       INSERT INTO meta VALUES ('pack_id', 'dict-base');
+      INSERT INTO meta VALUES ('schema_version', '1');
       INSERT INTO kana VALUES ('あ', 'a', 'hiragana', 'gojuon', 'a', 1);
     ''');
     db.dispose();
@@ -63,7 +69,13 @@ void main() {
     };
   });
 
-  tearDown(() => tmp.delete(recursive: true));
+  tearDown(() async {
+    for (final manager in managers) {
+      await manager.close();
+    }
+    managers.clear();
+    await tmp.delete(recursive: true);
+  });
 
   test('ensureReady installs the bundled base and opens it', () async {
     final packs = manager();
@@ -74,11 +86,13 @@ void main() {
     expect(packs.hasCore, isFalse);
     expect(packs.glossSchemas, ['main']);
 
-    final row = await packs.db.select('SELECT romaji FROM kana WHERE "char" = ?', ['あ']);
+    final row = await packs.db
+        .select('SELECT romaji FROM kana WHERE "char" = ?', ['あ']);
     expect(row.single['romaji'], 'a');
   });
 
-  test('registry survives a restart; same version is not reinstalled', () async {
+  test('registry survives a restart; same version is not reinstalled',
+      () async {
     final first = manager();
     await first.ensureReady();
     final installedAt = await File('${tmp.path}/packs/base.db').lastModified();
@@ -108,25 +122,30 @@ void main() {
   });
 
   test('schema names are stable identifiers', () {
-    expect(schemaForPack('dict-gloss-fr'), 'g_fr');
-    expect(schemaForPack('dict-gloss-en'), 'g_en');
+    expect(schemaForPack('dict-locale-fr'), 'loc_fr');
+    expect(schemaForPack('dict-locale-en'), 'loc_en');
     expect(schemaForPack('names'), 'nm');
-    expect(schemaForPack('examples'), 'ex');
+    expect(schemaForPack('examples-en'), 'ex_en');
     expect(schemaForPack('mnemonics-en'), 'mn_en');
     expect(schemaForPack('dict-core'), isNull);
     expect(schemaForPack('dict-base'), isNull);
   });
 
-  test('manifest v2 parses', () {
+  test('manifest v3 parses', () {
     final manifest = PacksManifest.fromJson({
-      'schema': 'jibiki-packs/2',
+      'schema': 'jibiki-packs/3',
       'packs': [
         {
-          'id': 'dict-gloss-fr',
+          'id': 'dict-core',
+          'version': '2026.07.09',
+          'file': 'dict-core-2026.07.09.db.gz',
+        },
+        {
+          'id': 'dict-locale-fr',
           'version': '2026.07.09',
           'schema_version': 1,
           'dataset_rev': 1,
-          'file': 'dict-gloss-fr-2026.07.09.db.gz',
+          'file': 'dict-locale-fr-2026.07.09.db.gz',
           'bytes': 1,
           'installed_bytes': 2,
           'sha256': 'x',
@@ -139,9 +158,40 @@ void main() {
         },
       ],
     });
-    final pack = manifest.byId('dict-gloss-fr')!;
+    final pack = manifest.byId('dict-locale-fr')!;
     expect(pack.requires.single.id, 'dict-core');
     expect(pack.languages, ['fr']);
     expect(manifest.byId('absent'), isNull);
+  });
+
+  test('manifest rejects unsupported schemas and unsafe files', () {
+    expect(
+      () => PacksManifest.fromJson({'schema': 'jibiki-packs/2', 'packs': []}),
+      throwsFormatException,
+    );
+    expect(
+      () => PacksManifest.fromJson({
+        'schema': packsManifestSchema,
+        'packs': [
+          {'id': 'unsafe', 'version': '1', 'file': '../unsafe.db.gz'},
+        ],
+      }),
+      throwsFormatException,
+    );
+  });
+
+  test('bundled database identity must match its manifest', () async {
+    final manifest = jsonDecode(
+      utf8.decode(assets['assets/packs/base_manifest.json']!),
+    ) as Map<String, dynamic>;
+    manifest['id'] = 'not-the-base';
+    assets['assets/packs/base_manifest.json'] = utf8.encode(
+      jsonEncode(manifest),
+    );
+
+    final packs = manager();
+    await packs.ensureReady();
+    expect(packs.ready, isFalse);
+    expect(packs.lastError, isA<StateError>());
   });
 }

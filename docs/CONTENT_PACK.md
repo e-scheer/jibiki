@@ -1,90 +1,108 @@
-# jibiki content pack - the data model you own
+# Content architecture
 
-The dictionary lives in **jibiki's own versioned JSON model**, not in any upstream
-format. Upstream sources (JMdict / KANJIDIC2 / KRADFILE / KanjiVG) are parsed
-**once** by `scripts/build_content_pack.py`; everything downstream - the backend
-DB, the app's offline store - consumes this pack and never touches XML again.
+Jibiki has one explicit data flow:
 
-**Enrich by adding to the model, not by re-scraping.** Meanings and glosses are
-keyed by language code, so adding French/German/… is adding a key. Add a new
-mnemonic language, fix a gloss, add a field: edit the JSON (or your own generator),
-bump the version, reload. No dependency on EDRDG's format or on parsing.
-
-## Layout
-
-```
-content/
-├── manifest.json     # schema, version, counts, per-file sha256, attribution
-├── kana.json
-├── radicals.json
-├── kanji.json
-└── words.json
+```text
+versioned sources -> import and seed commands -> PostgreSQL -> SQLite pack artifacts
 ```
 
-`manifest.json`:
+PostgreSQL is the canonical runtime store. JSON source files are inputs, never a
+second database. SQLite files are generated release artifacts, never edited by
+hand or imported back into PostgreSQL.
 
-```json
-{
-  "schema": "jibiki-content/1",
-  "version": "2026.07.05",
-  "source": "seed",                     // or "edrdg"
-  "languages": ["en", "fr"],
-  "counts": { "kana": 142, "radicals": 20, "kanji": 43, "words": 30 },
-  "files": [{ "name": "kanji.json", "sha256": "…", "bytes": 29520, "count": 43 }],
-  "attribution": { "words": "JMdict © EDRDG …", "strokes": "KanjiVG © … CC BY-SA 3.0" }
-}
+## Directory ownership
+
+| Path | Owner | Lifecycle |
+| --- | --- | --- |
+| `server/content_sources/` | Source control | Small, reviewed inputs used by seed commands |
+| External JMdict, KANJIDIC2, KanjiVG and similar files | Operator | Downloaded outside the repository and passed to import commands |
+| PostgreSQL | Django domain models | Canonical imported, curated and community content |
+| `var/media/` | Django storage | Local development uploads only, replaced by S3 or R2 in production |
+| `var/packs/` | `build_packs` | Generated downloadable artifacts, ignored by Git |
+| `app/assets/packs/` | Mobile release | Generated bundled base pack committed for offline first launch |
+
+The old JSON pack, `load_pack`, `build_content_pack.py` and their endpoints no
+longer exist. The API only serves SQLite pack artifacts declared by the current
+manifest.
+
+## Localized content and language-native content
+
+Translated reference content uses a neutral parent and language-tagged children:
+
+- `Sense` and `SenseNote`
+- `Radical` and `RadicalMeaning`
+- `Kanji` with `KanjiMeaning` and `KanjiExplanation`
+- `Kana` with `KanaExplanation`, `KanaUsageTranslation` and example translations
+- `ExampleSentence` and `ExampleTranslation`
+- `Name` and `NameTranslation`
+
+The field name is always `language`. A requested language can fall back to English
+for display, but that fallback remains labelled as English.
+
+A mnemonic follows a different rule. Its image, story, sound association and deck
+metadata are authored for one language. They are not translations of a neutral
+mnemonic. The identity of a reading mnemonic is:
+
+```text
+(kind, character, reading, language)
 ```
 
-## Schema `jibiki-content/1`
+This is why a French mnemonic and an English mnemonic for the same kana are two
+independent contributions. Translating one mechanically does not create the other.
 
-**kana.json** - `[{ char, romaji, script, kind, row, order }]`
+## Pack schema
 
-**radicals.json** - `[{ literal, strokes, reading, meaning }]`
+`contentpacks` owns generation, SQLite DDL and download endpoints. `dictionary`
+does not know how artifacts are packaged.
 
-**kanji.json**
-```json
-{
-  "literal": "水", "grade": 1, "stroke_count": 4, "jlpt": 5, "freq_rank": 130,
-  "radical_number": null, "on": ["スイ"], "kun": ["みず"], "nanori": [],
-  "meanings": { "en": ["water"], "fr": ["eau"] },
-  "components": ["水"],
-  "strokes": { "viewbox": "0 0 109 109", "paths": ["M…", "…"] }
-}
-```
+Schema version 2 separates neutral and localized tables:
 
-**words.json**
-```json
-{
-  "id": 6, "seq": 1358280, "common": true, "jlpt": 5, "freq_rank": null,
-  "kanji": [{ "text": "食べる", "common": true }],
-  "kana":  [{ "text": "たべる", "common": true }],
-  "senses": [
-    { "pos": ["v1", "vt"], "misc": [], "glosses": { "en": ["to eat"], "fr": ["manger"] } }
-  ]
-}
-```
+- `dict-core`: words, forms, senses, kanji, kana, radicals and writing data
+- `dict-locale-<language>`: glosses, meanings, notes and localized explanations
+- `names`: names and their language-tagged translations
+- `examples-<language>`: Japanese examples with one translation language
+- `mnemonics-<language>`: language-native seed stories and optional WebP image BLOBs
+- `dict-base`: a self-contained mobile bootstrap containing core plus selected locales
 
-`meanings` (kanji) and `senses[].glosses` (words) are **language-maps** - the one
-design decision that makes enrichment trivial.
+Images uploaded by the community remain storage objects referenced by the canonical
+`Mnemonic` row. Only reviewed seed images are embedded in an offline mnemonic pack.
+The story and image therefore travel atomically in that pack, while ordinary UGC is
+served from media storage.
 
-## Pipeline
+The manifest uses `jibiki-packs/3` and records stable id, content type, schema
+version, dataset revision, hashes, languages, dependencies, sizes, localized title
+and attribution for every artifact.
+
+## Build and serve
 
 ```bash
-# 1. Build the pack ONCE (curated seed - instant, always available):
-python scripts/build_content_pack.py --from-seed --server server --out content
+# Bundled base pack for the mobile release
+make build-base-pack
 
-#    …or from the full downloaded EDRDG + KanjiVG (also one-shot):
-python scripts/build_content_pack.py --out content --langs en,fr \
-    --jmdict JMdict_e.xml --kanjidic kanjidic2.xml \
-    --kradfile kradfile --kanjivg kanjivg/kanji
+# Downloadable catalog in var/packs
+make build-packs
 
-# 2. Backend loads the pack into the DB (never the XML):
-cd server && uv run python manage.py load_pack ../content
-
-# 3. Backend serves it for the app to download for offline use:
-#    GET /api/v1/content/manifest      GET /api/v1/content/file/<name>
+# Direct invocation
+cd server
+uv run python manage.py build_packs \
+  --out ../var/packs \
+  --packs core,locale-en,locale-fr,names,examples-en,mnemonics-en
 ```
 
-The committed `content/` is the curated seed pack (small, ships in the repo). Full
-EDRDG packs are large - build locally and host them; the manifest's version +
-sha256 let the app cache and update.
+The public download surface is:
+
+```text
+GET /api/v1/content/packs/manifest
+GET /api/v1/content/packs/file/<manifest-declared-file>
+```
+
+File downloads support byte ranges. A filename not declared by the manifest is
+rejected.
+
+## Release checklist
+
+1. Run the relevant import and seed commands against PostgreSQL.
+2. Review localized rows and language-native mnemonics independently.
+3. Run migrations and both test suites.
+4. Build the base pack and downloadable catalog.
+5. Verify manifest hashes and commit only the bundled base artifact.

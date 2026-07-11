@@ -221,10 +221,10 @@ class _ExampleRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TappableJapanese(example.japanese, style: const TextStyle(fontSize: 16, height: 1.4)),
-          if (example.english.isNotEmpty)
+          if (example.translation.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text(example.english, style: TextStyle(color: jc.muted, fontSize: 13.5, height: 1.35)),
+              child: Text(example.translation, style: TextStyle(color: jc.muted, fontSize: 13.5, height: 1.35)),
             ),
         ],
       ),

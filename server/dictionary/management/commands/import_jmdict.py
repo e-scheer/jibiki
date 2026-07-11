@@ -21,7 +21,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from dictionary.models import Gloss, Sense, Word, WordForm
+from dictionary.models import Gloss, Sense, SenseNote, Word, WordForm
 
 _ENTITY_RE = re.compile(r'<!ENTITY\s+([\w-]+)\s+"[^"]*">')
 _COMMON_TAGS = {"news1", "ichi1", "spec1", "spec2", "gai1"}  # ke_pri/re_pri "common" markers
@@ -120,12 +120,16 @@ class Command(BaseCommand):
                 pos=[p.text for p in s.findall("pos") if p.text],
                 misc=[m.text for m in s.findall("misc") if m.text],
                 field=[f.text for f in s.findall("field") if f.text],
-                info=(s.findtext("s_inf") or "")[:255],
             )
+            note = (s.findtext("s_inf") or "")[:255]
+            if note:
+                SenseNote.objects.create(sense=sense, language="en", text=note)
             Gloss.objects.bulk_create(
                 Gloss(
                     sense=sense,
-                    lang=_iso2(g.get("{http://www.w3.org/XML/1998/namespace}lang", "eng")),
+                    language=_iso2(
+                        g.get("{http://www.w3.org/XML/1998/namespace}lang", "eng")
+                    ),
                     text=(g.text or "")[:255],
                     order=i,
                 )

@@ -51,7 +51,7 @@ nommage à ~90-100 composants couvre l'essentiel du périmètre débutant.
 ## 4. Recommandations priorisées
 
 1. **Tri topologique des decks kanji/mots** (petit, pur code) : au `enrollDeck`/queue, ordonner par disponibilité des composants (kanji dont tous les composants sont connus d'abord), et mots après leurs kanji - l'effet « je construis toujours sur du connu » de WK/jpdb, sans gating rigide. Données déjà locales (`kanji_components`, `kanji_words`).
-2. **Seed d'histoires de sens N5** (moyen) : ~80 kanji × en/fr, chaînant les composants nommés de `content/mnemonic_briefs.json` - pipeline briefs → relecture humaine → seed, puis N4.
+2. **Seed d'histoires de sens N5** (moyen) : ~80 kanji × en/fr, avec des briefs par langue sous `server/content_sources/mnemonics/`, puis relecture humaine et seed.
 3. **Histoires de LECTURE par langue** (moyen-gros, différenciateur mondial) : ancres on/kun dérivées par langue (たい : EN "tie", FR « taille »…). Personne ne le fait hors anglais.
 4. **Vocab post-graduation** (petit) : un kanji passe en review → proposer 2-3 mots courants de `kanji_words` en un tap (« cimente-le »).
 5. **Stages nommés + progression** (petit-moyen) : mapper l'état FSRS sur des stages affichables (semis → pousse → arbre… à définir), jalons de deck, page progression. Ne pas copier « Burned ».

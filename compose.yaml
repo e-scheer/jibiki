@@ -50,14 +50,14 @@ services:
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-jibiki <noreply@jibiki.app>}
       SOCIALACCOUNT_GOOGLE_CLIENT_ID: ${SOCIALACCOUNT_GOOGLE_CLIENT_ID:-}
       SOCIALACCOUNT_GOOGLE_CLIENT_SECRET: ${SOCIALACCOUNT_GOOGLE_CLIENT_SECRET:-}
-      CONTENT_PACK_DIR: /data/content
+      CONTENT_PACK_DIR: /data/packs
       TZ: UTC
     volumes:
       - mediadata:/data/media
       - staticfiles:/app/staticfiles
       # SQLite content packs: built in the api container (manage.py build_packs
-      # --out /data/content/packs), served by Caddy from the same volume.
-      - packdata:/data/content/packs
+      # --out /data/packs), served by Caddy from the same volume.
+      - packdata:/data/packs
     depends_on:
       db:
         condition: service_healthy

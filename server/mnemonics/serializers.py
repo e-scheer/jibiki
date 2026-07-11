@@ -135,6 +135,7 @@ class CreateMnemonicSerializer(serializers.Serializer):
 
     kind = serializers.ChoiceField(choices=Mnemonic.Kind.choices)
     language = serializers.CharField(max_length=8, default=DEFAULT_LANGUAGE)
+    reading = serializers.CharField(max_length=32, required=False, allow_blank=True, default="")
     story = serializers.CharField(max_length=2000)
     image = serializers.FileField(required=False)
 
@@ -143,6 +144,18 @@ class CreateMnemonicSerializer(serializers.Serializer):
             mb = settings.MNEMONIC_IMAGE_MAX_BYTES // (1024 * 1024)
             raise serializers.ValidationError(f"Image exceeds the {mb} MB limit.")
         return f
+
+    def validate(self, attrs):
+        reading = attrs.get("reading", "")
+        if attrs["kind"] == Mnemonic.Kind.KANJI_READING and not reading:
+            raise serializers.ValidationError(
+                {"reading": "A reading mnemonic requires a reading."}
+            )
+        if attrs["kind"] != Mnemonic.Kind.KANJI_READING and reading:
+            raise serializers.ValidationError(
+                {"reading": "Only reading mnemonics can carry a reading."}
+            )
+        return attrs
 
 
 class VoteSerializer(serializers.Serializer):

@@ -1,10 +1,32 @@
 # Mnemonic sources - scraped idea-level research (2026-07-09)
 
-Raw research data behind `content/mnemonic_briefs.json`. Everything here is
+Research notes that informed the mnemonic model. Everything here is
 **idea-level extraction from public pages** (shape-association + sound anchor,
-paraphrased): no story text was copied verbatim, no images were downloaded, no
-paywall/login was bypassed. jibiki's own seed stories are original writing;
+paraphrased): no story text was copied verbatim and no source image is shipped.
+No paywall or login was bypassed. jibiki's own seed stories are original writing;
 this file exists for provenance and to avoid re-scraping.
+
+## Publication status
+
+The reviewed built-in catalogue is `server/content_sources/mnemonics/kana_stories.json`.
+It contains separate stories for all 46 hiragana and 46 katakana in English and
+French. An association may share a visual idea across languages, but its sound
+anchor and wording are reviewed in the target language.
+
+Other researched languages are not published as default decks yet:
+
+| Language | Research coverage | Publication blocker |
+|---|---|---|
+| Spanish | Complete public hiragana and katakana guides | Full 92-entry extraction and native review still required |
+| German | Complete guides | Several inherited English anchors must be replaced |
+| Russian | Complete guides | Offensive entries and tone require native rewriting |
+| Korean | Complete native method | The 92 associations have not been transcribed into a reviewable source file |
+| Chinese | Complete kana origins | The product should expose `kana.origin`; this is not a sound-story deck |
+| Thai / Indonesian | Official language-native apps | Public text coverage is insufficient for a reviewed 92-entry import |
+| Portuguese / Italian / Dutch / Vietnamese | Partial or uneven | No complete reviewed hiragana and katakana pair |
+
+A language is enabled only after all 92 glyphs have native anchors, source notes
+and review. Partial research is never padded with translated English stories.
 
 ## 1. Tofugu - Learn Hiragana / Learn Katakana (public guides)
 

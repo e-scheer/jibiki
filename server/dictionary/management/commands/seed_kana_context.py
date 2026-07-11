@@ -15,7 +15,14 @@ from __future__ import annotations
 
 from django.core.management.base import BaseCommand
 
-from dictionary.models import Kana
+from dictionary.models import (
+    Kana,
+    KanaExplanation,
+    KanaUsage,
+    KanaUsageExample,
+    KanaUsageExampleTranslation,
+    KanaUsageTranslation,
+)
 from dictionary.seed_data import kana_origin, kana_usage, kana_usage_examples
 
 
@@ -28,19 +35,32 @@ class Command(BaseCommand):
             origin, note = kana_origin(kana.romaji, kana.script, kana.kind)
             label, usage = kana_usage(kana.romaji, kana.script)
             examples = kana_usage_examples(kana.romaji, kana.script)
-            changed = (
-                kana.origin != origin
-                or kana.origin_note != note
-                or kana.usage_label != label
-                or kana.usage != usage
-                or kana.usage_examples != examples
-            )
-            if not changed:
-                continue
-            Kana.objects.filter(pk=kana.pk).update(
-                origin=origin, origin_note=note, usage_label=label, usage=usage,
-                usage_examples=examples,
-            )
+            Kana.objects.filter(pk=kana.pk).update(origin=origin)
+            kana.explanations.all().delete()
+            if note:
+                KanaExplanation.objects.create(
+                    kana=kana, language="en", origin_note=note
+                )
+            KanaUsage.objects.filter(kana=kana).delete()
+            if label or usage or examples:
+                role = KanaUsage.objects.create(kana=kana)
+                if label or usage:
+                    KanaUsageTranslation.objects.create(
+                        usage=role, language="en", label=label, explanation=usage
+                    )
+                for order, item in enumerate(examples):
+                    example = KanaUsageExample.objects.create(
+                        usage=role,
+                        order=order,
+                        before=item.get("before", ""),
+                        particle=item.get("particle", ""),
+                        after=item.get("after", ""),
+                        pronunciation=item.get("romaji", ""),
+                    )
+                    if item.get("en"):
+                        KanaUsageExampleTranslation.objects.create(
+                            example=example, language="en", text=item["en"]
+                        )
             updated += 1
         self.stdout.write(
             self.style.SUCCESS(f"Kana context set - {updated} updated / {Kana.objects.count()} total.")

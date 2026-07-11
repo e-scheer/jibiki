@@ -15,6 +15,7 @@ Moderation is designed in from day one (the Memrise / Koohii lessons):
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -83,6 +84,22 @@ class Mnemonic(models.Model):
             models.Index(fields=["character", "language", "score"]),
             models.Index(fields=["status"]),
         ]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(kind="kanji_reading", reading__gt="")
+                    | (~models.Q(kind="kanji_reading") & models.Q(reading=""))
+                ),
+                name="mnemonic_reading_matches_kind",
+            )
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.kind == self.Kind.KANJI_READING and not self.reading:
+            raise ValidationError({"reading": "A reading mnemonic requires a reading."})
+        if self.kind != self.Kind.KANJI_READING and self.reading:
+            raise ValidationError({"reading": "Only reading mnemonics can carry a reading."})
 
     def __str__(self) -> str:
         return f"{self.character} [{self.language}] score={self.score}"
@@ -201,6 +218,7 @@ class UserMnemonicChoice(models.Model):
     kind = models.CharField(max_length=16, choices=Mnemonic.Kind.choices)
     character = models.CharField(max_length=4)
     language = models.CharField(max_length=8, default="en")
+    reading = models.CharField(max_length=32, blank=True, default="")
     mnemonic = models.ForeignKey(Mnemonic, on_delete=models.CASCADE, related_name="chosen_by")
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -208,13 +226,15 @@ class UserMnemonicChoice(models.Model):
         db_table = "mnemonic_choices"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "kind", "character", "language"], name="uq_choice_per_char"
+                fields=["user", "kind", "character", "language", "reading"],
+                name="uq_choice_per_target",
             )
         ]
         indexes = [models.Index(fields=["user", "kind", "language"])]
 
     def __str__(self) -> str:
-        return f"choice u#{self.user_id} {self.character}[{self.language}]→m#{self.mnemonic_id}"
+        target = f"/{self.reading}" if self.reading else ""
+        return f"choice u#{self.user_id} {self.character}{target}[{self.language}]→m#{self.mnemonic_id}"
 
 
 class DeckStatus(models.TextChoices):

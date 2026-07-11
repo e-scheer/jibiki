@@ -41,16 +41,25 @@ class SearchView(APIView):
         # Proper names live in their own table so they never dilute word search;
         # surface a small ranked set alongside (trigram-indexed on Postgres).
         names = (
-            list(Name.objects.filter(Q(kanji__icontains=q) | Q(reading__icontains=q))[:12])
+            list(
+                Name.objects.filter(
+                    Q(kanji__icontains=q)
+                    | Q(reading__icontains=q)
+                    | Q(localized_names__text__icontains=q, localized_names__language=lang)
+                )
+                .prefetch_related("localized_names")
+                .distinct()[:12]
+            )
             if q
             else []
         )
+        context = {"request": request}
         return Response(
             {
                 "query": q,
                 "count": len(words),
-                "results": WordSerializer(words, many=True).data,
-                "names": NameSerializer(names, many=True).data,
+                "results": WordSerializer(words, many=True, context=context).data,
+                "names": NameSerializer(names, many=True, context=context).data,
             }
         )
 
@@ -59,19 +68,28 @@ class WordDetailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, pk: int):
-        word = Word.objects.filter(pk=pk).prefetch_related("forms", "senses__glosses").first()
+        word = (
+            Word.objects.filter(pk=pk)
+            .prefetch_related("forms", "senses__glosses", "senses__notes")
+            .first()
+        )
         if word is None:
             return Response({"detail": "Not found."}, status=404)
-        data = WordSerializer(word).data
+        context = {"request": request}
+        data = WordSerializer(word, context=context).data
         # Break the headword into its constituent kanji so the app can render the
         # per-kanji breakdown inline (jpdb-style, DEEP_SEARCH feature 7).
         chars = kanji_in(word.headword)
         kanji = Kanji.objects.filter(literal__in=chars).prefetch_related("meanings")
         by_lit = {k.literal: k for k in kanji}
-        data["kanji_breakdown"] = [KanjiSerializer(by_lit[c]).data for c in chars if c in by_lit]
+        data["kanji_breakdown"] = [
+            KanjiSerializer(by_lit[c], context=context).data for c in chars if c in by_lit
+        ]
         # A few example sentences containing the headword (Tanaka corpus).
-        examples = ExampleSentence.objects.filter(japanese__contains=word.headword)[:6]
-        data["examples"] = ExampleSerializer(examples, many=True).data
+        examples = ExampleSentence.objects.filter(
+            japanese__contains=word.headword
+        ).prefetch_related("translations")[:6]
+        data["examples"] = ExampleSerializer(examples, many=True, context=context).data
         return Response(data)
 
 
@@ -79,10 +97,14 @@ class KanjiDetailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, literal: str):
-        kanji = Kanji.objects.filter(literal=literal).prefetch_related("meanings").first()
+        kanji = (
+            Kanji.objects.filter(literal=literal)
+            .prefetch_related("meanings", "explanations")
+            .first()
+        )
         if kanji is None:
             return Response({"detail": "Not found."}, status=404)
-        return Response(KanjiDetailSerializer(kanji).data)
+        return Response(KanjiDetailSerializer(kanji, context={"request": request}).data)
 
 
 class WordListView(generics.ListAPIView):
@@ -93,7 +115,7 @@ class WordListView(generics.ListAPIView):
     serializer_class = WordSerializer
 
     def get_queryset(self):
-        qs = Word.objects.prefetch_related("forms", "senses__glosses")
+        qs = Word.objects.prefetch_related("forms", "senses__glosses", "senses__notes")
         p = self.request.query_params
         if p.get("common") in ("1", "true", "yes"):
             qs = qs.filter(is_common=True)
@@ -109,7 +131,7 @@ class KanjiListView(generics.ListAPIView):
     serializer_class = KanjiSerializer
 
     def get_queryset(self):
-        qs = Kanji.objects.prefetch_related("meanings")
+        qs = Kanji.objects.prefetch_related("meanings", "explanations")
         jlpt = self.request.query_params.get("jlpt")
         grade = self.request.query_params.get("grade")
         contains = self.request.query_params.get("contains")  # radical-grid lookup
@@ -130,7 +152,11 @@ class KanaListView(generics.ListAPIView):
     pagination_class = None  # the full chart is small; ship it in one response
 
     def get_queryset(self):
-        qs = Kana.objects.all()
+        qs = Kana.objects.prefetch_related(
+            "explanations",
+            "grammatical_usage__translations",
+            "grammatical_usage__examples__translations",
+        )
         script = self.request.query_params.get("script")
         if script:
             qs = qs.filter(script=script)
@@ -141,10 +167,18 @@ class KanaDetailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, char: str):
-        kana = Kana.objects.filter(char=char).first()
+        kana = (
+            Kana.objects.filter(char=char)
+            .prefetch_related(
+                "explanations",
+                "grammatical_usage__translations",
+                "grammatical_usage__examples__translations",
+            )
+            .first()
+        )
         if kana is None:
             return Response({"detail": "Not found."}, status=404)
-        return Response(KanaSerializer(kana).data)
+        return Response(KanaSerializer(kana, context={"request": request}).data)
 
 
 class RadicalListView(generics.ListAPIView):
@@ -153,4 +187,4 @@ class RadicalListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return Radical.objects.all()
+        return Radical.objects.prefetch_related("meanings")

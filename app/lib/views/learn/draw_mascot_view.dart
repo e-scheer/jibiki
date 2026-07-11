@@ -13,10 +13,14 @@ import 'drawing_pad.dart';
 /// licorne), name what it looks like, and save it as a mnemonic image. A full
 /// little studio, six brush engines (pen · calligraphy · marker · pencil ·
 /// neon · spray), a curated palette plus custom colours, size + opacity, a real
-/// eraser, undo/redo and a show/hide guide. The composited drawing is captured
-/// and uploaded.
+/// eraser, two layers around the guide, undo/redo and a show/hide guide. The
+/// composited drawing is captured and uploaded.
 class DrawMascotView extends StatefulWidget {
-  const DrawMascotView({super.key, required this.character, required this.language, this.kind = 'kana'});
+  const DrawMascotView(
+      {super.key,
+      required this.character,
+      required this.language,
+      this.kind = 'kana'});
   final String character;
   final String language;
   final String kind;
@@ -67,13 +71,16 @@ class _DrawMascotViewState extends State<DrawMascotView> {
     super.dispose();
   }
 
-  bool get _canSave => _word.text.trim().isNotEmpty && !_paint.isEmpty && !_saving;
+  bool get _canSave =>
+      _word.text.trim().isNotEmpty && !_paint.isEmpty && !_saving;
 
   Future<void> _save() async {
-    final repo = context.read<MnemonicRepository>(); // read before the async gaps
+    final repo =
+        context.read<MnemonicRepository>(); // read before the async gaps
     setState(() => _saving = true);
     try {
-      final boundary = _boundaryKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final boundary = _boundaryKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
       final image = await boundary.toImage(pixelRatio: 2.5);
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       final bytes = data!.buffer.asUint8List();
@@ -85,12 +92,15 @@ class _DrawMascotViewState extends State<DrawMascotView> {
         imageBytes: bytes,
       );
       if (!mounted) return;
-      final msg = created.status == 'visible' ? 'Saved, thank you!' : 'Submitted for review, thank you!';
+      final msg = created.status == 'visible'
+          ? 'Saved, thank you!'
+          : 'Submitted for review, thank you!';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not save the drawing')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not save the drawing')));
         setState(() => _saving = false);
       }
     }
@@ -104,8 +114,12 @@ class _DrawMascotViewState extends State<DrawMascotView> {
         title: const Text('Clear the drawing?'),
         content: const Text('This removes everything on the canvas.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Clear')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Clear')),
         ],
       ),
     );
@@ -129,7 +143,9 @@ class _DrawMascotViewState extends State<DrawMascotView> {
         actions: [
           IconButton(
             tooltip: _showGuide ? 'Hide guide' : 'Show guide',
-            icon: Icon(_showGuide ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+            icon: Icon(_showGuide
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined),
             onPressed: () => setState(() => _showGuide = !_showGuide),
           ),
           // Undo / redo live in the app bar so the toolbar can give the brushes
@@ -168,7 +184,10 @@ class _DrawMascotViewState extends State<DrawMascotView> {
             builder: (_, __) => TextButton(
               onPressed: _canSave ? _save : null,
               child: _saving
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2))
                   : const Text('Save'),
             ),
           ),
@@ -257,7 +276,27 @@ class _Toolbar extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Row 1, brushes (the headline of the studio) + eraser.
+                  SegmentedButton<DrawingLayer>(
+                    segments: [
+                      for (final layer in DrawingLayer.values)
+                        ButtonSegment(
+                          value: layer,
+                          icon: Icon(layer.icon, size: 18),
+                          label: Text(layer.label),
+                          tooltip: layer == DrawingLayer.below
+                              ? 'Draw behind the guide'
+                              : 'Draw in front of the guide',
+                        ),
+                    ],
+                    selected: {controller.layer},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (selection) {
+                      Haptics.tick();
+                      controller.setLayer(selection.single);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  // Brushes (the headline of the studio) + eraser.
                   SizedBox(
                     height: 58,
                     child: SingleChildScrollView(
@@ -268,7 +307,8 @@ class _Toolbar extends StatelessWidget {
                             _BrushButton(
                               icon: b.icon,
                               label: b.label,
-                              selected: !controller.erasing && controller.brush == b,
+                              selected:
+                                  !controller.erasing && controller.brush == b,
                               onTap: () {
                                 Haptics.tick();
                                 controller.setBrush(b);
@@ -300,7 +340,12 @@ class _Toolbar extends StatelessWidget {
                       shaderCallback: (rect) => const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
-                        colors: [Colors.transparent, Colors.black, Colors.black, Colors.transparent],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black,
+                          Colors.black,
+                          Colors.transparent
+                        ],
                         stops: [0.0, 0.04, 0.9, 1.0],
                       ).createShader(rect),
                       blendMode: BlendMode.dstIn,
@@ -313,7 +358,8 @@ class _Toolbar extends StatelessWidget {
                           final c = swatches[i];
                           return _Swatch(
                             color: c,
-                            selected: !controller.erasing && controller.color == c,
+                            selected:
+                                !controller.erasing && controller.color == c,
                             onTap: () => onPickColor(c),
                           );
                         },
@@ -331,9 +377,12 @@ class _Toolbar extends StatelessWidget {
                           max: _maxWidth,
                           onChanged: controller.setWidth,
                           leading: Container(
-                            width: (controller.width / _maxWidth * 18).clamp(4.0, 18.0),
-                            height: (controller.width / _maxWidth * 18).clamp(4.0, 18.0),
-                            decoration: BoxDecoration(color: jc.ink, shape: BoxShape.circle),
+                            width: (controller.width / _maxWidth * 18)
+                                .clamp(4.0, 18.0),
+                            height: (controller.width / _maxWidth * 18)
+                                .clamp(4.0, 18.0),
+                            decoration: BoxDecoration(
+                                color: jc.ink, shape: BoxShape.circle),
                           ),
                         ),
                       ),
@@ -344,7 +393,8 @@ class _Toolbar extends StatelessWidget {
                           min: _minOpacity,
                           max: 1.0,
                           onChanged: controller.setOpacity,
-                          leading: Icon(Icons.opacity, size: 18, color: jc.muted),
+                          leading:
+                              Icon(Icons.opacity, size: 18, color: jc.muted),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -371,7 +421,11 @@ class _Toolbar extends StatelessWidget {
 /// A brush (or the eraser) as an icon-over-label pill; the active tool glows in
 /// the brand colour.
 class _BrushButton extends StatelessWidget {
-  const _BrushButton({required this.icon, required this.label, required this.selected, required this.onTap});
+  const _BrushButton(
+      {required this.icon,
+      required this.label,
+      required this.selected,
+      required this.onTap});
   final IconData icon;
   final String label;
   final bool selected;
@@ -400,7 +454,8 @@ class _BrushButton extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               label,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
+              style: TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w600, color: fg),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -412,7 +467,8 @@ class _BrushButton extends StatelessWidget {
 }
 
 class _Swatch extends StatelessWidget {
-  const _Swatch({required this.color, required this.selected, required this.onTap});
+  const _Swatch(
+      {required this.color, required this.selected, required this.onTap});
   final Color color;
   final bool selected;
   final VoidCallback onTap;
@@ -435,7 +491,8 @@ class _Swatch extends StatelessWidget {
         padding: const EdgeInsets.all(3.5),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: selected ? jc.ink : Colors.transparent, width: 2),
+          border: Border.all(
+              color: selected ? jc.ink : Colors.transparent, width: 2),
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -479,7 +536,8 @@ class _MiniSlider extends StatelessWidget {
               overlayShape: SliderComponentShape.noOverlay,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
-            child: Slider(value: value, min: min, max: max, onChanged: onChanged),
+            child:
+                Slider(value: value, min: min, max: max, onChanged: onChanged),
           ),
         ),
       ],

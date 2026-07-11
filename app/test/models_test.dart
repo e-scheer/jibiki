@@ -31,8 +31,8 @@ void main() {
           {
             'pos': ['v1', 'vt'],
             'glosses': [
-              {'lang': 'en', 'text': 'to eat'},
-              {'lang': 'fr', 'text': 'manger'},
+              {'language': 'en', 'text': 'to eat'},
+              {'language': 'fr', 'text': 'manger'},
             ],
           }
         ],

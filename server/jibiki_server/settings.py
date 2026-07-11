@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "accounts",
     "dictionary",
+    "contentpacks",
     "srs",
     "mnemonics",
     "feedback",
@@ -247,7 +248,8 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", str(BASE_DIR / "staticfiles")
 # to Cloudflare R2 (zero egress - the DEEP_SEARCH recommendation) or any
 # S3-compatible store. Same swappable pattern as tusorsou's Hetzner offload.
 MEDIA_URL = "media/"
-MEDIA_ROOT = os.environ.get("MEDIA_STORE", str(BASE_DIR.parent / "data" / "media"))
+RUNTIME_DIR = Path(os.environ.get("JIBIKI_RUNTIME_DIR", BASE_DIR.parent / "var"))
+MEDIA_ROOT = os.environ.get("MEDIA_STORE", str(RUNTIME_DIR / "media"))
 
 # Ingest guardrails for uploaded mnemonic images (community.imaging re-encodes to
 # WebP, strips EXIF/GPS, caps dimensions - the DEEP_SEARCH moderation-pipeline rule).
@@ -281,10 +283,10 @@ if MEDIA_S3_BUCKET:
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
 
-# The jibiki content pack the API serves for download / offline use (built once by
-# scripts/build_content_pack.py, loaded by manage.py load_pack). Defaults to the
-# committed seed pack at the repo root.
-CONTENT_PACK_DIR = os.environ.get("CONTENT_PACK_DIR", str(BASE_DIR.parent / "content"))
+# Versioned source material is read-only input. Generated packs and uploaded media
+# are runtime artifacts and never become source files.
+CONTENT_SOURCE_DIR = Path(os.environ.get("CONTENT_SOURCE_DIR", BASE_DIR / "content_sources"))
+CONTENT_PACK_DIR = os.environ.get("CONTENT_PACK_DIR", str(RUNTIME_DIR / "packs"))
 
 # FSRS per-user optimization only helps past this many reviews (DEEP_SEARCH); below
 # it the default weights are used and perform ~like SM-2.

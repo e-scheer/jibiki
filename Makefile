@@ -48,8 +48,8 @@ sync-vectors:    ## regenerate the FSRS parity vectors (server fsrs.py <-> app f
 build-base-pack: ## rebuild the bundled offline dictionary asset from the local DB
 	$(SERVER) $(UV) python manage.py build_packs --base --out ../app/assets/packs
 
-build-packs:     ## build the downloadable packs into content/packs (serve via CONTENT_PACK_DIR)
-	$(SERVER) $(UV) python manage.py build_packs --out ../content/packs
+build-packs:     ## build downloadable runtime artifacts into var/packs
+	$(SERVER) $(UV) python manage.py build_packs --out ../var/packs
 
 # ── Loading the full EDRDG data (one-shot batch, over the seed) ───────────────
 

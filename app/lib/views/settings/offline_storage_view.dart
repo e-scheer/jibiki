@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
-import '../../data/packs/pack_manager.dart';
+import '../../infrastructure/packs/pack_manager.dart';
 import '../../sync/sync_engine.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/storage_viewmodel.dart';
+import '../widgets/sync_conflict_gate.dart';
 
 /// Offline & storage: what lives on the phone (packs, sizes, updates) and the
 /// study-sync status - the one place that makes the offline story visible.
@@ -19,12 +20,13 @@ class OfflineStorageView extends StatelessWidget {
       // Web: no local packs, nothing to manage.
       return Scaffold(
         appBar: AppBar(title: const Text('Offline & storage')),
-        body: const Center(child: Text('Offline packs are managed in the mobile app.')),
+        body: const Center(
+            child: Text('Offline packs are managed in the mobile app.')),
       );
     }
     return ChangeNotifierProvider(
-      create: (ctx) => StorageViewModel(packs, ctx.read<SyncEngine?>())
-        ..checkUpdates(),
+      create: (ctx) =>
+          StorageViewModel(packs, ctx.read<SyncEngine?>())..checkUpdates(),
       child: const _Storage(),
     );
   }
@@ -73,21 +75,47 @@ class _Storage extends StatelessWidget {
               _section(context, 'Study sync'),
               ListTile(
                 leading: Icon(
-                  sync.pendingCount > 0 ? Icons.cloud_upload_outlined : Icons.cloud_done_outlined,
-                  color: sync.pendingCount > 0 ? jc.brand : jc.muted,
+                  sync.conflict != null
+                      ? Icons.sync_problem_outlined
+                      : !sync.online
+                          ? Icons.cloud_off_outlined
+                          : sync.lastError != null
+                              ? Icons.sync_problem_outlined
+                              : sync.pendingCount > 0
+                                  ? Icons.cloud_upload_outlined
+                                  : Icons.cloud_done_outlined,
+                  color: sync.conflict != null ||
+                          sync.lastError != null ||
+                          sync.pendingCount > 0
+                      ? jc.brand
+                      : jc.muted,
                 ),
-                title: Text(sync.pendingCount > 0
-                    ? '${sync.pendingCount} reviews waiting to upload'
-                    : 'Everything synced'),
-                subtitle: Text(_lastSynced(sync)),
+                title: Text(
+                  sync.conflict != null
+                      ? 'Choose which progress to keep'
+                      : !sync.online
+                          ? 'Sync paused while offline'
+                          : sync.lastError != null
+                              ? 'Last sync attempt failed'
+                              : sync.pendingCount > 0
+                                  ? '${sync.pendingCount} changes waiting to upload'
+                                  : 'Everything synced',
+                ),
+                subtitle: Text('${_lastSynced(sync)}\n${_gap(sync)}'),
+                isThreeLine: true,
                 trailing: sync.syncing
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
                     : TextButton(
-                        onPressed: () => vm.syncNow(),
-                        child: const Text('Sync now')),
+                        onPressed: !sync.online
+                            ? null
+                            : sync.conflict != null
+                                ? () => showSyncConflictDialog(context, sync)
+                                : () => vm.syncNow(),
+                        child: Text(
+                            sync.conflict != null ? 'Resolve' : 'Sync now')),
               ),
             ],
             const SizedBox(height: 24),
@@ -117,6 +145,19 @@ class _Storage extends StatelessWidget {
     return 'Last synced ${delta.inDays} d ago';
   }
 
+  String _gap(SyncEngine sync) {
+    if (sync.pendingCount == 0) return 'Sync gap: 0 local changes';
+    final oldest = sync.oldestPendingAt;
+    if (oldest == null) return 'Sync gap: ${sync.pendingCount} local changes';
+    final age = DateTime.now().toUtc().difference(oldest.toUtc());
+    final value = age.inDays > 0
+        ? '${age.inDays} d'
+        : age.inHours > 0
+            ? '${age.inHours} h'
+            : '${age.inMinutes} min';
+    return 'Sync gap: ${sync.pendingCount} local changes, oldest $value';
+  }
+
   Widget _section(BuildContext context, String title) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
         child: Text(title,
@@ -143,7 +184,7 @@ class _PackTile extends StatelessWidget {
         switch (row.id) {
           basePackId => Icons.smartphone,
           'names' => Icons.badge_outlined,
-          'examples' => Icons.notes_outlined,
+          _ when row.id.startsWith('examples-') => Icons.notes_outlined,
           _ when row.id.startsWith('mnemonics-') => Icons.brush_outlined,
           _ => Icons.translate,
         },
@@ -154,7 +195,8 @@ class _PackTile extends StatelessWidget {
           ? Padding(
               padding: const EdgeInsets.only(top: 6),
               child: LinearProgressIndicator(
-                value: progress.phase == 'downloading' ? progress.fraction : null,
+                value:
+                    progress.phase == 'downloading' ? progress.fraction : null,
                 minHeight: 4,
               ),
             )
@@ -211,7 +253,9 @@ class _PackTile extends StatelessWidget {
         },
       );
     }
-    if (row.isInstalled) return Icon(Icons.check_circle, color: jc.brand, size: 20);
+    if (row.isInstalled) {
+      return Icon(Icons.check_circle, color: jc.brand, size: 20);
+    }
     return null;
   }
 }

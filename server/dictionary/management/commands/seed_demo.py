@@ -4,22 +4,30 @@ when the dictionary already has data (used by the Docker CMD)."""
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from dictionary.models import (
     Gloss,
     Kana,
+    KanaExplanation,
+    KanaUsage,
+    KanaUsageExample,
+    KanaUsageExampleTranslation,
+    KanaUsageTranslation,
     Kanji,
     KanjiMeaning,
     Radical,
+    RadicalMeaning,
     Sense,
     Word,
     WordForm,
 )
 from dictionary.seed_data import (
     KANA,
-    KANA_STORIES,
     KANJI,
     RADICALS,
     WORDS,
@@ -28,6 +36,7 @@ from dictionary.seed_data import (
     kana_usage_examples,
 )
 from dictionary.seed_strokes import STROKES
+from mnemonics.seeds import install_kana_entries, load_kana_entries
 
 
 class Command(BaseCommand):
@@ -63,24 +72,57 @@ class Command(BaseCommand):
                 char=hira,
                 defaults=dict(
                     romaji=romaji, script=Kana.Script.HIRAGANA, kind=kind, row=row, order=order,
-                    origin=o_h, origin_note=n_h, usage_label=u_label, usage=u_text,
-                    usage_examples=u_examples,
+                    origin=o_h,
                 ),
             )
             Kana.objects.update_or_create(
                 char=kata,
                 defaults=dict(
                     romaji=romaji, script=Kana.Script.KATAKANA, kind=kind, row=row, order=order,
-                    origin=o_k, origin_note=n_k,
+                    origin=o_k,
                 ),
             )
+            self._set_kana_content(hira, n_h, u_label, u_text, u_examples)
+            self._set_kana_content(kata, n_k, "", "", [])
         self.stdout.write(f"  kana: {Kana.objects.count()}")
+
+    def _set_kana_content(self, char, origin_note, label, explanation, examples) -> None:
+        kana = Kana.objects.get(char=char)
+        kana.explanations.all().delete()
+        if origin_note:
+            KanaExplanation.objects.create(
+                kana=kana, language="en", origin_note=origin_note
+            )
+        KanaUsage.objects.filter(kana=kana).delete()
+        if not (label or explanation or examples):
+            return
+        usage = KanaUsage.objects.create(kana=kana)
+        if label or explanation:
+            KanaUsageTranslation.objects.create(
+                usage=usage, language="en", label=label, explanation=explanation
+            )
+        for order, item in enumerate(examples):
+            example = KanaUsageExample.objects.create(
+                usage=usage,
+                order=order,
+                before=item.get("before", ""),
+                particle=item.get("particle", ""),
+                after=item.get("after", ""),
+                pronunciation=item.get("romaji", ""),
+            )
+            if item.get("en"):
+                KanaUsageExampleTranslation.objects.create(
+                    example=example, language="en", text=item["en"]
+                )
 
     def _seed_radicals(self) -> None:
         for literal, (strokes, reading, meaning) in RADICALS.items():
-            Radical.objects.update_or_create(
+            radical, _ = Radical.objects.update_or_create(
                 literal=literal,
-                defaults=dict(strokes=strokes, reading=reading, meaning=meaning),
+                defaults=dict(strokes=strokes, reading=reading),
+            )
+            RadicalMeaning.objects.update_or_create(
+                radical=radical, language="en", defaults={"text": meaning}
             )
         self.stdout.write(f"  radicals: {Radical.objects.count()}")
 
@@ -106,7 +148,9 @@ class Command(BaseCommand):
             order = 0
             for lang, key in (("en", "en"), ("fr", "fr")):
                 for text in d.get(key, []):
-                    KanjiMeaning.objects.create(kanji=kanji, lang=lang, text=text, order=order)
+                    KanjiMeaning.objects.create(
+                        kanji=kanji, language=lang, text=text, order=order
+                    )
                     order += 1
         self.stdout.write(f"  kanji: {Kanji.objects.count()}")
 
@@ -134,62 +178,15 @@ class Command(BaseCommand):
                 go = 0
                 for lang, key in (("en", "en"), ("fr", "fr")):
                     for text in sense.get(key, []):
-                        Gloss.objects.create(sense=s, lang=lang, text=text, order=go)
+                        Gloss.objects.create(
+                            sense=s, language=lang, text=text, order=go
+                        )
                         go += 1
         self.stdout.write(f"  words: {Word.objects.count()}")
 
     def _seed_mnemonics(self) -> None:
-        # Local import: the mnemonics app is a peer; seeding is a batch job, so a
-        # cross-app import here is fine (and keeps dictionary import-light).
-        from mnemonics.models import (
-            DeckStatus,
-            Mnemonic,
-            MnemonicDeck,
-            MnemonicDeckItem,
-            MnemonicStatus,
-        )
-
-        by_lang: dict[str, list] = {}
-        # One story per gojūon sound, applied to BOTH the hiragana and katakana
-        # character, in every language → the complete built-in default pack.
-        for romaji, hira, kata, _row, kind in KANA:
-            if kind != Kana.Kind.GOJUON:
-                continue
-            stories = KANA_STORIES.get(romaji)
-            if not stories:
-                continue
-            for lang, story in stories.items():
-                for char in (hira, kata):
-                    m, _ = Mnemonic.objects.update_or_create(
-                        character=char,
-                        language=lang,
-                        kind=Mnemonic.Kind.KANA,
-                        author=None,
-                        story=story,
-                        defaults=dict(status=MnemonicStatus.VISIBLE, is_seed=True),
-                    )
-                    by_lang.setdefault(lang, []).append(m)
-
-        # A built-in default pack per language, so every user has a browsable /
-        # applicable base set out of the box (idempotent on re-seed).
-        for lang, mnemonics in by_lang.items():
-            deck, _ = MnemonicDeck.objects.update_or_create(
-                is_seed=True,
-                kind=Mnemonic.Kind.KANA,
-                language=lang,
-                author=None,
-                defaults=dict(
-                    title="jibiki · Kana mascots",
-                    description="The built-in starter mnemonics.",
-                    status=DeckStatus.VISIBLE,
-                ),
-            )
-            for pos, m in enumerate(mnemonics):
-                MnemonicDeckItem.objects.update_or_create(
-                    deck=deck, mnemonic=m, defaults=dict(position=pos)
-                )
-
+        path = Path(settings.CONTENT_SOURCE_DIR) / "mnemonics" / "kana_stories.json"
+        created, updated, decks = install_kana_entries(load_kana_entries(path))
         self.stdout.write(
-            f"  kana mnemonics: {Mnemonic.objects.filter(is_seed=True).count()}"
-            f" · default packs: {MnemonicDeck.objects.filter(is_seed=True).count()}"
+            f"  kana mnemonics: {created} created, {updated} updated, {decks} default packs"
         )

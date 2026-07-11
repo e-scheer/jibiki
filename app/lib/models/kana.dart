@@ -5,15 +5,15 @@ class KanaUsageExample {
     required this.before,
     required this.particle,
     required this.after,
-    required this.romaji,
-    required this.en,
+    required this.pronunciation,
+    required this.translation,
   });
 
   final String before;
   final String particle;
   final String after;
-  final String romaji; // particle spelled as pronounced (は→wa, を→o, へ→e)
-  final String en;
+  final String pronunciation; // particle spelled as pronounced (は→wa, を→o, へ→e)
+  final String translation;
 
   String get sentence => '$before$particle$after';
 
@@ -21,8 +21,8 @@ class KanaUsageExample {
         before: j['before'] as String? ?? '',
         particle: j['particle'] as String? ?? '',
         after: j['after'] as String? ?? '',
-        romaji: j['romaji'] as String? ?? '',
-        en: j['en'] as String? ?? '',
+        pronunciation: j['pronunciation'] as String? ?? '',
+        translation: j['translation'] as String? ?? '',
       );
 }
 

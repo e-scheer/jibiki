@@ -1,7 +1,7 @@
 """Seed the bundled kanji MEANING mnemonics (kind='kanji') from the generated
 content briefs, one seed row per (kanji, language).
 
-Each brief file ``content/kanji_meaning_briefs.<level>.json`` holds entries
+Each source file ``content_sources/mnemonics/kanji_meaning_briefs.<level>.json`` holds entries
 shaped ``{literal, meaning, components, kind, en, fr}``. Every non-empty
 language story becomes one seed ``Mnemonic``: the ``en`` sentence under
 language='en', the ``fr`` sentence under 'fr', and so on for any future
@@ -35,10 +35,6 @@ from mnemonics.models import Mnemonic, MnemonicStatus
 
 # JLPT levels, easiest first. A level is seeded only if its brief file exists.
 ALL_LEVELS = ("n5", "n4", "n3", "n2", "n1")
-# Story keys we treat as per-language content in a brief entry.
-LANG_KEYS = ("en", "fr")
-
-
 class Command(BaseCommand):
     help = "Seed kanji meaning mnemonics (kind='kanji') from the content briefs."
 
@@ -56,21 +52,30 @@ class Command(BaseCommand):
         )
 
     def _brief_path(self, level: str) -> Path:
-        return Path(settings.CONTENT_PACK_DIR) / f"kanji_meaning_briefs.{level}.json"
+        return Path(settings.CONTENT_SOURCE_DIR) / "mnemonics" / (
+            f"kanji_meaning_briefs.{level}.json"
+        )
 
-    def _load(self, level: str) -> list[dict]:
+    def _load(self, level: str) -> tuple[list[dict], tuple[str, ...]]:
         path = self._brief_path(level)
         doc = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(doc, dict) or doc.get("strategy") != "visual_meaning":
+            raise CommandError(f"{path.name}: expected visual_meaning strategy")
         entries = doc["kanji"] if isinstance(doc, dict) else doc
+        languages = tuple(doc.get("languages", ())) if isinstance(doc, dict) else ()
+        if not languages:
+            raise CommandError(f"{path.name}: missing languages list")
         for e in entries:
             lit = e.get("literal", "")
             if not lit:
                 raise CommandError(f"{path.name}: entry with empty literal")
-            for key in LANG_KEYS:
+            for key in languages:
                 story = e.get(key, "")
+                if not story.strip():
+                    raise CommandError(f"{path.name}: missing {key} story for {lit!r}")
                 if story and ("—" in story or "–" in story):
                     raise CommandError(f"{path.name}: dash in {key} story for {lit!r}")
-        return entries
+        return entries, languages
 
     def handle(self, *args, **opts):
         levels = opts.get("levels") or [
@@ -78,7 +83,8 @@ class Command(BaseCommand):
         ]
         if not levels:
             raise CommandError(
-                f"No kanji_meaning_briefs.<level>.json found in {settings.CONTENT_PACK_DIR}"
+                "No kanji meaning sources found in "
+                f"{Path(settings.CONTENT_SOURCE_DIR) / 'mnemonics'}"
             )
 
         created = updated = unchanged = 0
@@ -87,10 +93,10 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             for level in levels:
-                entries = self._load(level)
+                entries, languages = self._load(level)
                 for e in entries:
                     char = e["literal"]
-                    for lang in LANG_KEYS:
+                    for lang in languages:
                         story = (e.get(lang) or "").strip()
                         if not story:
                             continue

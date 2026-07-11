@@ -30,11 +30,16 @@ GoRouter buildRouter(AppState app) {
       final loc = state.matchedLocation;
       final atAuth = loc == '/login' || loc == '/register';
 
-      if (app.status == AuthStatus.unknown) return loc == '/splash' ? null : '/splash';
+      if (app.status == AuthStatus.unknown) {
+        return loc == '/splash' ? null : '/splash';
+      }
       // Local-only (no account) counts as signed in: the paid app is fully
       // usable offline; login stays reachable to link an account later.
       if (!app.canEnter) return atAuth ? null : '/login';
       if (!app.onboarded) return loc == '/onboarding' ? null : '/onboarding';
+      if (app.localOnly && atAuth) {
+        return null;
+      }
       if (atAuth || loc == '/onboarding' || loc == '/splash') return '/';
       return null;
     },
@@ -54,20 +59,25 @@ GoRouter buildRouter(AppState app) {
       ),
       GoRoute(
         path: '/word/:id',
-        builder: (_, s) => WordDetailView(wordId: int.parse(s.pathParameters['id']!)),
+        builder: (_, s) =>
+            WordDetailView(wordId: int.parse(s.pathParameters['id']!)),
       ),
       GoRoute(
         path: '/kanji/:literal',
-        builder: (_, s) => KanjiDetailView(literal: s.pathParameters['literal']!),
+        builder: (_, s) =>
+            KanjiDetailView(literal: s.pathParameters['literal']!),
       ),
       GoRoute(
         path: '/kana/:char',
         builder: (_, s) => KanaDetailView(char: s.pathParameters['char']!),
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsView()),
-      GoRoute(path: '/settings/storage', builder: (_, __) => const OfflineStorageView()),
+      GoRoute(
+          path: '/settings/storage',
+          builder: (_, __) => const OfflineStorageView()),
       GoRoute(path: '/feedback', builder: (_, __) => const FeedbackView()),
-      GoRoute(path: '/submissions', builder: (_, __) => const MySubmissionsView()),
+      GoRoute(
+          path: '/submissions', builder: (_, __) => const MySubmissionsView()),
       GoRoute(path: '/decks/new', builder: (_, __) => const DeckBuilderView()),
       GoRoute(
         path: '/decks/community',

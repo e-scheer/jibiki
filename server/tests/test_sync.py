@@ -260,3 +260,51 @@ def test_local_only_history_upload(kana, api, user):
     assert card.reps == 5
     assert card.lapses == 1  # the Again from review state
     assert ReviewLog.objects.filter(user=user).count() == 5
+
+
+def test_sync_preview_reports_cloud_without_mutating_it(kana, api, user):
+    from srs.models import Card, ReviewLog
+
+    api.post(SYNC, {"reviews": [_review("あ", 3, timezone.now())]}, format="json")
+    before = (Card.objects.filter(user=user).count(), ReviewLog.objects.filter(user=user).count())
+
+    body = api.post(SYNC, {"mode": "preview"}, format="json").json()
+
+    assert body["cloud"]["cards"] == 1
+    assert body["cloud"]["reviews"] == 1
+    assert body["cloud"]["changed_at"] is not None
+    assert body["cards"] == []
+    assert before == (
+        Card.objects.filter(user=user).count(),
+        ReviewLog.objects.filter(user=user).count(),
+    )
+
+
+def test_replace_cloud_keeps_only_uploaded_local_history(kana, api, user):
+    from srs.models import Card, ReviewLog
+
+    old = _review("あ", 3, timezone.now() - timedelta(days=2))
+    api.post(SYNC, {"reviews": [old]}, format="json")
+    local = _review("あ", 4, timezone.now())
+
+    body = api.post(
+        SYNC,
+        {"mode": "replace_cloud", "last_synced_at": None, "reviews": [local]},
+        format="json",
+    ).json()
+
+    assert body["applied_review_ids"] == [local["client_review_id"]]
+    assert set(Card.objects.filter(user=user).values_list("kana__char", flat=True)) == {"あ"}
+    assert ReviewLog.objects.filter(user=user).count() == 1
+
+
+def test_replace_cloud_rejects_a_non_initial_cursor(api):
+    response = api.post(
+        SYNC,
+        {
+            "mode": "replace_cloud",
+            "last_synced_at": timezone.now().isoformat(),
+        },
+        format="json",
+    )
+    assert response.status_code == 400

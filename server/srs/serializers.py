@@ -133,5 +133,8 @@ class SyncSerializer(serializers.Serializer):
     until drained) plus its delta watermark."""
 
     last_synced_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    mode = serializers.ChoiceField(
+        choices=("sync", "preview", "replace_cloud"), default="sync", required=False
+    )
     reviews = SyncReviewSerializer(many=True, required=False, default=list, max_length=500)
     ops = SyncOpSerializer(many=True, required=False, default=list, max_length=200)

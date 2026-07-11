@@ -93,7 +93,7 @@ class Command(BaseCommand):
         )
         kanji.meanings.all().delete()
         KanjiMeaning.objects.bulk_create(
-            KanjiMeaning(kanji=kanji, lang=lang, text=text[:128], order=i)
+            KanjiMeaning(kanji=kanji, language=lang, text=text[:128], order=i)
             for i, (lang, text) in enumerate(meanings)
             if text
         )
