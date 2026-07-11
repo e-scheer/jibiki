@@ -321,6 +321,36 @@ class LocalStudyStore implements StudyStore {
       'SELECT count(*) AS n FROM review_log WHERE reviewed_at >= ?',
       [start],
     );
+    final reviewSummary = await _user.select(
+      'SELECT count(*) AS total, '
+      'sum(CASE WHEN rating >= 2 THEN 1 ELSE 0 END) AS correct, '
+      'sum(duration_ms) AS duration, '
+      'sum(CASE WHEN state_before = 2 THEN 1 ELSE 0 END) AS mature, '
+      'sum(CASE WHEN state_before = 2 AND rating >= 2 THEN 1 ELSE 0 END) AS mature_correct '
+      'FROM review_log',
+    );
+    final ratings = await _user.select(
+      'SELECT rating, count(*) AS n FROM review_log GROUP BY rating',
+    );
+    final historyRows = await _user.select(
+      'SELECT reviewed_at, rating FROM review_log WHERE reviewed_at >= ? ORDER BY reviewed_at',
+      [start - const Duration(days: 13).inMilliseconds],
+    );
+    final history = <String, ({int reviews, int correct})>{};
+    for (final row in historyRows) {
+      final date = DateTime.fromMillisecondsSinceEpoch(
+        row['reviewed_at'] as int,
+        isUtc: true,
+      ).toIso8601String().substring(0, 10);
+      final previous = history[date] ?? (reviews: 0, correct: 0);
+      history[date] = (
+        reviews: previous.reviews + 1,
+        correct: previous.correct + ((row['rating'] as int) >= 2 ? 1 : 0),
+      );
+    }
+    final byTypeRows = await _user.select(
+      'SELECT item_type, count(*) AS n FROM cards WHERE deleted = 0 GROUP BY item_type',
+    );
     final states = await _user.select(
       'SELECT state, count(*) AS n FROM cards WHERE deleted = 0 GROUP BY state',
     );
@@ -341,6 +371,25 @@ class LocalStudyStore implements StudyStore {
       streak: reviews.single['n'] == 0 ? 0 : 1,
       totalCards: rows.single['total'] as int,
       byState: byState,
+      totalReviews: reviewSummary.single['total'] as int? ?? 0,
+      correctReviews: reviewSummary.single['correct'] as int? ?? 0,
+      studyTimeMs: reviewSummary.single['duration'] as int? ?? 0,
+      matureReviews: reviewSummary.single['mature'] as int? ?? 0,
+      matureCorrectReviews: reviewSummary.single['mature_correct'] as int? ?? 0,
+      reviewsByRating: {
+        for (final row in ratings) '${row['rating']}': row['n'] as int,
+      },
+      cardsByType: {
+        for (final row in byTypeRows) '${row['item_type']}': row['n'] as int,
+      },
+      history: [
+        for (final entry in history.entries)
+          StudyStatsDay(
+            date: DateTime.parse(entry.key),
+            reviews: entry.value.reviews,
+            correct: entry.value.correct,
+          ),
+      ],
     );
   }
 

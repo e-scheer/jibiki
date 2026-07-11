@@ -205,10 +205,43 @@ class StatsView(APIView):
             ).count(),
             "review": Card.objects.filter(user=user, state=State.REVIEW).count(),
         }
+        from datetime import timedelta
+
+        from django.db.models import Count, Q, Sum
         from django.utils import timezone
 
-        start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        reviews_today = user.review_logs.filter(reviewed_at__gte=start).count()
+        now = timezone.now()
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        logs = user.review_logs.all()
+        reviews_today = logs.filter(reviewed_at__gte=start).count()
+        total_reviews = logs.count()
+        correct_reviews = logs.filter(rating__gte=2).count()
+        mature_logs = logs.filter(state_before=State.REVIEW)
+        rating_counts = {
+            str(rating): logs.filter(rating=rating).count() for rating in range(1, 5)
+        }
+        since = start - timedelta(days=13)
+        history_rows = (
+            logs.filter(reviewed_at__gte=since)
+            .values("reviewed_at__date")
+            .annotate(reviews=Count("id"), correct=Count("id", filter=Q(rating__gte=2)))
+            .order_by("reviewed_at__date")
+        )
+        history = [
+            {
+                "date": row["reviewed_at__date"].isoformat(),
+                "reviews": row["reviews"],
+                "correct": row["correct"],
+            }
+            for row in history_rows
+        ]
+        cards_by_type = {
+            item_type: Card.objects.filter(user=user, item_type=item_type).count()
+            for item_type, _ in Card.objects.filter(user=user)
+            .values_list("item_type")
+            .distinct()
+        }
+        duration = logs.aggregate(value=Sum("duration_ms"))["value"] or 0
         return Response(
             {
                 "due_now": counts["due"],
@@ -217,6 +250,14 @@ class StatsView(APIView):
                 "streak": streak_days(user),
                 "total_cards": sum(by_state.values()),
                 "by_state": by_state,
+                "total_reviews": total_reviews,
+                "correct_reviews": correct_reviews,
+                "study_time_ms": duration,
+                "mature_reviews": mature_logs.count(),
+                "mature_correct_reviews": mature_logs.filter(rating__gte=2).count(),
+                "reviews_by_rating": rating_counts,
+                "cards_by_type": cards_by_type,
+                "history": history,
             }
         )
 

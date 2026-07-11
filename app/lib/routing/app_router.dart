@@ -19,6 +19,8 @@ import '../views/settings/wanikani_view.dart';
 import '../views/shell/home_shell.dart';
 import '../views/shell/splash_view.dart';
 import '../views/study/session_view.dart';
+import '../views/study/statistics_view.dart';
+import '../views/reference/reference_view.dart';
 
 /// Declarative routing with a single redirect guard that reads AppState:
 ///   unknown → splash · unauthenticated → login · authenticated but
@@ -73,6 +75,8 @@ GoRouter buildRouter(AppState app) {
         builder: (_, s) => KanaDetailView(char: s.pathParameters['char']!),
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsView()),
+      GoRoute(path: '/reference', builder: (_, __) => const ReferenceView()),
+      GoRoute(path: '/stats', builder: (_, __) => const StatisticsView()),
       GoRoute(
           path: '/settings/storage',
           builder: (_, __) => const OfflineStorageView()),

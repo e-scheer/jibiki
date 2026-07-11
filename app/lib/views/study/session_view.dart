@@ -80,6 +80,17 @@ class _SessionState extends State<_Session> {
     if (picked != null) _pick(picked);
   }
 
+  void _openCurrentDetail(ReviewViewModel vm) {
+    final card = vm.current;
+    if (card == null) return;
+    final path = switch (card.itemType) {
+      ItemType.word => '/word/${card.itemRef}',
+      ItemType.kanji => '/kanji/${card.itemRef}',
+      ItemType.kana => '/kana/${card.itemRef}',
+    };
+    context.push(path);
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
@@ -100,6 +111,12 @@ class _SessionState extends State<_Session> {
               tooltip: context.trText('Direction: ${_direction.label}'),
               isSelected: _direction.isRecall,
               onPressed: _toggleDirection,
+            ),
+          if (!vm.finished)
+            IconButton(
+              tooltip: context.trText('Open full details'),
+              icon: const Icon(Icons.menu_book_outlined),
+              onPressed: () => _openCurrentDetail(vm),
             ),
           if (!vm.finished)
             Padding(

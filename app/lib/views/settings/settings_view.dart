@@ -148,6 +148,22 @@ class _Settings extends StatelessWidget {
             const Divider(),
             _section(context, context.l10n.data),
             ListTile(
+              leading: const Icon(Icons.menu_book_outlined),
+              title: Text(context.trText('Japanese reference')),
+              subtitle: Text(context.trText(
+                  'Particles, conjugation, readings and other quick references.')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/reference'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.insights_outlined),
+              title: Text(context.trText('Statistics')),
+              subtitle: Text(context.trText(
+                  'See retention, accumulated knowledge and review trends.')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/stats'),
+            ),
+            ListTile(
               leading: const Icon(Icons.download_for_offline_outlined),
               title: Text(context.l10n.offlineStorage),
               subtitle: Text(context.l10n.offlineStorageHelp),

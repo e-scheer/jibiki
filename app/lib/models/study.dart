@@ -99,6 +99,14 @@ class StudyStats {
     required this.streak,
     required this.totalCards,
     required this.byState,
+    this.totalReviews = 0,
+    this.correctReviews = 0,
+    this.studyTimeMs = 0,
+    this.matureReviews = 0,
+    this.matureCorrectReviews = 0,
+    this.history = const [],
+    this.cardsByType = const {},
+    this.reviewsByRating = const {},
   });
 
   final int dueNow;
@@ -107,6 +115,19 @@ class StudyStats {
   final int streak;
   final int totalCards;
   final Map<String, int> byState;
+  final int totalReviews;
+  final int correctReviews;
+  final int studyTimeMs;
+  final int matureReviews;
+  final int matureCorrectReviews;
+  final List<StudyStatsDay> history;
+  final Map<String, int> cardsByType;
+  final Map<String, int> reviewsByRating;
+
+  double get accuracy => totalReviews == 0 ? 0 : correctReviews / totalReviews;
+  double get matureRetention =>
+      matureReviews == 0 ? 0 : matureCorrectReviews / matureReviews;
+  int get studyMinutes => (studyTimeMs / 60000).round();
 
   factory StudyStats.fromJson(Map<String, dynamic> j) => StudyStats(
         dueNow: (j['due_now'] as num?)?.toInt() ?? 0,
@@ -115,6 +136,20 @@ class StudyStats {
         streak: (j['streak'] as num?)?.toInt() ?? 0,
         totalCards: (j['total_cards'] as num?)?.toInt() ?? 0,
         byState: ((j['by_state'] as Map?) ?? const {})
+            .map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
+        totalReviews: (j['total_reviews'] as num?)?.toInt() ?? 0,
+        correctReviews: (j['correct_reviews'] as num?)?.toInt() ?? 0,
+        studyTimeMs: (j['study_time_ms'] as num?)?.toInt() ?? 0,
+        matureReviews: (j['mature_reviews'] as num?)?.toInt() ?? 0,
+        matureCorrectReviews:
+            (j['mature_correct_reviews'] as num?)?.toInt() ?? 0,
+        history: ((j['history'] as List?) ?? const [])
+            .whereType<Map>()
+            .map((e) => StudyStatsDay.fromJson(e.cast<String, dynamic>()))
+            .toList(),
+        cardsByType: ((j['cards_by_type'] as Map?) ?? const {})
+            .map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
+        reviewsByRating: ((j['reviews_by_rating'] as Map?) ?? const {})
             .map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
       );
 
@@ -125,5 +160,22 @@ class StudyStats {
         streak: 0,
         totalCards: 0,
         byState: const {},
+      );
+}
+
+class StudyStatsDay {
+  const StudyStatsDay(
+      {required this.date, required this.reviews, required this.correct});
+
+  final DateTime date;
+  final int reviews;
+  final int correct;
+
+  double get accuracy => reviews == 0 ? 0 : correct / reviews;
+
+  factory StudyStatsDay.fromJson(Map<String, dynamic> j) => StudyStatsDay(
+        date: DateTime.tryParse(j['date'] as String? ?? '') ?? DateTime.now(),
+        reviews: (j['reviews'] as num?)?.toInt() ?? 0,
+        correct: (j['correct'] as num?)?.toInt() ?? 0,
       );
 }

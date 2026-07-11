@@ -43,7 +43,16 @@ class _Decks extends StatelessWidget {
     final loading = vm.isLoading && vm.decks.isEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.trText('Study'))),
+      appBar: AppBar(
+        title: Text(context.trText('Study')),
+        actions: [
+          IconButton(
+            tooltip: context.trText('Statistics'),
+            icon: const Icon(Icons.insights_outlined),
+            onPressed: () => context.push('/stats'),
+          ),
+        ],
+      ),
       body: BoundedContent(
         child: RefreshIndicator(
           color: jc.brand,
