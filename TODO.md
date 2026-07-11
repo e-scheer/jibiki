@@ -1,26 +1,25 @@
-- mobile and tablet friendly, but also watch friendly
-- sync automatique avec ton compte si tu es en ligne (affiche la dernière synchronisation et l'écart)
-	-> gestion si conflit entre deux (choisir version cloud ou local)
+c'est parti pour refaire tout le design de l'app, on va intégrer 10-neopop.html dans design-explorations:
+- le design actuel ne doit pas t'influencer dans ta vision UI/UX (le but est aussi de repenser le UI UX au besoin)
+- mobile and tablet friendly
+- extrememnt optimisé (pas de lag, s'il faut attendre alors avec loader/skeleton/...)
+- les fonctionalités et le contenu est la, à toi de voir si avec le design il faut ou pas les reordonnées etc, le visuel n'est pas CONDITIONNé par ce qui existe mtn
+
 
 - build ios android
 - deployment sur hetnzer (redonance, sockage S3 pas cher, ...)
 - faire un frontpage meme design que l'app
 
 - choisir fremium ou one shot payment
-
-- changer le drawing tool pour que tu aies deux layers (un par dessus et un en dessous)
 - version tablette premium
 
-
-- supprime le dossier data avec les images elles puent toutes (et supprime aussi le script pour les générés)
-- faire grosse repasse sur tout le data model pour avoir un trucs clair et harmonieux
-	- bien prendre en compte les champs traduisibles
-	- prendre en compte que les mnemotechniques SONT propre à une langue (donc traduire betement n'est pas tjrs bon)
-
-=> tu peux en profiter pour repassser sur la méthode actuelle de stockage et gestion des packs (image + commentaire hint text)
-=> pour l'instant il y a des json, des trucs en db, des trucs qui sont scrapé, c'est pas clair
+- creer plusieurs fiche note technique cheatsheet (trouve le bon nom) sur tous les concepts du japonais : particules, la conjugaison, onyumi kuniymi, etc
 
 
-- faire une repasse sur le projet pour clean tout et mieux architecturer les foldering etc
+- modifie le code de sorte que demain je puisse facilement décider de quelle fonctionalité est gratuite ou payante (je ne sais pas encore si c'est un pay one shot ou un abonnement) : je pense notamment à 
 
-- creer ficher note technique cheatsheet sur tous les concepts du japonais : particules, la conjugaison, onyumi kuniymi, etc
+
+- un peu comme le sync avec Anki, regarde s'il y a d'autres outils qui mériterait un sync ou autre (via api ou whatever), par ex https://jpdb.io/
+
+- reprendre les grands concurrent/services/produits qui font comme le notre, voir ce que les gens adorent et font qu'ils paient ET AUSSI les plus grosses frustrations
+
+- repasse sur tous les champs texte du front et du back pour être sur  qu'ils sont bien dans des balises de traductions (changement dynamique de langue)

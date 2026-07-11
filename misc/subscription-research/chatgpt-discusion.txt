@@ -1,0 +1,297 @@
+J'ai lu la description de ton produit, et il y a un point qui ressort immédiatement : tu n'es **pas en train de construire un énième SRS**. Tu construis un **dictionnaire qui devient automatiquement un outil de mémorisation**, avec comme avantage concurrentiel une base de **mnémoniques visuelles communautaires, localisées par langue**. C'est une différence importante, et elle change complètement la manière de monétiser.  
+
+## Mon impression générale
+
+Je pense que tu sous-estimes la valeur du produit.
+
+Aujourd'hui, un étudiant japonais utilise souvent :
+
+* Jisho ou Takoboto comme dictionnaire
+* Anki pour mémoriser
+* WaniKani pour les kanji
+* Bunpro pour la grammaire
+* éventuellement Yomitan
+
+Ton produit fusionne déjà plusieurs de ces usages :
+
+* dictionnaire
+* SRS moderne (FSRS)
+* décomposition des kanji
+* export Anki
+* animation d'ordre des traits
+* mnémoniques communautaires
+* fonctionnement sans compte pour la consultation
+* multilingue
+
+Ce n'est pas un "petit dictionnaire".
+
+C'est un **outil quotidien**.
+
+Et les outils quotidiens se prêtent très bien à un abonnement.
+
+---
+
+# Ce que montre le marché
+
+Les références principales aujourd'hui sont :
+
+| Produit  | Prix                                                                 |
+| -------- | -------------------------------------------------------------------- |
+| Bunpro   | 5 $/mois ou 150 $ à vie ([Bunpro][1])                                |
+| WaniKani | 9 $/mois, 89 $/an, 299 $ à vie ([WaniKani Knowledge][2])             |
+| Memrise  | environ 25 $/mois ou 62 $/an (souvent remisé) ([app.memrise.com][3]) |
+
+Ce qui est intéressant n'est pas tant le prix que **ce que les gens acceptent de payer**.
+
+Sur Reddit, on voit constamment des personnes dire :
+
+> "Je ne paie presque aucun abonnement... sauf WaniKani."
+
+Ou
+
+> "Bunpro vaut largement les 5 $." ([Reddit][4])
+
+Autrement dit :
+
+Les apprenants japonais sont probablement l'une des communautés les plus habituées à payer pour de bons outils.
+
+---
+
+# Le plus gros trou du marché
+
+Le point le plus fort de ton README est presque caché :
+
+> **community, language-dependent visual mnemonics**
+
+Je pense que c'est ton véritable moat.
+
+Pourquoi ?
+
+Parce que :
+
+WaniKani possède d'excellentes mnémoniques…
+
+…mais uniquement en anglais.
+
+Anki possède des decks…
+
+…mais ils ne sont pas communautaires.
+
+Memrise possédait les "mems"…
+
+…puis les a supprimés, ce qui reste encore un sujet de frustration dans la communauté. ([Reddit][5])
+
+Toi tu proposes :
+
+* français
+* anglais
+* demain espagnol
+* demain allemand
+
+avec
+
+* votes
+* images
+* modération
+* historique
+
+C'est extrêmement difficile à reproduire.
+
+---
+
+# Est-ce qu'un abonnement est justifié ?
+
+Oui.
+
+À condition que tu vendes quelque chose qui continue de produire de la valeur.
+
+Un paiement unique fonctionne pour :
+
+* un dictionnaire
+* une application offline
+
+Mais ton produit continue d'évoluer :
+
+* nouvelles mnémoniques
+* nouvelles images
+* nouveaux votes
+* meilleure modération
+* nouveaux mots
+* entraînement FSRS
+* sauvegarde cloud
+* synchronisation
+
+Tout cela représente un service vivant.
+
+Donc un abonnement est cohérent.
+
+---
+
+# Est-ce que je ferais un paiement unique ?
+
+Oui...
+
+mais pas comme modèle principal.
+
+Je proposerais :
+
+Free
+
+↓
+
+Premium
+
+↓
+
+Lifetime
+
+Exactement comme Bunpro.
+
+Pourquoi ?
+
+Parce que les étudiants japonais restent parfois plusieurs années.
+
+Et énormément détestent les abonnements.
+
+Le Lifetime est psychologiquement très rassurant.
+
+---
+
+# Ce que je ne ferais surtout pas
+
+Je ne mettrais jamais le dictionnaire derrière un paywall.
+
+Ton README insiste beaucoup dessus.
+
+Et je pense que tu as raison.
+
+Le dictionnaire doit rester gratuit.
+
+C'est lui qui attire les utilisateurs.
+
+Puis un jour :
+
+> "Ajouter ce mot à votre mémoire"
+
+Et là :
+
+création de compte.
+
+Puis abonnement.
+
+C'est un tunnel d'acquisition extrêmement naturel.
+
+---
+
+# Les fonctionnalités Premium
+
+Je laisserais gratuit :
+
+* recherche
+* kanji
+* vocabulaire
+* décomposition
+* ordre des traits
+* lecture des mnémoniques
+
+Je réserverais au Premium :
+
+* ajout illimité dans le SRS
+* synchronisation cloud
+* statistiques
+* optimisation FSRS
+* export
+* collections
+* notifications intelligentes
+* contribution illimitée de mnémoniques
+
+Ainsi, le produit reste réellement utile gratuitement tout en donnant une raison claire de payer.
+
+---
+
+# La littérature scientifique
+
+Sur ce point, ton intuition est très bonne.
+
+Les recherches montrent globalement que :
+
+* les mnémoniques facilitent fortement l'encodage initial ;
+* la répétition espacée est le principal facteur de rétention à long terme ;
+* la combinaison des deux est meilleure que chacune séparément. ([arXiv][6])
+
+C'est exactement ce que raconte ton produit :
+
+> comprendre maintenant,
+>
+> retenir plus tard.
+
+Je trouve ce positionnement très crédible.
+
+---
+
+# Combien les gens sont-ils prêts à payer ?
+
+Je pense qu'il serait dangereux de viser immédiatement WaniKani.
+
+WaniKani vend :
+
+* plus de 10 ans d'existence
+* une énorme réputation
+* un contenu entièrement propriétaire
+
+Toi tu arrives avec une nouveauté.
+
+Je viserais donc un prix plus agressif.
+
+Je partirais sur quelque chose comme :
+
+* Gratuit
+* Premium : **4,99 €/mois**
+* Annuel : **44,99 €/an**
+* Lifetime de lancement : **99–129 €**
+* Puis plus tard : **149 €**
+
+Tu serais immédiatement perçu comme "moins cher que WaniKani", tout en restant largement au-dessus du seuil psychologique des applications "jetables".
+
+---
+
+# Taille potentielle de la niche
+
+La niche est plus grande qu'on ne le pense.
+
+Les apprenants japonais sont nombreux :
+
+* étudiants universitaires ;
+* amateurs d'anime et de manga ;
+* candidats au JLPT ;
+* expatriés ;
+* professionnels.
+
+En revanche, le marché est **très spécialisé**.
+
+Je ne construirais donc pas un business en imaginant des millions d'abonnés.
+
+En visant quelques milliers d'utilisateurs actifs très engagés, le modèle peut déjà devenir solide.
+
+Par exemple :
+
+* 2 000 abonnés à 5 €/mois ≈ 10 000 €/mois de revenus récurrents ;
+* 5 000 abonnés ≈ 25 000 €/mois ;
+* 10 000 abonnés ≈ 50 000 €/mois.
+
+Pour un produit aussi spécialisé, ce sont déjà des objectifs ambitieux mais réalistes si tu réussis à te différencier.
+
+## Ma conclusion
+
+Je pense que ton intuition de départ est la bonne, mais je pousserais encore plus loin le positionnement.
+
+Tu ne vends pas un dictionnaire, ni un SRS. Tu vends **la continuité entre les deux** : transformer une recherche ponctuelle en connaissance durable, sans changer d'outil. C'est un angle que ni WaniKani, ni Bunpro, ni Anki ne couvrent complètement aujourd'hui. Tes mnémoniques communautaires multilingues renforcent encore cette proposition de valeur. 
+
+Si j'étais à ta place, je choisirais un modèle **freemium avec abonnement**, complété par une **offre Lifetime**. C'est celui qui est le plus cohérent avec la valeur continue que crée ton produit et avec les attentes des apprenants de japonais, tout en restant aligné sur les standards du marché.
+
+[1]: https://bunpro.jp/pricing?utm_source=chatgpt.com "Pricing | Bunpro"
+[2]: https://knowledge.wanikani.com/getting-started/account-and-membership/payment-and-billing/wanikani-premium-membership/?utm_source=chatgpt.com "WaniKani Premium Membership | WaniKani Knowledge"
+[3]: https://app.memrise.com/payment/plans/en?utm_source=chatgpt.com "Memrise Language Learning App - Subscription Plans"
+[4]: https://www.reddit.com/r/LearnJapanese/comments/1l79hxs/best_monthly_subscription_app_for_you/?utm_source=chatgpt.com "Best monthly subscription app for you?"
+[5]: https://www.reddit.com/r/memrise/comments/1ak3dyw?utm_source=chatgpt.com "JLPT advice"
+[6]: https://arxiv.org/abs/2207.00896?utm_source=chatgpt.com "VocabulARy: Learning Vocabulary in AR Supported by Keyword Visualisations"

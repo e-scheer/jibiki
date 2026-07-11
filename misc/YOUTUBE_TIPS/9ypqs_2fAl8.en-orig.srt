@@ -1,0 +1,1412 @@
+1
+00:00:00,000 --> 00:00:05,800
+After studying nearly 3,000 paywalls,
+
+2
+00:00:03,240 --> 00:00:07,800
+hundreds of subscription flows on Moby,
+
+3
+00:00:05,800 --> 00:00:10,640
+and talking to someone who's designed
+
+4
+00:00:07,800 --> 00:00:11,790
+over 4,700 paywalls,
+
+5
+00:00:10,640 --> 00:00:12,120
+we found this.
+
+6
+00:00:11,790 --> 00:00:14,360
+>> [music]
+
+7
+00:00:12,120 --> 00:00:16,080
+>> Sometimes, an ugly paywall could
+
+8
+00:00:14,360 --> 00:00:18,760
+outperform a beautiful one.
+
+9
+00:00:16,080 --> 00:00:21,280
+>> No matter what I did, the ugly paywall
+
+10
+00:00:18,760 --> 00:00:22,960
+with a ton of text completely over
+
+11
+00:00:21,280 --> 00:00:24,840
+performed anything that I would do.
+
+12
+00:00:22,960 --> 00:00:25,840
+>> More friction could increase
+
+13
+00:00:24,840 --> 00:00:28,280
+conversions.
+
+14
+00:00:25,840 --> 00:00:30,080
+>> Multi-page paywalls almost always do
+
+15
+00:00:28,280 --> 00:00:32,119
+better than single-page paywalls.
+
+16
+00:00:30,080 --> 00:00:34,240
+>> Every paywall today kind of looks the
+
+17
+00:00:32,119 --> 00:00:36,680
+same. So, I wanted to know what
+
+18
+00:00:34,240 --> 00:00:38,920
+separates a high-performing paywall from
+
+19
+00:00:36,680 --> 00:00:41,240
+an average one.
+
+20
+00:00:38,920 --> 00:00:43,920
+I used to think the decision happens on
+
+21
+00:00:41,240 --> 00:00:46,400
+a paywall, but actually, users sometimes
+
+22
+00:00:43,920 --> 00:00:46,960
+decide to pay before they even see the
+
+23
+00:00:46,400 --> 00:00:48,280
+paywall.
+
+24
+00:00:46,960 --> 00:00:49,480
+>> All the different touchpoints are
+
+25
+00:00:48,280 --> 00:00:52,080
+extremely important.
+
+26
+00:00:49,480 --> 00:00:54,320
+>> The paywall can appear after onboarding,
+
+27
+00:00:52,080 --> 00:00:56,000
+when you unlock a premium feature,
+
+28
+00:00:54,320 --> 00:00:58,520
+inside settings, [music]
+
+29
+00:00:56,000 --> 00:00:59,320
+or even as a win-back offer before you
+
+30
+00:00:58,520 --> 00:01:01,520
+leave.
+
+31
+00:00:59,320 --> 00:01:03,400
+>> Those paywalls speak more to the user
+
+32
+00:01:01,520 --> 00:01:05,480
+because they're more personalized.
+
+33
+00:01:03,400 --> 00:01:08,280
+You're constantly trying to get the user
+
+34
+00:01:05,480 --> 00:01:10,000
+to either pay or stay as a subscribing
+
+35
+00:01:08,280 --> 00:01:12,160
+member, and so you have to think about
+
+36
+00:01:10,000 --> 00:01:14,360
+the entire life cycle of the customer.
+
+37
+00:01:12,160 --> 00:01:16,760
+And yes, product is important for being
+
+38
+00:01:14,360 --> 00:01:19,080
+able to solve a problem, but life cycle
+
+39
+00:01:16,760 --> 00:01:20,960
+monetization and the paywalls, that's
+
+40
+00:01:19,080 --> 00:01:21,640
+the only part of the app that makes
+
+41
+00:01:20,960 --> 00:01:24,640
+money.
+
+42
+00:01:21,640 --> 00:01:25,600
+>> A paywall isn't just a screen. It's a
+
+43
+00:01:24,640 --> 00:01:27,840
+flow.
+
+44
+00:01:25,600 --> 00:01:29,840
+Before asking for money, Opal spends
+
+45
+00:01:27,840 --> 00:01:32,200
+time selling the outcome, getting 8
+
+46
+00:01:29,840 --> 00:01:34,321
+years of your life back. By the time you
+
+47
+00:01:32,200 --> 00:01:36,040
+reach the paywall, it doesn't feel like
+
+48
+00:01:34,321 --> 00:01:37,960
+[music] an interruption.
+
+49
+00:01:36,040 --> 00:01:40,320
+By showing users how many years of their
+
+50
+00:01:37,960 --> 00:01:43,840
+life they could save, trial sign-ups
+
+51
+00:01:40,320 --> 00:01:46,640
+went up from 7% to 17%.
+
+52
+00:01:43,840 --> 00:01:49,160
+Jonathan prefers multi-page paywalls.
+
+53
+00:01:46,640 --> 00:01:51,240
+>> Multi-page paywalls almost always do
+
+54
+00:01:49,160 --> 00:01:53,720
+better than single-page paywalls. And
+
+55
+00:01:51,240 --> 00:01:55,920
+so, in this paywall, you're at the end
+
+56
+00:01:53,720 --> 00:01:58,680
+of the customer journey and onboarding,
+
+57
+00:01:55,920 --> 00:02:01,120
+and you've just showed the customer that
+
+58
+00:01:58,680 --> 00:02:02,720
+hey, your plan is ready. This is what
+
+59
+00:02:01,120 --> 00:02:04,640
+you can expect. You're speaking to them
+
+60
+00:02:02,720 --> 00:02:05,560
+from an emotional perspective. You're
+
+61
+00:02:04,640 --> 00:02:07,520
+telling them they're going to start
+
+62
+00:02:05,560 --> 00:02:08,880
+feeling like themselves in 4 weeks or
+
+63
+00:02:07,520 --> 00:02:10,759
+you're going to tell them something that
+
+64
+00:02:08,880 --> 00:02:13,160
+is in line with their actual ideal
+
+65
+00:02:10,759 --> 00:02:15,360
+outcome. Does the paywall already feel
+
+66
+00:02:13,160 --> 00:02:17,920
+part of the experience? Like if it's an
+
+67
+00:02:15,360 --> 00:02:19,600
+onboarding, is it a natural segue to
+
+68
+00:02:17,920 --> 00:02:22,160
+kind of finish the onboarding?
+
+69
+00:02:19,600 --> 00:02:24,720
+>> A Head takes a similar approach.
+
+70
+00:02:22,160 --> 00:02:26,959
+Information unfolds gradually. It gives
+
+71
+00:02:24,720 --> 00:02:28,840
+users time to process the decision
+
+72
+00:02:26,959 --> 00:02:30,640
+instead of forcing them to absorb
+
+73
+00:02:28,840 --> 00:02:32,880
+everything at once.
+
+74
+00:02:30,640 --> 00:02:35,080
+I think when a paywall works, it doesn't
+
+75
+00:02:32,880 --> 00:02:37,120
+feel like you've hit a wall. It feels
+
+76
+00:02:35,080 --> 00:02:39,120
+like the product is asking you to take
+
+77
+00:02:37,120 --> 00:02:40,880
+the natural next step.
+
+78
+00:02:39,120 --> 00:02:42,680
+Even if you have a well-designed
+
+79
+00:02:40,880 --> 00:02:45,560
+paywall, [music] if it appears at the
+
+80
+00:02:42,680 --> 00:02:48,000
+wrong moment, it's still a bad paywall.
+
+81
+00:02:45,560 --> 00:02:50,160
+One example is the one-time offer. If
+
+82
+00:02:48,000 --> 00:02:52,440
+you close it, it's gone. Paired with
+
+83
+00:02:50,160 --> 00:02:54,280
+animation and haptic feedback, this
+
+84
+00:02:52,440 --> 00:02:56,000
+helps to pull the attention of the user
+
+85
+00:02:54,280 --> 00:02:58,880
+the moment that you're considering an
+
+86
+00:02:56,000 --> 00:03:01,880
+upgrade. Even when the timing is right,
+
+87
+00:02:58,880 --> 00:03:03,800
+people can still hesitate. Will I forget
+
+88
+00:03:01,880 --> 00:03:05,720
+to cancel? Am I making the right
+
+89
+00:03:03,800 --> 00:03:08,000
+decision? And that's why some of the
+
+90
+00:03:05,720 --> 00:03:10,800
+best-performing paywalls focus on
+
+91
+00:03:08,000 --> 00:03:12,800
+reducing risk. Blinkist had a problem.
+
+92
+00:03:10,800 --> 00:03:14,800
+Their users complained about free trials
+
+93
+00:03:12,800 --> 00:03:17,239
+because they felt tricked into being
+
+94
+00:03:14,800 --> 00:03:20,440
+charged. So, they redesigned the paywall
+
+95
+00:03:17,239 --> 00:03:22,880
+screen to show a step-by-step timeline.
+
+96
+00:03:20,440 --> 00:03:25,320
+The result was more trial sign-ups,
+
+97
+00:03:22,880 --> 00:03:28,160
+fewer complaints. Push notification
+
+98
+00:03:25,320 --> 00:03:30,400
+opt-ins also went up, which makes sense
+
+99
+00:03:28,160 --> 00:03:31,567
+because they remind you before your
+
+100
+00:03:30,400 --> 00:03:32,080
+trial ends.
+
+101
+00:03:31,567 --> 00:03:34,560
+>> [music]
+
+102
+00:03:32,080 --> 00:03:36,640
+>> Tipstop emphasized the free trial, added
+
+103
+00:03:34,560 --> 00:03:38,800
+a discount badge, and made the offer
+
+104
+00:03:36,640 --> 00:03:41,360
+easier to understand. The offer didn't
+
+105
+00:03:38,800 --> 00:03:44,160
+change. The way it was presented [music]
+
+106
+00:03:41,360 --> 00:03:46,640
+did. Direct conversions almost tripled.
+
+107
+00:03:44,160 --> 00:03:48,720
+And then there's Slopes. Instead of
+
+108
+00:03:46,640 --> 00:03:50,519
+redesigning the paywall, they asked a
+
+109
+00:03:48,720 --> 00:03:52,720
+different question. What if we got rid
+
+110
+00:03:50,519 --> 00:03:54,680
+of the paywall altogether? They took
+
+111
+00:03:52,720 --> 00:03:57,080
+inspiration from Apple's redeem free
+
+112
+00:03:54,680 --> 00:04:00,400
+trial approach and built what they call
+
+113
+00:03:57,080 --> 00:04:02,880
+a pay ramp. Users see a single action,
+
+114
+00:04:00,400 --> 00:04:05,280
+redeem your free week. No traditional
+
+115
+00:04:02,880 --> 00:04:09,160
+paywall standing in the way. This alone
+
+116
+00:04:05,280 --> 00:04:11,080
+increased trial starts by 25%.
+
+117
+00:04:09,160 --> 00:04:12,840
+Which brings us to one of Jonathan's
+
+118
+00:04:11,080 --> 00:04:14,560
+favorite paywall tweaks.
+
+119
+00:04:12,840 --> 00:04:18,280
+>> This no commitment cancel anytime
+
+120
+00:04:14,560 --> 00:04:20,720
+subtitle always seems to do well. Adding
+
+121
+00:04:18,280 --> 00:04:22,800
+it to the paywall will bump things up
+
+122
+00:04:20,720 --> 00:04:26,000
+incrementally. And then also having some
+
+123
+00:04:22,800 --> 00:04:29,480
+kind of call to action for what the user
+
+124
+00:04:26,000 --> 00:04:31,680
+is doing instead of just continue is hit
+
+125
+00:04:29,480 --> 00:04:33,800
+or miss, but I do like to experiment
+
+126
+00:04:31,680 --> 00:04:36,000
+with that as well. Another thing too is
+
+127
+00:04:33,800 --> 00:04:39,200
+like having this right chevron here on
+
+128
+00:04:36,000 --> 00:04:41,880
+the button. I can't make a judgement yet
+
+129
+00:04:39,200 --> 00:04:44,000
+as to whether like this in itself does
+
+130
+00:04:41,880 --> 00:04:45,720
+the best because I have not done a test
+
+131
+00:04:44,000 --> 00:04:48,360
+yet where everything is the same except
+
+132
+00:04:45,720 --> 00:04:50,680
+for this right chevron, but in most of
+
+133
+00:04:48,360 --> 00:04:52,400
+the paywalls that end up winning, they
+
+134
+00:04:50,680 --> 00:04:54,320
+have this right chevron. So, I've also
+
+135
+00:04:52,400 --> 00:04:56,400
+started to include it on the button
+
+136
+00:04:54,320 --> 00:04:58,240
+along with this subtitle here.
+
+137
+00:04:56,400 --> 00:04:58,800
+>> Jonathan takes this idea one step
+
+138
+00:04:58,240 --> 00:05:01,600
+further.
+
+139
+00:04:58,800 --> 00:05:04,040
+>> So, if they try to hit cancel over here,
+
+140
+00:05:01,600 --> 00:05:05,800
+I like to show the users an exit intent
+
+141
+00:05:04,040 --> 00:05:08,240
+sheet. If they're not ready to commit
+
+142
+00:05:05,800 --> 00:05:09,720
+for a year, you can still subscribe to
+
+143
+00:05:08,240 --> 00:05:11,880
+the monthly plan.
+
+144
+00:05:09,720 --> 00:05:13,040
+>> And when we talked about aggressive last
+
+145
+00:05:11,880 --> 00:05:14,840
+minute discounts?
+
+146
+00:05:13,040 --> 00:05:17,280
+>> I wouldn't really do this unless it's
+
+147
+00:05:14,840 --> 00:05:19,160
+maybe Cyber Monday Black Friday. I'm
+
+148
+00:05:17,280 --> 00:05:21,600
+really curious to see how Apple is going
+
+149
+00:05:19,160 --> 00:05:23,520
+to approach that this year for all these
+
+150
+00:05:21,600 --> 00:05:25,720
+different sales, but to make sure that
+
+151
+00:05:23,520 --> 00:05:28,080
+I'm compliant and safe, I'd recommend
+
+152
+00:05:25,720 --> 00:05:28,800
+instead to have an offer with a larger
+
+153
+00:05:28,080 --> 00:05:31,240
+trial.
+
+154
+00:05:28,800 --> 00:05:32,919
+>> Giving users a longer trial could help
+
+155
+00:05:31,240 --> 00:05:35,840
+you achieve the same goal while
+
+156
+00:05:32,919 --> 00:05:38,240
+preserving trust. So, if reducing risk
+
+157
+00:05:35,840 --> 00:05:40,960
+helps with conversions, we would expect
+
+158
+00:05:38,240 --> 00:05:43,400
+that removing friction will do the same.
+
+159
+00:05:40,960 --> 00:05:45,843
+But that's not the case.
+
+160
+00:05:43,400 --> 00:05:46,000
+To start your free trial on Outsider,
+
+161
+00:05:45,843 --> 00:05:47,440
+>> [music]
+
+162
+00:05:46,000 --> 00:05:50,280
+>> you'll need to enter your credit card
+
+163
+00:05:47,440 --> 00:05:53,120
+details. Sign-ups dropped by more than
+
+164
+00:05:50,280 --> 00:05:55,320
+half, but the conversion rates increased
+
+165
+00:05:53,120 --> 00:05:56,960
+by five times, more than double the
+
+166
+00:05:55,320 --> 00:05:59,400
+paying customers.
+
+167
+00:05:56,960 --> 00:06:00,880
+The extra friction filtered out people
+
+168
+00:05:59,400 --> 00:06:03,120
+who were never serious in the first
+
+169
+00:06:00,880 --> 00:06:05,560
+place. Moonly discovered something
+
+170
+00:06:03,120 --> 00:06:09,320
+similar. They introduced a free trial,
+
+171
+00:06:05,560 --> 00:06:11,920
+but only on the annual plan.
+
+172
+00:06:09,320 --> 00:06:14,800
+Sometimes what changes isn't the offer,
+
+173
+00:06:11,920 --> 00:06:17,360
+it's how the offer is framed. One of the
+
+174
+00:06:14,800 --> 00:06:20,360
+most common techniques is social proof
+
+175
+00:06:17,360 --> 00:06:22,840
+with real user reviews and a five-star
+
+176
+00:06:20,360 --> 00:06:22,840
+rating.
+
+177
+00:06:24,120 --> 00:06:27,640
+>> These social accolades are really nice
+
+178
+00:06:26,120 --> 00:06:28,400
+to kind of show credibility and
+
+179
+00:06:27,640 --> 00:06:30,200
+authority.
+
+180
+00:06:28,400 --> 00:06:31,039
+>> The second common technique is value
+
+181
+00:06:30,200 --> 00:06:31,200
+framing.
+
+182
+00:06:31,039 --> 00:06:32,800
+>> [music]
+
+183
+00:06:31,200 --> 00:06:34,560
+>> You're framing the value in such a way
+
+184
+00:06:32,800 --> 00:06:37,320
+that it matches what the users care
+
+185
+00:06:34,560 --> 00:06:40,264
+about. All these screens are selling
+
+186
+00:06:37,320 --> 00:06:40,264
+different futures. [music]
+
+187
+00:06:40,919 --> 00:06:45,960
+And then there's price anchoring.
+
+188
+00:06:43,680 --> 00:06:48,560
+Tide breaks down the price into smaller
+
+189
+00:06:45,960 --> 00:06:50,840
+weekly amounts. Ahead compares its
+
+190
+00:06:48,560 --> 00:06:54,600
+subscription to things people already
+
+191
+00:06:50,840 --> 00:06:56,840
+spend money on, like coffee or therapy.
+
+192
+00:06:54,600 --> 00:07:00,040
+Next up, pricing and packaging.
+
+193
+00:06:56,840 --> 00:07:02,600
+Headspace [music] tested 7-day, 14-day,
+
+194
+00:07:00,040 --> 00:07:05,099
+and 30-day free trials. The winning
+
+195
+00:07:02,600 --> 00:07:07,200
+variant was this, 14-day trial for
+
+196
+00:07:05,099 --> 00:07:09,560
+[music] the annual plan. Even though the
+
+197
+00:07:07,200 --> 00:07:12,200
+annual plan costs more, the longer trial
+
+198
+00:07:09,560 --> 00:07:13,800
+made the whole decision feel less risky.
+
+199
+00:07:12,200 --> 00:07:16,040
+If you're wondering what the best
+
+200
+00:07:13,800 --> 00:07:17,640
+pricing structure is, [music] it depends
+
+201
+00:07:16,040 --> 00:07:20,840
+on what you're optimizing for.
+
+202
+00:07:17,640 --> 00:07:22,640
+>> Ideally, you want to default to a yearly
+
+203
+00:07:20,840 --> 00:07:24,640
+product because we see that that has the
+
+204
+00:07:22,640 --> 00:07:27,040
+highest LTV, but a yearly product may
+
+205
+00:07:24,640 --> 00:07:28,680
+not be the best for your business. If
+
+206
+00:07:27,040 --> 00:07:30,880
+you need to, you have that yearly
+
+207
+00:07:28,680 --> 00:07:33,480
+product with [music] a weekly or with a
+
+208
+00:07:30,880 --> 00:07:35,800
+monthly product. You only want to show
+
+209
+00:07:33,480 --> 00:07:37,400
+two to decrease cognitive load on the
+
+210
+00:07:35,800 --> 00:07:39,240
+user. So, if you do want to support
+
+211
+00:07:37,400 --> 00:07:41,240
+other pricing options, you always hide
+
+212
+00:07:39,240 --> 00:07:42,720
+it behind a view all plans button that
+
+213
+00:07:41,240 --> 00:07:44,400
+opens up a sheet with all the different
+
+214
+00:07:42,720 --> 00:07:46,880
+pricing. You want to keep the base
+
+215
+00:07:44,400 --> 00:07:49,680
+paywall simple, get a bunch of users in
+
+216
+00:07:46,880 --> 00:07:52,400
+there to see how your base stats perform
+
+217
+00:07:49,680 --> 00:07:53,600
+before you go crazy on optimizing all
+
+218
+00:07:52,400 --> 00:07:55,680
+your different placements.
+
+219
+00:07:53,600 --> 00:07:56,920
+>> Jonathan is also a big believer in
+
+220
+00:07:55,680 --> 00:07:58,040
+table-based [music]
+
+221
+00:07:56,920 --> 00:07:59,880
+paywalls.
+
+222
+00:07:58,040 --> 00:08:02,000
+>> I am a huge fan of tables. They're a
+
+223
+00:07:59,880 --> 00:08:03,320
+little hard to build in Superwall. I
+
+224
+00:08:02,000 --> 00:08:05,040
+think that's maybe why, like in
+
+225
+00:08:03,320 --> 00:08:07,160
+RevenueCat and Superwall, I'm not really
+
+226
+00:08:05,040 --> 00:08:08,680
+seeing a lot of tables. These also do a
+
+227
+00:08:07,160 --> 00:08:10,920
+good job of showcasing what you're
+
+228
+00:08:08,680 --> 00:08:13,600
+missing out on if you don't subscribe.
+
+229
+00:08:10,920 --> 00:08:16,640
+This also works pretty well. A video
+
+230
+00:08:13,600 --> 00:08:18,800
+paywall showing you the app in action
+
+231
+00:08:16,640 --> 00:08:20,480
+and simple bullet list, simple social
+
+232
+00:08:18,800 --> 00:08:20,960
+proof here of people already using your
+
+233
+00:08:20,480 --> 00:08:22,919
+app.
+
+234
+00:08:20,960 --> 00:08:24,840
+>> Video could communicate value faster
+
+235
+00:08:22,919 --> 00:08:26,840
+than static screenshots or bullet
+
+236
+00:08:24,840 --> 00:08:28,800
+points. Now, one thing we kept coming
+
+237
+00:08:26,840 --> 00:08:30,520
+back to was polish.
+
+238
+00:08:28,800 --> 00:08:31,919
+>> I think animations work really well.
+
+239
+00:08:30,520 --> 00:08:33,159
+There's an app that I really like right
+
+240
+00:08:31,919 --> 00:08:35,479
+now that's going viral. It's called
+
+241
+00:08:33,159 --> 00:08:38,520
+Focus Town, and they've done an amazing
+
+242
+00:08:35,479 --> 00:08:40,919
+job of branding and creating a Animal
+
+243
+00:08:38,520 --> 00:08:42,640
+Crossing-esque experience, and that's
+
+244
+00:08:40,919 --> 00:08:44,600
+the level of polish that we're going to
+
+245
+00:08:42,640 --> 00:08:46,040
+be seeing from the most successful apps
+
+246
+00:08:44,600 --> 00:08:47,920
+moving forward. You know, the bar has
+
+247
+00:08:46,040 --> 00:08:50,320
+just been raised because now that anyone
+
+248
+00:08:47,920 --> 00:08:52,280
+can ship an app, the ones that really
+
+249
+00:08:50,320 --> 00:08:53,920
+put in the time to polish it with
+
+250
+00:08:52,280 --> 00:08:55,880
+animations, with custom character
+
+251
+00:08:53,920 --> 00:08:57,560
+designs, with world building are going
+
+252
+00:08:55,880 --> 00:08:58,360
+to be the most successful moving
+
+253
+00:08:57,560 --> 00:09:00,280
+forward.
+
+254
+00:08:58,360 --> 00:09:02,880
+>> When two products are competing for the
+
+255
+00:09:00,280 --> 00:09:05,040
+same user, polish could be the reason
+
+256
+00:09:02,880 --> 00:09:06,480
+why someone chooses your product over
+
+257
+00:09:05,040 --> 00:09:09,120
+the others. [music] If you're building
+
+258
+00:09:06,480 --> 00:09:12,000
+with AI, that's exactly what Mobbin MCP
+
+259
+00:09:09,120 --> 00:09:14,560
+is for. It gives tools like Claude,
+
+260
+00:09:12,000 --> 00:09:16,520
+ChatGPT, and Cursor access to Mobbin's
+
+261
+00:09:14,560 --> 00:09:18,040
+library. So, instead of making things
+
+262
+00:09:16,520 --> 00:09:20,240
+up, [music] your AI can reference
+
+263
+00:09:18,040 --> 00:09:22,760
+patterns that already exist in the real
+
+264
+00:09:20,240 --> 00:09:25,440
+world, compare how apps design their
+
+265
+00:09:22,760 --> 00:09:27,720
+paywalls, and pull examples directly
+
+266
+00:09:25,440 --> 00:09:30,040
+into your workflow. Think of it as
+
+267
+00:09:27,720 --> 00:09:31,800
+grounding your AI's output in what's
+
+268
+00:09:30,040 --> 00:09:34,560
+already been shipped.
+
+269
+00:09:31,800 --> 00:09:36,839
+Not every pattern is worth copying.
+
+270
+00:09:34,560 --> 00:09:38,800
+Some of the highest converting paywalls
+
+271
+00:09:36,839 --> 00:09:40,960
+are the ones Jonathan is the most
+
+272
+00:09:38,800 --> 00:09:42,920
+skeptical of. The same tactics you'll
+
+273
+00:09:40,960 --> 00:09:44,840
+find in drop shipping stores and
+
+274
+00:09:42,920 --> 00:09:47,920
+e-commerce websites.
+
+275
+00:09:44,840 --> 00:09:50,160
+>> So, one paywall that works extremely
+
+276
+00:09:47,920 --> 00:09:52,880
+well that I really have a hard time
+
+277
+00:09:50,160 --> 00:09:55,200
+accepting is the spin the wheel paywall.
+
+278
+00:09:52,880 --> 00:09:57,640
+This is a predetermined spin the wheel
+
+279
+00:09:55,200 --> 00:09:59,840
+Lottie file that may land on some kind
+
+280
+00:09:57,640 --> 00:10:02,400
+of discounted percentage. You know, the
+
+281
+00:09:59,840 --> 00:10:04,600
+user gets to claim it and then cuz
+
+282
+00:10:02,400 --> 00:10:06,680
+they've just won something, the idea is
+
+283
+00:10:04,600 --> 00:10:08,920
+that they'll uh be more likely to then
+
+284
+00:10:06,680 --> 00:10:11,320
+subscribe at that price point. If you're
+
+285
+00:10:08,920 --> 00:10:13,480
+optimizing for a longer-term business,
+
+286
+00:10:11,320 --> 00:10:15,600
+that may not be a good paywall for you.
+
+287
+00:10:13,480 --> 00:10:18,200
+But, if you're optimizing for a weekly
+
+288
+00:10:15,600 --> 00:10:20,640
+price and you want to maximize revenue,
+
+289
+00:10:18,200 --> 00:10:22,760
+unfortunately, it works. The issue is
+
+290
+00:10:20,640 --> 00:10:24,880
+that everyone is also starting to use it
+
+291
+00:10:22,760 --> 00:10:27,240
+or I'm seeing it used a lot more.
+
+292
+00:10:24,880 --> 00:10:30,120
+>> When every app uses fake urgency
+
+293
+00:10:27,240 --> 00:10:30,680
+tactics, users eventually stop believing
+
+294
+00:10:30,120 --> 00:10:32,440
+it.
+
+295
+00:10:30,680 --> 00:10:34,200
+>> I think more and more users are getting
+
+296
+00:10:32,440 --> 00:10:35,680
+comfortable closing paywalls because
+
+297
+00:10:34,200 --> 00:10:37,360
+they know they're going to get some kind
+
+298
+00:10:35,680 --> 00:10:40,280
+of offer afterwards.
+
+299
+00:10:37,360 --> 00:10:42,520
+>> And in early 2026, Apple also started
+
+300
+00:10:40,280 --> 00:10:44,839
+rejecting paywall patterns that relied
+
+301
+00:10:42,520 --> 00:10:47,080
+on free trial toggles because some of
+
+302
+00:10:44,839 --> 00:10:48,080
+these were considered confusing or
+
+303
+00:10:47,080 --> 00:10:49,800
+misleading.
+
+304
+00:10:48,080 --> 00:10:50,480
+>> Just remember that this is a long-term
+
+305
+00:10:49,800 --> 00:10:52,600
+game.
+
+306
+00:10:50,480 --> 00:10:54,080
+>> Jonathan once worked with an AI
+
+307
+00:10:52,600 --> 00:10:56,440
+girlfriend app.
+
+308
+00:10:54,080 --> 00:10:58,960
+>> They had probably the ugliest paywall
+
+309
+00:10:56,440 --> 00:11:01,839
+I've ever seen and it was really compact
+
+310
+00:10:58,960 --> 00:11:04,080
+elements, very aggressive squeeze page
+
+311
+00:11:01,839 --> 00:11:06,560
+kind of paywall. So, that ended up
+
+312
+00:11:04,080 --> 00:11:08,120
+over-performing pretty much any paywall
+
+313
+00:11:06,560 --> 00:11:10,640
+that I tried to do.
+
+314
+00:11:08,120 --> 00:11:13,560
+>> Which means that there is literally no
+
+315
+00:11:10,640 --> 00:11:14,920
+universal best paywall, only better
+
+316
+00:11:13,560 --> 00:11:16,960
+experiments.
+
+317
+00:11:14,920 --> 00:11:19,360
+>> One thing that I learned from Jake and
+
+318
+00:11:16,960 --> 00:11:21,560
+Nick at Superwall was that design tests
+
+319
+00:11:19,360 --> 00:11:23,040
+move the needle the most. We ended up
+
+320
+00:11:21,560 --> 00:11:25,680
+running radically [music] different
+
+321
+00:11:23,040 --> 00:11:27,360
+designs until you find something that
+
+322
+00:11:25,680 --> 00:11:28,680
+blows everything out of the water. You
+
+323
+00:11:27,360 --> 00:11:30,680
+could have a video paywall, you could
+
+324
+00:11:28,680 --> 00:11:32,640
+have bullet list paywall, a trial
+
+325
+00:11:30,680 --> 00:11:33,240
+timeline paywall, a long-form [music]
+
+326
+00:11:32,640 --> 00:11:36,240
+paywall.
+
+327
+00:11:33,240 --> 00:11:38,480
+>> Test every copy, the pricing, the flow
+
+328
+00:11:36,240 --> 00:11:40,760
+until something clearly wins. Getting
+
+329
+00:11:38,480 --> 00:11:42,720
+people to subscribe is one thing.
+
+330
+00:11:40,760 --> 00:11:45,240
+Building something that people continues
+
+331
+00:11:42,720 --> 00:11:47,280
+to pay for [music] is much harder.
+
+332
+00:11:45,240 --> 00:11:49,840
+>> The metrics that I wish more founders
+
+333
+00:11:47,280 --> 00:11:52,120
+really care the most about is retention
+
+334
+00:11:49,840 --> 00:11:54,240
+and LTV. I think if retention and LTV
+
+335
+00:11:52,120 --> 00:11:56,000
+are good, you're building a good product
+
+336
+00:11:54,240 --> 00:11:58,360
+and you want to build good products so
+
+337
+00:11:56,000 --> 00:11:59,240
+that the ecosystem is flourishing in
+
+338
+00:11:58,360 --> 00:12:01,440
+itself. So,
+
+339
+00:11:59,240 --> 00:12:03,960
+>> maybe the question isn't how do I get
+
+340
+00:12:01,440 --> 00:12:05,960
+people to [music] pay? It's more of how
+
+341
+00:12:03,960 --> 00:12:07,040
+could I create something worth paying
+
+342
+00:12:05,960 --> 00:12:07,713
+for?
+
+343
+00:12:07,040 --> 00:12:07,720
+Fun fact,
+
+344
+00:12:07,713 --> 00:12:09,480
+>> [music]
+
+345
+00:12:07,720 --> 00:12:12,360
+>> it takes less than five screens to
+
+346
+00:12:09,480 --> 00:12:14,360
+subscribe to ClassPass, but 17 screens
+
+347
+00:12:12,360 --> 00:12:16,400
+to cancel. Let us know if you'd like us
+
+348
+00:12:14,360 --> 00:12:18,440
+to dive into cancellation flows or
+
+349
+00:12:16,400 --> 00:12:20,880
+anything else in the comments below.
+
+350
+00:12:18,440 --> 00:12:23,640
+Next, watch our breakdown on onboarding
+
+351
+00:12:20,880 --> 00:12:26,560
+flows, dashboard designs,
+
+352
+00:12:23,640 --> 00:12:29,200
+and the psychology behind streaks.
+
+353
+00:12:26,560 --> 00:12:29,200
+I'll see you there.
+
