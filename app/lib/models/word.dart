@@ -4,7 +4,8 @@ class WordFormItem {
   WordFormItem({required this.text, required this.isCommon, this.pitch = ''});
   final String text;
   final bool isCommon;
-  final String pitch; // pitch-accent pattern, e.g. "0" or "0,2" (empty if unknown)
+  final String
+      pitch; // pitch-accent pattern, e.g. "0" or "0,2" (empty if unknown)
 
   factory WordFormItem.fromJson(Map<String, dynamic> j) => WordFormItem(
         text: j['text'] as String? ?? '',
@@ -18,13 +19,18 @@ class ExampleItem {
   final String japanese;
   final String translation;
 
-  factory ExampleItem.fromJson(Map<String, dynamic> j) =>
-      ExampleItem(japanese: j['japanese'] as String? ?? '', translation: j['translation'] as String? ?? '');
+  factory ExampleItem.fromJson(Map<String, dynamic> j) => ExampleItem(
+      japanese: j['japanese'] as String? ?? '',
+      translation: j['translation'] as String? ?? '');
 }
 
 /// A JMnedict proper name (place, surname, company, …) returned alongside a search.
 class NameItem {
-  NameItem({required this.kanji, required this.reading, required this.translations, required this.types});
+  NameItem(
+      {required this.kanji,
+      required this.reading,
+      required this.translations,
+      required this.types});
   final String kanji;
   final String reading;
   final List<String> translations;
@@ -40,7 +46,9 @@ class NameItem {
             .map((e) => e['text']?.toString() ?? '')
             .where((text) => text.isNotEmpty)
             .toList(),
-        types: ((j['name_types'] as List?) ?? const []).map((e) => e.toString()).toList(),
+        types: ((j['name_types'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .toList(),
       );
 }
 
@@ -50,7 +58,8 @@ class SearchResults {
   final List<WordEntry> words;
   final List<NameItem> names;
 
-  static SearchResults empty() => SearchResults(words: const [], names: const []);
+  static SearchResults empty() =>
+      SearchResults(words: const [], names: const []);
 }
 
 class GlossItem {
@@ -58,8 +67,9 @@ class GlossItem {
   final String language;
   final String text;
 
-  factory GlossItem.fromJson(Map<String, dynamic> j) =>
-      GlossItem(language: j['language'] as String? ?? 'en', text: j['text'] as String? ?? '');
+  factory GlossItem.fromJson(Map<String, dynamic> j) => GlossItem(
+      language: j['language'] as String? ?? 'en',
+      text: j['text'] as String? ?? '');
 }
 
 class Sense {
@@ -68,7 +78,8 @@ class Sense {
   final List<GlossItem> glosses;
 
   factory Sense.fromJson(Map<String, dynamic> j) => Sense(
-        pos: ((j['pos'] as List?) ?? const []).map((e) => e.toString()).toList(),
+        pos:
+            ((j['pos'] as List?) ?? const []).map((e) => e.toString()).toList(),
         glosses: ((j['glosses'] as List?) ?? const [])
             .map((e) => GlossItem.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
@@ -76,9 +87,11 @@ class Sense {
 
   /// Glosses in the requested language, falling back to English then to all.
   List<String> glossesFor(String lang) {
-    final wanted = glosses.where((g) => g.language == lang).map((g) => g.text).toList();
+    final wanted =
+        glosses.where((g) => g.language == lang).map((g) => g.text).toList();
     if (wanted.isNotEmpty) return wanted;
-    final en = glosses.where((g) => g.language == 'en').map((g) => g.text).toList();
+    final en =
+        glosses.where((g) => g.language == 'en').map((g) => g.text).toList();
     return en.isNotEmpty ? en : glosses.map((g) => g.text).toList();
   }
 }
@@ -117,6 +130,14 @@ class WordEntry {
     return '';
   }
 
+  /// Meanings that have at least one definition in [lang] or its English
+  /// fallback. Some JMdict records contain metadata-only sense rows; they are
+  /// useful to preserve in the pack but must not render as empty numbered rows.
+  List<Sense> sensesFor(String lang) => [
+        for (final sense in senses)
+          if (sense.glossesFor(lang).isNotEmpty) sense,
+      ];
+
   factory WordEntry.fromJson(Map<String, dynamic> j) => WordEntry(
         id: (j['id'] as num).toInt(),
         isCommon: j['is_common'] as bool? ?? false,
@@ -124,10 +145,12 @@ class WordEntry {
         headword: j['headword'] as String? ?? '',
         primaryReading: j['primary_reading'] as String? ?? '',
         kanji: ((j['kanji'] as List?) ?? const [])
-            .map((e) => WordFormItem.fromJson((e as Map).cast<String, dynamic>()))
+            .map((e) =>
+                WordFormItem.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
         readings: ((j['readings'] as List?) ?? const [])
-            .map((e) => WordFormItem.fromJson((e as Map).cast<String, dynamic>()))
+            .map((e) =>
+                WordFormItem.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
         senses: ((j['senses'] as List?) ?? const [])
             .map((e) => Sense.fromJson((e as Map).cast<String, dynamic>()))
@@ -136,7 +159,8 @@ class WordEntry {
             .map((e) => KanjiEntry.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
         examples: ((j['examples'] as List?) ?? const [])
-            .map((e) => ExampleItem.fromJson((e as Map).cast<String, dynamic>()))
+            .map(
+                (e) => ExampleItem.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
       );
 }

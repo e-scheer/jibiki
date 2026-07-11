@@ -43,6 +43,31 @@ void main() {
       // Unknown language falls back to English.
       expect(w.summaryGloss('de'), 'to eat');
     });
+
+    test('sensesFor hides metadata-only senses without definitions', () {
+      final w = WordEntry.fromJson({
+        'id': 2,
+        'is_common': false,
+        'headword': '扉',
+        'primary_reading': 'とびら',
+        'kanji': const [],
+        'readings': const [],
+        'senses': [
+          {
+            'pos': ['n'],
+            'glosses': const []
+          },
+          {
+            'pos': const [],
+            'glosses': [
+              {'language': 'en', 'text': 'door'},
+            ],
+          },
+        ],
+      });
+      expect(w.sensesFor('en'), hasLength(1));
+      expect(w.sensesFor('en').single.glossesFor('en'), ['door']);
+    });
   });
 
   group('StudyCard.fromJson', () {
@@ -55,7 +80,12 @@ void main() {
         'due': '2026-07-05T12:00:00Z',
         'reps': 0,
         'lapses': 0,
-        'item': {'char': 'く', 'romaji': 'ku', 'script': 'hiragana', 'kind': 'gojuon'},
+        'item': {
+          'char': 'く',
+          'romaji': 'ku',
+          'script': 'hiragana',
+          'kind': 'gojuon'
+        },
       });
       expect(c.itemType, ItemType.kana);
       expect(c.front, 'く');

@@ -103,6 +103,7 @@ class _WordDetail extends StatelessWidget {
 
   Widget _content(BuildContext context, WordEntry word, String lang) {
     final jc = context.jc;
+    final senses = word.sensesFor(lang);
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
@@ -159,7 +160,7 @@ class _WordDetail extends StatelessWidget {
         const SizedBox(height: 20),
         Text(context.trText('Meanings'), style: context.text.titleMedium),
         const SizedBox(height: 8),
-        ...word.senses
+        ...senses
             .asMap()
             .entries
             .map((e) => _sense(context, e.key + 1, e.value, lang)),
