@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -151,7 +152,7 @@ class _ListenStageState extends State<ListenStage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Type what you hear',
+          Text(context.trText('Type what you hear'),
               style: TextStyle(
                   color: jc.muted,
                   fontSize: 13.5,
@@ -219,7 +220,7 @@ class _ListenStageState extends State<ListenStage> {
           width: double.infinity,
           child: FilledButton(
             onPressed: (full && !_checked) ? _check : null,
-            child: const Text('Check'),
+            child: Text(context.trText('Check')),
           ),
         ),
       ],

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -53,13 +54,15 @@ class _ProfileStep extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 8),
-        Text('How will you use jibiki?',
+        Text(context.trText('How will you use jibiki?'),
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall
                 ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
-        Text('Pick a starting point. You can change it anytime in Settings.',
+        Text(
+            context.trText(
+                'Pick a starting point. You can change it anytime in Settings.'),
             style: TextStyle(color: jc.muted)),
         const SizedBox(height: 20),
         for (final m in AppMode.values)
@@ -72,12 +75,14 @@ class _ProfileStep extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 12),
-        Text('Mnemonic language', style: Theme.of(context).textTheme.titleMedium),
+        Text(context.trText('Mnemonic language'),
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
-            'Kana mnemonics ride on sound, so they differ by language. Pick '
-            'yours even if it has no content yet - English backs you up, and '
-            'the community can draw the rest.',
+            context.trText(
+                'Kana mnemonics ride on sound, so they differ by language. Pick '
+                'yours even if it has no content yet - English backs you up, and '
+                'the community can draw the rest.'),
             style: TextStyle(color: jc.muted, fontSize: 13, height: 1.35)),
         const SizedBox(height: 10),
         Wrap(
@@ -92,7 +97,7 @@ class _ProfileStep extends StatelessWidget {
               ),
             ActionChip(
               avatar: const Icon(Icons.language, size: 18),
-              label: const Text('More…'),
+              label: Text(context.trText('More…')),
               onPressed: () async {
                 final picked =
                     await showMnemonicLanguagePicker(context, vm.language);
@@ -117,7 +122,8 @@ class _ProfileStep extends StatelessWidget {
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : Text(vm.hasDataStep ? 'Continue' : 'Start learning'),
         ),
       ],
@@ -146,16 +152,17 @@ class _DataStep extends StatelessWidget {
             ),
           ],
         ),
-        Text('Take it offline?',
+        Text(context.trText('Take it offline?'),
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall
                 ?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
         Text(
-            'The essentials are already on your phone - kana, JLPT kanji and '
-            'everyday words work with no connection. Add more now or later in '
-            'Settings.',
+            context.trText(
+                'The essentials are already on your phone - kana, JLPT kanji and '
+                'everyday words work with no connection. Add more now or later in '
+                'Settings.'),
             style: TextStyle(color: jc.muted, height: 1.4)),
         const SizedBox(height: 20),
         if (!vm.offersLoaded)
@@ -172,14 +179,13 @@ class _DataStep extends StatelessWidget {
         const SizedBox(height: 16),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: jc.brand),
-          onPressed: vm.isLoading
-              ? null
-              : () => vm.finish(download: true),
+          onPressed: vm.isLoading ? null : () => vm.finish(download: true),
           child: vm.isLoading
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : Text(vm.offers.any((o) => o.selected)
                   ? 'Download & start'
                   : 'Start learning'),
@@ -187,7 +193,7 @@ class _DataStep extends StatelessWidget {
         const SizedBox(height: 8),
         TextButton(
           onPressed: vm.isLoading ? null : () => vm.finish(),
-          child: const Text('Skip - download later in Settings'),
+          child: Text(context.trText('Skip - download later in Settings')),
         ),
       ],
     );
@@ -225,13 +231,13 @@ class _OfferCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                      size == null ? offer.title : '${offer.title} · $size',
-                      style:
-                          const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  Text(size == null ? offer.title : '${offer.title} · $size',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 15)),
                   const SizedBox(height: 4),
                   Text(offer.blurb,
-                      style: TextStyle(color: jc.muted, fontSize: 13, height: 1.35)),
+                      style: TextStyle(
+                          color: jc.muted, fontSize: 13, height: 1.35)),
                 ],
               ),
             ),
@@ -247,7 +253,8 @@ class _OfferCard extends StatelessWidget {
 }
 
 class _ModeCard extends StatelessWidget {
-  const _ModeCard({required this.mode, required this.selected, required this.onTap});
+  const _ModeCard(
+      {required this.mode, required this.selected, required this.onTap});
   final AppMode mode;
   final bool selected;
   final VoidCallback onTap;
@@ -285,10 +292,12 @@ class _ModeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(mode.label,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 16)),
                   const SizedBox(height: 4),
                   Text(mode.blurb,
-                      style: TextStyle(color: jc.muted, fontSize: 13, height: 1.35)),
+                      style: TextStyle(
+                          color: jc.muted, fontSize: 13, height: 1.35)),
                 ],
               ),
             ),

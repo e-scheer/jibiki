@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -345,12 +346,12 @@ class _BottomBar extends StatelessWidget {
               onSay();
             },
             icon: Icon(Icons.volume_up_rounded, color: jc.brand),
-            tooltip: 'Play audio',
+            tooltip: context.trText('Play audio'),
           ),
           IconButton(
             onPressed: onDraw,
             icon: Icon(Icons.edit_outlined, color: jc.brand),
-            tooltip: 'Draw a mascot',
+            tooltip: context.trText('Draw a mascot'),
           ),
         ],
       ),

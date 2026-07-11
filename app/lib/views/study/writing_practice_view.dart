@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -46,13 +47,20 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Stroke order', style: ctx.text.titleMedium),
+            Text(context.trText('Stroke order'), style: ctx.text.titleMedium),
             const SizedBox(height: 8),
-            StrokeOrderView(paths: widget.strokePaths, viewBox: widget.strokeViewBox, size: 220),
+            StrokeOrderView(
+                paths: widget.strokePaths,
+                viewBox: widget.strokeViewBox,
+                size: 220),
             if (widget.reading.isNotEmpty)
-              Text(widget.reading, style: TextStyle(color: ctx.jc.brand, fontWeight: FontWeight.w600)),
+              Text(widget.reading,
+                  style: TextStyle(
+                      color: ctx.jc.brand, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
-            FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('Got it')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(context.trText('Got it'))),
           ],
         ),
       ),
@@ -63,7 +71,8 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
   Widget build(BuildContext context) {
     final jc = context.jc;
     return Scaffold(
-      appBar: AppBar(title: Text('Write · ${widget.character}')),
+      appBar:
+          AppBar(title: Text(context.trText('Write · ${widget.character}'))),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -83,17 +92,25 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Write the character for', style: TextStyle(color: jc.muted, fontSize: 12.5)),
+                          Text(context.trText('Write the character for'),
+                              style:
+                                  TextStyle(color: jc.muted, fontSize: 12.5)),
                           const SizedBox(height: 4),
                           Text(widget.meaning, style: context.text.titleLarge),
                           if (widget.reading.isNotEmpty)
-                            Text(widget.reading, style: TextStyle(color: jc.brand, fontWeight: FontWeight.w600)),
+                            Text(widget.reading,
+                                style: TextStyle(
+                                    color: jc.brand,
+                                    fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
                     if (!_showGuide)
                       Text(widget.character,
-                          style: TextStyle(fontSize: 40, color: jc.hairline, fontWeight: FontWeight.w700)),
+                          style: TextStyle(
+                              fontSize: 40,
+                              color: jc.hairline,
+                              fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -115,12 +132,16 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _Tool(icon: Icons.undo, label: 'Undo', onTap: _controller.undo),
+                  _Tool(
+                      icon: Icons.undo, label: 'Undo', onTap: _controller.undo),
                   const SizedBox(width: 8),
-                  _Tool(icon: Icons.layers_clear_outlined, label: 'Clear', onTap: _controller.clear),
+                  _Tool(
+                      icon: Icons.layers_clear_outlined,
+                      label: 'Clear',
+                      onTap: _controller.clear),
                   const SizedBox(width: 8),
                   FilterChip(
-                    label: const Text('Guide'),
+                    label: Text(context.trText('Guide')),
                     selected: _showGuide,
                     onSelected: (v) => setState(() => _showGuide = v),
                   ),
@@ -129,9 +150,10 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: _reveal,
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52)),
                 icon: const Icon(Icons.gesture),
-                label: const Text('Reveal stroke order'),
+                label: Text(context.trText('Reveal stroke order')),
               ),
             ],
           ),

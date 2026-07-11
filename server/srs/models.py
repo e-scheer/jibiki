@@ -13,21 +13,22 @@ from __future__ import annotations
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .fsrs import LEARNING, NEW, REVIEW, MemoryState
 
 
 class ItemType(models.TextChoices):
-    WORD = "word", "Word"
-    KANJI = "kanji", "Kanji"
-    KANA = "kana", "Kana"
+    WORD = "word", _("Word")
+    KANJI = "kanji", _("Kanji")
+    KANA = "kana", _("Kana")
 
 
 class State(models.IntegerChoices):
-    NEW = 0, "New"
-    LEARNING = 1, "Learning"
-    REVIEW = 2, "Review"
-    RELEARNING = 3, "Relearning"
+    NEW = 0, _("New")
+    LEARNING = 1, _("Learning")
+    REVIEW = 2, _("Review")
+    RELEARNING = 3, _("Relearning")
 
 
 class CardQuerySet(models.QuerySet):

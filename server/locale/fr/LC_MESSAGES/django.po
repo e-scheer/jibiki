@@ -1,0 +1,128 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "This feature requires an active subscription."
+msgstr "Cette fonctionnalité nécessite un abonnement actif."
+
+msgid "'%(value)s' is not an ISO 639-1 language code."
+msgstr "« %(value)s » n’est pas un code de langue ISO 639-1."
+
+msgid "Unsupported interface language."
+msgstr "Langue d’interface non prise en charge."
+
+msgid "Desired retention must be between 0.70 and 0.97."
+msgstr "La rétention souhaitée doit être comprise entre 0,70 et 0,97."
+
+msgid "Tell us a little more."
+msgstr "Dites-nous-en un peu plus."
+
+msgid "Content pack manifest is invalid."
+msgstr "Le manifeste du pack de contenu est invalide."
+
+msgid "No content packs available."
+msgstr "Aucun pack de contenu disponible."
+
+msgid "Image exceeds the %(size)s MB limit."
+msgstr "L’image dépasse la limite de %(size)s Mo."
+
+msgid "A reading mnemonic requires a reading."
+msgstr "Une mnémotechnique de lecture nécessite une lecture."
+
+msgid "Only reading mnemonics can carry a reading."
+msgstr "Seules les mnémotechniques de lecture peuvent contenir une lecture."
+
+msgid "Cloud replacement requires an initial sync."
+msgstr "Le remplacement du cloud nécessite une synchronisation initiale."
+
+msgid "Character is required."
+msgstr "Le caractère est obligatoire."
+
+msgid "Uploaded file is not a valid image."
+msgstr "Le fichier envoyé n’est pas une image valide."
+
+msgid "Not found."
+msgstr "Introuvable."
+
+msgid "Characters must be a list."
+msgstr "Les caractères doivent former une liste."
+
+msgid "Authentication required."
+msgstr "Authentification requise."
+
+msgid "Unknown study item."
+msgstr "Élément d’étude inconnu."
+
+msgid "Unknown deck."
+msgstr "Deck inconnu."
+
+msgid "Idea"
+msgstr "Idée"
+
+msgid "Bug"
+msgstr "Bug"
+
+msgid "Love"
+msgstr "Coup de cœur"
+
+msgid "Other"
+msgstr "Autre"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "Seen"
+msgstr "Vu"
+
+msgid "Done"
+msgstr "Terminé"
+
+msgid "Kanji"
+msgstr "Kanji"
+
+msgid "Kana"
+msgstr "Kana"
+
+msgid "Word"
+msgstr "Mot"
+
+msgid "Something is wrong"
+msgstr "Quelque chose est incorrect"
+
+msgid "Something is missing"
+msgstr "Quelque chose manque"
+
+msgid "Typo or formatting"
+msgstr "Faute ou mise en forme"
+
+msgid "Something else"
+msgstr "Autre chose"
+
+msgid "Learning"
+msgstr "En apprentissage"
+
+msgid "Review"
+msgstr "Révision"
+
+msgid "Relearning"
+msgstr "Réapprentissage"
+
+msgid "Hiragana"
+msgstr "Hiragana"
+
+msgid "Katakana"
+msgstr "Katakana"
+
+msgid "Gojūon"
+msgstr "Gojūon"
+
+msgid "Dakuten"
+msgstr "Dakuten"
+
+msgid "Handakuten"
+msgstr "Handakuten"
+
+msgid "Yōon"
+msgstr "Yōon"

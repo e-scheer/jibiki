@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -105,13 +106,16 @@ class _MatchStageState extends State<MatchStage> {
           children: [
             Row(
               children: [
-                Text('Find the pairs', style: context.text.titleMedium),
+                Text(context.trText('Find the pairs'),
+                    style: context.text.titleMedium),
                 const Spacer(),
                 _PairPips(done: _pairsDone, total: total),
               ],
             ),
             const SizedBox(height: 4),
-            Text('Flip two tiles to match a character with its meaning.',
+            Text(
+                context.trText(
+                    'Flip two tiles to match a character with its meaning.'),
                 style: TextStyle(color: jc.muted, fontSize: 13),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),

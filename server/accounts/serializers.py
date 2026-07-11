@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from .models import UserProfile
@@ -15,6 +16,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "mode",
             "display_name",
             "mnemonic_language",
+            "interface_language",
             "desired_retention",
             "new_cards_per_day",
             "timezone",
@@ -36,10 +38,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return validate_language_code(value)
 
+    def validate_interface_language(self, value: str) -> str:
+        value = value.lower().split("-")[0].split("_")[0]
+        if value not in {"en", "fr"}:
+            raise serializers.ValidationError(_("Unsupported interface language."))
+        return value
+
     def validate_desired_retention(self, value: float) -> float:
         # FSRS is only sane in this band; outside it the interval solver degenerates.
         if not (0.7 <= value <= 0.97):
-            raise serializers.ValidationError("desired_retention must be between 0.70 and 0.97")
+            raise serializers.ValidationError(
+                _("Desired retention must be between 0.70 and 0.97.")
+            )
         return value
 
 

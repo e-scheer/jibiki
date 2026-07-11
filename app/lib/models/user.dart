@@ -6,6 +6,7 @@ class UserProfile {
     required this.mode,
     required this.displayName,
     required this.mnemonicLanguage,
+    required this.interfaceLanguage,
     required this.desiredRetention,
     required this.newCardsPerDay,
     required this.timezone,
@@ -18,6 +19,7 @@ class UserProfile {
   final AppMode mode;
   final String displayName;
   final String mnemonicLanguage;
+  final String interfaceLanguage;
   final double desiredRetention;
   final int newCardsPerDay;
   final String timezone;
@@ -32,7 +34,9 @@ class UserProfile {
         mode: AppMode.fromString(json['mode'] as String?),
         displayName: (json['display_name'] as String?) ?? '',
         mnemonicLanguage: (json['mnemonic_language'] as String?) ?? 'en',
-        desiredRetention: (json['desired_retention'] as num?)?.toDouble() ?? 0.9,
+        interfaceLanguage: (json['interface_language'] as String?) ?? 'en',
+        desiredRetention:
+            (json['desired_retention'] as num?)?.toDouble() ?? 0.9,
         newCardsPerDay: (json['new_cards_per_day'] as num?)?.toInt() ?? 15,
         timezone: (json['timezone'] as String?) ?? 'UTC',
         notificationsEnabled: (json['notifications_enabled'] as bool?) ?? false,
@@ -49,6 +53,7 @@ class UserProfile {
         'mode': mode.wire,
         'display_name': displayName,
         'mnemonic_language': mnemonicLanguage,
+        'interface_language': interfaceLanguage,
         'desired_retention': desiredRetention,
         'new_cards_per_day': newCardsPerDay,
         'timezone': timezone,
@@ -58,10 +63,15 @@ class UserProfile {
         'plan_expires_at': planExpiresAt?.toUtc().toIso8601String(),
       };
 
-  UserProfile copyWith({AppMode? mode, String? mnemonicLanguage}) => UserProfile(
+  UserProfile copyWith(
+          {AppMode? mode,
+          String? mnemonicLanguage,
+          String? interfaceLanguage}) =>
+      UserProfile(
         mode: mode ?? this.mode,
         displayName: displayName,
         mnemonicLanguage: mnemonicLanguage ?? this.mnemonicLanguage,
+        interfaceLanguage: interfaceLanguage ?? this.interfaceLanguage,
         desiredRetention: desiredRetention,
         newCardsPerDay: newCardsPerDay,
         timezone: timezone,

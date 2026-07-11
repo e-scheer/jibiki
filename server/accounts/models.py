@@ -91,6 +91,7 @@ class UserProfile(models.Model):
     # mnemonics are sound-associations, so a French speaker keys off "coucou"
     # where an English speaker keys off "cuckoo" (DEEP_SEARCH feature 6).
     mnemonic_language = models.CharField(max_length=8, default="en")
+    interface_language = models.CharField(max_length=8, default="en")
 
     # SRS knobs (DEEP_SEARCH feature 1). desired_retention feeds FSRS's interval
     # solver; new_cards_per_day bounds the daily intake; timezone drives when

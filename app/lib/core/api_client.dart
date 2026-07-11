@@ -20,6 +20,7 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          options.headers['Accept-Language'] = _interfaceLanguage;
           final token = _session.token;
           if (token != null && token.isNotEmpty) {
             options.headers['X-Session-Token'] = token;
@@ -32,6 +33,11 @@ class ApiClient {
 
   final Dio _dio;
   final SessionStore _session;
+  String _interfaceLanguage = 'en';
+
+  void setInterfaceLanguage(String language) {
+    _interfaceLanguage = language == 'fr' ? 'fr' : 'en';
+  }
 
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>
       _request(() => _dio.get(path, queryParameters: query));
@@ -49,7 +55,8 @@ class ApiClient {
     }
   }
 
-  Future<dynamic> post(String path, {Object? data, Map<String, dynamic>? query}) =>
+  Future<dynamic> post(String path,
+          {Object? data, Map<String, dynamic>? query}) =>
       _request(() => _dio.post(path, data: data, queryParameters: query));
 
   Future<dynamic> patch(String path, {Object? data}) =>
@@ -81,13 +88,16 @@ class ApiClient {
     final status = resp?.statusCode;
     if (resp == null) {
       return ApiException(
-        'Network error. Is the API reachable at ${ApiConfig.baseUrl}?',
+        _interfaceLanguage == 'fr'
+            ? 'Erreur réseau. Le service est-il accessible à ${ApiConfig.baseUrl} ?'
+            : 'Network error. Is the API reachable at ${ApiConfig.baseUrl}?',
         statusCode: null,
       );
     }
     final data = resp.data;
     final fieldErrors = _fieldErrors(data);
-    return ApiException(_message(data, status), statusCode: status, fieldErrors: fieldErrors);
+    return ApiException(_message(data, status),
+        statusCode: status, fieldErrors: fieldErrors);
   }
 
   String _message(dynamic data, int? status) {
@@ -98,11 +108,22 @@ class ApiClient {
       final errors = data['errors'];
       if (errors is List && errors.isNotEmpty) {
         final first = errors.first;
-        if (first is Map && first['message'] is String) return first['message'] as String;
+        if (first is Map && first['message'] is String) {
+          return first['message'] as String;
+        }
       }
       // DRF field errors: surface the first one.
       final fe = _fieldErrors(data);
       if (fe != null && fe.isNotEmpty) return fe.values.first.first;
+    }
+    if (_interfaceLanguage == 'fr') {
+      return switch (status) {
+        400 => 'Requête invalide.',
+        401 || 403 => 'Connectez-vous pour continuer.',
+        404 => 'Introuvable.',
+        429 => 'Trop de requêtes, réessayez dans un instant.',
+        _ => 'Une erreur est survenue (HTTP $status).',
+      };
     }
     return switch (status) {
       400 => 'Invalid request.',
@@ -130,7 +151,9 @@ class ApiClient {
     data.forEach((key, value) {
       if (key == 'detail' || key == 'errors' || key == 'status') return;
       if (value is List) {
-        out.putIfAbsent(key.toString(), () => []).addAll(value.map((v) => v.toString()));
+        out
+            .putIfAbsent(key.toString(), () => [])
+            .addAll(value.map((v) => v.toString()));
       } else if (value is String) {
         out.putIfAbsent(key.toString(), () => []).add(value);
       }

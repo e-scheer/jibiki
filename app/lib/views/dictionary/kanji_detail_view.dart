@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -73,16 +74,19 @@ class _KanjiDetail extends StatelessWidget {
     final k = vm.kanji;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kanji'),
+        title: Text(context.trText('Kanji')),
         actions: k == null
             ? null
             : [
                 ReportItemAction(
-                    type: ReportItemType.kanji, itemRef: k.literal, label: k.literal),
+                    type: ReportItemType.kanji,
+                    itemRef: k.literal,
+                    label: k.literal),
               ],
       ),
-      bottomNavigationBar:
-          k == null ? null : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
+      bottomNavigationBar: k == null
+          ? null
+          : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
       body: BoundedContent(
         child: vm.isLoading
             ? const LoadingView()
@@ -104,10 +108,16 @@ class _KanjiDetail extends StatelessWidget {
         Center(
           child: k.hasStrokes
               ? StrokeOrderView(paths: k.strokePaths, viewBox: k.strokeViewbox)
-              : Text(k.literal, style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w600, height: 1.05)),
+              : Text(k.literal,
+                  style: const TextStyle(
+                      fontSize: 96, fontWeight: FontWeight.w600, height: 1.05)),
         ),
-        Center(child: Text(k.meaningsFor(lang).join(', '), style: const TextStyle(fontSize: 18))),
-        Center(child: SpeechButton(text: _readAloud(k), tooltip: 'Play reading')),
+        Center(
+            child: Text(k.meaningsFor(lang).join(', '),
+                style: const TextStyle(fontSize: 18))),
+        Center(
+            child: SpeechButton(
+                text: _readAloud(k), tooltip: context.trText('Play reading'))),
         if (k.hasStrokes) ...[
           const SizedBox(height: 12),
           Center(
@@ -116,13 +126,14 @@ class _KanjiDetail extends StatelessWidget {
                 builder: (_) => WritingPracticeView(
                   character: k.literal,
                   meaning: k.meaningsFor(lang).take(2).join(', '),
-                  reading: [...k.kunReadings, ...k.onReadings].take(2).join('  '),
+                  reading:
+                      [...k.kunReadings, ...k.onReadings].take(2).join('  '),
                   strokePaths: k.strokePaths,
                   strokeViewBox: k.strokeViewbox,
                 ),
               )),
               icon: const Icon(Icons.edit_outlined, size: 18),
-              label: const Text('Practice writing'),
+              label: Text(context.trText('Practice writing')),
             ),
           ),
         ],
@@ -141,7 +152,8 @@ class _KanjiDetail extends StatelessWidget {
         ReadingMnemonicSection(character: k.literal, language: lang),
         if (k.componentDetails.isNotEmpty) ...[
           const SizedBox(height: 16),
-          Text('Composition', style: Theme.of(context).textTheme.titleMedium),
+          Text(context.trText('Composition'),
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -151,7 +163,8 @@ class _KanjiDetail extends StatelessWidget {
               return ActionChip(
                 avatar: Text(c.literal, style: const TextStyle(fontSize: 20)),
                 label: Text(c.meaning.isEmpty ? c.literal : c.meaning),
-                onPressed: tappable ? () => context.push('/kanji/${c.literal}') : null,
+                onPressed:
+                    tappable ? () => context.push('/kanji/${c.literal}') : null,
               );
             }).toList(),
           ),
@@ -164,10 +177,14 @@ class _KanjiDetail extends StatelessWidget {
         const MnemonicPanel(),
         if (words.isNotEmpty) ...[
           const SizedBox(height: 20),
-          Text('Words with ${k.literal}', style: context.text.titleMedium),
+          Text(context.trText('Words with ${k.literal}'),
+              style: context.text.titleMedium),
           const SizedBox(height: 4),
           for (final w in words) ...[
-            WordTile(word: w, lang: lang, onTap: () => context.push('/word/${w.id}')),
+            WordTile(
+                word: w,
+                lang: lang,
+                onTap: () => context.push('/word/${w.id}')),
             if (w != words.last) Divider(height: 1, color: context.jc.hairline),
           ],
         ],
@@ -182,9 +199,15 @@ class _KanjiDetail extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 40, child: Text(label, style: TextStyle(color: jc.muted, fontWeight: FontWeight.w600))),
+          SizedBox(
+              width: 40,
+              child: Text(label,
+                  style:
+                      TextStyle(color: jc.muted, fontWeight: FontWeight.w600))),
           const SizedBox(width: 8),
-          Expanded(child: Text(readings.join('  ·  '), style: const TextStyle(fontSize: 16))),
+          Expanded(
+              child: Text(readings.join('  ·  '),
+                  style: const TextStyle(fontSize: 16))),
         ],
       ),
     );

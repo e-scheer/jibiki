@@ -26,6 +26,7 @@ from datetime import timedelta
 from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
+from django.utils.translation import gettext
 from rest_framework import serializers as drf_serializers
 
 from accounts.serializers import ProfileSerializer
@@ -69,7 +70,11 @@ def apply_sync(user, data: dict) -> dict:
     if mode == "replace_cloud":
         if cursor is not None:
             raise drf_serializers.ValidationError(
-                {"last_synced_at": "Cloud replacement requires an initial sync."}
+                {
+                    "last_synced_at": gettext(
+                        "Cloud replacement requires an initial sync."
+                    )
+                }
             )
         _clear_study_cloud(user)
 

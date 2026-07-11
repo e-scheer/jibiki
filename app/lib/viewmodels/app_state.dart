@@ -56,6 +56,7 @@ class AppState extends ChangeNotifier {
 
   AppMode get mode => profile?.mode ?? AppMode.middle;
   String get mnemonicLanguage => profile?.mnemonicLanguage ?? fallbackLanguage;
+  String get interfaceLanguage => profile?.interfaceLanguage ?? 'en';
   UserProfile? get profile =>
       _user?.profile ?? (_localOnly ? _localProfile ?? _defaultProfile : null);
 
@@ -166,8 +167,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> completeOnboarding({required AppMode mode, required String mnemonicLanguage}) async {
-    await updateProfile({'mode': mode.wire, 'mnemonic_language': mnemonicLanguage});
+  Future<void> completeOnboarding(
+      {required AppMode mode, required String mnemonicLanguage}) async {
+    await updateProfile(
+        {'mode': mode.wire, 'mnemonic_language': mnemonicLanguage});
     await _auth.setOnboarded(true);
     notifyListeners();
   }

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,11 @@ class KanaChartView extends StatelessWidget {
 /// Passed down to each cell: which chars are already carded (for the badge), and,
 /// in select mode, which are picked plus how to toggle them.
 class _Selection {
-  const _Selection({required this.active, required this.chars, required this.states, required this.onToggle});
+  const _Selection(
+      {required this.active,
+      required this.chars,
+      required this.states,
+      required this.onToggle});
   final bool active;
   final Set<String> chars;
   final Map<String, int> states;
@@ -74,7 +79,9 @@ class _KanaChartState extends State<_KanaChart> {
 
   Future<void> _loadStates() async {
     try {
-      final s = await context.read<StudyRepository>().studyStates(type: ItemType.kana);
+      final s = await context
+          .read<StudyRepository>()
+          .studyStates(type: ItemType.kana);
       if (mounted) setState(() => _states = s);
     } catch (_) {
       // No study state (e.g. offline) just means no badges - never block the chart.
@@ -110,7 +117,8 @@ class _KanaChartState extends State<_KanaChart> {
     setState(() => _busy = true);
     final items = [for (final c in _selected) (type: ItemType.kana, ref: c)];
     try {
-      final summary = await context.read<StudyRepository>().bulkAdd(items, known: known);
+      final summary =
+          await context.read<StudyRepository>().bulkAdd(items, known: known);
       if (!mounted) return;
       await _loadStates();
       if (!mounted) return;
@@ -121,12 +129,14 @@ class _KanaChartState extends State<_KanaChart> {
         _busy = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(known ? 'Marked $n as known' : 'Added $n to study')),
+        SnackBar(
+            content: Text(known ? 'Marked $n as known' : 'Added $n to study')),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not update your deck')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(context.trText('Could not update your deck'))));
     }
   }
 
@@ -143,26 +153,30 @@ class _KanaChartState extends State<_KanaChart> {
     return Scaffold(
       appBar: AppBar(
         leading: _selecting
-            ? IconButton(icon: const Icon(Icons.close), tooltip: 'Cancel', onPressed: _exitSelect)
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: context.trText('Cancel'),
+                onPressed: _exitSelect)
             : null,
         title: Text(_selecting ? '${_selected.length} selected' : 'Kana'),
         actions: _selecting
             ? [
                 TextButton(
-                  onPressed: vm.current.isEmpty ? null : () => _selectAllVisible(vm),
-                  child: const Text('Select all'),
+                  onPressed:
+                      vm.current.isEmpty ? null : () => _selectAllVisible(vm),
+                  child: Text(context.trText('Select all')),
                 ),
               ]
             : [
                 if (vm.current.isNotEmpty)
                   IconButton(
-                    tooltip: 'Select kana',
+                    tooltip: context.trText('Select kana'),
                     icon: const Icon(Icons.checklist_rounded),
                     onPressed: _enterSelect,
                   ),
                 if (vm.current.isNotEmpty)
                   IconButton(
-                    tooltip: 'Learn with mnemonics',
+                    tooltip: context.trText('Learn with mnemonics'),
                     icon: const Icon(Icons.auto_stories_outlined),
                     onPressed: () {
                       final lang = context.read<AppState>().mnemonicLanguage;
@@ -180,7 +194,7 @@ class _KanaChartState extends State<_KanaChart> {
                     },
                   ),
                 IconButton(
-                  tooltip: 'Settings',
+                  tooltip: context.trText('Settings'),
                   icon: const Icon(Icons.settings_outlined),
                   onPressed: () => context.push('/settings'),
                 ),
@@ -225,8 +239,10 @@ class _KanaChartState extends State<_KanaChart> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
-                            'Tap the checklist to pick kana, then mark the ones you know or add the rest to learn.',
-                            style: TextStyle(color: context.jc.muted, fontSize: 12.5),
+                            context.trText(
+                                'Tap the checklist to pick kana, then mark the ones you know or add the rest to learn.'),
+                            style: TextStyle(
+                                color: context.jc.muted, fontSize: 12.5),
                           ),
                         ),
                       _KanaMatrix(items: vm.byKind('gojuon'), sel: sel),
@@ -234,7 +250,8 @@ class _KanaChartState extends State<_KanaChart> {
                         if (vm.byKind(entry.key).isNotEmpty) ...[
                           Padding(
                             padding: const EdgeInsets.only(top: 22, bottom: 6),
-                            child: Text(entry.value, style: context.text.titleMedium),
+                            child: Text(entry.value,
+                                style: context.text.titleMedium),
                           ),
                           _KanaMatrix(items: vm.byKind(entry.key), sel: sel),
                         ],
@@ -262,13 +279,15 @@ class _ScriptToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final index = _opts.indexWhere((o) => o.value == script).clamp(0, _opts.length - 1);
+    final index =
+        _opts.indexWhere((o) => o.value == script).clamp(0, _opts.length - 1);
     // -1 (first) … +1 (last): the alignment the pill slides to.
     final x = -1.0 + index * (2.0 / (_opts.length - 1));
 
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
+      decoration: BoxDecoration(
+          color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
       child: SizedBox(
         height: 34,
         child: Stack(
@@ -282,8 +301,9 @@ class _ScriptToggle extends StatelessWidget {
                 widthFactor: 1 / _opts.length,
                 heightFactor: 1,
                 child: DecoratedBox(
-                  decoration:
-                      BoxDecoration(color: jc.brand, borderRadius: BorderRadius.circular(Radii.sm)),
+                  decoration: BoxDecoration(
+                      color: jc.brand,
+                      borderRadius: BorderRadius.circular(Radii.sm)),
                 ),
               ),
             ),
@@ -360,19 +380,25 @@ class _KanaMatrix extends StatelessWidget {
       if (cur == null || k.order < cur) rowMinOrder[k.row] = k.order;
     }
     for (final list in byKey.values) {
-      list.sort((a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
+      list.sort(
+          (a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
     }
-    noVowel.sort((a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
+    noVowel
+        .sort((a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
     final rows = rowMinOrder.keys.toList()
       ..sort((a, b) => rowMinOrder[a]!.compareTo(rowMinOrder[b]!));
 
-    final headerStyle = TextStyle(color: jc.muted, fontWeight: FontWeight.w800, fontSize: 12);
+    final headerStyle =
+        TextStyle(color: jc.muted, fontWeight: FontWeight.w800, fontSize: 12);
 
     Widget cell(List<KanaEntry>? entries) {
       if (entries == null || entries.isEmpty) {
-        return const Expanded(child: Padding(padding: EdgeInsets.all(2.5), child: SizedBox(height: 56)));
+        return const Expanded(
+            child: Padding(
+                padding: EdgeInsets.all(2.5), child: SizedBox(height: 56)));
       }
-      final picked = sel.active && entries.map((e) => e.char).every(sel.contains);
+      final picked =
+          sel.active && entries.map((e) => e.char).every(sel.contains);
       // Study status = the furthest-along state among this cell's glyphs.
       int? maxState;
       for (final e in entries) {
@@ -399,7 +425,10 @@ class _KanaMatrix extends StatelessWidget {
         Row(
           children: [
             const SizedBox(width: 20),
-            for (final v in _vowels) Expanded(child: Center(child: Text(v.toUpperCase(), style: headerStyle))),
+            for (final v in _vowels)
+              Expanded(
+                  child:
+                      Center(child: Text(v.toUpperCase(), style: headerStyle))),
           ],
         ),
         const SizedBox(height: 4),
@@ -408,7 +437,9 @@ class _KanaMatrix extends StatelessWidget {
             children: [
               SizedBox(
                 width: 20,
-                child: Center(child: Text(_rowLabel[r] ?? r.toUpperCase(), style: headerStyle)),
+                child: Center(
+                    child: Text(_rowLabel[r] ?? r.toUpperCase(),
+                        style: headerStyle)),
               ),
               for (final v in _vowels) cell(byKey['$r$v']),
             ],
@@ -425,4 +456,3 @@ class _KanaMatrix extends StatelessWidget {
     );
   }
 }
-

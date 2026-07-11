@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -73,35 +74,52 @@ class _LoginFormState extends State<_LoginForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('字', style: TextStyle(fontSize: 56, color: context.jc.brand, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                    Text(context.trText('字'),
+                        style: TextStyle(
+                            fontSize: 56,
+                            color: context.jc.brand,
+                            fontWeight: FontWeight.w600),
+                        textAlign: TextAlign.center),
                     const SizedBox(height: 4),
-                    Text('Welcome back', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+                    Text(context.trText('Welcome back'),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        textAlign: TextAlign.center),
                     const SizedBox(height: 28),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
-                      validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                      decoration: InputDecoration(
+                          labelText: context.trText('Email'),
+                          prefixIcon: const Icon(Icons.mail_outline)),
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? context.trText('Enter a valid email')
+                          : null,
                     ),
                     const SizedBox(height: 14),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
-                      decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
-                      validator: (v) => (v == null || v.length < 6) ? 'At least 6 characters' : null,
+                      decoration: InputDecoration(
+                          labelText: context.trText('Password'),
+                          prefixIcon: const Icon(Icons.lock_outline)),
+                      validator: (v) => (v == null || v.length < 6)
+                          ? context.trText('At least 6 characters')
+                          : null,
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     if (vm.hasError) ...[
                       const SizedBox(height: 12),
-                      Text(vm.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      Text(vm.error!,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
                     ],
                     if (DevLogin.enabled) ...[
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Text('DEV',
+                          Text(context.trText('DEV'),
                               style: TextStyle(
                                   color: context.jc.muted,
                                   fontSize: 11,
@@ -131,8 +149,11 @@ class _LoginFormState extends State<_LoginForm> {
                     FilledButton(
                       onPressed: vm.isLoading ? null : _submit,
                       child: vm.isLoading
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Sign in'),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : Text(context.trText('Sign in')),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -145,7 +166,8 @@ class _LoginFormState extends State<_LoginForm> {
                     TextButton(
                       onPressed: () =>
                           context.read<AppState>().continueWithoutAccount(),
-                      child: const Text('Continue without an account'),
+                      child:
+                          Text(context.trText('Continue without an account')),
                     ),
                   ],
                 ),

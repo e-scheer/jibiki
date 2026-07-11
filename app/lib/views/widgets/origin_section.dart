@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,7 +26,7 @@ class KanjiOriginSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('Origin', style: context.text.titleMedium),
+            Text(context.trText('Origin'), style: context.text.titleMedium),
             if (k.formation.isNotEmpty) ...[
               const SizedBox(width: 8),
               _FormationBadge(formation: k.formation),
@@ -50,7 +51,7 @@ class KanjiOriginSection extends StatelessWidget {
                 _PhoneticCallout(phonetic: k.phonetic, self: k.literal),
               ],
               const SizedBox(height: 12),
-              Text('Glyph origin from Wiktionary · CC BY-SA',
+              Text(context.trText('Glyph origin from Wiktionary · CC BY-SA'),
                   style: TextStyle(color: jc.muted, fontSize: 11)),
             ],
           ),
@@ -89,7 +90,8 @@ class _FormationBadge extends StatelessWidget {
       ),
       child: Text(
         jp.isEmpty ? label : '$label · $jp',
-        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: color),
+        style: TextStyle(
+            fontSize: 11.5, fontWeight: FontWeight.w700, color: color),
       ),
     );
   }
@@ -127,18 +129,27 @@ class _PhoneticCallout extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Radii.sm),
               ),
               child: Text(phonetic,
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: jc.ink, height: 1.0)),
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: jc.ink,
+                      height: 1.0)),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('音符 · sound component',
-                      style: TextStyle(color: jc.brand, fontWeight: FontWeight.w800, fontSize: 12.5)),
+                  Text(context.trText('音符 · sound component'),
+                      style: TextStyle(
+                          color: jc.brand,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12.5)),
                   const SizedBox(height: 2),
-                  Text('$phonetic is here to hint the reading - not the meaning.',
-                      style: TextStyle(color: jc.body, fontSize: 13, height: 1.35)),
+                  Text(
+                      '$phonetic is here to hint the reading - not the meaning.',
+                      style: TextStyle(
+                          color: jc.body, fontSize: 13, height: 1.35)),
                 ],
               ),
             ),
@@ -162,11 +173,12 @@ class KanaOriginSection extends StatelessWidget {
     if (!kana.hasOrigin) return const SizedBox.shrink();
     final jc = context.jc;
     // Gojūon kana derive from a kanji worth visiting; dakuten from a base kana.
-    final onTap = kana.originIsKanji ? () => context.push('/kanji/${kana.origin}') : null;
+    final onTap =
+        kana.originIsKanji ? () => context.push('/kanji/${kana.origin}') : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Origin', style: context.text.titleMedium),
+        Text(context.trText('Origin'), style: context.text.titleMedium),
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
@@ -190,7 +202,8 @@ class KanaOriginSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              Text(kana.originNote, textAlign: TextAlign.center, style: context.text.bodyMedium),
+              Text(kana.originNote,
+                  textAlign: TextAlign.center, style: context.text.bodyMedium),
             ],
           ),
         ),
@@ -214,7 +227,7 @@ class KanaGrammarSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('In a sentence', style: context.text.titleMedium),
+        Text(context.trText('In a sentence'), style: context.text.titleMedium),
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
@@ -229,13 +242,17 @@ class KanaGrammarSection extends StatelessWidget {
             children: [
               if (kana.usageLabel.isNotEmpty) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: jc.brand.withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(Radii.sm),
                   ),
                   child: Text(kana.usageLabel,
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: jc.brand)),
+                      style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: jc.brand)),
                 ),
                 const SizedBox(height: 10),
               ],
@@ -282,7 +299,8 @@ class _UsageExampleRow extends StatelessWidget {
                       TextSpan(text: example.before),
                       TextSpan(
                         text: example.particle,
-                        style: TextStyle(color: jc.brand, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                            color: jc.brand, fontWeight: FontWeight.w800),
                       ),
                       TextSpan(text: example.after),
                     ],
@@ -291,9 +309,14 @@ class _UsageExampleRow extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(example.pronunciation,
                     style: TextStyle(
-                        color: jc.muted, fontSize: 12.5, fontStyle: FontStyle.italic, height: 1.3)),
+                        color: jc.muted,
+                        fontSize: 12.5,
+                        fontStyle: FontStyle.italic,
+                        height: 1.3)),
                 const SizedBox(height: 2),
-                Text(example.translation, style: TextStyle(color: jc.body, fontSize: 13.5, height: 1.35)),
+                Text(example.translation,
+                    style: TextStyle(
+                        color: jc.body, fontSize: 13.5, height: 1.35)),
               ],
             ),
           ),
@@ -324,9 +347,15 @@ class _GlyphBox extends StatelessWidget {
       ),
       child: Text(char,
           style: TextStyle(
-              fontSize: 44, fontWeight: FontWeight.w600, height: 1.0, color: brand ? jc.brand : jc.ink)),
+              fontSize: 44,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
+              color: brand ? jc.brand : jc.ink)),
     );
     if (onTap == null) return box;
-    return InkWell(onTap: onTap, borderRadius: BorderRadius.circular(Radii.md), child: box);
+    return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(Radii.md),
+        child: box);
   }
 }

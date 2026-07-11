@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +47,8 @@ class _RegisterFormState extends State<_RegisterForm> {
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
     return Scaffold(
-      appBar: AppBar(leading: BackButton(onPressed: () => context.go('/login'))),
+      appBar:
+          AppBar(leading: BackButton(onPressed: () => context.go('/login'))),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -58,36 +60,54 @@ class _RegisterFormState extends State<_RegisterForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Create your account', style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+                    Text(context.trText('Create your account'),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        textAlign: TextAlign.center),
                     const SizedBox(height: 6),
-                    Text('Free. Your study progress syncs across devices.',
+                    Text(
+                        context.trText(
+                            'Free. Your study progress syncs across devices.'),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: context.jc.muted)),
                     const SizedBox(height: 26),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
-                      validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                      decoration: InputDecoration(
+                          labelText: context.trText('Email'),
+                          prefixIcon: const Icon(Icons.mail_outline)),
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? context.trText('Enter a valid email')
+                          : null,
                     ),
                     const SizedBox(height: 14),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
-                      validator: (v) => (v == null || v.length < 8) ? 'Use at least 8 characters' : null,
+                      decoration: InputDecoration(
+                          labelText: context.trText('Password'),
+                          prefixIcon: const Icon(Icons.lock_outline)),
+                      validator: (v) => (v == null || v.length < 8)
+                          ? context.trText('Use at least 8 characters')
+                          : null,
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     if (vm.hasError) ...[
                       const SizedBox(height: 12),
-                      Text(vm.error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      Text(vm.error!,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
                     ],
                     const SizedBox(height: 22),
                     FilledButton(
                       onPressed: vm.isLoading ? null : _submit,
                       child: vm.isLoading
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Text('Create account'),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white))
+                          : Text(context.trText('Create account')),
                     ),
                   ],
                 ),

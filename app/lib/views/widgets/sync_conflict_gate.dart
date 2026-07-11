@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../sync/sync_engine.dart';
@@ -87,11 +88,11 @@ Future<void> showSyncConflictDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Not now'),
+          child: Text(context.trText('Not now')),
         ),
         OutlinedButton.icon(
           icon: const Icon(Icons.cloud_outlined),
-          label: const Text('Keep cloud'),
+          label: Text(context.trText('Keep cloud')),
           onPressed: () async {
             Navigator.pop(dialogContext);
             await sync.resolveConflict(SyncResolution.cloud);
@@ -100,7 +101,7 @@ Future<void> showSyncConflictDialog(
         if (!anotherAccount)
           FilledButton.icon(
             icon: const Icon(Icons.phone_android_outlined),
-            label: const Text('Keep this device'),
+            label: Text(context.trText('Keep this device')),
             onPressed: () async {
               Navigator.pop(dialogContext);
               await sync.resolveConflict(SyncResolution.local);

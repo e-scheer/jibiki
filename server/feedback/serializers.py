@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from .models import (
@@ -24,7 +25,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def validate_message(self, value: str) -> str:
         if len(value.strip()) < 3:
-            raise serializers.ValidationError("Tell us a little more.")
+            raise serializers.ValidationError(_("Tell us a little more."))
         return value.strip()
 
 

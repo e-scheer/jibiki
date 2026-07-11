@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,8 @@ import '../../theme/app_theme.dart';
 /// Animates a kanji's KanjiVG strokes in order: completed strokes stay inked, the
 /// current stroke traces in, upcoming strokes show as a faint guide. Tap to replay.
 class StrokeOrderView extends StatefulWidget {
-  const StrokeOrderView({super.key, required this.paths, required this.viewBox, this.size = 200});
+  const StrokeOrderView(
+      {super.key, required this.paths, required this.viewBox, this.size = 200});
 
   final List<String> paths; // SVG `d` strings, in stroke order
   final String viewBox; // "0 0 109 109"
@@ -18,7 +20,8 @@ class StrokeOrderView extends StatefulWidget {
   State<StrokeOrderView> createState() => _StrokeOrderViewState();
 }
 
-class _StrokeOrderViewState extends State<StrokeOrderView> with SingleTickerProviderStateMixin {
+class _StrokeOrderViewState extends State<StrokeOrderView>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late List<Path> _parsed;
   // PathMetrics precomputed once per stroke, extracting them every frame in the
@@ -79,7 +82,8 @@ class _StrokeOrderViewState extends State<StrokeOrderView> with SingleTickerProv
     super.didUpdateWidget(old);
     if (old.paths != widget.paths) {
       _parse();
-      _controller.duration = Duration(milliseconds: 380 * widget.paths.length.clamp(1, 40));
+      _controller.duration =
+          Duration(milliseconds: 380 * widget.paths.length.clamp(1, 40));
       _play();
     }
   }
@@ -105,32 +109,32 @@ class _StrokeOrderViewState extends State<StrokeOrderView> with SingleTickerProv
           button: true,
           label: 'Replay stroke order',
           child: GestureDetector(
-          onTap: _replay,
-          child: SizedBox(
-            width: widget.size,
-            height: widget.size,
-            child: RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (_, __) => CustomPaint(
-                  painter: _StrokePainter(
-                    strokes: _parsed,
-                    metrics: _metrics,
-                    canvas: _canvas,
-                    progress: _controller.value,
-                    ink: jc.ink,
-                    guide: jc.ink.withValues(alpha: 0.12),
+            onTap: _replay,
+            child: SizedBox(
+              width: widget.size,
+              height: widget.size,
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (_, __) => CustomPaint(
+                    painter: _StrokePainter(
+                      strokes: _parsed,
+                      metrics: _metrics,
+                      canvas: _canvas,
+                      progress: _controller.value,
+                      ink: jc.ink,
+                      guide: jc.ink.withValues(alpha: 0.12),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          ),
         ),
         TextButton.icon(
           onPressed: _replay,
           icon: const Icon(Icons.replay, size: 18),
-          label: const Text('Replay strokes'),
+          label: Text(context.trText('Replay strokes')),
         ),
       ],
     );
@@ -193,5 +197,6 @@ class _StrokePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_StrokePainter old) => old.progress != progress || old.strokes != strokes || old.ink != ink;
+  bool shouldRepaint(_StrokePainter old) =>
+      old.progress != progress || old.strokes != strokes || old.ink != ink;
 }

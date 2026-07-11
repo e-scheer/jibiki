@@ -14,6 +14,7 @@ from django.http import (
     JsonResponse,
     StreamingHttpResponse,
 )
+from django.utils.translation import gettext as _
 
 from .manifest import InvalidManifest, validate_manifest
 
@@ -38,9 +39,9 @@ def packs_manifest(_request):
     try:
         m = _packs_manifest()
     except (InvalidManifest, json.JSONDecodeError):
-        return JsonResponse({"detail": "Content pack manifest is invalid."}, status=503)
+        return JsonResponse({"detail": _("Content pack manifest is invalid.")}, status=503)
     if m is None:
-        return JsonResponse({"detail": "No content packs available."}, status=404)
+        return JsonResponse({"detail": _("No content packs available.")}, status=404)
     return JsonResponse(m)
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db.models import Prefetch
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -126,7 +127,7 @@ class MnemonicListView(APIView):
         language = normalize_language_code(raw_lang)
         if not character:
             return Response(
-                {"detail": "character is required."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("Character is required.")}, status=status.HTTP_400_BAD_REQUEST
             )
 
         mnemonics = visible_or_own_for(request.user, character, language, kind)
@@ -161,7 +162,7 @@ class MnemonicCreateView(APIView):
             )
         except ImageRejected:
             return Response(
-                {"detail": "Uploaded file is not a valid image."},
+                {"detail": _("Uploaded file is not a valid image.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(
@@ -177,7 +178,7 @@ class MnemonicVoteView(APIView):
     def post(self, request, pk: int):
         mnemonic = Mnemonic.objects.filter(pk=pk, status=MnemonicStatus.VISIBLE).first()
         if mnemonic is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         serializer = VoteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         score = cast_vote(request.user, mnemonic, serializer.validated_data["value"])
@@ -193,7 +194,7 @@ class MnemonicReportView(APIView):
     def post(self, request, pk: int):
         mnemonic = Mnemonic.objects.filter(pk=pk).first()
         if mnemonic is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReportSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         hidden = file_report(
@@ -228,7 +229,7 @@ class MnemonicSaveView(APIView):
     def post(self, request, pk: int):
         mnemonic = Mnemonic.objects.filter(pk=pk, status=MnemonicStatus.VISIBLE).first()
         if mnemonic is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         # An explicit {"value": bool} is replay-safe (offline sync); without it,
         # keep the historical toggle behavior.
         if "value" in request.data:
@@ -263,7 +264,7 @@ class MnemonicActiveView(APIView):
         characters = request.data.get("characters")
         if not isinstance(characters, list):
             return Response(
-                {"detail": "characters must be a list."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("Characters must be a list.")}, status=status.HTTP_400_BAD_REQUEST
             )
         raw_lang = request.data.get("language")
         if not raw_lang:
@@ -296,7 +297,7 @@ class MnemonicChooseView(APIView):
             .first()
         )
         if mnemonic is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         set_choice(request.user, mnemonic)
         return Response(
             {
@@ -338,7 +339,7 @@ class MnemonicDeckListView(APIView):
         kind = request.query_params.get("kind")
         if mine:
             if not request.user.is_authenticated:
-                return Response({"detail": "Authentication required."}, status=401)
+                return Response({"detail": _("Authentication required.")}, status=401)
             qs = (
                 MnemonicDeck.objects.filter(author=request.user)
                 .exclude(status=DeckStatus.REMOVED)
@@ -402,7 +403,7 @@ class MnemonicDeckDetailView(APIView):
     def get(self, request, pk: int):
         deck = self._get(request, pk)
         if deck is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         items = [it.mnemonic for it in deck.items.all() if it.mnemonic_id]
         ctx = {
             "my_deck_votes": _my_deck_votes(request.user, [deck]),
@@ -420,7 +421,7 @@ class MnemonicDeckPublishView(APIView):
     def post(self, request, pk: int):
         deck = MnemonicDeck.objects.filter(pk=pk, author=request.user).first()
         if deck is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         new_status = publish_deck(deck, request.user)
         return Response({"id": deck.id, "status": new_status})
 
@@ -432,7 +433,7 @@ class MnemonicDeckVoteView(APIView):
     def post(self, request, pk: int):
         deck = MnemonicDeck.objects.filter(pk=pk, status=DeckStatus.VISIBLE).first()
         if deck is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         serializer = VoteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         score = cast_deck_vote(request.user, deck, serializer.validated_data["value"])
@@ -451,7 +452,7 @@ class MnemonicDeckEnrollView(APIView):
         if deck is None or (
             deck.status != DeckStatus.VISIBLE and deck.author_id != request.user.id
         ):
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         created = enroll_deck(request.user, deck)
         return Response({"id": deck.id, "enrolled": created})
 
@@ -468,6 +469,6 @@ class MnemonicDeckApplyView(APIView):
         if deck is None or (
             deck.status != DeckStatus.VISIBLE and deck.author_id != request.user.id
         ):
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         applied = apply_pack(request.user, deck)
         return Response({"id": deck.id, "applied": applied})

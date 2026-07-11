@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,8 @@ class _Decks extends StatelessWidget {
     Haptics.light();
     final ok = await vm.enroll(deck);
     if (!ok || !context.mounted) return;
-    await context.push('/session?deck=${deck.id}&title=${Uri.encodeComponent(deck.title)}');
+    await context.push(
+        '/session?deck=${deck.id}&title=${Uri.encodeComponent(deck.title)}');
     if (context.mounted) vm.load();
   }
 
@@ -41,51 +43,57 @@ class _Decks extends StatelessWidget {
     final loading = vm.isLoading && vm.decks.isEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Study')),
+      appBar: AppBar(title: Text(context.trText('Study'))),
       body: BoundedContent(
         child: RefreshIndicator(
-        color: jc.brand,
-        onRefresh: vm.load,
-        child: vm.hasError
-            ? ListView(children: [ErrorRetry(message: vm.error!, onRetry: vm.load)])
-            : ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-                children: [
-                  loading
-                      ? const Skeleton(height: 82, radius: Radii.lg)
-                      : _DueHero(due: due, streak: vm.stats.streak),
-                  const SizedBox(height: 22),
-                  Text('Decks', style: context.text.titleLarge),
-                  const SizedBox(height: 4),
-                  Text('Study a whole set. It paces itself.',
-                      style: TextStyle(color: jc.muted, fontSize: 13.5)),
-                  const SizedBox(height: 14),
-                  if (loading)
-                    const SkeletonCardGrid(
-                      shrinkWrap: true,
-                      maxCrossAxisExtent: 220,
-                      childAspectRatio: 0.98,
-                      count: 4,
-                      padding: EdgeInsets.zero,
-                    )
-                  else
-                    GridView.extent(
-                      maxCrossAxisExtent: 220, // 2 cols on phones, more as the screen widens
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.98,
-                      children: [
-                        for (final deck in vm.decks)
-                          _DeckCard(deck: deck, busy: vm.busyDeck == deck.id, onTap: () => _open(context, vm, deck)),
-                      ],
-                    ),
-                  const SizedBox(height: 26),
-                  const _CommunityPacksCard(),
-                ],
-              ),
+          color: jc.brand,
+          onRefresh: vm.load,
+          child: vm.hasError
+              ? ListView(
+                  children: [ErrorRetry(message: vm.error!, onRetry: vm.load)])
+              : ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+                  children: [
+                    loading
+                        ? const Skeleton(height: 82, radius: Radii.lg)
+                        : _DueHero(due: due, streak: vm.stats.streak),
+                    const SizedBox(height: 22),
+                    Text(context.trText('Decks'),
+                        style: context.text.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(context.trText('Study a whole set. It paces itself.'),
+                        style: TextStyle(color: jc.muted, fontSize: 13.5)),
+                    const SizedBox(height: 14),
+                    if (loading)
+                      const SkeletonCardGrid(
+                        shrinkWrap: true,
+                        maxCrossAxisExtent: 220,
+                        childAspectRatio: 0.98,
+                        count: 4,
+                        padding: EdgeInsets.zero,
+                      )
+                    else
+                      GridView.extent(
+                        maxCrossAxisExtent:
+                            220, // 2 cols on phones, more as the screen widens
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.98,
+                        children: [
+                          for (final deck in vm.decks)
+                            _DeckCard(
+                                deck: deck,
+                                busy: vm.busyDeck == deck.id,
+                                onTap: () => _open(context, vm, deck)),
+                        ],
+                      ),
+                    const SizedBox(height: 26),
+                    const _CommunityPacksCard(),
+                  ],
+                ),
         ),
       ),
     );
@@ -109,22 +117,29 @@ class _CommunityPacksCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Community packs',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white)),
+          Text(context.trText('Community packs'),
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white)),
           const SizedBox(height: 2),
-          const Text('Draw mascots, bundle them into a pack, and share it, or study one someone else made.',
-              style: TextStyle(color: Colors.white, fontSize: 13.5, height: 1.35)),
+          Text(
+              context.trText(
+                  'Draw mascots, bundle them into a pack, and share it, or study one someone else made.'),
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 13.5, height: 1.35)),
           const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
                 child: FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: jc.ink),
+                  style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white, foregroundColor: jc.ink),
                   onPressed: () {
                     Haptics.light();
                     context.push('/decks/community');
                   },
-                  child: const Text('Browse'),
+                  child: Text(context.trText('Browse')),
                 ),
               ),
               const SizedBox(width: 10),
@@ -138,7 +153,7 @@ class _CommunityPacksCard extends StatelessWidget {
                     Haptics.light();
                     context.push('/decks/new');
                   },
-                  child: const Text('Create'),
+                  child: Text(context.trText('Create')),
                 ),
               ),
             ],
@@ -175,7 +190,8 @@ class _DueHero extends StatelessWidget {
                 Text(
                   nothing ? 'All caught up' : '$due due now',
                   style: TextStyle(
-                    fontSize: 26, fontWeight: FontWeight.w800,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
                     color: nothing ? jc.ink : Colors.white,
                   ),
                 ),
@@ -187,7 +203,7 @@ class _DueHero extends StatelessWidget {
                       Icon(Icons.local_fire_department_rounded,
                           size: 15, color: nothing ? jc.warn : Colors.white),
                       const SizedBox(width: 4),
-                      Text('$streak day streak',
+                      Text(context.trText('$streak day streak'),
                           style: TextStyle(
                               color: nothing ? jc.body : Colors.white,
                               fontWeight: FontWeight.w600,
@@ -195,22 +211,24 @@ class _DueHero extends StatelessWidget {
                     ],
                   )
                 else
-                  Text('Build a streak today',
+                  Text(context.trText('Build a streak today'),
                       style: TextStyle(
                           color: nothing ? jc.muted : Colors.white,
-                          fontWeight: nothing ? FontWeight.w400 : FontWeight.w500,
+                          fontWeight:
+                              nothing ? FontWeight.w400 : FontWeight.w500,
                           fontSize: 13.5)),
               ],
             ),
           ),
           if (!nothing)
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: jc.brand),
+              style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white, foregroundColor: jc.brand),
               onPressed: () async {
                 Haptics.light();
                 await context.push('/session');
               },
-              child: const Text('Review'),
+              child: Text(context.trText('Review')),
             ),
         ],
       ),
@@ -219,7 +237,8 @@ class _DueHero extends StatelessWidget {
 }
 
 class _DeckCard extends StatelessWidget {
-  const _DeckCard({required this.deck, required this.busy, required this.onTap});
+  const _DeckCard(
+      {required this.deck, required this.busy, required this.onTap});
   final Deck deck;
   final bool busy;
   final VoidCallback onTap;
@@ -245,26 +264,49 @@ class _DeckCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 46, height: 46,
-                    decoration: BoxDecoration(color: jc.brandSoft, borderRadius: BorderRadius.circular(Radii.md)),
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                        color: jc.brandSoft,
+                        borderRadius: BorderRadius.circular(Radii.md)),
                     alignment: Alignment.center,
-                    child: Text(deck.icon, style: TextStyle(fontSize: 24, color: jc.brand, fontWeight: FontWeight.w700)),
+                    child: Text(deck.icon,
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: jc.brand,
+                            fontWeight: FontWeight.w700)),
                   ),
                   const Spacer(),
                   if (busy)
-                    const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                   else if (deck.due > 0)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: jc.brand, borderRadius: BorderRadius.circular(Radii.pill)),
-                      child: Text('${deck.due}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: jc.brand,
+                          borderRadius: BorderRadius.circular(Radii.pill)),
+                      child: Text(context.trText('${deck.due}'),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12)),
                     ),
                 ],
               ),
               const Spacer(),
-              Text(deck.title, style: context.text.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(deck.title,
+                  style: context.text.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
               const SizedBox(height: 2),
-              Text(deck.subtitle, style: TextStyle(color: jc.muted, fontSize: 12.5), maxLines: 2, overflow: TextOverflow.ellipsis),
+              Text(deck.subtitle,
+                  style: TextStyle(color: jc.muted, fontSize: 12.5),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis),
               const SizedBox(height: 10),
               _Progress(deck: deck),
             ],
@@ -298,7 +340,9 @@ class _Progress extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(label, style: TextStyle(color: jc.muted, fontSize: 11.5, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(
+                color: jc.muted, fontSize: 11.5, fontWeight: FontWeight.w600)),
       ],
     );
   }

@@ -97,9 +97,13 @@ class Mnemonic(models.Model):
     def clean(self):
         super().clean()
         if self.kind == self.Kind.KANJI_READING and not self.reading:
-            raise ValidationError({"reading": "A reading mnemonic requires a reading."})
+            raise ValidationError(
+                {"reading": _("A reading mnemonic requires a reading.")}
+            )
         if self.kind != self.Kind.KANJI_READING and self.reading:
-            raise ValidationError({"reading": "Only reading mnemonics can carry a reading."})
+            raise ValidationError(
+                {"reading": _("Only reading mnemonics can carry a reading.")}
+            )
 
     def __str__(self) -> str:
         return f"{self.character} [{self.language}] score={self.score}"

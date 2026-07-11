@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   # State management - MVVM: Views observe ChangeNotifier ViewModels via Provider.
   provider: ^6.1.2
   # Declarative routing with an auth/onboarding redirect guard.
@@ -74,6 +77,7 @@ flutter_native_splash:
   ios: true
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     # Bundled offline dictionary (the "base" content pack, installed on first

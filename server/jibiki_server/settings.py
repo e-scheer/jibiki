@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",  # before CommonMiddleware, so preflight is answered
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -236,6 +237,7 @@ EMAIL_BACKEND = os.environ.get(
 # Containers run UTC; localization is a client concern (the app renders in the
 # device locale). The API speaks ISO-8601 UTC everywhere.
 LANGUAGE_CODE = "en-us"
+LANGUAGES = [("en", "English"), ("fr", "Français")]
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True

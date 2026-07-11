@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,7 @@ class _Feedback extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<FeedbackViewModel>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Make jibiki better')),
+      appBar: AppBar(title: Text(context.trText('Make jibiki better'))),
       body: BoundedContent(
         maxWidth: 640,
         child: vm.sent ? const _ThankYou() : const _Form(),
@@ -55,7 +56,9 @@ class _Form extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text('Ideas, bugs, love letters - a human reads every single one.',
+        Text(
+            context.trText(
+                'Ideas, bugs, love letters - a human reads every single one.'),
             style: TextStyle(color: jc.muted, height: 1.4)),
         const SizedBox(height: 16),
         Wrap(
@@ -64,7 +67,7 @@ class _Form extends StatelessWidget {
           children: [
             for (final kind in FeedbackKind.values)
               ChoiceChip(
-                label: Text('${kind.emoji}  ${kind.label}'),
+                label: Text(context.trText('${kind.emoji}  ${kind.label}')),
                 selected: vm.kind == kind,
                 onSelected: (_) => vm.selectKind(kind),
               ),
@@ -79,7 +82,8 @@ class _Form extends StatelessWidget {
           textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             hintText: vm.kind.prompt,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.md)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Radii.md)),
             counterText: '',
           ),
           onChanged: vm.setMessage,
@@ -89,9 +93,11 @@ class _Form extends StatelessWidget {
           TextField(
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-              hintText: 'Email - only if you’d like a reply (optional)',
+              hintText: context
+                  .trText('Email - only if you’d like a reply (optional)'),
               isDense: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.md)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.md)),
             ),
             onChanged: vm.setEmail,
           ),
@@ -104,7 +110,8 @@ class _Form extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Sent along for context: ${_contextLine(vm)} - nothing else.',
+                context.trText(
+                    'Sent along for context: ${_contextLine(vm)} - nothing else.'),
                 style: TextStyle(fontSize: 12, color: jc.muted, height: 1.4),
               ),
             ),
@@ -126,8 +133,9 @@ class _Form extends StatelessWidget {
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Send'),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
+              : Text(context.trText('Send')),
         ),
       ],
     );
@@ -154,18 +162,21 @@ class _ThankYou extends StatelessWidget {
           children: [
             Icon(Icons.favorite, color: jc.brand, size: 56),
             const SizedBox(height: 16),
-            Text('Thank you!',
+            Text(context.trText('Thank you!'),
                 style: Theme.of(context)
                     .textTheme
                     .headlineSmall
                     ?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Text('We read everything. It genuinely shapes what gets built next.',
-                textAlign: TextAlign.center, style: TextStyle(color: jc.muted)),
+            Text(
+                context.trText(
+                    'We read everything. It genuinely shapes what gets built next.'),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: jc.muted)),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => context.pop(),
-              child: const Text('Done'),
+              child: Text(context.trText('Done')),
             ),
           ],
         ),

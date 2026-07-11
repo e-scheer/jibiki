@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,9 +18,11 @@ class SplashView extends StatefulWidget {
   State<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashViewState extends State<SplashView> with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: true);
+class _SplashViewState extends State<SplashView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 1500))
+    ..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -39,7 +42,11 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
 
     Widget glyph = Text(
       '字',
-      style: TextStyle(fontFamily: 'NotoSansJP', fontSize: 104, fontWeight: FontWeight.w600, color: jc.brand),
+      style: TextStyle(
+          fontFamily: 'NotoSansJP',
+          fontSize: 104,
+          fontWeight: FontWeight.w600,
+          color: jc.brand),
     );
     // Breathe only while actually loading; hold still once we're asking to retry.
     if (loading && Motion.enabled(context)) {
@@ -65,11 +72,19 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
             children: [
               glyph,
               const SizedBox(height: 10),
-              Text('jibiki',
-                  style: TextStyle(fontSize: 17, letterSpacing: 3, fontWeight: FontWeight.w700, color: jc.ink)),
+              Text(context.trText('jibiki'),
+                  style: TextStyle(
+                      fontSize: 17,
+                      letterSpacing: 3,
+                      fontWeight: FontWeight.w700,
+                      color: jc.ink)),
               if (retrying) ...[
                 const SizedBox(height: 20),
-                Text('Connecting…', style: TextStyle(color: jc.muted, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(context.trText('Connecting…'),
+                    style: TextStyle(
+                        color: jc.muted,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
               ] else if (error != null) ...[
                 const SizedBox(height: 28),
                 Icon(Icons.cloud_off_outlined, color: jc.muted, size: 26),
@@ -89,7 +104,8 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
                       Text(
                         ApiConfig.baseUrl,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: jc.muted, fontSize: 12, height: 1.3),
+                        style: TextStyle(
+                            color: jc.muted, fontSize: 12, height: 1.3),
                       ),
                     ],
                   ),
@@ -97,7 +113,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: () => context.read<AppState>().bootstrap(),
-                  child: const Text('Try again'),
+                  child: Text(context.trText('Try again')),
                 ),
                 const SizedBox(height: 2),
                 // Escape hatch: never trap a user on the splash when the API is
@@ -105,7 +121,7 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
                 // drop it and reach the sign-in screen.
                 TextButton(
                   onPressed: () => context.read<AppState>().logout(),
-                  child: const Text('Sign in instead'),
+                  child: Text(context.trText('Sign in instead')),
                 ),
               ],
             ],

@@ -11,6 +11,7 @@ downloads are what actually enforce it.
 from __future__ import annotations
 
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import BasePermission
 
 from .models import Plan, UserProfile
@@ -35,7 +36,7 @@ class IsPremium(BasePermission):
     """DRF permission for premium-gated endpoints (unused while the app is a
     one-shot purchase - ready for the flip)."""
 
-    message = "This feature requires an active subscription."
+    message = _("This feature requires an active subscription.")
 
     def has_permission(self, request, view) -> bool:
         return has_premium(request.user)

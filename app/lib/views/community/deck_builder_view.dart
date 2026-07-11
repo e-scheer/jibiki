@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -60,7 +61,8 @@ class _BuilderState extends State<_Builder> {
     if (!mounted) return;
     if (deck == null) {
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(vm.error ?? 'Could not create the pack')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(vm.error ?? 'Could not create the pack')));
       return;
     }
     final msg = !_publish
@@ -78,9 +80,11 @@ class _BuilderState extends State<_Builder> {
     final jc = context.jc;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New pack')),
+      appBar: AppBar(title: Text(context.trText('New pack'))),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: jc.canvas, border: Border(top: BorderSide(color: jc.hairline))),
+        decoration: BoxDecoration(
+            color: jc.canvas,
+            border: Border(top: BorderSide(color: jc.hairline))),
         child: SafeArea(
           top: false,
           child: Padding(
@@ -93,13 +97,20 @@ class _BuilderState extends State<_Builder> {
               child: ListenableBuilder(
                 listenable: _title,
                 builder: (context, _) {
-                  final canCreate = _title.text.trim().isNotEmpty && vm.selectedCount > 0 && !_saving;
+                  final canCreate = _title.text.trim().isNotEmpty &&
+                      vm.selectedCount > 0 &&
+                      !_saving;
                   return FilledButton(
                     onPressed: canCreate ? () => _create(vm) : null,
                     child: _saving
                         ? const SizedBox(
-                            height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_publish ? 'Publish pack (${vm.selectedCount})' : 'Save draft (${vm.selectedCount})'),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : Text(_publish
+                            ? 'Publish pack (${vm.selectedCount})'
+                            : 'Save draft (${vm.selectedCount})'),
                   );
                 },
               ),
@@ -113,13 +124,16 @@ class _BuilderState extends State<_Builder> {
           TextField(
             controller: _title,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(labelText: 'Pack title', hintText: 'e.g. My hiragana mascots'),
+            decoration: InputDecoration(
+                labelText: context.trText('Pack title'),
+                hintText: context.trText('e.g. My hiragana mascots')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _description,
             maxLines: 2,
-            decoration: const InputDecoration(labelText: 'Description (optional)'),
+            decoration: InputDecoration(
+                labelText: context.trText('Description (optional)')),
           ),
           const SizedBox(height: 16),
           _KindToggle(kind: vm.kind, onChanged: vm.setKind),
@@ -128,26 +142,36 @@ class _BuilderState extends State<_Builder> {
             value: _publish,
             onChanged: (v) => setState(() => _publish = v),
             contentPadding: EdgeInsets.zero,
-            title: const Text('Publish to the community'),
-            subtitle: Text(_publish ? 'Others can discover and study it' : 'Keep it private for now',
+            title: Text(context.trText('Publish to the community')),
+            subtitle: Text(
+                _publish
+                    ? 'Others can discover and study it'
+                    : 'Keep it private for now',
                 style: TextStyle(color: jc.muted, fontSize: 12.5)),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Text('Your ${vm.kind == 'kanji' ? 'kanji' : 'kana'} drawings', style: context.text.titleMedium),
+              Text(
+                  context.trText(
+                      'Your ${vm.kind == 'kanji' ? 'kanji' : 'kana'} drawings'),
+                  style: context.text.titleMedium),
               const Spacer(),
-              Text('${vm.selectedCount} selected', style: TextStyle(color: jc.muted, fontSize: 12.5)),
+              Text(context.trText('${vm.selectedCount} selected'),
+                  style: TextStyle(color: jc.muted, fontSize: 12.5)),
             ],
           ),
           const SizedBox(height: 12),
           if (vm.isLoading && vm.available.isEmpty)
-            const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+            const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(child: CircularProgressIndicator()))
           else if (vm.available.isEmpty)
             const EmptyHint(
               icon: Icons.brush_outlined,
               title: 'No drawings yet',
-              subtitle: 'Draw some mascots first (from a kana or kanji), then bundle them here.',
+              subtitle:
+                  'Draw some mascots first (from a kana or kanji), then bundle them here.',
             )
           else
             GridView.count(
@@ -158,7 +182,10 @@ class _BuilderState extends State<_Builder> {
               crossAxisSpacing: 10,
               children: [
                 for (final m in vm.available)
-                  _PickTile(mnemonic: m, selected: vm.isSelected(m.id), onTap: () => vm.toggle(m.id)),
+                  _PickTile(
+                      mnemonic: m,
+                      selected: vm.isSelected(m.id),
+                      onTap: () => vm.toggle(m.id)),
               ],
             ),
         ],
@@ -191,7 +218,10 @@ class _KindToggle extends StatelessWidget {
               borderRadius: BorderRadius.circular(Radii.sm),
             ),
             child: Text(label,
-                style: TextStyle(color: on ? Colors.white : jc.muted, fontWeight: FontWeight.w700, fontSize: 13.5)),
+                style: TextStyle(
+                    color: on ? Colors.white : jc.muted,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5)),
           ),
         ),
       );
@@ -199,14 +229,16 @@ class _KindToggle extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
+      decoration: BoxDecoration(
+          color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
       child: Row(children: [seg('kana', 'Kana'), seg('kanji', 'Kanji')]),
     );
   }
 }
 
 class _PickTile extends StatelessWidget {
-  const _PickTile({required this.mnemonic, required this.selected, required this.onTap});
+  const _PickTile(
+      {required this.mnemonic, required this.selected, required this.onTap});
   final Mnemonic mnemonic;
   final bool selected;
   final VoidCallback onTap;
@@ -226,7 +258,10 @@ class _PickTile extends StatelessWidget {
             Container(
               color: jc.surfaceAlt,
               child: mnemonic.hasImage
-                  ? NetImage(url: mnemonic.imageUrl, cacheWidth: 300, errorBuilder: (_) => _glyph(jc))
+                  ? NetImage(
+                      url: mnemonic.imageUrl,
+                      cacheWidth: 300,
+                      errorBuilder: (_) => _glyph(jc))
                   : _glyph(jc),
             ),
             if (selected)
@@ -252,7 +287,10 @@ class _PickTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(Radii.sm),
                 ),
                 child: Text(mnemonic.character,
-                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700)),
               ),
             ),
           ],
@@ -262,6 +300,8 @@ class _PickTile extends StatelessWidget {
   }
 
   Widget _glyph(JibikiColors jc) => Center(
-        child: Text(mnemonic.character, style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: jc.brand)),
+        child: Text(mnemonic.character,
+            style: TextStyle(
+                fontSize: 30, fontWeight: FontWeight.w700, color: jc.brand)),
       );
 }

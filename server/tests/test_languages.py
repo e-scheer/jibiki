@@ -30,6 +30,20 @@ def test_profile_normalizes_case(api, user):
     assert user.profile.mnemonic_language == "pt"
 
 
+def test_interface_language_is_normalized_and_restricted(api, user):
+    resp = api.patch(
+        "/api/v1/auth/me", {"interface_language": "FR-be"}, format="json"
+    )
+    assert resp.status_code == 200
+    user.profile.refresh_from_db()
+    assert user.profile.interface_language == "fr"
+
+    resp = api.patch(
+        "/api/v1/auth/me", {"interface_language": "ja"}, format="json"
+    )
+    assert resp.status_code == 400
+
+
 def test_mnemonic_create_rejects_phantom_language(api):
     resp = api.post(
         "/api/v1/mnemonics/create",

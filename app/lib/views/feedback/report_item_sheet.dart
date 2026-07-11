@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -50,9 +51,9 @@ class ReportItemAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.flag_outlined),
-      tooltip: 'Report an issue',
-      onPressed: () =>
-          showReportItemSheet(context, type: type, itemRef: itemRef, label: label),
+      tooltip: context.trText('Report an issue'),
+      onPressed: () => showReportItemSheet(context,
+          type: type, itemRef: itemRef, label: label),
     );
   }
 }
@@ -74,7 +75,8 @@ Future<void> showReportItemSheet(
 }
 
 class _ReportSheet extends StatefulWidget {
-  const _ReportSheet({required this.type, required this.itemRef, required this.label});
+  const _ReportSheet(
+      {required this.type, required this.itemRef, required this.label});
   final ReportItemType type;
   final String itemRef;
   final String label;
@@ -100,15 +102,15 @@ class _ReportSheetState extends State<_ReportSheet> {
     });
     try {
       await context.read<FeedbackService>().reportContent(
-            itemType: widget.type.wire,
-            itemRef: widget.itemRef,
-            reason: _reason!.wire,
-            message: _message.trim(),
-            context: {
-              'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
-              'label': widget.label,
-            },
-          );
+        itemType: widget.type.wire,
+        itemRef: widget.itemRef,
+        reason: _reason!.wire,
+        message: _message.trim(),
+        context: {
+          'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
+          'label': widget.label,
+        },
+      );
       navigator.pop();
       messenger.showSnackBar(
         const SnackBar(content: Text("Thanks, we'll take a look.")),
@@ -139,9 +141,11 @@ class _ReportSheetState extends State<_ReportSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Report an issue', style: context.text.titleLarge),
+        Text(context.trText('Report an issue'), style: context.text.titleLarge),
         const SizedBox(height: 4),
-        Text('Tell us what looks off with ${widget.type.noun} (${widget.label}).',
+        Text(
+            context.trText(
+                'Tell us what looks off with ${widget.type.noun} (${widget.label}).'),
             style: TextStyle(color: jc.muted, height: 1.35)),
         const SizedBox(height: 16),
         Wrap(
@@ -163,8 +167,9 @@ class _ReportSheetState extends State<_ReportSheet> {
           maxLength: 2000,
           textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
-            hintText: 'Anything to add? (optional)',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.md)),
+            hintText: context.trText('Anything to add? (optional)'),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Radii.md)),
             counterText: '',
           ),
           onChanged: (v) => _message = v,
@@ -186,8 +191,9 @@ class _ReportSheetState extends State<_ReportSheet> {
                 ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Send report'),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white))
+                : Text(context.trText('Send report')),
           ),
         ),
       ],
@@ -200,11 +206,12 @@ class _ReportSheetState extends State<_ReportSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Report an issue', style: context.text.titleLarge),
+        Text(context.trText('Report an issue'), style: context.text.titleLarge),
         const SizedBox(height: 8),
         Text(
-          'Sign in to report a correction. It keeps reports accountable and lets '
-          'us reply if we need a detail.',
+          context.trText(
+              'Sign in to report a correction. It keeps reports accountable and lets '
+              'us reply if we need a detail.'),
           style: TextStyle(color: jc.muted, height: 1.4),
         ),
         const SizedBox(height: 18),
@@ -216,7 +223,7 @@ class _ReportSheetState extends State<_ReportSheet> {
               Navigator.of(context).pop();
               context.push('/login');
             },
-            child: const Text('Sign in'),
+            child: Text(context.trText('Sign in')),
           ),
         ),
       ],

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +18,9 @@ class DeckDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => DeckDetailViewModel(ctx.read<MnemonicDeckRepository>(), deckId)..load(),
+      create: (ctx) =>
+          DeckDetailViewModel(ctx.read<MnemonicDeckRepository>(), deckId)
+            ..load(),
       child: _DeckDetail(owned: owned),
     );
   }
@@ -33,7 +36,8 @@ class _DeckDetail extends StatelessWidget {
     final deck = vm.deck;
     return Scaffold(
       appBar: AppBar(title: Text(deck?.title ?? 'Pack')),
-      bottomNavigationBar: deck == null ? null : _BottomBar(deck: deck, owned: owned, vm: vm),
+      bottomNavigationBar:
+          deck == null ? null : _BottomBar(deck: deck, owned: owned, vm: vm),
       body: vm.isLoading && deck == null
           ? const LoadingView()
           : vm.hasError
@@ -44,7 +48,8 @@ class _DeckDetail extends StatelessWidget {
     );
   }
 
-  Widget _content(BuildContext context, MnemonicDeck deck, DeckDetailViewModel vm) {
+  Widget _content(
+      BuildContext context, MnemonicDeck deck, DeckDetailViewModel vm) {
     final jc = context.jc;
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
@@ -63,7 +68,8 @@ class _DeckDetail extends StatelessWidget {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Text('by ${deck.authorName}', style: TextStyle(color: jc.muted, fontSize: 13.5)),
+                  Text(context.trText('by ${deck.authorName}'),
+                      style: TextStyle(color: jc.muted, fontSize: 13.5)),
                   const Spacer(),
                   if (deck.isPublic)
                     InkWell(
@@ -76,11 +82,17 @@ class _DeckDetail extends StatelessWidget {
                         padding: const EdgeInsets.all(4),
                         child: Row(
                           children: [
-                            Icon(deck.liked ? Icons.favorite : Icons.favorite_border,
-                                size: 20, color: deck.liked ? jc.ratingAgain : jc.ink),
+                            Icon(
+                                deck.liked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 20,
+                                color: deck.liked ? jc.ratingAgain : jc.ink),
                             if (deck.score > 0) ...[
                               const SizedBox(width: 5),
-                              Text('${deck.score}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                              Text(context.trText('${deck.score}'),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700)),
                             ],
                           ],
                         ),
@@ -90,14 +102,18 @@ class _DeckDetail extends StatelessWidget {
               ),
               if (deck.description.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text(deck.description, style: TextStyle(color: jc.body, fontSize: 14.5, height: 1.4)),
+                Text(deck.description,
+                    style:
+                        TextStyle(color: jc.body, fontSize: 14.5, height: 1.4)),
               ],
               if (owned && !deck.isPublic) ...[
                 const SizedBox(height: 12),
                 _DraftBanner(deck: deck, vm: vm),
               ],
               const SizedBox(height: 18),
-              Text('${deck.itemCount} ${deck.kind == 'kanji' ? 'kanji' : 'kana'}', style: context.text.titleMedium),
+              Text(
+                  '${deck.itemCount} ${deck.kind == 'kanji' ? 'kanji' : 'kana'}',
+                  style: context.text.titleMedium),
               const SizedBox(height: 12),
             ],
           ),
@@ -127,10 +143,12 @@ class _DraftBanner extends StatelessWidget {
     final pending = deck.isPending;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
+      decoration: BoxDecoration(
+          color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
       child: Row(
         children: [
-          Icon(pending ? Icons.hourglass_top : Icons.lock_outline, size: 20, color: jc.muted),
+          Icon(pending ? Icons.hourglass_top : Icons.lock_outline,
+              size: 20, color: jc.muted),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -146,11 +164,14 @@ class _DraftBanner extends StatelessWidget {
               onPressed: () async {
                 final status = await vm.publish();
                 if (context.mounted && status != null) {
-                  final msg = status == 'visible' ? 'Published, thank you!' : 'Submitted for review, thank you!';
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                  final msg = status == 'visible'
+                      ? 'Published, thank you!'
+                      : 'Submitted for review, thank you!';
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(msg)));
                 }
               },
-              child: const Text('Publish'),
+              child: Text(context.trText('Publish')),
             ),
           ],
         ],
@@ -191,7 +212,10 @@ class _ItemTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(Radii.sm),
                 ),
                 child: Text(mnemonic.character,
-                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700)),
               ),
             ),
           ],
@@ -201,7 +225,9 @@ class _ItemTile extends StatelessWidget {
   }
 
   Widget _glyph(JibikiColors jc) => Center(
-        child: Text(mnemonic.character, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w700, color: jc.brand)),
+        child: Text(mnemonic.character,
+            style: TextStyle(
+                fontSize: 34, fontWeight: FontWeight.w700, color: jc.brand)),
       );
 }
 
@@ -235,7 +261,10 @@ class _BottomBar extends StatelessWidget {
                       final n = await vm.enroll();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(n > 0 ? 'Added $n cards to your study' : 'Already in your study')),
+                          SnackBar(
+                              content: Text(n > 0
+                                  ? 'Added $n cards to your study'
+                                  : 'Already in your study')),
                         );
                       }
                     },
@@ -247,7 +276,8 @@ class _BottomBar extends StatelessWidget {
                       disabledForegroundColor: Colors.white,
                     )
                   : null,
-              icon: Icon(vm.enrolled ? Icons.check : Icons.school_outlined, size: 20),
+              icon: Icon(vm.enrolled ? Icons.check : Icons.school_outlined,
+                  size: 20),
               label: Text(vm.enrolled ? 'In your study' : 'Study this pack'),
             ),
           ),

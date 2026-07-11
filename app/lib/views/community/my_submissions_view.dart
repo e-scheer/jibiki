@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,8 @@ class MySubmissionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => MySubmissionsViewModel(ctx.read<MnemonicRepository>())..load(),
+      create: (ctx) =>
+          MySubmissionsViewModel(ctx.read<MnemonicRepository>())..load(),
       child: const _MySubmissions(),
     );
   }
@@ -33,40 +35,50 @@ class _MySubmissions extends StatelessWidget {
     final jc = context.jc;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My submissions')),
+      appBar: AppBar(title: Text(context.trText('My submissions'))),
       body: RefreshIndicator(
         color: jc.brand,
         onRefresh: vm.load,
         child: vm.hasError
-            ? ListView(children: [ErrorRetry(message: vm.error!, onRetry: vm.load)])
+            ? ListView(
+                children: [ErrorRetry(message: vm.error!, onRetry: vm.load)])
             : ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.collections_bookmark_outlined, color: jc.brand),
-                    title: const Text('My packs'),
-                    subtitle: Text('Drafts, in review and published', style: TextStyle(color: jc.muted, fontSize: 12.5)),
+                    leading: Icon(Icons.collections_bookmark_outlined,
+                        color: jc.brand),
+                    title: Text(context.trText('My packs')),
+                    subtitle: Text(
+                        context.trText('Drafts, in review and published'),
+                        style: TextStyle(color: jc.muted, fontSize: 12.5)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/decks/community?tab=mine'),
                   ),
                   Divider(color: jc.hairline, height: 8),
                   const SizedBox(height: 8),
-                  Text('Mnemonics you\'ve drawn', style: context.text.titleMedium),
+                  Text(context.trText('Mnemonics you\'ve drawn'),
+                      style: context.text.titleMedium),
                   const SizedBox(height: 4),
-                  Text('Held submissions post once approved by moderation.',
+                  Text(
+                      context.trText(
+                          'Held submissions post once approved by moderation.'),
                       style: TextStyle(color: jc.muted, fontSize: 12.5)),
                   const SizedBox(height: 12),
                   if (vm.isLoading && vm.items.isEmpty)
-                    const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+                    const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(child: CircularProgressIndicator()))
                   else if (vm.items.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 24),
                       child: EmptyHint(
                         icon: Icons.brush_outlined,
                         title: 'Nothing yet',
-                        subtitle: 'Open a kana or kanji and tap Draw to make your first mnemonic.',
+                        subtitle:
+                            'Open a kana or kanji and tap Draw to make your first mnemonic.',
                       ),
                     )
                   else
@@ -88,7 +100,8 @@ class _SubmissionTile extends StatelessWidget {
     final m = mnemonic;
     return InkWell(
       borderRadius: BorderRadius.circular(Radii.md),
-      onTap: () => context.push(m.kind == 'kanji' ? '/kanji/${m.character}' : '/kana/${m.character}'),
+      onTap: () => context.push(
+          m.kind == 'kanji' ? '/kanji/${m.character}' : '/kana/${m.character}'),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
@@ -99,12 +112,18 @@ class _SubmissionTile extends StatelessWidget {
                 width: 56,
                 height: 56,
                 child: m.hasImage
-                    ? NetImage(url: m.imageUrl, cacheWidth: 150, semanticLabel: 'Mnemonic drawing for ${m.character}')
+                    ? NetImage(
+                        url: m.imageUrl,
+                        cacheWidth: 150,
+                        semanticLabel: 'Mnemonic drawing for ${m.character}')
                     : Container(
                         color: jc.surfaceAlt,
                         alignment: Alignment.center,
                         child: Text(m.character,
-                            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: jc.brand)),
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: jc.brand)),
                       ),
               ),
             ),
@@ -113,10 +132,15 @@ class _SubmissionTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${m.character} · ${mnemonicLanguageName(m.language)}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  Text(
+                      context.trText(
+                          '${m.character} · ${mnemonicLanguageName(m.language)}'),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 14)),
                   const SizedBox(height: 2),
-                  Text(m.story, maxLines: 2, overflow: TextOverflow.ellipsis,
+                  Text(m.story,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: jc.body, fontSize: 13)),
                 ],
               ),
@@ -149,7 +173,9 @@ class _StatusChip extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(Radii.pill),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11.5, fontWeight: FontWeight.w700)),
+      child: Text(label,
+          style: TextStyle(
+              color: color, fontSize: 11.5, fontWeight: FontWeight.w700)),
     );
   }
 }

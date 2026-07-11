@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +20,10 @@ class OfflineStorageView extends StatelessWidget {
     if (packs == null) {
       // Web: no local packs, nothing to manage.
       return Scaffold(
-        appBar: AppBar(title: const Text('Offline & storage')),
-        body: const Center(
-            child: Text('Offline packs are managed in the mobile app.')),
+        appBar: AppBar(title: Text(context.trText('Offline & storage'))),
+        body: Center(
+            child: Text(context
+                .trText('Offline packs are managed in the mobile app.'))),
       );
     }
     return ChangeNotifierProvider(
@@ -42,14 +44,14 @@ class _Storage extends StatelessWidget {
     final sync = vm.sync;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Offline & storage')),
+      appBar: AppBar(title: Text(context.trText('Offline & storage'))),
       body: BoundedContent(
         maxWidth: 640,
         child: ListView(
           children: [
             ListTile(
               leading: const Icon(Icons.sd_storage_outlined),
-              title: const Text('On this phone'),
+              title: Text(context.trText('On this phone')),
               subtitle: Text(
                   '${StorageViewModel.humanSize(vm.installedBytesTotal)} of dictionary data'),
             ),
@@ -63,7 +65,7 @@ class _Storage extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.refresh),
-              title: const Text('Check for updates'),
+              title: Text(context.trText('Check for updates')),
               subtitle: vm.updateError != null
                   ? Text("Can't reach the server right now.",
                       style: TextStyle(color: jc.muted))
@@ -101,7 +103,8 @@ class _Storage extends StatelessWidget {
                                   ? '${sync.pendingCount} changes waiting to upload'
                                   : 'Everything synced',
                 ),
-                subtitle: Text('${_lastSynced(sync)}\n${_gap(sync)}'),
+                subtitle:
+                    Text(context.trText('${_lastSynced(sync)}\n${_gap(sync)}')),
                 isThreeLine: true,
                 trailing: sync.syncing
                     ? const SizedBox(
@@ -122,9 +125,10 @@ class _Storage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'Dictionary data © EDRDG (JMdict, KANJIDIC2, JMnedict) under the '
-                'EDRDG licence · stroke order © KanjiVG (CC BY-SA 3.0) · examples '
-                '© Tatoeba (CC-BY) · pitch accent © Kanjium.',
+                context.trText(
+                    'Dictionary data © EDRDG (JMdict, KANJIDIC2, JMnedict) under the '
+                    'EDRDG licence · stroke order © KanjiVG (CC BY-SA 3.0) · examples '
+                    '© Tatoeba (CC-BY) · pitch accent © Kanjium.'),
                 style: TextStyle(fontSize: 11, color: jc.muted, height: 1.4),
               ),
             ),
@@ -211,41 +215,41 @@ class _PackTile extends StatelessWidget {
     if (progress != null) {
       return IconButton(
         icon: const Icon(Icons.close),
-        tooltip: 'Cancel',
+        tooltip: context.trText('Cancel'),
         onPressed: () => vm.cancel(row.id),
       );
     }
     if (row.updateAvailable) {
       return TextButton(
         onPressed: () => vm.download(row.id),
-        child: const Text('Update'),
+        child: Text(context.trText('Update')),
       );
     }
     if (row.canDownload) {
       return IconButton(
         icon: Icon(Icons.download_outlined, color: jc.brand),
-        tooltip: 'Download',
+        tooltip: context.trText('Download'),
         onPressed: () => vm.download(row.id),
       );
     }
     if (row.canDelete) {
       return IconButton(
         icon: const Icon(Icons.delete_outline),
-        tooltip: 'Delete',
+        tooltip: context.trText('Delete'),
         onPressed: () async {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: Text('Delete ${row.title}?'),
-              content: const Text(
-                  'The built-in essentials keep working; you can download this pack again anytime.'),
+              title: Text(context.trText('Delete ${row.title}?')),
+              content: Text(context.trText(
+                  'The built-in essentials keep working; you can download this pack again anytime.')),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancel')),
+                    child: Text(context.trText('Cancel'))),
                 FilledButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Delete')),
+                    child: Text(context.trText('Delete'))),
               ],
             ),
           );

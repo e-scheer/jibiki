@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db.models import F, Q
+from django.utils.translation import gettext as _
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -74,7 +75,7 @@ class WordDetailView(APIView):
             .first()
         )
         if word is None:
-            return Response({"detail": "Not found."}, status=404)
+            return Response({"detail": _("Not found.")}, status=404)
         context = {"request": request}
         data = WordSerializer(word, context=context).data
         # Break the headword into its constituent kanji so the app can render the
@@ -103,7 +104,7 @@ class KanjiDetailView(APIView):
             .first()
         )
         if kanji is None:
-            return Response({"detail": "Not found."}, status=404)
+            return Response({"detail": _("Not found.")}, status=404)
         return Response(KanjiDetailSerializer(kanji, context={"request": request}).data)
 
 
@@ -177,7 +178,7 @@ class KanaDetailView(APIView):
             .first()
         )
         if kana is None:
-            return Response({"detail": "Not found."}, status=404)
+            return Response({"detail": _("Not found.")}, status=404)
         return Response(KanaSerializer(kana, context={"request": request}).data)
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.http import HttpResponse
+from django.utils.translation import gettext as _
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -74,7 +75,7 @@ class AddCardView(APIView):
             serializer.validated_data["ref"],
         )
         if card is None:
-            return Response({"detail": "Unknown study item."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Unknown study item.")}, status=status.HTTP_404_NOT_FOUND)
         return Response(
             CardSerializer(card).data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
@@ -139,7 +140,7 @@ class ReviewView(APIView):
             .first()
         )
         if card is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         log = review_card(
@@ -177,7 +178,7 @@ class CardDetailView(APIView):
             .first()
         )
         if card is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         from .services import write_tombstone
 
         write_tombstone(request.user, card.item_type, card.item_ref)
@@ -237,7 +238,7 @@ class DeckEnrollView(APIView):
 
         spec = deck_by_id(deck_id)
         if spec is None:
-            return Response({"detail": "Unknown deck."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Unknown deck.")}, status=status.HTTP_404_NOT_FOUND)
         enroll(request.user, spec)
         return Response(deck_stats(request.user, spec))
 
@@ -252,7 +253,7 @@ class DeckQueueView(APIView):
 
         spec = deck_by_id(deck_id)
         if spec is None:
-            return Response({"detail": "Unknown deck."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Unknown deck.")}, status=status.HTTP_404_NOT_FOUND)
         queue = deck_queue(request.user, spec, new_limit=_requested_new_limit(request))
         return Response(
             {
@@ -269,7 +270,7 @@ class FavoriteView(APIView):
     def post(self, request, pk: int):
         card = Card.objects.filter(pk=pk, user=request.user).first()
         if card is None:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         card.favorite = bool(request.data.get("value", not card.favorite))
         card.save(update_fields=["favorite", "updated_at"])
         return Response({"id": card.id, "favorite": card.favorite})

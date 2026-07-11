@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,7 @@ class _SearchScreen extends StatelessWidget {
       appBar: AppBar(
         titleSpacing: 20,
         title: Text(
-          'jibiki',
+          context.trText('jibiki'),
           style: TextStyle(
             color: context.jc.brand,
             fontSize: 24,
@@ -48,7 +49,7 @@ class _SearchScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            tooltip: 'Settings',
+            tooltip: context.trText('Settings'),
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),
           ),
@@ -60,21 +61,25 @@ class _SearchScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: TextField(
-              autofocus: false,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Search kanji, kana, romaji or meaning…',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: vm.isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-                      )
-                    : null,
+                autofocus: false,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText:
+                      context.trText('Search kanji, kana, romaji or meaning…'),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: vm.isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2)),
+                        )
+                      : null,
+                ),
+                onChanged: vm.onQueryChanged,
+                onSubmitted: vm.submit,
               ),
-              onChanged: vm.onQueryChanged,
-              onSubmitted: vm.submit,
-            ),
             ),
           ),
           Expanded(child: BoundedContent(child: _results(context, vm))),
@@ -84,7 +89,9 @@ class _SearchScreen extends StatelessWidget {
   }
 
   Widget _results(BuildContext context, SearchViewModel vm) {
-    if (vm.hasError) return ErrorRetry(message: vm.error!, onRetry: () => vm.submit(vm.query));
+    if (vm.hasError) {
+      return ErrorRetry(message: vm.error!, onRetry: () => vm.submit(vm.query));
+    }
     if (!vm.hasSearched) {
       return const _ExploreLanding();
     }
@@ -92,7 +99,8 @@ class _SearchScreen extends StatelessWidget {
       return const SkeletonTileList();
     }
     if (vm.results.isEmpty && vm.names.isEmpty && !vm.isLoading) {
-      return EmptyHint(icon: Icons.search_off, title: 'No matches for “${vm.query}”');
+      return EmptyHint(
+          icon: Icons.search_off, title: 'No matches for “${vm.query}”');
     }
     final jc = context.jc;
     return ListView(
@@ -108,7 +116,8 @@ class _SearchScreen extends StatelessWidget {
         if (vm.names.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-            child: Text('Names', style: context.text.titleMedium),
+            child:
+                Text(context.trText('Names'), style: context.text.titleMedium),
           ),
           ...vm.names.map((n) => _NameTile(name: n)),
         ],
@@ -140,11 +149,14 @@ class _NameTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name.display, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                Text(name.display,
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w600)),
                 if (subtitle.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 1),
-                    child: Text(subtitle, style: TextStyle(color: jc.muted, fontSize: 13)),
+                    child: Text(subtitle,
+                        style: TextStyle(color: jc.muted, fontSize: 13)),
                   ),
               ],
             ),
@@ -152,9 +164,14 @@ class _NameTile extends StatelessWidget {
           if (name.types.isNotEmpty)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.pill)),
+              decoration: BoxDecoration(
+                  color: jc.surfaceAlt,
+                  borderRadius: BorderRadius.circular(Radii.pill)),
               child: Text(name.types.first.replaceAll('_', ' '),
-                  style: TextStyle(color: jc.body, fontSize: 11, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      color: jc.body,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600)),
             ),
         ],
       ),
@@ -176,35 +193,60 @@ class _ExploreLanding extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        Text('Explore', style: context.text.headlineSmall),
+        Text(context.trText('Explore'), style: context.text.headlineSmall),
         const SizedBox(height: 2),
-        Text('Browse the dictionary, reading, not flashcards.',
+        Text(context.trText('Browse the dictionary, reading, not flashcards.'),
             style: TextStyle(color: jc.muted, fontSize: 13.5)),
         const SizedBox(height: 20),
         _section(context, 'Words'),
         Wrap(spacing: 8, runSpacing: 8, children: [
-          _chip(context, 'Common', () => _open(context,
-              const BrowseListView(spec: BrowseSpec.words(title: 'Common words', common: true)))),
-          _chip(context, 'All words', () => _open(context,
-              const BrowseListView(spec: BrowseSpec.words(title: 'All words')))),
+          _chip(
+              context,
+              'Common',
+              () => _open(
+                  context,
+                  const BrowseListView(
+                      spec: BrowseSpec.words(
+                          title: 'Common words', common: true)))),
+          _chip(
+              context,
+              'All words',
+              () => _open(
+                  context,
+                  const BrowseListView(
+                      spec: BrowseSpec.words(title: 'All words')))),
           for (final n in [5, 4, 3, 2, 1])
-            _chip(context, 'JLPT N$n', () => _open(context,
-                BrowseListView(spec: BrowseSpec.words(title: 'JLPT N$n words', jlpt: n)))),
+            _chip(
+                context,
+                'JLPT N$n',
+                () => _open(
+                    context,
+                    BrowseListView(
+                        spec: BrowseSpec.words(
+                            title: 'JLPT N$n words', jlpt: n)))),
         ]),
         const SizedBox(height: 22),
         _section(context, 'Kanji'),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final n in [5, 4, 3, 2, 1])
-            _chip(context, 'JLPT N$n', () => _open(context,
-                BrowseListView(spec: BrowseSpec.kanji(title: 'JLPT N$n kanji', jlpt: n)))),
-          _chip(context, '部 By radical', () => _open(context, const RadicalPickerView())),
+            _chip(
+                context,
+                'JLPT N$n',
+                () => _open(
+                    context,
+                    BrowseListView(
+                        spec: BrowseSpec.kanji(
+                            title: 'JLPT N$n kanji', jlpt: n)))),
+          _chip(context, '部 By radical',
+              () => _open(context, const RadicalPickerView())),
         ]),
       ],
     );
   }
 
-  Widget _section(BuildContext c, String t) =>
-      Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(t, style: c.text.titleMedium));
+  Widget _section(BuildContext c, String t) => Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(t, style: c.text.titleMedium));
 
   Widget _chip(BuildContext c, String label, VoidCallback onTap) {
     final jc = c.jc;
@@ -216,7 +258,11 @@ class _ExploreLanding extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          child: Text(label, style: TextStyle(color: jc.brandPressed, fontWeight: FontWeight.w700, fontSize: 14)),
+          child: Text(label,
+              style: TextStyle(
+                  color: jc.brandPressed,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14)),
         ),
       ),
     );

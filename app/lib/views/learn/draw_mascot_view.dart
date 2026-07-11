@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -99,8 +100,8 @@ class _DrawMascotViewState extends State<DrawMascotView> {
       Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not save the drawing')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(context.trText('Could not save the drawing'))));
         setState(() => _saving = false);
       }
     }
@@ -111,15 +112,15 @@ class _DrawMascotViewState extends State<DrawMascotView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear the drawing?'),
-        content: const Text('This removes everything on the canvas.'),
+        title: Text(context.trText('Clear the drawing?')),
+        content: Text(context.trText('This removes everything on the canvas.')),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(context.trText('Cancel'))),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Clear')),
+              child: Text(context.trText('Clear'))),
         ],
       ),
     );
@@ -139,7 +140,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
       // overlay the bottom instead of resizing (and squashing) the canvas.
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Draw · ${widget.character}'),
+        title: Text(context.trText('Draw · ${widget.character}')),
         actions: [
           IconButton(
             tooltip: _showGuide ? 'Hide guide' : 'Show guide',
@@ -155,7 +156,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
             builder: (_, __) => Row(
               children: [
                 IconButton(
-                  tooltip: 'Undo',
+                  tooltip: context.trText('Undo'),
                   icon: const Icon(Icons.undo),
                   onPressed: _paint.canUndo
                       ? () {
@@ -165,7 +166,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
                       : null,
                 ),
                 IconButton(
-                  tooltip: 'Redo',
+                  tooltip: context.trText('Redo'),
                   icon: const Icon(Icons.redo),
                   onPressed: _paint.canRedo
                       ? () {
@@ -188,7 +189,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Save'),
+                  : Text(context.trText('Save')),
             ),
           ),
         ],
@@ -201,10 +202,10 @@ class _DrawMascotViewState extends State<DrawMascotView> {
               child: TextField(
                 controller: _word,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'It looks like…',
-                  hintText: 'e.g. a unicorn / une licorne',
-                  prefixIcon: Icon(Icons.lightbulb_outline),
+                decoration: InputDecoration(
+                  labelText: context.trText('It looks like…'),
+                  hintText: context.trText('e.g. a unicorn / une licorne'),
+                  prefixIcon: const Icon(Icons.lightbulb_outline),
                 ),
               ),
             ),
@@ -400,7 +401,7 @@ class _Toolbar extends StatelessWidget {
                       const SizedBox(width: 6),
                       _ToolButton(
                         icon: Icons.delete_outline,
-                        tooltip: 'Clear',
+                        tooltip: context.trText('Clear'),
                         enabled: controller.canUndo,
                         onTap: onClear,
                       ),

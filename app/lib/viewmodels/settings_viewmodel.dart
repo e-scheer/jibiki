@@ -12,16 +12,24 @@ class SettingsViewModel extends BaseViewModel {
   final StudyRepository _study;
 
   Future<void> setMode(AppMode mode) => _patch({'mode': mode.wire});
-  Future<void> setMnemonicLanguage(String code) => _patch({'mnemonic_language': code});
+  Future<void> setMnemonicLanguage(String code) =>
+      _patch({'mnemonic_language': code});
+  Future<void> setInterfaceLanguage(String code) =>
+      _patch({'interface_language': code});
   Future<void> setNewCardsPerDay(int n) => _patch({'new_cards_per_day': n});
-  Future<void> setDesiredRetention(double r) => _patch({'desired_retention': r});
-  Future<void> setNotifications(bool on) => _patch({'notifications_enabled': on});
+  Future<void> setDesiredRetention(double r) =>
+      _patch({'desired_retention': r});
+  Future<void> setNotifications(bool on) =>
+      _patch({'notifications_enabled': on});
 
-  Future<void> _patch(Map<String, dynamic> patch) => runGuarded(() => _app.updateProfile(patch));
+  Future<void> _patch(Map<String, dynamic> patch) =>
+      runGuarded(() => _app.updateProfile(patch));
 
   Future<void> logout() => runGuarded(() => _app.logout());
 
   Future<String?> exportDeck() => runGuarded(() => _study.exportTsv());
-  Future<Map<String, dynamic>?> optimizeStatus() => runGuarded(() => _study.optimizeStatus(), silent: true);
-  Future<Map<String, dynamic>?> runOptimize() => runGuarded(() => _study.runOptimize());
+  Future<Map<String, dynamic>?> optimizeStatus() =>
+      runGuarded(() => _study.optimizeStatus(), silent: true);
+  Future<Map<String, dynamic>?> runOptimize() =>
+      runGuarded(() => _study.runOptimize());
 }

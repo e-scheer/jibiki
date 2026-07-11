@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
 import '../../core/languages.dart';
+import '../../l10n/l10n.dart';
 import '../widgets/language_picker.dart';
 import '../../models/enums.dart';
 import '../../repositories/study_repository.dart';
@@ -39,12 +40,33 @@ class _Settings extends StatelessWidget {
     final jc = context.jc;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.l10n.settings)),
       body: BoundedContent(
         maxWidth: 640,
         child: ListView(
           children: [
-            _section(context, 'Mode'),
+            _section(context, context.l10n.interfaceLanguage),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: Text(profile.interfaceLanguage == 'fr'
+                  ? context.l10n.french
+                  : context.l10n.english),
+              subtitle: Text(context.l10n.interfaceLanguageHelp),
+              trailing: DropdownButton<String>(
+                value: profile.interfaceLanguage,
+                onChanged: (code) {
+                  if (code != null) vm.setInterfaceLanguage(code);
+                },
+                items: [
+                  DropdownMenuItem(
+                      value: 'en', child: Text(context.l10n.english)),
+                  DropdownMenuItem(
+                      value: 'fr', child: Text(context.l10n.french)),
+                ],
+              ),
+            ),
+            const Divider(),
+            _section(context, context.l10n.mode),
             RadioGroup<AppMode>(
               groupValue: app.mode,
               onChanged: (v) => v == null ? null : vm.setMode(v),
@@ -52,21 +74,19 @@ class _Settings extends StatelessWidget {
                 children: AppMode.values
                     .map((m) => RadioListTile<AppMode>(
                           value: m,
-                          title: Text(m.label),
-                          subtitle: Text(m.blurb,
+                          title: Text(_modeLabel(context, m)),
+                          subtitle: Text(_modeHelp(context, m),
                               style: const TextStyle(fontSize: 12)),
                         ))
                     .toList(),
               ),
             ),
             const Divider(),
-            _section(context, 'Mnemonic language'),
+            _section(context, context.l10n.mnemonicLanguage),
             ListTile(
               leading: const Icon(Icons.translate),
               title: Text(mnemonicLanguageName(profile.mnemonicLanguage)),
-              subtitle: const Text(
-                  'Any language works - where content is missing, English backs '
-                  'you up and the community (you?) can draw the first set.'),
+              subtitle: Text(context.l10n.mnemonicLanguageHelp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 final picked = await showMnemonicLanguagePicker(
@@ -75,12 +95,10 @@ class _Settings extends StatelessWidget {
               },
             ),
             const Divider(),
-            _section(context, 'Spaced repetition'),
+            _section(context, context.l10n.spacedRepetition),
             _CommitSlider(
-              title: 'New cards per session',
-              helper:
-                  'How many new cards to start a session with. Not a daily cap, '
-                  'tap “Study more” at the end to keep going.',
+              title: context.l10n.newCardsPerSession,
+              helper: context.l10n.newCardsHelp,
               value: profile.newCardsPerDay.toDouble(),
               min: 0,
               max: 50,
@@ -89,7 +107,7 @@ class _Settings extends StatelessWidget {
               onCommit: (v) => vm.setNewCardsPerDay(v.round()),
             ),
             _CommitSlider(
-              title: 'Desired retention',
+              title: context.l10n.desiredRetention,
               value: profile.desiredRetention.clamp(0.80, 0.95),
               min: 0.80,
               max: 0.95,
@@ -99,62 +117,57 @@ class _Settings extends StatelessWidget {
                   vm.setDesiredRetention(double.parse(v.toStringAsFixed(2))),
             ),
             SwitchListTile(
-              title: const Text('Study reminders'),
-              subtitle: const Text('A gentle nudge when enough cards are due.'),
+              title: Text(context.l10n.studyReminders),
+              subtitle: Text(context.l10n.studyRemindersHelp),
               value: profile.notificationsEnabled,
               onChanged: vm.setNotifications,
             ),
             const Divider(),
-            _section(context, 'Community'),
+            _section(context, context.l10n.community),
             ListTile(
               leading: const Icon(Icons.brush_outlined),
-              title: const Text('My submissions'),
-              subtitle:
-                  const Text('Your drawn mnemonics and their review status.'),
+              title: Text(context.l10n.mySubmissions),
+              subtitle: Text(context.l10n.mySubmissionsHelp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/submissions'),
             ),
             ListTile(
               leading: const Icon(Icons.collections_bookmark_outlined),
-              title: const Text('My packs'),
-              subtitle: const Text(
-                  'Packs you created, drafts, in review, published.'),
+              title: Text(context.l10n.myPacks),
+              subtitle: Text(context.l10n.myPacksHelp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/decks/community?tab=mine'),
             ),
             ListTile(
               leading: const Icon(Icons.forum_outlined),
-              title: const Text('Make jibiki better'),
-              subtitle: const Text(
-                  'Ideas, bugs, love letters - we read every single one.'),
+              title: Text(context.l10n.makeJibikiBetter),
+              subtitle: Text(context.l10n.makeJibikiBetterHelp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/feedback'),
             ),
             const Divider(),
-            _section(context, 'Data'),
+            _section(context, context.l10n.data),
             ListTile(
               leading: const Icon(Icons.download_for_offline_outlined),
-              title: const Text('Offline & storage'),
-              subtitle: const Text(
-                  'Dictionary packs on this phone, updates, sync status.'),
+              title: Text(context.l10n.offlineStorage),
+              subtitle: Text(context.l10n.offlineStorageHelp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/settings/storage'),
             ),
             ListTile(
               leading: const Icon(Icons.ios_share),
-              title: const Text('Export to Anki'),
-              subtitle: const Text('Your deck as an Anki-importable TSV.'),
+              title: Text(context.l10n.exportToAnki),
+              subtitle: Text(context.l10n.exportToAnkiHelp),
               onTap: () => _export(context, vm),
             ),
             ListTile(
               leading: const Icon(Icons.auto_graph),
-              title: const Text('Personalised scheduling'),
-              subtitle: const Text(
-                  'Train FSRS on your own history once you have enough reviews.'),
+              title: Text(context.l10n.personalisedScheduling),
+              subtitle: Text(context.l10n.personalisedSchedulingHelp),
               onTap: () => _optimize(context, vm),
             ),
             const Divider(),
-            _section(context, 'Account'),
+            _section(context, context.l10n.account),
             if (app.isAuthenticated) ...[
               ListTile(
                 leading: const Icon(Icons.mail_outline),
@@ -162,25 +175,22 @@ class _Settings extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.logout, color: jc.ratingAgain),
-                title:
-                    Text('Sign out', style: TextStyle(color: jc.ratingAgain)),
+                title: Text(context.l10n.signOut,
+                    style: TextStyle(color: jc.ratingAgain)),
                 onTap: () => vm.logout(),
               ),
             ] else ...[
               ListTile(
                 leading: const Icon(Icons.cloud_upload_outlined),
-                title: const Text('Sync with an account'),
-                subtitle: const Text(
-                  'Sign in or create an account. Your local progress stays on '
-                  'this device until you choose how to reconcile it with the cloud.',
-                ),
+                title: Text(context.l10n.syncWithAccount),
+                subtitle: Text(context.l10n.syncWithAccountHelp),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/login'),
               ),
             ],
             const SizedBox(height: 24),
             Center(
-              child: Text('jibiki · dictionary data © EDRDG (JMdict/KANJIDIC)',
+              child: Text(context.l10n.dictionaryCredits,
                   style: TextStyle(fontSize: 11, color: jc.muted)),
             ),
             const SizedBox(height: 16),
@@ -194,8 +204,8 @@ class _Settings extends StatelessWidget {
     final tsv = await vm.exportDeck();
     if (!context.mounted) return;
     if (tsv == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(vm.error ?? 'Export failed')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(vm.error ?? context.l10n.exportFailed)));
       return;
     }
     final lines =
@@ -203,7 +213,7 @@ class _Settings extends StatelessWidget {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Export · $lines cards'),
+        title: Text(context.l10n.exportCards(lines)),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
@@ -213,21 +223,20 @@ class _Settings extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(context.l10n.close)),
           FilledButton.icon(
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: tsv));
               if (ctx.mounted) Navigator.pop(ctx);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Copied, paste into a .txt and import in Anki')),
+                  SnackBar(content: Text(context.l10n.ankiCopied)),
                 );
               }
             },
             icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Copy'),
+            label: Text(context.l10n.copy),
           ),
         ],
       ),
@@ -243,26 +252,25 @@ class _Settings extends StatelessWidget {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Personalised scheduling'),
+        title: Text(context.l10n.personalisedScheduling),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LinearProgressIndicator(value: (reviews / minReviews).clamp(0, 1)),
             const SizedBox(height: 12),
-            Text('$reviews / $minReviews reviews'),
+            Text(context.l10n.reviewProgress(reviews, minReviews)),
             const SizedBox(height: 6),
             Text(
-              ready
-                  ? 'Ready. FSRS can now be tuned to your own memory.'
-                  : 'Keep reviewing. FSRS uses solid defaults until then.',
+              ready ? context.l10n.fsrsReady : context.l10n.fsrsKeepReviewing,
               style: TextStyle(color: ctx.jc.muted, fontSize: 13),
             ),
           ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(context.l10n.close)),
           FilledButton(
             onPressed: ready
                 ? () async {
@@ -272,13 +280,13 @@ class _Settings extends StatelessWidget {
                       final improved = res['improved'] == true;
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(improved
-                            ? 'Scheduler personalised to your history 🎯'
-                            : 'Kept the defaults, they already fit you well.'),
+                            ? context.l10n.schedulerPersonalised
+                            : context.l10n.schedulerDefaultsKept),
                       ));
                     }
                   }
                 : null,
-            child: const Text('Optimise now'),
+            child: Text(context.l10n.optimiseNow),
           ),
         ],
       ),
@@ -293,6 +301,18 @@ class _Settings extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: context.jc.brand)),
       );
+
+  String _modeLabel(BuildContext context, AppMode mode) => switch (mode) {
+        AppMode.dictionary => context.l10n.dictionaryMode,
+        AppMode.middle => context.l10n.middleMode,
+        AppMode.learning => context.l10n.learningMode,
+      };
+
+  String _modeHelp(BuildContext context, AppMode mode) => switch (mode) {
+        AppMode.dictionary => context.l10n.dictionaryModeHelp,
+        AppMode.middle => context.l10n.middleModeHelp,
+        AppMode.learning => context.l10n.learningModeHelp,
+      };
 }
 
 /// A slider that tracks the finger locally and only writes the profile once the

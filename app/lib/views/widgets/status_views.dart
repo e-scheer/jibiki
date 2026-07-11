@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
@@ -5,8 +6,9 @@ import '../../theme/app_theme.dart';
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override
-  Widget build(BuildContext context) =>
-      const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()));
+  Widget build(BuildContext context) => const Center(
+      child: Padding(
+          padding: EdgeInsets.all(32), child: CircularProgressIndicator()));
 }
 
 class ErrorRetry extends StatelessWidget {
@@ -27,7 +29,8 @@ class ErrorRetry extends StatelessWidget {
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+              OutlinedButton(
+                  onPressed: onRetry, child: Text(context.trText('Retry'))),
             ],
           ],
         ),
@@ -37,7 +40,8 @@ class ErrorRetry extends StatelessWidget {
 }
 
 class EmptyHint extends StatelessWidget {
-  const EmptyHint({super.key, required this.icon, required this.title, this.subtitle});
+  const EmptyHint(
+      {super.key, required this.icon, required this.title, this.subtitle});
   final IconData icon;
   final String title;
   final String? subtitle;
@@ -53,10 +57,14 @@ class EmptyHint extends StatelessWidget {
           children: [
             Icon(icon, size: 44, color: jc.muted),
             const SizedBox(height: 14),
-            Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            Text(title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center),
             if (subtitle != null) ...[
               const SizedBox(height: 6),
-              Text(subtitle!, textAlign: TextAlign.center, style: TextStyle(color: jc.muted)),
+              Text(subtitle!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: jc.muted)),
             ],
           ],
         ),
@@ -68,7 +76,12 @@ class EmptyHint extends StatelessWidget {
 /// A single static placeholder block (a skeleton bone). Group several inside a
 /// [_Pulse] to make them breathe; on its own it's just a rounded neutral shape.
 class Skeleton extends StatelessWidget {
-  const Skeleton({super.key, this.width, this.height = 12, this.radius = 6, this.circle = false});
+  const Skeleton(
+      {super.key,
+      this.width,
+      this.height = 12,
+      this.radius = 6,
+      this.circle = false});
   final double? width;
   final double height;
   final double radius;
@@ -99,8 +112,9 @@ class _Pulse extends StatefulWidget {
 }
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  late final AnimationController _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 1100))
+    ..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -110,10 +124,13 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (!Motion.enabled(context)) return Opacity(opacity: 0.7, child: widget.child);
+    if (!Motion.enabled(context)) {
+      return Opacity(opacity: 0.7, child: widget.child);
+    }
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) => Opacity(opacity: 0.5 + 0.4 * _c.value, child: widget.child),
+      builder: (_, __) =>
+          Opacity(opacity: 0.5 + 0.4 * _c.value, child: widget.child),
     );
   }
 }
@@ -197,7 +214,8 @@ class SkeletonCardGrid extends StatelessWidget {
         shrinkWrap: shrinkWrap,
         physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
         itemCount: count,
-        itemBuilder: (_, __) => const Skeleton(width: double.infinity, height: double.infinity, radius: Radii.lg),
+        itemBuilder: (_, __) => const Skeleton(
+            width: double.infinity, height: double.infinity, radius: Radii.lg),
       ),
     );
   }
@@ -220,7 +238,9 @@ class TagChip extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(Radii.sm),
       ),
-      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
+      child: Text(label,
+          style:
+              TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
     );
   }
 }

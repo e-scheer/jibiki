@@ -15,6 +15,7 @@ backup everywhere a language has no content yet.
 from __future__ import annotations
 
 import pycountry
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 DEFAULT_LANGUAGE = "en"
@@ -29,7 +30,9 @@ def validate_language_code(value: str) -> str:
     ValidationError. Use on write paths (profile, mnemonic/deck creation)."""
     code = (value or "").strip().lower()
     if not _is_iso_639_1(code):
-        raise serializers.ValidationError(f"'{value}' is not an ISO 639-1 language code.")
+        raise serializers.ValidationError(
+            _("'%(value)s' is not an ISO 639-1 language code.") % {"value": value}
+        )
     return code
 
 

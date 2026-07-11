@@ -11,19 +11,20 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class FeedbackKind(models.TextChoices):
-    IDEA = "idea", "Idea"
-    BUG = "bug", "Bug"
-    LOVE = "love", "Love"
-    OTHER = "other", "Other"
+    IDEA = "idea", _("Idea")
+    BUG = "bug", _("Bug")
+    LOVE = "love", _("Love")
+    OTHER = "other", _("Other")
 
 
 class FeedbackStatus(models.TextChoices):
-    NEW = "new", "New"
-    SEEN = "seen", "Seen"
-    DONE = "done", "Done"
+    NEW = "new", _("New")
+    SEEN = "seen", _("Seen")
+    DONE = "done", _("Done")
 
 
 class Feedback(models.Model):
@@ -58,16 +59,16 @@ class Feedback(models.Model):
 
 
 class ContentItemType(models.TextChoices):
-    KANJI = "kanji", "Kanji"
-    KANA = "kana", "Kana"
-    WORD = "word", "Word"
+    KANJI = "kanji", _("Kanji")
+    KANA = "kana", _("Kana")
+    WORD = "word", _("Word")
 
 
 class ContentReportReason(models.TextChoices):
-    WRONG = "wrong", "Something is wrong"
-    MISSING = "missing", "Something is missing"
-    TYPO = "typo", "Typo or formatting"
-    OTHER = "other", "Something else"
+    WRONG = "wrong", _("Something is wrong")
+    MISSING = "missing", _("Something is missing")
+    TYPO = "typo", _("Typo or formatting")
+    OTHER = "other", _("Something else")
 
 
 class ContentReport(models.Model):

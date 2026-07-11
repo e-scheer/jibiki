@@ -21,6 +21,7 @@ import 'infrastructure/local/local_dictionary_data_source.dart';
 import 'infrastructure/local/local_study_store.dart';
 import 'infrastructure/packs/pack_manager.dart';
 import 'infrastructure/user_db_handle.dart';
+import 'l10n/app_localizations.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/dictionary_repository.dart';
 import 'repositories/mnemonic_deck_repository.dart';
@@ -187,24 +188,31 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         Provider(create: (_) => FeedbackService(_api)),
         ChangeNotifierProvider.value(value: _app),
       ],
-      child: MaterialApp.router(
-        title: 'jibiki',
-        debugShowCheckedModeBanner: false,
-        theme: _light,
-        darkTheme: _dark,
-        routerConfig: _router,
-        // Premium touch: tapping anywhere outside a field dismisses the keyboard.
-        // Translucent so empty space is captured while buttons/fields still win
-        // their own taps.
-        builder: (context, child) => SyncConflictGate(
-          sync: _sync,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            child: child!,
+      child: Builder(builder: (context) {
+        final interfaceLanguage = context.watch<AppState>().interfaceLanguage;
+        _api.setInterfaceLanguage(interfaceLanguage);
+        return MaterialApp.router(
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          locale: Locale(context.watch<AppState>().interfaceLanguage),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          debugShowCheckedModeBanner: false,
+          theme: _light,
+          darkTheme: _dark,
+          routerConfig: _router,
+          // Premium touch: tapping anywhere outside a field dismisses the keyboard.
+          // Translucent so empty space is captured while buttons/fields still win
+          // their own taps.
+          builder: (context, child) => SyncConflictGate(
+            sync: _sync,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              child: child!,
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

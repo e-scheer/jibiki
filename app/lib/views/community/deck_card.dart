@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/mnemonic_deck.dart';
@@ -7,7 +8,8 @@ import '../widgets/net_image.dart';
 /// An Instagram-explore-style tile for a community pack: square cover, title,
 /// author and an engagement row.
 class DeckCard extends StatelessWidget {
-  const DeckCard({super.key, required this.deck, required this.onTap, this.onLike});
+  const DeckCard(
+      {super.key, required this.deck, required this.onTap, this.onLike});
   final MnemonicDeck deck;
   final VoidCallback onTap;
   final VoidCallback? onLike;
@@ -53,9 +55,12 @@ class DeckCard extends StatelessWidget {
                     Text(deck.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 14.5)),
                     const SizedBox(height: 2),
-                    Text('by ${deck.authorName} · ${deck.itemCount} cards',
+                    Text(
+                        context.trText(
+                            'by ${deck.authorName} · ${deck.itemCount} cards'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: jc.muted, fontSize: 12.5)),
@@ -63,13 +68,17 @@ class DeckCard extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: jc.surfaceAlt,
                             borderRadius: BorderRadius.circular(Radii.pill),
                           ),
                           child: Text(deck.kind == 'kanji' ? 'Kanji' : 'Kana',
-                              style: TextStyle(color: jc.body, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                              style: TextStyle(
+                                  color: jc.body,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600)),
                         ),
                         const Spacer(),
                         if (deck.isPublic)
@@ -80,12 +89,19 @@ class DeckCard extends StatelessWidget {
                               padding: const EdgeInsets.all(2),
                               child: Row(
                                 children: [
-                                  Icon(deck.liked ? Icons.favorite : Icons.favorite_border,
-                                      size: 18, color: deck.liked ? jc.ratingAgain : jc.ink),
+                                  Icon(
+                                      deck.liked
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      size: 18,
+                                      color:
+                                          deck.liked ? jc.ratingAgain : jc.ink),
                                   if (deck.score > 0) ...[
                                     const SizedBox(width: 4),
-                                    Text('${deck.score}',
-                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+                                    Text(context.trText('${deck.score}'),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12.5)),
                                   ],
                                 ],
                               ),
@@ -112,7 +128,10 @@ class _Cover extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     if (deck.hasCover) {
-      return NetImage(url: deck.coverUrl, cacheWidth: 500, errorBuilder: (_) => _fallback(jc));
+      return NetImage(
+          url: deck.coverUrl,
+          cacheWidth: 500,
+          errorBuilder: (_) => _fallback(jc));
     }
     return _fallback(jc);
   }
@@ -122,7 +141,8 @@ class _Cover extends StatelessWidget {
       decoration: BoxDecoration(gradient: jc.instaLinear),
       alignment: Alignment.center,
       child: Text(deck.kind == 'kanji' ? '漢' : 'あ',
-          style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w800, color: Colors.white)),
+          style: const TextStyle(
+              fontSize: 56, fontWeight: FontWeight.w800, color: Colors.white)),
     );
   }
 }
@@ -145,7 +165,9 @@ class _StatusChip extends StatelessWidget {
         color: jc.ink.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(Radii.pill),
       ),
-      child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+      child: Text(label,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -54,7 +55,8 @@ class _ReadingMnemonicSectionState extends State<ReadingMnemonicSection> {
     });
   }
 
-  Future<List<Mnemonic>> _listOrEmpty(MnemonicRepository repo, String language) async {
+  Future<List<Mnemonic>> _listOrEmpty(
+      MnemonicRepository repo, String language) async {
     try {
       return await repo.list(
         character: widget.character,
@@ -76,7 +78,9 @@ class _ReadingMnemonicSectionState extends State<ReadingMnemonicSection> {
         Row(
           children: [
             Expanded(
-              child: Text('Reading mnemonic · ${mnemonicLanguageName(_items.first.language)}',
+              child: Text(
+                  context.trText(
+                      'Reading mnemonic · ${mnemonicLanguageName(_items.first.language)}'),
                   style: context.text.titleMedium),
             ),
             if (_englishFallback)

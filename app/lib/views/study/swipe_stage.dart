@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/breakpoints.dart';
@@ -77,7 +78,10 @@ class _SwipeStageState extends State<SwipeStage> {
             const SizedBox(width: 16),
             SizedBox(
               width: 150,
-              child: _ActionBar(revealed: _revealed, controller: _controller, axis: Axis.vertical),
+              child: _ActionBar(
+                  revealed: _revealed,
+                  controller: _controller,
+                  axis: Axis.vertical),
             ),
           ],
         ),
@@ -87,7 +91,9 @@ class _SwipeStageState extends State<SwipeStage> {
       child: Column(
         children: [
           Expanded(
-            child: Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 6), child: cardStack),
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
+                child: cardStack),
           ),
           _ActionBar(revealed: _revealed, controller: _controller),
         ],
@@ -143,7 +149,10 @@ class _PeekCard extends StatelessWidget {
 /// The premium bottom controls: "Show answer" before reveal, then the four
 /// colour-coded grade buttons that mirror the swipe directions.
 class _ActionBar extends StatelessWidget {
-  const _ActionBar({required this.revealed, required this.controller, this.axis = Axis.horizontal});
+  const _ActionBar(
+      {required this.revealed,
+      required this.controller,
+      this.axis = Axis.horizontal});
   final bool revealed;
   final SwipeCardController controller;
   final Axis axis;
@@ -163,7 +172,7 @@ class _ActionBar extends StatelessWidget {
           controller.reveal();
         },
         icon: const Icon(Icons.visibility_outlined, size: 20),
-        label: const Text('Show answer'),
+        label: Text(context.trText('Show answer')),
       ),
     );
 
@@ -176,7 +185,9 @@ class _ActionBar extends StatelessWidget {
                 children: [
                   for (var i = 0; i < _grades.length; i++) ...[
                     if (i > 0) const SizedBox(height: 8),
-                    _GradeButton(rating: _grades[i], onTap: () => controller.rate(_grades[i])),
+                    _GradeButton(
+                        rating: _grades[i],
+                        onTap: () => controller.rate(_grades[i])),
                   ],
                 ],
               )
@@ -185,7 +196,10 @@ class _ActionBar extends StatelessWidget {
                 children: [
                   for (var i = 0; i < _grades.length; i++) ...[
                     if (i > 0) const SizedBox(width: 8),
-                    Expanded(child: _GradeButton(rating: _grades[i], onTap: () => controller.rate(_grades[i]))),
+                    Expanded(
+                        child: _GradeButton(
+                            rating: _grades[i],
+                            onTap: () => controller.rate(_grades[i]))),
                   ],
                 ],
               ))
@@ -200,7 +214,8 @@ class _ActionBar extends StatelessWidget {
         padding: vertical
             ? const EdgeInsets.symmetric(vertical: 4)
             : const EdgeInsets.fromLTRB(20, 4, 20, 12),
-        child: AnimatedSwitcher(duration: Motion.timed(context, Motion.fast), child: content),
+        child: AnimatedSwitcher(
+            duration: Motion.timed(context, Motion.fast), child: content),
       ),
     );
   }
@@ -241,10 +256,16 @@ class _GradeButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(ratingArrow(rating),
-                      style: TextStyle(color: color.withValues(alpha: 0.7), fontWeight: FontWeight.w900, fontSize: 12)),
+                      style: TextStyle(
+                          color: color.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12)),
                   const SizedBox(width: 4),
                   Text(rating.label,
-                      style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12.5)),
+                      style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12.5)),
                 ],
               ),
             ),
@@ -293,7 +314,10 @@ class _Face extends StatelessWidget {
           else
             _AnswerBlock(card: card, lang: lang),
           const Spacer(),
-          if (revealed) const _Hint(icon: Icons.swipe_outlined, text: 'Swipe any way, or tap a button'),
+          if (revealed)
+            const _Hint(
+                icon: Icons.swipe_outlined,
+                text: 'Swipe any way, or tap a button'),
         ],
       ),
     );
@@ -317,7 +341,9 @@ class _AnswerBlock extends StatelessWidget {
         Container(
           width: 44,
           height: 3,
-          decoration: BoxDecoration(color: jc.hairline, borderRadius: BorderRadius.circular(Radii.pill)),
+          decoration: BoxDecoration(
+              color: jc.hairline,
+              borderRadius: BorderRadius.circular(Radii.pill)),
         ),
         const SizedBox(height: 16),
         if (hasReading) ...[
@@ -335,7 +361,11 @@ class _AnswerBlock extends StatelessWidget {
         ],
         Text(card.meaning(lang),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 19, color: jc.body, height: 1.35, fontWeight: FontWeight.w500)),
+            style: TextStyle(
+                fontSize: 19,
+                color: jc.body,
+                height: 1.35,
+                fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
         SpeechButton(text: _cardSpeech(card), size: 26),
       ],
@@ -356,7 +386,9 @@ class _Hint extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: jc.muted),
         const SizedBox(width: 6),
-        Text(text, style: TextStyle(color: jc.muted, fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(text,
+            style: TextStyle(
+                color: jc.muted, fontSize: 13, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -374,8 +406,15 @@ class _TypeBadge extends StatelessWidget {
     final color = isNew ? jc.brand : jc.muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(Radii.pill)),
-      child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1.2)),
+      decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(Radii.pill)),
+      child: Text(label,
+          style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+              letterSpacing: 1.2)),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -96,7 +97,7 @@ class _SessionState extends State<_Session> {
           if (!vm.finished && _mode == StudyMode.quiz)
             IconButton(
               icon: const Icon(Icons.swap_horiz_rounded),
-              tooltip: 'Direction: ${_direction.label}',
+              tooltip: context.trText('Direction: ${_direction.label}'),
               isSelected: _direction.isRecall,
               onPressed: _toggleDirection,
             ),
@@ -163,7 +164,8 @@ class _SessionState extends State<_Session> {
                             vm: vm,
                             lang: lang),
                         StudyMode.quiz => QuizStage(
-                            key: ValueKey('q${vm.current!.id}-${_direction.name}'),
+                            key: ValueKey(
+                                'q${vm.current!.id}-${_direction.name}'),
                             vm: vm,
                             lang: lang,
                             direction: _direction),
@@ -247,7 +249,8 @@ class _GamePickerSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.only(left: 6, bottom: 12),
-              child: Text('Choose a game', style: context.text.titleLarge),
+              child: Text(context.trText('Choose a game'),
+                  style: context.text.titleLarge),
             ),
             for (final m in StudyMode.values)
               _GameRow(
@@ -405,12 +408,15 @@ class _Summary extends StatelessWidget {
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Study more'),
+                    : Text(context.trText('Study more')),
               ),
               const SizedBox(height: 6),
-              TextButton(onPressed: onDone, child: const Text('Done for now')),
+              TextButton(
+                  onPressed: onDone,
+                  child: Text(context.trText('Done for now'))),
             ] else
-              FilledButton(onPressed: onDone, child: const Text('Done')),
+              FilledButton(
+                  onPressed: onDone, child: Text(context.trText('Done'))),
           ],
         ),
       ),

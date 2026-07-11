@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from accounts.languages import DEFAULT_LANGUAGE, validate_language_code
@@ -142,18 +143,20 @@ class CreateMnemonicSerializer(serializers.Serializer):
     def validate_image(self, f):
         if f.size > settings.MNEMONIC_IMAGE_MAX_BYTES:
             mb = settings.MNEMONIC_IMAGE_MAX_BYTES // (1024 * 1024)
-            raise serializers.ValidationError(f"Image exceeds the {mb} MB limit.")
+            raise serializers.ValidationError(
+                _("Image exceeds the %(size)s MB limit.") % {"size": mb}
+            )
         return f
 
     def validate(self, attrs):
         reading = attrs.get("reading", "")
         if attrs["kind"] == Mnemonic.Kind.KANJI_READING and not reading:
             raise serializers.ValidationError(
-                {"reading": "A reading mnemonic requires a reading."}
+                {"reading": _("A reading mnemonic requires a reading.")}
             )
         if attrs["kind"] != Mnemonic.Kind.KANJI_READING and reading:
             raise serializers.ValidationError(
-                {"reading": "Only reading mnemonics can carry a reading."}
+                {"reading": _("Only reading mnemonics can carry a reading.")}
             )
         return attrs
 

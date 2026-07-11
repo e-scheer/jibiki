@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/languages.dart';
@@ -7,7 +8,8 @@ import '../../theme/app_theme.dart';
 /// ISO 639-1 language is selectable, so the community can start a language
 /// before we curate it (English stays the display backup) - but ONLY real
 /// languages: the list is the ISO catalog, never free text.
-Future<String?> showMnemonicLanguagePicker(BuildContext context, String current) {
+Future<String?> showMnemonicLanguagePicker(
+    BuildContext context, String current) {
   return showModalBottomSheet<String>(
     context: context,
     showDragHandle: true,
@@ -54,18 +56,20 @@ class _LanguageSheetState extends State<_LanguageSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mnemonic language', style: Theme.of(ctx).textTheme.titleMedium),
+                Text(context.trText('Mnemonic language'),
+                    style: Theme.of(ctx).textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text(
-                  'Mnemonics ride on sound, so they belong to a language. '
-                  'No content in yours yet? Draw the first - or ask for a '
-                  'curated set via Settings → Make jibiki better.',
+                  context.trText(
+                      'Mnemonics ride on sound, so they belong to a language. '
+                      'No content in yours yet? Draw the first - or ask for a '
+                      'curated set via Settings → Make jibiki better.'),
                   style: TextStyle(color: jc.muted, fontSize: 13, height: 1.4),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   decoration: InputDecoration(
-                    hintText: 'Search languages…',
+                    hintText: context.trText('Search languages…'),
                     prefixIcon: const Icon(Icons.search),
                     isDense: true,
                     border: OutlineInputBorder(
@@ -85,7 +89,7 @@ class _LanguageSheetState extends State<_LanguageSheet> {
           ] else if (filtered.isEmpty)
             Padding(
               padding: const EdgeInsets.all(24),
-              child: Text('No language matches "$_query".',
+              child: Text(context.trText('No language matches "$_query".'),
                   style: TextStyle(color: jc.muted)),
             )
           else
@@ -112,7 +116,7 @@ class _LanguageSheetState extends State<_LanguageSheet> {
       title: Text(lang.nativeName),
       subtitle: lang.seeded
           ? null
-          : Text('No content yet - be the first!',
+          : Text(context.trText('No content yet - be the first!'),
               style: TextStyle(fontSize: 11, color: jc.muted)),
       trailing: lang.code == widget.current
           ? Icon(Icons.check, color: jc.brand)

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -25,10 +26,10 @@ class CommunityDecksView extends StatelessWidget {
       initialIndex: initialTab,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Packs'),
+          title: Text(context.trText('Packs')),
           actions: [
             IconButton(
-              tooltip: 'Create a pack',
+              tooltip: context.trText('Create a pack'),
               icon: const Icon(Icons.add_box_outlined),
               onPressed: () => context.push('/decks/new'),
             ),
@@ -60,8 +61,11 @@ class _DecksTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) =>
-          CommunityDecksViewModel(ctx.read<MnemonicDeckRepository>(), language: language, mine: mine)..load(),
+      create: (ctx) => CommunityDecksViewModel(
+          ctx.read<MnemonicDeckRepository>(),
+          language: language,
+          mine: mine)
+        ..load(),
       child: _DecksGrid(mine: mine),
     );
   }
@@ -77,17 +81,21 @@ class _DecksGrid extends StatelessWidget {
     final jc = context.jc;
 
     if (vm.hasError) {
-      return ListView(children: [ErrorRetry(message: vm.error!, onRetry: vm.load)]);
+      return ListView(
+          children: [ErrorRetry(message: vm.error!, onRetry: vm.load)]);
     }
     if (vm.isLoading && vm.decks.isEmpty) {
-      return const SkeletonCardGrid(count: 6, crossAxisCount: 2, childAspectRatio: 0.72);
+      return const SkeletonCardGrid(
+          count: 6, crossAxisCount: 2, childAspectRatio: 0.72);
     }
     if (vm.decks.isEmpty) {
       return EmptyHint(
-        icon: mine ? Icons.collections_bookmark_outlined : Icons.explore_outlined,
+        icon:
+            mine ? Icons.collections_bookmark_outlined : Icons.explore_outlined,
         title: mine ? 'No packs yet' : 'No community packs yet',
-        subtitle:
-            mine ? 'Bundle your drawings into a pack and share it.' : 'Be the first to publish a pack of mascots.',
+        subtitle: mine
+            ? 'Bundle your drawings into a pack and share it.'
+            : 'Be the first to publish a pack of mascots.',
       );
     }
     return RefreshIndicator(
@@ -107,7 +115,8 @@ class _DecksGrid extends StatelessWidget {
           final deck = vm.decks[i];
           return DeckCard(
             deck: deck,
-            onTap: () => context.push('/decks/community/${deck.id}?owned=${mine ? 1 : 0}'),
+            onTap: () => context
+                .push('/decks/community/${deck.id}?owned=${mine ? 1 : 0}'),
             onLike: deck.isPublic ? () => vm.like(deck) : null,
           );
         },

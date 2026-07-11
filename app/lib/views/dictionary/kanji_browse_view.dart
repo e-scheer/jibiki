@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
 
   Future<void> _loadStates() async {
     try {
-      final s = await context.read<StudyRepository>().studyStates(type: ItemType.kanji);
+      final s = await context
+          .read<StudyRepository>()
+          .studyStates(type: ItemType.kanji);
       if (mounted) setState(() => _states = s);
     } catch (_) {
       // No study state (e.g. offline) just means no badges.
@@ -53,7 +56,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
 
   void _toggle(String literal) {
     Haptics.tick();
-    setState(() => _selected.contains(literal) ? _selected.remove(literal) : _selected.add(literal));
+    setState(() => _selected.contains(literal)
+        ? _selected.remove(literal)
+        : _selected.add(literal));
   }
 
   Future<void> _bulk(bool known, List<KanjiEntry> visible) async {
@@ -62,7 +67,8 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
     setState(() => _busy = true);
     final items = [for (final c in _selected) (type: ItemType.kanji, ref: c)];
     try {
-      final summary = await context.read<StudyRepository>().bulkAdd(items, known: known);
+      final summary =
+          await context.read<StudyRepository>().bulkAdd(items, known: known);
       if (!mounted) return;
       await _loadStates();
       if (!mounted) return;
@@ -73,12 +79,14 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
         _busy = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(known ? 'Marked $n as known' : 'Added $n to study')),
+        SnackBar(
+            content: Text(known ? 'Marked $n as known' : 'Added $n to study')),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not update your deck')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(context.trText('Could not update your deck'))));
     }
   }
 
@@ -88,7 +96,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
       _error = null;
     });
     try {
-      final r = await context.read<DictionaryRepository>().kanjiList(jlpt: _jlpt, limit: 1500);
+      final r = await context
+          .read<DictionaryRepository>()
+          .kanjiList(jlpt: _jlpt, limit: 1500);
       if (mounted) setState(() => _all = r);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -116,7 +126,7 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
         leading: _selecting
             ? IconButton(
                 icon: const Icon(Icons.close),
-                tooltip: 'Cancel',
+                tooltip: context.trText('Cancel'),
                 onPressed: () => setState(() {
                   _selecting = false;
                   _selected.clear();
@@ -131,19 +141,20 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                       ? null
                       : () {
                           Haptics.tick();
-                          setState(() => _selected.addAll(list.map((k) => k.literal)));
+                          setState(() =>
+                              _selected.addAll(list.map((k) => k.literal)));
                         },
-                  child: const Text('Select all'),
+                  child: Text(context.trText('Select all')),
                 ),
               ]
             : [
                 IconButton(
-                  tooltip: 'Select kanji',
+                  tooltip: context.trText('Select kanji'),
                   icon: const Icon(Icons.checklist_rounded),
                   onPressed: () => setState(() => _selecting = true),
                 ),
                 IconButton(
-                  tooltip: 'Settings',
+                  tooltip: context.trText('Settings'),
                   icon: const Icon(Icons.settings_outlined),
                   onPressed: () => context.push('/settings'),
                 ),
@@ -163,9 +174,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: TextField(
               onChanged: (v) => setState(() => _q = v),
-              decoration: const InputDecoration(
-                hintText: 'Filter by kanji or meaning…',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: context.trText('Filter by kanji or meaning…'),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
@@ -176,11 +187,15 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _chip('All', _jlpt == null, () => _setJlpt(null)),
-                for (final n in [5, 4, 3, 2, 1]) _chip('N$n', _jlpt == n, () => _setJlpt(n)),
+                for (final n in [5, 4, 3, 2, 1])
+                  _chip('N$n', _jlpt == n, () => _setJlpt(n)),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: _chip('部 Radical', false,
-                      () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RadicalPickerView()))),
+                  child: _chip(
+                      '部 Radical',
+                      false,
+                      () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const RadicalPickerView()))),
                 ),
               ],
             ),
@@ -197,11 +212,14 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                 : _error != null
                     ? ErrorRetry(message: _error!, onRetry: _load)
                     : list.isEmpty
-                        ? const EmptyHint(icon: Icons.search_off, title: 'No kanji found')
+                        ? const EmptyHint(
+                            icon: Icons.search_off, title: 'No kanji found')
                         : GridView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 88, // ~4 across on phones, denser on tablets
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent:
+                                  88, // ~4 across on phones, denser on tablets
                               mainAxisSpacing: 10,
                               crossAxisSpacing: 10,
                               childAspectRatio: 0.9,
@@ -247,7 +265,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
           ),
           child: Text(label,
               style: TextStyle(
-                  color: on ? Colors.white : jc.body, fontWeight: FontWeight.w700, fontSize: 13)),
+                  color: on ? Colors.white : jc.body,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13)),
         ),
       ),
     );
@@ -280,7 +300,8 @@ class _KanjiTile extends StatelessWidget {
     return Pressable(
       label: '${kanji.literal} ${meaning.isNotEmpty ? meaning.first : ''}',
       selected: selected,
-      onTap: selecting ? onToggle : () => context.push('/kanji/${kanji.literal}'),
+      onTap:
+          selecting ? onToggle : () => context.push('/kanji/${kanji.literal}'),
       child: AnimatedContainer(
         duration: Motion.timed(context, Motion.fast),
         curve: Motion.out,
@@ -288,7 +309,8 @@ class _KanjiTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? jc.brandSoft : jc.surfaceAlt,
           borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(color: selected ? jc.brand : Colors.transparent, width: 1.5),
+          border: Border.all(
+              color: selected ? jc.brand : Colors.transparent, width: 1.5),
         ),
         child: Stack(
           children: [
@@ -297,19 +319,28 @@ class _KanjiTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(kanji.literal,
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600, height: 1, color: jc.ink)),
+                      style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                          color: jc.ink)),
                   const SizedBox(height: 5),
                   Text(
                     meaning.isNotEmpty ? meaning.first : '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: jc.muted, height: 1.1),
+                    style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w500,
+                        color: jc.muted,
+                        height: 1.1),
                   ),
                 ],
               ),
             ),
-            if (mark != StudyMark.none) Positioned(top: 4, right: 4, child: StudyDot(mark: mark)),
+            if (mark != StudyMark.none)
+              Positioned(top: 4, right: 4, child: StudyDot(mark: mark)),
           ],
         ),
       ),

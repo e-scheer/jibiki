@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,10 +14,10 @@ class StudioView extends StatelessWidget {
     final jc = context.jc;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Studio'),
+        title: Text(context.trText('Studio')),
         actions: [
           IconButton(
-            tooltip: 'Settings',
+            tooltip: context.trText('Settings'),
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),
           ),
@@ -27,28 +28,37 @@ class StudioView extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(gradient: jc.instaLinear, borderRadius: BorderRadius.circular(Radii.lg)),
+            decoration: BoxDecoration(
+                gradient: jc.instaLinear,
+                borderRadius: BorderRadius.circular(Radii.lg)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Mnemonic packs',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white)),
+                Text(context.trText('Mnemonic packs'),
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white)),
                 const SizedBox(height: 2),
-                const Text(
-                  'Every character shows a drawing by default. Swap the whole pack, or draw your own; it then appears everywhere you study.',
-                  style: TextStyle(color: Colors.white, fontSize: 13.5, height: 1.35),
+                Text(
+                  context.trText(
+                      'Every character shows a drawing by default. Swap the whole pack, or draw your own; it then appears everywhere you study.'),
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 13.5, height: 1.35),
                 ),
                 const SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
                       child: FilledButton(
-                        style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: jc.ink),
+                        style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: jc.ink),
                         onPressed: () {
                           Haptics.light();
                           context.push('/decks/community');
                         },
-                        child: const Text('Browse packs'),
+                        child: Text(context.trText('Browse packs')),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -62,7 +72,7 @@ class StudioView extends StatelessWidget {
                           Haptics.light();
                           context.push('/decks/new');
                         },
-                        child: const Text('Create'),
+                        child: Text(context.trText('Create')),
                       ),
                     ),
                   ],
@@ -71,7 +81,7 @@ class StudioView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          Text('Your work', style: context.text.titleMedium),
+          Text(context.trText('Your work'), style: context.text.titleMedium),
           const SizedBox(height: 10),
           _Tile(
             icon: Icons.brush_outlined,
@@ -92,11 +102,19 @@ class StudioView extends StatelessWidget {
             onTap: () => context.push('/decks/new'),
           ),
           const SizedBox(height: 22),
-          Text('How it works', style: context.text.titleMedium),
+          Text(context.trText('How it works'), style: context.text.titleMedium),
           const SizedBox(height: 8),
-          const _Step(n: '1', text: 'Open any kana or kanji and tap Draw to make a mnemonic.'),
-          const _Step(n: '2', text: 'Your drawing becomes the active one for that character, everywhere.'),
-          const _Step(n: '3', text: 'Bundle drawings into a pack and share it, or apply someone else\'s.'),
+          const _Step(
+              n: '1',
+              text: 'Open any kana or kanji and tap Draw to make a mnemonic.'),
+          const _Step(
+              n: '2',
+              text:
+                  'Your drawing becomes the active one for that character, everywhere.'),
+          const _Step(
+              n: '3',
+              text:
+                  'Bundle drawings into a pack and share it, or apply someone else\'s.'),
         ],
       ),
     );
@@ -104,7 +122,11 @@ class StudioView extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.title, required this.subtitle, required this.onTap});
+  const _Tile(
+      {required this.icon,
+      required this.title,
+      required this.subtitle,
+      required this.onTap});
   final IconData icon;
   final String title;
   final String subtitle;
@@ -132,7 +154,9 @@ class _Tile extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: jc.brandSoft, borderRadius: BorderRadius.circular(Radii.sm)),
+                  decoration: BoxDecoration(
+                      color: jc.brandSoft,
+                      borderRadius: BorderRadius.circular(Radii.sm)),
                   child: Icon(icon, color: jc.brand, size: 22),
                 ),
                 const SizedBox(width: 12),
@@ -140,9 +164,12 @@ class _Tile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                      Text(title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 15)),
                       const SizedBox(height: 1),
-                      Text(subtitle, style: TextStyle(color: jc.muted, fontSize: 12.5)),
+                      Text(subtitle,
+                          style: TextStyle(color: jc.muted, fontSize: 12.5)),
                     ],
                   ),
                 ),
@@ -173,11 +200,19 @@ class _Step extends StatelessWidget {
             width: 24,
             height: 24,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: jc.brandSoft, shape: BoxShape.circle),
-            child: Text(n, style: TextStyle(color: jc.brandPressed, fontWeight: FontWeight.w800, fontSize: 12)),
+            decoration:
+                BoxDecoration(color: jc.brandSoft, shape: BoxShape.circle),
+            child: Text(n,
+                style: TextStyle(
+                    color: jc.brandPressed,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12)),
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: TextStyle(color: jc.body, fontSize: 13.5, height: 1.35))),
+          Expanded(
+              child: Text(text,
+                  style:
+                      TextStyle(color: jc.body, fontSize: 13.5, height: 1.35))),
         ],
       ),
     );

@@ -15,6 +15,7 @@ Postgres (see the ``*_trgm`` migrations).
 from __future__ import annotations
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 # ── Words (JMdict) ────────────────────────────────────────────────────────────
 
@@ -62,8 +63,8 @@ class WordForm(models.Model):
     lookups hit ``text`` here, ranked by ``is_common``."""
 
     class Kind(models.TextChoices):
-        KANJI = "kanji", "Kanji"
-        KANA = "kana", "Kana"
+        KANJI = "kanji", _("Kanji")
+        KANA = "kana", _("Kana")
 
     id = models.BigAutoField(primary_key=True)
     word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name="forms")
@@ -304,14 +305,14 @@ class Kana(models.Model):
     """
 
     class Script(models.TextChoices):
-        HIRAGANA = "hiragana", "Hiragana"
-        KATAKANA = "katakana", "Katakana"
+        HIRAGANA = "hiragana", _("Hiragana")
+        KATAKANA = "katakana", _("Katakana")
 
     class Kind(models.TextChoices):
-        GOJUON = "gojuon", "Gojūon"  # base syllables
-        DAKUTEN = "dakuten", "Dakuten"  # voiced (゛)
-        HANDAKUTEN = "handakuten", "Handakuten"  # half-voiced (゜)
-        YOON = "yoon", "Yōon"  # contracted (きゃ …)
+        GOJUON = "gojuon", _("Gojūon")  # base syllables
+        DAKUTEN = "dakuten", _("Dakuten")  # voiced (゛)
+        HANDAKUTEN = "handakuten", _("Handakuten")  # half-voiced (゜)
+        YOON = "yoon", _("Yōon")  # contracted (きゃ …)
 
     id = models.BigAutoField(primary_key=True)
     char = models.CharField(max_length=4, unique=True)

@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +12,30 @@ typedef Lookupable = ({String char, bool isKanji});
 // Small (sutegana) kana and marks are never standalone learnable units, so we
 // don't linkify them - tapping ゃ or っ shouldn't try to open a detail page.
 const Set<int> _smallKana = {
-  0x3041, 0x3043, 0x3045, 0x3047, 0x3049, 0x3063, 0x3083, 0x3085, 0x3087, 0x308E, 0x3095, 0x3096,
-  0x30A1, 0x30A3, 0x30A5, 0x30A7, 0x30A9, 0x30C3, 0x30E3, 0x30E5, 0x30E7, 0x30EE, 0x30F5, 0x30F6,
+  0x3041,
+  0x3043,
+  0x3045,
+  0x3047,
+  0x3049,
+  0x3063,
+  0x3083,
+  0x3085,
+  0x3087,
+  0x308E,
+  0x3095,
+  0x3096,
+  0x30A1,
+  0x30A3,
+  0x30A5,
+  0x30A7,
+  0x30A9,
+  0x30C3,
+  0x30E3,
+  0x30E5,
+  0x30E7,
+  0x30EE,
+  0x30F5,
+  0x30F6,
 };
 
 bool _isKanji(int c) =>
@@ -49,7 +72,8 @@ List<Lookupable> lookupableChars(String text) {
 /// opens a breakdown sheet where each kana/kanji is itself tappable through to
 /// its detail. Runs with no Japanese in them just render as plain, inert text.
 class TappableJapanese extends StatelessWidget {
-  const TappableJapanese(this.text, {super.key, this.style, this.affordance = true});
+  const TappableJapanese(this.text,
+      {super.key, this.style, this.affordance = true});
   final String text;
   final TextStyle? style;
 
@@ -116,7 +140,7 @@ class TappableJapanese extends StatelessWidget {
                   children: [
                     Text(text, style: sheetCtx.text.headlineSmall),
                     const SizedBox(height: 2),
-                    Text('Tap a character to look it up',
+                    Text(context.trText('Tap a character to look it up'),
                         style: TextStyle(color: jc.muted, fontSize: 13)),
                     const SizedBox(height: 16),
                     Wrap(
@@ -148,7 +172,8 @@ class TappableJapanese extends StatelessWidget {
 class _CharTile extends StatelessWidget {
   const _CharTile({required this.lookup, required this.onTap, this.romaji});
   final Lookupable lookup;
-  final String? romaji; // the kana's reading; null for kanji (contextual readings)
+  final String?
+      romaji; // the kana's reading; null for kanji (contextual readings)
   final VoidCallback onTap;
 
   @override
@@ -171,7 +196,8 @@ class _CharTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(lookup.char,
-                style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w600, height: 1.0)),
+                style: const TextStyle(
+                    fontSize: 34, fontWeight: FontWeight.w600, height: 1.0)),
             const SizedBox(height: 6),
             Text(sub,
                 style: TextStyle(

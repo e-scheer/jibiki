@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +70,9 @@ class _KanaDetailState extends State<_KanaDetail> {
     final otherScript = focused.isHiragana ? 'katakana' : 'hiragana';
     KanaEntry? twin;
     for (final k in all) {
-      if (k.script == otherScript && k.romaji == focused.romaji && k.kind == focused.kind) {
+      if (k.script == otherScript &&
+          k.romaji == focused.romaji &&
+          k.kind == focused.kind) {
         twin = k;
         break;
       }
@@ -82,7 +85,7 @@ class _KanaDetailState extends State<_KanaDetail> {
     final vm = context.watch<MnemonicViewModel>();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Kana · ${widget.char}'),
+        title: Text(context.trText('Kana · ${widget.char}')),
         actions: [
           FutureBuilder<_KanaPair>(
             future: _pair,
@@ -93,7 +96,9 @@ class _KanaDetailState extends State<_KanaDetail> {
             },
           ),
           ReportItemAction(
-              type: ReportItemType.kana, itemRef: widget.char, label: widget.char),
+              type: ReportItemType.kana,
+              itemRef: widget.char,
+              label: widget.char),
         ],
       ),
       bottomNavigationBar: AddToStudyBar(
@@ -102,7 +107,9 @@ class _KanaDetailState extends State<_KanaDetail> {
           final ok = await vm.addToStudy();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(ok ? 'Added to your study deck' : vm.error ?? 'Failed')),
+              SnackBar(
+                  content: Text(
+                      ok ? 'Added to your study deck' : vm.error ?? 'Failed')),
             );
           }
         },
@@ -138,7 +145,9 @@ class _SoloGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(char, style: const TextStyle(fontSize: 116, fontWeight: FontWeight.w600, height: 1.1)),
+      child: Text(char,
+          style: const TextStyle(
+              fontSize: 116, fontWeight: FontWeight.w600, height: 1.1)),
     );
   }
 }
@@ -161,7 +170,10 @@ class _PairHeader extends StatelessWidget {
         Center(
           child: Text(focused.char,
               style: const TextStyle(
-                  fontFamily: 'NotoSansJP', fontSize: 116, fontWeight: FontWeight.w600, height: 1.1)),
+                  fontFamily: 'NotoSansJP',
+                  fontSize: 116,
+                  fontWeight: FontWeight.w600,
+                  height: 1.1)),
         ),
         const SizedBox(height: 6),
         Center(
@@ -169,7 +181,10 @@ class _PairHeader extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(focused.romaji,
-                  style: TextStyle(fontSize: 18, color: jc.muted, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: jc.muted,
+                      fontWeight: FontWeight.w600)),
               const SizedBox(width: 4),
               SpeechButton(text: focused.char),
             ],
@@ -206,15 +221,24 @@ class _EquivalentAction extends StatelessWidget {
         onTap: () => context.push('/kana/${twin.char}'),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-          decoration: BoxDecoration(color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.pill)),
+          decoration: BoxDecoration(
+              color: jc.surfaceAlt,
+              borderRadius: BorderRadius.circular(Radii.pill)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(twin.char,
-                  style: TextStyle(fontFamily: 'NotoSansJP', fontSize: 16, fontWeight: FontWeight.w700, color: jc.ink)),
+                  style: TextStyle(
+                      fontFamily: 'NotoSansJP',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: jc.ink)),
               const SizedBox(width: 5),
               Text(_scriptLabel(twin),
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: jc.body)),
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: jc.body)),
             ],
           ),
         ),

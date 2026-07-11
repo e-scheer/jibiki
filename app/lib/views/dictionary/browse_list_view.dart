@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,8 @@ class BrowseListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => BrowseViewModel(ctx.read<DictionaryRepository>(), spec)..load(),
+      create: (ctx) =>
+          BrowseViewModel(ctx.read<DictionaryRepository>(), spec)..load(),
       child: _Browse(spec: spec),
     );
   }
@@ -37,17 +39,20 @@ class _Browse extends StatelessWidget {
     Widget body;
     if (vm.isLoading && vm.words.isEmpty && vm.kanji.isEmpty) {
       body = spec.isKanji
-          ? const SkeletonCardGrid(count: 12, crossAxisCount: 4, childAspectRatio: 0.82)
+          ? const SkeletonCardGrid(
+              count: 12, crossAxisCount: 4, childAspectRatio: 0.82)
           : const SkeletonTileList();
     } else if (vm.hasError) {
       body = ErrorRetry(message: vm.error!, onRetry: vm.load);
     } else if (spec.isKanji) {
       body = vm.kanji.isEmpty
-          ? const EmptyHint(icon: Icons.grid_view_outlined, title: 'Nothing here')
+          ? const EmptyHint(
+              icon: Icons.grid_view_outlined, title: 'Nothing here')
           : GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 88, // ~4 across on phones, denser on tablets
+                maxCrossAxisExtent:
+                    88, // ~4 across on phones, denser on tablets
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
                 childAspectRatio: 0.82,
@@ -57,13 +62,18 @@ class _Browse extends StatelessWidget {
             );
     } else {
       body = vm.words.isEmpty
-          ? const EmptyHint(icon: Icons.menu_book_outlined, title: 'Nothing here')
+          ? const EmptyHint(
+              icon: Icons.menu_book_outlined, title: 'Nothing here')
           : ListView.separated(
               itemCount: vm.words.length,
-              separatorBuilder: (_, __) => Divider(height: 1, color: context.jc.hairline),
+              separatorBuilder: (_, __) =>
+                  Divider(height: 1, color: context.jc.hairline),
               itemBuilder: (_, i) {
                 final w = vm.words[i];
-                return WordTile(word: w, lang: lang, onTap: () => context.push('/word/${w.id}'));
+                return WordTile(
+                    word: w,
+                    lang: lang,
+                    onTap: () => context.push('/word/${w.id}'));
               },
             );
     }
@@ -99,7 +109,9 @@ class _KanjiCell extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(kanji.literal, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+              Text(kanji.literal,
+                  style: const TextStyle(
+                      fontSize: 30, fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(
                 meaning.isNotEmpty ? meaning.first : '',
@@ -148,15 +160,17 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
     final jc = context.jc;
     final radicals = _radicals;
     return Scaffold(
-      appBar: AppBar(title: const Text('By radical')),
+      appBar: AppBar(title: Text(context.trText('By radical'))),
       body: _error != null
           ? ErrorRetry(message: _error!, onRetry: () => setState(() => _load()))
           : radicals == null
-              ? const SkeletonCardGrid(count: 18, crossAxisCount: 6, childAspectRatio: 1)
+              ? const SkeletonCardGrid(
+                  count: 18, crossAxisCount: 6, childAspectRatio: 1)
               : GridView.builder(
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 60, // ~6 across on phones, more on tablets
+                    maxCrossAxisExtent:
+                        60, // ~6 across on phones, more on tablets
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                     childAspectRatio: 1,
@@ -169,9 +183,11 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
                       borderRadius: BorderRadius.circular(Radii.sm),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(Radii.sm),
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        onTap: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => BrowseListView(
-                            spec: BrowseSpec.kanji(title: 'Kanji with $lit', contains: lit),
+                            spec: BrowseSpec.kanji(
+                                title: 'Kanji with $lit', contains: lit),
                           ),
                         )),
                         child: Container(
@@ -180,7 +196,9 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
                             borderRadius: BorderRadius.circular(Radii.sm),
                             border: Border.all(color: jc.hairline),
                           ),
-                          child: Text(lit, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+                          child: Text(lit,
+                              style: const TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     );

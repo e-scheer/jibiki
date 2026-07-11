@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -55,11 +56,15 @@ class _ShellState extends State<_Shell> {
     (icon: Icons.palette_outlined, sel: Icons.palette, label: 'Studio'),
   ];
 
-  Widget _navIcon(int i, {required bool selected, required int due, required bool showBadge}) {
+  Widget _navIcon(int i,
+      {required bool selected, required int due, required bool showBadge}) {
     final d = _dests[i];
     final icon = Icon(selected ? d.sel : d.icon);
     if (i != _studyIndex) return icon;
-    return Badge(isLabelVisible: showBadge, label: Text('$due'), child: icon);
+    return Badge(
+        isLabelVisible: showBadge,
+        label: Text(context.trText('$due')),
+        child: icon);
   }
 
   @override
@@ -104,7 +109,9 @@ class _ShellState extends State<_Shell> {
   // while _index moved via the rail; nudge it back so the bar and content agree.
   void _syncPager() {
     final pager = _pager;
-    if (pager != null && pager.hasClients && (pager.page?.round() ?? _index) != _index) {
+    if (pager != null &&
+        pager.hasClients &&
+        (pager.page?.round() ?? _index) != _index) {
       pager.jumpToPage(_index);
     }
   }
@@ -135,8 +142,10 @@ class _ShellState extends State<_Shell> {
           destinations: [
             for (var i = 0; i < _dests.length; i++)
               NavigationDestination(
-                icon: _navIcon(i, selected: false, due: due, showBadge: showBadge),
-                selectedIcon: _navIcon(i, selected: true, due: due, showBadge: showBadge),
+                icon: _navIcon(i,
+                    selected: false, due: due, showBadge: showBadge),
+                selectedIcon:
+                    _navIcon(i, selected: true, due: due, showBadge: showBadge),
                 label: _dests[i].label,
               ),
           ],
@@ -149,7 +158,8 @@ class _ShellState extends State<_Shell> {
     // tab can never drift apart the way a resized PageView's can on rotation. The
     // rail frees the scarce vertical space landscape needs and reads native on a
     // tablet; it extends with labels + brand mark on truly wide screens.
-    final extended = MediaQuery.sizeOf(context).width >= Breakpoints.railExtended;
+    final extended =
+        MediaQuery.sizeOf(context).width >= Breakpoints.railExtended;
     return Scaffold(
       body: SafeArea(
         child: Row(
@@ -158,7 +168,8 @@ class _ShellState extends State<_Shell> {
               index: _index,
               extended: extended,
               onSelect: _go,
-              iconBuilder: (i, selected) => _navIcon(i, selected: selected, due: due, showBadge: showBadge),
+              iconBuilder: (i, selected) => _navIcon(i,
+                  selected: selected, due: due, showBadge: showBadge),
               labels: [for (final d in _dests) d.label],
             ),
             VerticalDivider(width: 1, thickness: 1, color: context.jc.hairline),
@@ -202,7 +213,9 @@ class _NavRail extends StatelessWidget {
               selectedIndex: index,
               onDestinationSelected: onSelect,
               extended: extended,
-              labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
+              labelType: extended
+                  ? NavigationRailLabelType.none
+                  : NavigationRailLabelType.selected,
               groupAlignment: -0.75,
               useIndicator: false,
               leading: extended
@@ -211,20 +224,28 @@ class _NavRail extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('字', style: TextStyle(fontSize: 26, color: jc.brand, fontWeight: FontWeight.w700)),
+                          Text(context.trText('字'),
+                              style: TextStyle(
+                                  fontSize: 26,
+                                  color: jc.brand,
+                                  fontWeight: FontWeight.w700)),
                           const SizedBox(width: 8),
-                          Text('jibiki',
-                              style: TextStyle(fontSize: 17, color: jc.ink, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
+                          Text(context.trText('jibiki'),
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  color: jc.ink,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3)),
                         ],
                       ),
                     )
                   : null,
               selectedIconTheme: IconThemeData(color: jc.brand, size: 26),
               unselectedIconTheme: IconThemeData(color: jc.muted, size: 25),
-              selectedLabelTextStyle:
-                  TextStyle(color: jc.brand, fontWeight: FontWeight.w700, fontSize: 12.5),
-              unselectedLabelTextStyle:
-                  TextStyle(color: jc.muted, fontWeight: FontWeight.w600, fontSize: 12.5),
+              selectedLabelTextStyle: TextStyle(
+                  color: jc.brand, fontWeight: FontWeight.w700, fontSize: 12.5),
+              unselectedLabelTextStyle: TextStyle(
+                  color: jc.muted, fontWeight: FontWeight.w600, fontSize: 12.5),
               destinations: [
                 for (var i = 0; i < labels.length; i++)
                   NavigationRailDestination(
@@ -251,7 +272,8 @@ class _KeepAlive extends StatefulWidget {
   State<_KeepAlive> createState() => _KeepAliveState();
 }
 
-class _KeepAliveState extends State<_KeepAlive> with AutomaticKeepAliveClientMixin {
+class _KeepAliveState extends State<_KeepAlive>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -274,5 +296,6 @@ class _SnappyPageScrollPhysics extends ScrollPhysics {
   // Lighter mass + stiffer than the default, critically damped: the page snaps
   // home crisply without an overshoot wobble.
   @override
-  SpringDescription get spring => SpringDescription.withDampingRatio(mass: 0.5, stiffness: 200, ratio: 1.0);
+  SpringDescription get spring =>
+      SpringDescription.withDampingRatio(mass: 0.5, stiffness: 200, ratio: 1.0);
 }
