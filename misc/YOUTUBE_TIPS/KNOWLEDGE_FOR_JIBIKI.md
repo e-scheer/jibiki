@@ -1,5 +1,10 @@
 # Connaissances utiles pour jibiki
 
+> Cette note contient la première synthèse opérationnelle. L'analyse élargie aux
+> vidéos onboarding et streak, les arbitrages éthiques sur le booster et le plan
+> de priorités se trouvent dans
+> [`ANALYSIS_AND_PLAN.md`](ANALYSIS_AND_PLAN.md).
+
 ## Décision en bref
 
 Les deux vidéos convergent sur une idée utile : la qualité perçue vient moins de
@@ -162,4 +167,3 @@ gagner un écran tout en abîmant le produit.
   [`Du2lkZ_cux8.en-orig.srt`](Du2lkZ_cux8.en-orig.srt)
 - Sous-titres de *We Studied 2,995 Paywalls. Here's What Actually Converts.* :
   [`9ypqs_2fAl8.en-orig.srt`](9ypqs_2fAl8.en-orig.srt)
-

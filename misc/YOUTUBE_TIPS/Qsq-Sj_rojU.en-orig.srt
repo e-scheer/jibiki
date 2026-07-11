@@ -1,0 +1,1075 @@
+1
+00:00:00,000 --> 00:00:02,640
+I've studied over a thousand onboarding
+
+2
+00:00:02,640 --> 00:00:05,600
+flows to find out what makes good
+
+3
+00:00:05,600 --> 00:00:08,600
+onboarding and do we even need one? A
+
+4
+00:00:08,600 --> 00:00:10,360
+lot of what I've read says keep it
+
+5
+00:00:10,360 --> 00:00:13,120
+short, but based on what I found, the
+
+6
+00:00:13,120 --> 00:00:16,280
+average app has 25 onboarding screens.
+
+7
+00:00:16,280 --> 00:00:18,340
+The longest categories are finance,
+
+8
+00:00:18,340 --> 00:00:20,120
+[music] health and fitness, and
+
+9
+00:00:20,120 --> 00:00:22,920
+education. Seven out of 10 of these
+
+10
+00:00:22,920 --> 00:00:25,520
+longest apps are actually finance apps
+
+11
+00:00:25,520 --> 00:00:27,360
+as [music] well. Some of the apps with
+
+12
+00:00:27,360 --> 00:00:30,040
+the longest onboarding flows are also
+
+13
+00:00:30,040 --> 00:00:32,800
+one of the most successful ones. When we
+
+14
+00:00:32,800 --> 00:00:34,400
+look at apps with the shortest
+
+15
+00:00:34,400 --> 00:00:37,240
+onboarding flows, three of them are AI
+
+16
+00:00:37,240 --> 00:00:40,240
+products. So, maybe keeping our
+
+17
+00:00:40,240 --> 00:00:43,120
+onboarding flows short was never the
+
+18
+00:00:43,120 --> 00:00:45,240
+point. The best onboarding seem to
+
+19
+00:00:45,240 --> 00:00:46,505
+follow this pattern.
+
+20
+00:00:46,505 --> 00:00:46,680
+>> [music]
+
+21
+00:00:46,680 --> 00:00:48,920
+>> You sign up, set up your account, you
+
+22
+00:00:48,920 --> 00:00:51,040
+hit the aha moment. That's where you
+
+23
+00:00:51,040 --> 00:00:53,600
+actually feel the product's value. For
+
+24
+00:00:53,600 --> 00:00:56,200
+Airbnb, it's making your first booking.
+
+25
+00:00:56,200 --> 00:00:58,440
+For Netflix, it's finding and watching a
+
+26
+00:00:58,440 --> 00:01:01,160
+show. For Mobbin, it's finding a screen
+
+27
+00:01:01,160 --> 00:01:03,840
+or an animation that you love and saving
+
+28
+00:01:03,840 --> 00:01:06,000
+it to your collection. So, what are
+
+29
+00:01:06,000 --> 00:01:08,880
+these apps actually doing? The best
+
+30
+00:01:08,880 --> 00:01:10,760
+onboarding screens I've kept seeing had
+
+31
+00:01:10,760 --> 00:01:12,880
+one thing in common. They're not listing
+
+32
+00:01:12,880 --> 00:01:15,200
+features, they're selling the outcome.
+
+33
+00:01:15,200 --> 00:01:17,290
+Timehop does this really simply.
+
+34
+00:01:17,290 --> 00:01:17,480
+>> [music]
+
+35
+00:01:17,480 --> 00:01:19,600
+>> Their welcome screen is just showing the
+
+36
+00:01:19,600 --> 00:01:21,520
+product in action on both their mobile
+
+37
+00:01:21,520 --> 00:01:23,520
+app and desktop.
+
+38
+00:01:23,520 --> 00:01:26,120
+Runkeeper does this with animation. The
+
+39
+00:01:26,120 --> 00:01:28,360
+moment you open the app, you get a feel
+
+40
+00:01:28,360 --> 00:01:30,080
+for what it does without reading a
+
+41
+00:01:30,080 --> 00:01:32,720
+single word. And Elma [music] goes one
+
+42
+00:01:32,720 --> 00:01:35,000
+step further. It lets you try the core
+
+43
+00:01:35,000 --> 00:01:38,080
+experience before you sign up. I rarely
+
+44
+00:01:38,080 --> 00:01:40,720
+see apps with AI features who lets you
+
+45
+00:01:40,720 --> 00:01:42,836
+try it out before signing up an account.
+
+46
+00:01:42,836 --> 00:01:43,360
+[music]
+
+47
+00:01:43,360 --> 00:01:45,120
+And sometimes it could just be a copy
+
+48
+00:01:45,120 --> 00:01:47,320
+tweak like Superhuman. They turn a
+
+49
+00:01:47,320 --> 00:01:49,840
+boring sign up screen into a pitch with
+
+50
+00:01:49,840 --> 00:01:52,720
+logos on the side as social proof. Some
+
+51
+00:01:52,720 --> 00:01:55,400
+apps skip the pitch entirely and just
+
+52
+00:01:55,400 --> 00:01:57,760
+feel human. This is an app called One
+
+53
+00:01:57,760 --> 00:02:00,040
+Year. So, in their onboarding flow, they
+
+54
+00:02:00,040 --> 00:02:01,831
+included a founder's note, which had
+
+55
+00:02:01,831 --> 00:02:03,680
+[music] a handwritten signature and a
+
+56
+00:02:03,680 --> 00:02:05,720
+hand-drawn flower in it.
+
+57
+00:02:05,720 --> 00:02:08,240
+It's pretty cute. And Tinder [music]
+
+58
+00:02:08,240 --> 00:02:09,880
+acknowledge when your birthday is around
+
+59
+00:02:09,880 --> 00:02:11,120
+the corner.
+
+60
+00:02:11,120 --> 00:02:13,320
+Airbnb, well, this one's not even in the
+
+61
+00:02:13,320 --> 00:02:15,000
+onboarding flow, but when you
+
+62
+00:02:15,000 --> 00:02:17,760
+successfully list your first space, they
+
+63
+00:02:17,760 --> 00:02:20,440
+show you a video from their CEO.
+
+64
+00:02:20,440 --> 00:02:22,880
+It's a founder's touch at the aha
+
+65
+00:02:22,880 --> 00:02:24,040
+moment.
+
+66
+00:02:24,040 --> 00:02:26,240
+As for Basecamp, they put a personal
+
+67
+00:02:26,240 --> 00:02:28,560
+note from the CEO after you've created
+
+68
+00:02:28,560 --> 00:02:31,200
+an account. It feels like the product
+
+69
+00:02:31,200 --> 00:02:33,280
+was made with intention. And one of the
+
+70
+00:02:33,280 --> 00:02:34,880
+best onboarding flows add
+
+71
+00:02:34,880 --> 00:02:37,080
+personalization into the flow, and they
+
+72
+00:02:37,080 --> 00:02:40,000
+make it worth your time. 23% of apps
+
+73
+00:02:40,000 --> 00:02:42,640
+personalize during onboarding, with AI
+
+74
+00:02:42,640 --> 00:02:46,520
+apps at only 7%. It seems like AI tools
+
+75
+00:02:46,520 --> 00:02:48,360
+don't ask questions about your users up
+
+76
+00:02:48,360 --> 00:02:50,480
+front. They let the product learn from
+
+77
+00:02:50,480 --> 00:02:52,200
+us instead.
+
+78
+00:02:52,200 --> 00:02:54,280
+Looking at Tide's onboarding, it's short
+
+79
+00:02:54,280 --> 00:02:56,120
+and sweet. You just download the app,
+
+80
+00:02:56,120 --> 00:02:58,840
+answer two questions, watch it customize
+
+81
+00:02:58,840 --> 00:03:00,720
+your recommendations,
+
+82
+00:03:00,720 --> 00:03:02,400
+and it'll prompt you to sign up. That's
+
+83
+00:03:02,400 --> 00:03:04,440
+it, very simple.
+
+84
+00:03:04,440 --> 00:03:06,080
+Headspace found out that their users
+
+85
+00:03:06,080 --> 00:03:07,680
+come to their app with more than one
+
+86
+00:03:07,680 --> 00:03:09,840
+pain point to solve. So, instead of
+
+87
+00:03:09,840 --> 00:03:12,000
+asking users to pick just one goal that
+
+88
+00:03:12,000 --> 00:03:12,880
+they want to achieve [music] with
+
+89
+00:03:12,880 --> 00:03:15,000
+Headspace, they let them pick more than
+
+90
+00:03:15,000 --> 00:03:17,640
+one. It's only like a very simple tweak,
+
+91
+00:03:17,640 --> 00:03:20,160
+but it led to 10% increase in free trial
+
+92
+00:03:20,160 --> 00:03:22,360
+conversion. There are also other apps
+
+93
+00:03:22,360 --> 00:03:26,280
+that allow multi-intent queries. [music]
+
+94
+00:03:26,280 --> 00:03:28,600
+Focus Flight lets you choose your map
+
+95
+00:03:28,600 --> 00:03:31,280
+style during onboarding. It makes the
+
+96
+00:03:31,280 --> 00:03:34,080
+app [music] feel like yours before you
+
+97
+00:03:34,080 --> 00:03:36,152
+even started using it. Sometimes,
+
+98
+00:03:36,152 --> 00:03:37,800
+[music] it can be even simpler than
+
+99
+00:03:37,800 --> 00:03:40,560
+that. Dollar Shave Club tweaked the quiz
+
+100
+00:03:40,560 --> 00:03:43,400
+copy to be more conversational. This
+
+101
+00:03:43,400 --> 00:03:45,760
+alone led to 5% increase in
+
+102
+00:03:45,760 --> 00:03:48,000
+subscriptions. Some apps don't just
+
+103
+00:03:48,000 --> 00:03:49,800
+collect answers during the quiz. They
+
+104
+00:03:49,800 --> 00:03:52,640
+actually show you what those answers
+
+105
+00:03:52,640 --> 00:03:54,960
+unlocked. So, in Endless onboarding, you
+
+106
+00:03:54,960 --> 00:03:56,960
+answer six questions,
+
+107
+00:03:56,960 --> 00:03:59,080
+and then they show you this. You haven't
+
+108
+00:03:59,080 --> 00:04:00,720
+even used the product yet, but it
+
+109
+00:04:00,720 --> 00:04:02,352
+already feels like it's going to work.
+
+110
+00:04:02,352 --> 00:04:03,160
+[music]
+
+111
+00:04:03,160 --> 00:04:05,360
+Byte Pal does the same thing. After the
+
+112
+00:04:05,360 --> 00:04:07,720
+quiz, they build your personal plan and
+
+113
+00:04:07,720 --> 00:04:10,040
+then tell you exactly when you'll hit
+
+114
+00:04:10,040 --> 00:04:12,400
+your goal.
+
+115
+00:04:12,400 --> 00:04:14,440
+Brilliant [music] shows you courses that
+
+116
+00:04:14,440 --> 00:04:17,440
+are personalized to your responses.
+
+117
+00:04:17,440 --> 00:04:19,120
+As soon as you finish your onboarding
+
+118
+00:04:19,120 --> 00:04:20,799
+flow, your home page is already
+
+119
+00:04:20,799 --> 00:04:22,760
+populated with only the content that you
+
+120
+00:04:22,760 --> 00:04:24,520
+want to see.
+
+121
+00:04:24,520 --> 00:04:26,600
+Here's another one by Speak, a language
+
+122
+00:04:26,600 --> 00:04:28,840
+learning app. They ask you what language
+
+123
+00:04:28,840 --> 00:04:30,919
+you'd like to learn and your goals.
+
+124
+00:04:30,919 --> 00:04:32,960
+Then, in one simple screen, it tells
+
+125
+00:04:32,960 --> 00:04:35,000
+you, "In 2 months, you'll be able to
+
+126
+00:04:35,000 --> 00:04:37,520
+communicate while traveling in France."
+
+127
+00:04:37,520 --> 00:04:39,440
+There's a simple graph showing that
+
+128
+00:04:39,440 --> 00:04:40,960
+speaking helps you reach your goals
+
+129
+00:04:40,960 --> 00:04:42,680
+faster than reading. The [music] steps
+
+130
+00:04:42,680 --> 00:04:44,560
+before this screen already had you
+
+131
+00:04:44,560 --> 00:04:47,040
+speaking instead of typing.
+
+132
+00:04:47,040 --> 00:04:49,280
+So, out of 900-plus
+
+133
+00:04:49,280 --> 00:04:51,960
+apps and websites, 22% [music] of them
+
+134
+00:04:51,960 --> 00:04:54,360
+throws a paywall during onboarding. Some
+
+135
+00:04:54,360 --> 00:04:57,080
+apps also pair personalization with a
+
+136
+00:04:57,080 --> 00:04:58,400
+paywall.
+
+137
+00:04:58,400 --> 00:05:01,000
+The site pairs a quiz with a one-time
+
+138
+00:05:01,000 --> 00:05:04,000
+offer to drive urgency.
+
+139
+00:05:04,000 --> 00:05:06,919
+Timely does the same with a full page of
+
+140
+00:05:06,919 --> 00:05:09,520
+social proof before showing the paywall.
+
+141
+00:05:09,520 --> 00:05:11,440
+And Focus Flight makes the paywall
+
+142
+00:05:11,440 --> 00:05:14,160
+itself fun. The one-time offer, it's
+
+143
+00:05:14,160 --> 00:05:15,800
+shaped like a flight ticket, and your
+
+144
+00:05:15,800 --> 00:05:18,160
+phone vibrates as it gets printed out.
+
+145
+00:05:18,160 --> 00:05:19,600
+It's a paywall that actually feels
+
+146
+00:05:19,600 --> 00:05:22,480
+delightful. As for Grammarly, based on
+
+147
+00:05:22,480 --> 00:05:24,680
+your quiz answers, they recommend
+
+148
+00:05:24,680 --> 00:05:27,320
+tailored pricing plans. This alone led
+
+149
+00:05:27,320 --> 00:05:29,800
+to almost a 20% increase in plan
+
+150
+00:05:29,800 --> 00:05:32,400
+upgrades. Okay, some of these onboarding
+
+151
+00:05:32,400 --> 00:05:35,080
+flows are really long, yet they don't
+
+152
+00:05:35,080 --> 00:05:37,160
+feel like it. The onboarding flows that
+
+153
+00:05:37,160 --> 00:05:39,560
+I really love tend to make onboarding
+
+154
+00:05:39,560 --> 00:05:41,640
+flows feel short.
+
+155
+00:05:41,640 --> 00:05:45,080
+Out of 986 apps, Duolingo has one one
+
+156
+00:05:45,080 --> 00:05:47,880
+the longest onboarding flows. And if we
+
+157
+00:05:47,880 --> 00:05:50,120
+zoom in, it goes like this. You get
+
+158
+00:05:50,120 --> 00:05:51,680
+started, choose the language that you
+
+159
+00:05:51,680 --> 00:05:53,960
+want to learn, it learns about you, you
+
+160
+00:05:53,960 --> 00:05:55,960
+start your first lesson, get the
+
+161
+00:05:55,960 --> 00:05:58,440
+satisfaction of completing it, and then
+
+162
+00:05:58,440 --> 00:06:00,960
+you create an account. By that point,
+
+163
+00:06:00,960 --> 00:06:03,080
+you've already gone through 60 screens
+
+164
+00:06:03,080 --> 00:06:05,680
+before you even sign up. And the crazy
+
+165
+00:06:05,680 --> 00:06:08,080
+part is it doesn't even feel long. Okay,
+
+166
+00:06:08,080 --> 00:06:10,320
+so Bump's onboarding flow is creative.
+
+167
+00:06:10,320 --> 00:06:13,000
+Even the loading states are wild.
+
+168
+00:06:13,000 --> 00:06:14,360
+There's always something going on
+
+169
+00:06:14,360 --> 00:06:16,080
+throughout the onboarding flow. Smooth
+
+170
+00:06:16,080 --> 00:06:18,120
+animations on things like verification
+
+171
+00:06:18,120 --> 00:06:19,720
+that rarely [music] get special
+
+172
+00:06:19,720 --> 00:06:22,480
+treatment. It adds fun. It doesn't feel
+
+173
+00:06:22,480 --> 00:06:24,760
+like you're going through a boring
+
+174
+00:06:24,760 --> 00:06:26,360
+onboarding flow.
+
+175
+00:06:26,360 --> 00:06:29,400
+Bipul has 61 screens. The onboarding was
+
+176
+00:06:29,400 --> 00:06:31,560
+a lot of fun. It has really amazing
+
+177
+00:06:31,560 --> 00:06:33,160
+animations. The raccoon is quite
+
+178
+00:06:33,160 --> 00:06:35,360
+lovable. And you even get to name your
+
+179
+00:06:35,360 --> 00:06:37,400
+virtual pet raccoon.
+
+180
+00:06:37,400 --> 00:06:38,520
+Throughout the onboarding, they
+
+181
+00:06:38,520 --> 00:06:40,560
+emphasize the value. Like, your personal
+
+182
+00:06:40,560 --> 00:06:42,400
+plan is ready and you'll lose weight by
+
+183
+00:06:42,400 --> 00:06:45,560
+an exact date. And then bam, a paywall.
+
+184
+00:06:45,560 --> 00:06:46,720
+All right. So, another pattern I
+
+185
+00:06:46,720 --> 00:06:49,560
+noticed, some apps don't front-load all
+
+186
+00:06:49,560 --> 00:06:52,080
+the education to you. Cake Equity is a
+
+187
+00:06:52,080 --> 00:06:53,760
+great example. They're dealing with dry
+
+188
+00:06:53,760 --> 00:06:56,240
+concepts like company equity and vesting
+
+189
+00:06:56,240 --> 00:06:58,320
+schedules, and turns it into something
+
+190
+00:06:58,320 --> 00:07:00,600
+approachable with copy that reassures
+
+191
+00:07:00,600 --> 00:07:02,720
+users from time to time, and tooltips
+
+192
+00:07:02,720 --> 00:07:05,099
+that explain the impact of each step so
+
+193
+00:07:05,099 --> 00:07:06,760
+[music] that users feel like someone's
+
+194
+00:07:06,760 --> 00:07:08,120
+guiding them along the way. Even
+
+195
+00:07:08,120 --> 00:07:10,160
+something as small as a password field
+
+196
+00:07:10,160 --> 00:07:11,800
+that checks off requirements in real
+
+197
+00:07:11,800 --> 00:07:13,640
+time as you type, removes a reason to
+
+198
+00:07:13,640 --> 00:07:15,560
+get stuck. Maybe it's a progress
+
+199
+00:07:15,560 --> 00:07:18,040
+indicator, maybe it's microcopy. None of
+
+200
+00:07:18,040 --> 00:07:19,960
+this is flashy, but it makes the
+
+201
+00:07:19,960 --> 00:07:22,760
+experience feel effortless. To-do apps
+
+202
+00:07:22,760 --> 00:07:25,000
+does this really well, too. Instead of
+
+203
+00:07:25,000 --> 00:07:28,080
+giving users a blank empty state, they
+
+204
+00:07:28,080 --> 00:07:29,960
+show you something like this with no
+
+205
+00:07:29,960 --> 00:07:33,040
+guided tours, no pop-ups, just a little
+
+206
+00:07:33,040 --> 00:07:35,000
+nudge in the right place.
+
+207
+00:07:35,000 --> 00:07:37,360
+And when Mural replaced pop-ups and
+
+208
+00:07:37,360 --> 00:07:39,800
+banners with a clear six-step checklist,
+
+209
+00:07:39,800 --> 00:07:42,600
+it drove a 10% relative increase in
+
+210
+00:07:42,600 --> 00:07:44,440
+one-week retention. Checklists stick
+
+211
+00:07:44,440 --> 00:07:46,800
+around even after the user dismisses the
+
+212
+00:07:46,800 --> 00:07:48,160
+initial flow.
+
+213
+00:07:48,160 --> 00:07:50,280
+If you go on Mobbin and do an AI search
+
+214
+00:07:50,280 --> 00:07:52,680
+for onboarding checklist, you will find
+
+215
+00:07:52,680 --> 00:07:55,520
+more ideas like this.
+
+216
+00:07:55,520 --> 00:07:57,560
+Another pattern that I kept seeing is a
+
+217
+00:07:57,560 --> 00:08:00,280
+lot of apps show a custom screen before
+
+218
+00:08:00,280 --> 00:08:02,400
+the notification pop-up. Apparently, it
+
+219
+00:08:02,400 --> 00:08:04,680
+improves accept rates significantly.
+
+220
+00:08:04,680 --> 00:08:06,520
+Here's an example by Brilliant. I'll
+
+221
+00:08:06,520 --> 00:08:08,160
+remind you to learn so it becomes a
+
+222
+00:08:08,160 --> 00:08:10,280
+long-term habit. Cool.
+
+223
+00:08:10,280 --> 00:08:12,640
+Center takes it one step further. It
+
+224
+00:08:12,640 --> 00:08:14,480
+also teases you the notification that
+
+225
+00:08:14,480 --> 00:08:16,960
+you'll receive if you allow it. This
+
+226
+00:08:16,960 --> 00:08:20,240
+might explain why web onboarding is 21%
+
+227
+00:08:20,240 --> 00:08:22,960
+shorter than iOS. Mobile just has more
+
+228
+00:08:22,960 --> 00:08:25,680
+permission and paywall screens baked in.
+
+229
+00:08:25,680 --> 00:08:28,480
+Okay, this one surprised me. House split
+
+230
+00:08:28,480 --> 00:08:30,760
+their sign-up form into multiple screens
+
+231
+00:08:30,760 --> 00:08:33,960
+and they see a 15% increase in
+
+232
+00:08:33,960 --> 00:08:36,560
+conversions. Maybe the friction we add
+
+233
+00:08:36,560 --> 00:08:38,800
+in one place removes friction in
+
+234
+00:08:38,800 --> 00:08:41,400
+another. Culture plays a role here as
+
+235
+00:08:41,400 --> 00:08:43,599
+well. Users in Eastern markets tend to
+
+236
+00:08:43,599 --> 00:08:44,760
+be more comfortable with
+
+237
+00:08:44,760 --> 00:08:47,320
+information-heavy interfaces. So, what
+
+238
+00:08:47,320 --> 00:08:49,480
+feels like clutter to one audience feels
+
+239
+00:08:49,480 --> 00:08:51,280
+efficient to another, which is partly
+
+240
+00:08:51,280 --> 00:08:53,080
+why we can't just copy what worked. And
+
+241
+00:08:53,080 --> 00:08:54,880
+I don't think there's one right or wrong
+
+242
+00:08:54,880 --> 00:08:57,040
+way to design an onboarding flow that's
+
+243
+00:08:57,040 --> 00:08:59,600
+best in class. The ones that stuck with
+
+244
+00:08:59,600 --> 00:09:02,240
+me didn't feel like onboarding. What I
+
+245
+00:09:02,240 --> 00:09:04,680
+saw in common in these apps is that they
+
+246
+00:09:04,680 --> 00:09:07,320
+brought users to value quickly.
+
+247
+00:09:07,320 --> 00:09:09,880
+Sometimes it's adding delight to a very
+
+248
+00:09:09,880 --> 00:09:11,920
+long onboarding flow. Sometimes it's
+
+249
+00:09:11,920 --> 00:09:13,920
+letting users personalize their app
+
+250
+00:09:13,920 --> 00:09:16,360
+experience for themselves. And sometimes
+
+251
+00:09:16,360 --> 00:09:19,560
+it's getting out of the way. So, do we
+
+252
+00:09:19,560 --> 00:09:21,800
+even need onboarding?
+
+253
+00:09:21,800 --> 00:09:23,880
+Mobbin is a place to find design
+
+254
+00:09:23,880 --> 00:09:26,120
+inspiration. The product speaks for
+
+255
+00:09:26,120 --> 00:09:29,320
+itself. Same with AI chat apps. The
+
+256
+00:09:29,320 --> 00:09:32,520
+first prompt is where users find value.
+
+257
+00:09:32,520 --> 00:09:34,600
+For products like these, maybe the best
+
+258
+00:09:34,600 --> 00:09:36,520
+experience [music] is just to let users
+
+259
+00:09:36,520 --> 00:09:39,640
+get in fast and not have an onboarding
+
+260
+00:09:39,640 --> 00:09:42,520
+experience that gets in their way.
+
+261
+00:09:42,520 --> 00:09:44,920
+Maybe it all boils down to the product.
+
+262
+00:09:44,920 --> 00:09:47,160
+We had so much fun diving into the data,
+
+263
+00:09:47,160 --> 00:09:49,240
+and did you know that onboarding flows
+
+264
+00:09:49,240 --> 00:09:52,480
+are the second most searched on Mobbin?
+
+265
+00:09:52,480 --> 00:09:54,200
+For the next video, I have a feeling
+
+266
+00:09:54,200 --> 00:09:55,600
+that we're going to dive really deep
+
+267
+00:09:55,600 --> 00:09:57,360
+into dashboards and see what the data
+
+268
+00:09:57,360 --> 00:10:00,160
+tells us. So, stick around. Subscribe if
+
+269
+00:10:00,160 --> 00:10:03,240
+this vibes with you.

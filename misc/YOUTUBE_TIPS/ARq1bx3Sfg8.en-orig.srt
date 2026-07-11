@@ -1,0 +1,871 @@
+1
+00:00:04,720 --> 00:00:07,480
+At some point, keeping my streak alive
+
+2
+00:00:07,480 --> 00:00:09,960
+mattered more than actually learning.
+
+3
+00:00:09,960 --> 00:00:11,760
+Why does breaking a streak feel so
+
+4
+00:00:11,760 --> 00:00:13,920
+terrible? And are streaks actually
+
+5
+00:00:13,920 --> 00:00:16,640
+helping us build habits or just making
+
+6
+00:00:16,640 --> 00:00:18,720
+us afraid to stop?
+
+7
+00:00:18,720 --> 00:00:22,120
+Here's what I found after looking at 859
+
+8
+00:00:22,120 --> 00:00:24,440
+streak designs on Mobbin. Every streak
+
+9
+00:00:24,440 --> 00:00:26,720
+design revolves around this question.
+
+10
+00:00:26,720 --> 00:00:29,440
+What makes us come back tomorrow? Let's
+
+11
+00:00:29,440 --> 00:00:31,320
+start with the most obvious pattern,
+
+12
+00:00:31,320 --> 00:00:34,360
+fear. Let's say you won $10 today. It
+
+13
+00:00:34,360 --> 00:00:37,480
+feels nice. Now, imagine losing $10
+
+14
+00:00:37,480 --> 00:00:40,080
+instead. It stings way more.
+
+15
+00:00:40,080 --> 00:00:42,320
+This is what we call loss aversion.
+
+16
+00:00:42,320 --> 00:00:45,240
+Streak mechanics bet on this.
+
+17
+00:00:45,240 --> 00:00:48,800
+The copy becomes more urgent.
+
+18
+00:00:48,800 --> 00:00:51,000
+The clock starts counting down.
+
+19
+00:00:51,000 --> 00:00:53,200
+And look, an angry owl giving you a
+
+20
+00:00:53,200 --> 00:00:55,680
+sense of guilt. Fear-based streaks work
+
+21
+00:00:55,680 --> 00:00:57,240
+because we're protecting something we
+
+22
+00:00:57,240 --> 00:00:58,960
+could lose.
+
+23
+00:00:58,960 --> 00:01:00,960
+Now, some streak systems lean on
+
+24
+00:01:00,960 --> 00:01:03,240
+optimism. These designs make us feel
+
+25
+00:01:03,240 --> 00:01:05,000
+like we're building towards a better
+
+26
+00:01:05,000 --> 00:01:07,160
+version of ourselves.
+
+27
+00:01:07,160 --> 00:01:10,240
+Copy is positive and encouraging.
+
+28
+00:01:10,240 --> 00:01:12,960
+Even tiny shifts to calls to actions.
+
+29
+00:01:12,960 --> 00:01:15,080
+Duolingo's product team tested these
+
+30
+00:01:15,080 --> 00:01:17,120
+copy changes. We used to say continue
+
+31
+00:01:17,120 --> 00:01:19,320
+and we changed that to commit to my goal
+
+32
+00:01:19,320 --> 00:01:21,440
+and it was like a massive win.
+
+33
+00:01:21,440 --> 00:01:23,960
+More and more apps are doing this today.
+
+34
+00:01:23,960 --> 00:01:25,840
+Reframing a call to action into a
+
+35
+00:01:25,840 --> 00:01:29,200
+promise you make to yourself.
+
+36
+00:01:29,200 --> 00:01:31,320
+Some apps even turn streaks into
+
+37
+00:01:31,320 --> 00:01:35,120
+collectibles, like badges, milestones,
+
+38
+00:01:35,120 --> 00:01:38,240
+and tangible proof of progress.
+
+39
+00:01:38,240 --> 00:01:41,040
+In Opal, your streak earns you literal
+
+40
+00:01:41,040 --> 00:01:43,040
+milestones that you can collect over
+
+41
+00:01:43,040 --> 00:01:44,840
+time.
+
+42
+00:01:44,840 --> 00:01:46,680
+I noticed I wasn't opening Duolingo
+
+43
+00:01:46,680 --> 00:01:48,560
+because I cared about the streak number
+
+44
+00:01:48,560 --> 00:01:51,160
+anymore. I opened because I didn't want
+
+45
+00:01:51,160 --> 00:01:54,000
+to disappoint Duo. It's just a cartoon
+
+46
+00:01:54,000 --> 00:01:56,840
+owl, just pixels, but I still felt it.
+
+47
+00:01:56,840 --> 00:01:58,680
+So, I looked into why.
+
+48
+00:01:58,680 --> 00:02:01,040
+When we assign human emotions to
+
+49
+00:02:01,040 --> 00:02:03,080
+non-human things, it's called
+
+50
+00:02:03,080 --> 00:02:05,240
+anthropomorphism.
+
+51
+00:02:05,240 --> 00:02:07,400
+That's why we yell at computers, name
+
+52
+00:02:07,400 --> 00:02:11,120
+our cars, and apologize [music] to AI.
+
+53
+00:02:11,120 --> 00:02:13,200
+Software uses this, too.
+
+54
+00:02:13,200 --> 00:02:14,800
+A mascot cheering you on like it
+
+55
+00:02:14,800 --> 00:02:17,080
+believes in you.
+
+56
+00:02:17,080 --> 00:02:20,120
+A little bird growing alongside you.
+
+57
+00:02:20,120 --> 00:02:22,560
+So, back in the '90s, people got
+
+58
+00:02:22,560 --> 00:02:25,080
+emotionally attached to these tiny
+
+59
+00:02:25,080 --> 00:02:26,880
+virtual pets you had to feed [music] and
+
+60
+00:02:26,880 --> 00:02:29,200
+care for. Tamagotchi, the original
+
+61
+00:02:29,200 --> 00:02:31,160
+virtual reality pet. Your care
+
+62
+00:02:31,160 --> 00:02:33,520
+determines the pets you get from Bandai.
+
+63
+00:02:33,520 --> 00:02:35,400
+If you ignored your Tamagotchi, they
+
+64
+00:02:35,400 --> 00:02:36,959
+would literally die.
+
+65
+00:02:36,959 --> 00:02:39,160
+People carried them everywhere, even
+
+66
+00:02:39,160 --> 00:02:42,120
+grieved when they died. This is called
+
+67
+00:02:42,120 --> 00:02:43,959
+the Tamagotchi effect. It's the
+
+68
+00:02:43,959 --> 00:02:46,280
+attachment that forms when a digital
+
+69
+00:02:46,280 --> 00:02:49,600
+thing appears to need you back.
+
+70
+00:02:49,600 --> 00:02:53,880
+Duolingo took it further than most.
+
+71
+00:02:57,400 --> 00:03:00,080
+It became a personality. I realized that
+
+72
+00:03:00,080 --> 00:03:02,120
+mascots aren't just there to make apps
+
+73
+00:03:02,120 --> 00:03:04,720
+feel cute. They're designed to create
+
+74
+00:03:04,720 --> 00:03:06,280
+attachment.
+
+75
+00:03:06,280 --> 00:03:07,800
+The moment you feel something for a
+
+76
+00:03:07,800 --> 00:03:10,640
+product, the barrier to leaving feels a
+
+77
+00:03:10,640 --> 00:03:13,120
+lot higher. And maybe that's why we care
+
+78
+00:03:13,120 --> 00:03:17,000
+so much about a cartoon owl.
+
+79
+00:03:18,239 --> 00:03:21,400
+Some streak systems don't rely on fear,
+
+80
+00:03:21,400 --> 00:03:24,360
+hope, or attachment. They work through
+
+81
+00:03:24,360 --> 00:03:26,120
+visual attention.
+
+82
+00:03:26,120 --> 00:03:28,760
+They all turn consistency into a visible
+
+83
+00:03:28,760 --> 00:03:31,760
+pattern. Once there's a gap, our brain
+
+84
+00:03:31,760 --> 00:03:33,840
+notices it immediately.
+
+85
+00:03:33,840 --> 00:03:36,600
+Part of this relates to the Zeigarnik
+
+86
+00:03:36,600 --> 00:03:39,519
+effect. Unfinished things stay active in
+
+87
+00:03:39,519 --> 00:03:42,320
+our mind longer than completed ones.
+
+88
+00:03:42,320 --> 00:03:44,480
+That's why filling one tiny missing
+
+89
+00:03:44,480 --> 00:03:46,800
+block feels strangely satisfying, and
+
+90
+00:03:46,800 --> 00:03:49,200
+why breaking the chain feels worse than
+
+91
+00:03:49,200 --> 00:03:50,720
+it probably should.
+
+92
+00:03:50,720 --> 00:03:53,000
+These mechanics are everywhere, even in
+
+93
+00:03:53,000 --> 00:03:54,640
+places that have nothing to do with
+
+94
+00:03:54,640 --> 00:03:57,040
+self-improvement. Different interfaces
+
+95
+00:03:57,040 --> 00:03:59,077
+with the same underlying idea, giving
+
+96
+00:03:59,077 --> 00:04:01,000
+[music] people something they don't want
+
+97
+00:04:01,000 --> 00:04:03,320
+to break. These patterns keep pulling us
+
+98
+00:04:03,320 --> 00:04:06,760
+back, but why? What's actually working
+
+99
+00:04:06,760 --> 00:04:07,720
+here?
+
+100
+00:04:07,720 --> 00:04:09,800
+We tend to think dopamine is the
+
+101
+00:04:09,800 --> 00:04:12,480
+chemical our brain releases after
+
+102
+00:04:12,480 --> 00:04:14,680
+something rewarding happens, but
+
+103
+00:04:14,680 --> 00:04:16,760
+Professor Schultz found that dopamine
+
+104
+00:04:16,760 --> 00:04:19,280
+doesn't just respond to rewards. It
+
+105
+00:04:19,280 --> 00:04:22,002
+responds to the prediction of rewards.
+
+106
+00:04:22,002 --> 00:04:23,040
+[music]
+
+107
+00:04:23,040 --> 00:04:24,919
+The smell of coffee before our first
+
+108
+00:04:24,919 --> 00:04:27,600
+sip, the notification chime before we
+
+109
+00:04:27,600 --> 00:04:29,720
+even read it. Our brain starts to
+
+110
+00:04:29,720 --> 00:04:31,919
+reacting to [music] what it thinks is
+
+111
+00:04:31,919 --> 00:04:34,600
+coming next, which means a streak
+
+112
+00:04:34,600 --> 00:04:36,400
+doesn't need to feel satisfying every
+
+113
+00:04:36,400 --> 00:04:39,240
+single time. It just needs to make our
+
+114
+00:04:39,240 --> 00:04:42,160
+brain feel like something satisfying is
+
+115
+00:04:42,160 --> 00:04:45,360
+about to happen. And that's exactly what
+
+116
+00:04:45,360 --> 00:04:48,080
+the habit loop is built around. Almost
+
+117
+00:04:48,080 --> 00:04:50,040
+every habit follows the same four
+
+118
+00:04:50,040 --> 00:04:52,960
+stages. The first stage, cue, something
+
+119
+00:04:52,960 --> 00:04:55,400
+that triggers the anticipation before we
+
+120
+00:04:55,400 --> 00:04:59,160
+even open the app. Then comes craving.
+
+121
+00:04:59,160 --> 00:05:01,200
+The Duolingo jingle after each lesson
+
+122
+00:05:01,200 --> 00:05:02,919
+makes us want the next one.
+
+123
+00:05:02,919 --> 00:05:05,720
+Next, response. Make it easy so we'll do
+
+124
+00:05:05,720 --> 00:05:07,880
+it, like auto progressing to the next
+
+125
+00:05:07,880 --> 00:05:10,000
+step. Finally, the reward. [music]
+
+126
+00:05:10,000 --> 00:05:12,160
+It's that satisfying feeling our brain
+
+127
+00:05:12,160 --> 00:05:14,360
+spent the last minute anticipating.
+
+128
+00:05:14,360 --> 00:05:16,160
+Studies found that when people are
+
+129
+00:05:16,160 --> 00:05:18,440
+reminded of their streak, just seeing
+
+130
+00:05:18,440 --> 00:05:20,560
+the number, they're more likely to keep
+
+131
+00:05:20,560 --> 00:05:22,760
+going. We haven't even opened the app
+
+132
+00:05:22,760 --> 00:05:24,840
+yet, but the cue already triggered the
+
+133
+00:05:24,840 --> 00:05:26,919
+loop. That's what makes us want to come
+
+134
+00:05:26,919 --> 00:05:29,919
+back tomorrow, not the lesson, not even
+
+135
+00:05:29,919 --> 00:05:33,440
+the streak, but the habit loop itself.
+
+136
+00:05:33,440 --> 00:05:36,080
+But if just seeing the streak is enough
+
+137
+00:05:36,080 --> 00:05:38,520
+to pull us back in, why do people give
+
+138
+00:05:38,520 --> 00:05:41,640
+up entirely after breaking a streak? The
+
+139
+00:05:41,640 --> 00:05:44,280
+longer the streak, the more our identity
+
+140
+00:05:44,280 --> 00:05:46,560
+gets wrapped up in it.
+
+141
+00:05:46,560 --> 00:05:48,680
+The obvious solution to this would be
+
+142
+00:05:48,680 --> 00:05:50,840
+making your streaks stricter, adding
+
+143
+00:05:50,840 --> 00:05:53,320
+more pressure and accountability, but
+
+144
+00:05:53,320 --> 00:05:55,520
+Duolingo found the opposite worked
+
+145
+00:05:55,520 --> 00:05:57,360
+better. They implemented a feature
+
+146
+00:05:57,360 --> 00:05:59,840
+called streak freeze that lets you miss
+
+147
+00:05:59,840 --> 00:06:02,480
+a day without losing everything. And
+
+148
+00:06:02,480 --> 00:06:04,440
+when Duolingo allowed users to equip up
+
+149
+00:06:04,440 --> 00:06:07,200
+to two streak freezes at a time, daily
+
+150
+00:06:07,200 --> 00:06:10,520
+active learners increased by 0.38%.
+
+151
+00:06:10,520 --> 00:06:12,680
+That's over 200,000 more people coming
+
+152
+00:06:12,680 --> 00:06:14,880
+back every day. People were more likely
+
+153
+00:06:14,880 --> 00:06:17,360
+to keep going after failure when goals
+
+154
+00:06:17,360 --> 00:06:20,200
+included a little built-in flexibility.
+
+155
+00:06:20,200 --> 00:06:22,840
+Duolingo tested two variants. First,
+
+156
+00:06:22,840 --> 00:06:25,360
+users must hit their full daily goal in
+
+157
+00:06:25,360 --> 00:06:27,600
+order to preserve the streak.
+
+158
+00:06:27,600 --> 00:06:29,400
+The second variant is where users could
+
+159
+00:06:29,400 --> 00:06:31,240
+keep their streak alive by just
+
+160
+00:06:31,240 --> 00:06:33,840
+completing one lesson on Duolingo.
+
+161
+00:06:33,840 --> 00:06:35,840
+This variant won.
+
+162
+00:06:35,840 --> 00:06:38,640
+Over 40% more people maintained their
+
+163
+00:06:38,640 --> 00:06:41,000
+7-day streak. More and more apps are
+
+164
+00:06:41,000 --> 00:06:42,680
+designing streaks around recovery
+
+165
+00:06:42,680 --> 00:06:45,680
+instead of perfection. Repairs, freezing
+
+166
+00:06:45,680 --> 00:06:48,720
+your streaks, pauses, and giving people
+
+167
+00:06:48,720 --> 00:06:51,200
+grace days. But that raises a bigger
+
+168
+00:06:51,200 --> 00:06:53,880
+question. Do streaks actually help
+
+169
+00:06:53,880 --> 00:06:56,400
+people build long-term habits or are
+
+170
+00:06:56,400 --> 00:06:58,200
+they just really good at making people
+
+171
+00:06:58,200 --> 00:06:59,560
+come back? [music]
+
+172
+00:06:59,560 --> 00:07:01,600
+On hindsight, streaks seem like the
+
+173
+00:07:01,600 --> 00:07:03,760
+perfect habit-building system. All we
+
+174
+00:07:03,760 --> 00:07:05,840
+need to do is to show up every day and
+
+175
+00:07:05,840 --> 00:07:07,760
+eventually the behavior became
+
+176
+00:07:07,760 --> 00:07:10,520
+automatic. But the more I research, the
+
+177
+00:07:10,520 --> 00:07:12,680
+more I notice that most evidence around
+
+178
+00:07:12,680 --> 00:07:14,680
+streaks focuses on engagement and
+
+179
+00:07:14,680 --> 00:07:17,080
+retention, not necessarily lasting
+
+180
+00:07:17,080 --> 00:07:19,000
+behavioral change.
+
+181
+00:07:19,000 --> 00:07:21,520
+We know that dopamine responds to the
+
+182
+00:07:21,520 --> 00:07:23,680
+prediction or the anticipation of
+
+183
+00:07:23,680 --> 00:07:26,200
+reward. But once the streak becomes
+
+184
+00:07:26,200 --> 00:07:29,040
+routine, when things become predictable,
+
+185
+00:07:29,040 --> 00:07:31,520
+that dopamine signal actually weakens.
+
+186
+00:07:31,520 --> 00:07:35,000
+So, apps keep layering in new surprises.
+
+187
+00:07:35,000 --> 00:07:36,640
+Animations,
+
+188
+00:07:36,640 --> 00:07:39,000
+milestone celebrations,
+
+189
+00:07:39,000 --> 00:07:40,800
+bonus XP.
+
+190
+00:07:40,800 --> 00:07:42,160
+They're all manufacturing
+
+191
+00:07:42,160 --> 00:07:46,880
+unpredictability to keep the loop alive.
+
+192
+00:07:48,400 --> 00:07:51,200
+But, optimizing for engagement and
+
+193
+00:07:51,200 --> 00:07:54,240
+optimizing for long-term habit formation
+
+194
+00:07:54,240 --> 00:07:57,160
+is not the same thing. So, what actually
+
+195
+00:07:57,160 --> 00:07:59,760
+makes habits stick?
+
+196
+00:07:59,760 --> 00:08:01,800
+Most streak systems are designed around
+
+197
+00:08:01,800 --> 00:08:03,320
+never missing a day, right? We got to
+
+198
+00:08:03,320 --> 00:08:05,680
+show up every single day to keep our
+
+199
+00:08:05,680 --> 00:08:07,160
+streak moving.
+
+200
+00:08:07,160 --> 00:08:09,320
+A study tracked people building real
+
+201
+00:08:09,320 --> 00:08:11,520
+habits over months and found that
+
+202
+00:08:11,520 --> 00:08:14,640
+missing a day had almost no effect on
+
+203
+00:08:14,640 --> 00:08:17,480
+whether the behavior eventually became
+
+204
+00:08:17,480 --> 00:08:20,425
+automatic. People simply resumed and the
+
+205
+00:08:20,425 --> 00:08:22,760
+[music] habit continued, which is the
+
+206
+00:08:22,760 --> 00:08:25,840
+opposite of how most streak systems are
+
+207
+00:08:25,840 --> 00:08:27,600
+designed.
+
+208
+00:08:27,600 --> 00:08:30,560
+Maybe what matters isn't how long you
+
+209
+00:08:30,560 --> 00:08:33,200
+keep your streak. It's whether you come
+
+210
+00:08:33,200 --> 00:08:36,145
+back even after breaking it. And that's
+
+211
+00:08:36,145 --> 00:08:38,080
+[music] good news to me. Now I know that
+
+212
+00:08:38,080 --> 00:08:42,280
+one bad day doesn't erase everything.
+
+213
+00:08:42,280 --> 00:08:43,800
+Next, watch what we learned from
+
+214
+00:08:43,800 --> 00:08:46,080
+analyzing a thousand onboarding flows
+
+215
+00:08:46,080 --> 00:08:48,320
+and what separates intuitive dashboards
+
+216
+00:08:48,320 --> 00:08:51,040
+from overwhelming ones across 2,000
+
+217
+00:08:51,040 --> 00:08:53,520
+dashboard designs. Be sure to subscribe
+
+218
+00:08:53,520 --> 00:08:58,120
+for our next deep dive on paywalls.
