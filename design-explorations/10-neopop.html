@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>jibiki — exploration 10 · Neo-pop</title>
+<title>jibiki · exploration 10 · Neo-pop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
@@ -335,6 +335,180 @@
   .grade.easy{background:var(--klein);color:#fff}
   .grade.easy .icon{stroke:#fff}
 
+  /* ---------- composants partagés (écrans 4 à 11) ---------- */
+  .h2{font-size:26px;font-weight:700;letter-spacing:-0.02em;line-height:1.1}
+  .seg{display:flex;gap:4px;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);padding:4px}
+  .seg button{flex:1;min-height:44px;padding:0 12px;border-radius:8px;font-size:14px;font-weight:700;white-space:nowrap}
+  .seg button.on{background:var(--acid);border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+  .seg.mini{padding:3px;gap:3px;box-shadow:3px 3px 0 var(--ink)}
+  .seg.mini button{padding:0 10px;font-size:12.5px}
+  .fchip{min-height:44px;padding:0 12px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:9px;font-size:14px;font-weight:700}
+  .fchip.on{background:var(--acid);box-shadow:3px 3px 0 var(--ink)}
+  .tgl{position:relative;width:68px;height:44px;flex:0 0 auto;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--ink)}
+  .tgl i{position:absolute;top:3px;left:4px;width:32px;height:32px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-style:normal}
+  .tgl.on{background:var(--lime)}
+  .tgl.on i{left:auto;right:4px}
+  .tgl.on i::after{content:"✓"}
+  .stick{display:inline-block;background:var(--acid);border:var(--line);border-radius:10px;box-shadow:4px 4px 0 var(--ink);padding:8px 14px;font-size:15px;font-weight:700;transform:rotate(-3deg)}
+  .chev{font-size:22px;font-weight:700;line-height:1}
+
+  /* ================= KANA · MATRICE ================= */
+  .screen.tall{height:920px}
+  .kana-head{padding:12px 14px 0}
+  .kana-top{display:flex;align-items:stretch;gap:10px}
+  .kana-top .seg{flex:1}
+  .kana-count{align-self:center;text-align:right;font-size:12px;font-weight:700;line-height:1.15;flex:0 0 auto}
+  .kana-count b{display:block;font-size:22px;letter-spacing:-0.02em}
+  .kana-legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 11px;margin-top:9px}
+  .kana-legend li{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600}
+  .klm{width:17px;height:17px;flex:0 0 auto;background:var(--paperw);border:2px solid var(--ink);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;line-height:1}
+  .klm.ok{background:var(--lime)}
+  .klm.mid{background:var(--acid);font-size:7px}
+  .klm.is-due{background:var(--magenta);font-size:8px}
+  .kana-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:9px 14px 0}
+  .kc{position:relative;height:56px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1}
+  .kc .kg{font-size:24px;font-weight:900}
+  .kc .kr{font-size:9.5px;font-weight:700;font-family:"Space Grotesk",sans-serif}
+  .kc .ks{position:absolute;top:3px;right:5px;font-size:10px;font-weight:700;line-height:1}
+  .kc.ok{background:var(--lime)}
+  .kc.mid{background:var(--acid)}
+  .kc.mid .ks{font-size:8px;top:4px}
+  .kc.is-due{background:var(--magenta)}
+  .kc.is-due .ks{font-size:9.5px}
+  .kc-void{height:56px;border:2.5px dashed #a49fb0;border-radius:10px}
+  .kana-cta{padding:11px 14px 12px}
+  .kana-cta .btn-primary{background:var(--ink);color:var(--acid)}
+
+  /* ================= KANA DÉTAIL ================= */
+  .kd-hero{background:var(--lime)}
+  .kd-hero .kj{font-size:104px;line-height:1.02}
+  .kd-strokes{display:flex;gap:12px;margin-top:6px}
+  .kd-box{width:168px;height:168px;flex:0 0 auto;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .kd-box svg{display:block;width:100%;height:100%}
+  .kd-notes{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:flex-start}
+  .kd-note{font-size:12.5px;font-weight:600;line-height:1.35}
+  .kd-near-row{display:flex;gap:8px;margin-top:6px}
+  .kd-near-row .kc{width:64px;flex:0 0 auto}
+
+  /* ================= KANJI · PARCOURIR ================= */
+  .kj-head{padding:14px 16px 0}
+  .kj-row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .kj-row1 .seg{flex:0 0 auto}
+  .kj-chips{display:flex;gap:6px;margin-top:12px}
+  .kj-chips .fchip{flex:1;padding:0}
+  .kj-prog{margin:12px 16px 0;background:var(--paperw);border:var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
+  .kj-line{display:flex;align-items:baseline;gap:7px}
+  .kj-line b{font-size:46px;font-weight:700;letter-spacing:-0.03em;line-height:.95}
+  .kj-line span{font-size:14px;font-weight:700}
+  .gseg{display:flex;gap:3px;margin-top:10px}
+  .gseg i{flex:1;height:15px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:4px}
+  .gseg i.f{background:var(--klein)}
+  .kj-note{font-size:12.5px;font-weight:600;margin-top:9px}
+  .kj-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:14px 16px 0}
+  .kt{position:relative;height:78px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .kt .g{font-size:29px;font-weight:900;line-height:1}
+  .kt .ks{position:absolute;top:3px;right:5px;font-size:9.5px;font-weight:700;line-height:1}
+  .kt.ok{background:var(--lime)}
+  .kt.mid{background:var(--acid)}
+  .kt.mid .ks{font-size:8px}
+  .kt.is-due{background:var(--magenta)}
+  .kj-foot{padding:12px 16px 0;font-size:12px;font-weight:600;color:var(--ink-2);text-align:center}
+
+  /* ================= PAQUETS ================= */
+  .pk-head{padding:16px 16px 0}
+  .pk-sub{font-size:13.5px;font-weight:600;margin-top:4px}
+  .pk-list{display:flex;flex-direction:column;gap:12px;padding:14px 16px 0}
+  .pk-deck{display:flex;align-items:center;gap:12px;background:var(--paperw);border:var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px}
+  .pk-num{width:56px;height:56px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--acid);border:2.5px solid var(--ink);border-radius:10px;font-size:24px;font-weight:700}
+  .pk-num.done{background:var(--lime);font-size:22px}
+  .pk-info{flex:1;min-width:0}
+  .pk-name{font-size:16.5px;font-weight:700}
+  .pk-meta{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:2px}
+  .pk-go{background:var(--ink);color:var(--acid);border:var(--line);border-radius:10px;box-shadow:var(--shadow);min-height:46px;padding:0 16px;font-size:15px;font-weight:700;flex:0 0 auto}
+  .pk-h3{font-size:16px;font-weight:700;padding:18px 16px 0}
+  .pk-cmy{display:flex;flex-direction:column;gap:10px;padding:10px 16px 0}
+  .pk-browse{margin:12px 16px 0;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);min-height:50px;font-size:15px;font-weight:700}
+
+  .cmy{background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;text-align:left}
+  .cmy-top{display:flex;align-items:center;gap:8px}
+  .cmy-name{font-size:15.5px;font-weight:700;flex:1;min-width:0}
+  .cmy-ver{display:inline-flex;align-items:center;gap:4px;background:var(--klein);color:#fff;border:2px solid var(--ink);border-radius:7px;padding:3px 7px;font-size:10.5px;font-weight:700;flex:0 0 auto}
+  .cmy-meta{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:3px}
+  .cmy-stats{display:flex;gap:14px;margin-top:8px;font-size:13px;font-weight:700;align-items:center}
+  .cmy-stats .st{display:inline-flex;align-items:center;gap:5px}
+
+  /* ================= COMMUNAUTÉ ================= */
+  .cm-head{background:var(--magenta);border-bottom:var(--line);padding:18px 16px 16px}
+  .cm-head p{font-size:13.5px;font-weight:600;margin-top:4px}
+  .cm-chips{display:flex;gap:6px;padding:14px 16px 0}
+  .cm-list{display:flex;flex-direction:column;gap:10px;padding:12px 16px 0}
+  .cm-cta{padding:14px 16px 14px}
+  .cm-cta .btn-primary{background:var(--magenta)}
+
+  /* ================= PROFIL ================= */
+  .pf-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 16px 0}
+  .pf-sub{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:3px}
+  .pf-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 16px 0}
+  .pf-stat{border:var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px}
+  .pf-stat b{display:block;font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+  .pf-stat span{display:block;font-size:13px;font-weight:700;margin-top:4px}
+  .pf-stat.wide{grid-column:1/-1;background:var(--acid)}
+  .pf-stat.wide b{font-size:56px}
+  .pf-stat.g{background:var(--lime)}
+  .pf-stat.v{background:var(--lav)}
+  .pf-card{margin:12px 16px 0;background:var(--paperw);border:var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
+  .pf-bars{display:flex;align-items:flex-end;gap:6px;height:84px;margin-top:10px}
+  .pfb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+  .pfb b{font-size:10.5px;font-weight:700;line-height:1}
+  .pfb i{width:100%;background:var(--klein);border:2.5px solid var(--ink);border-radius:5px}
+  .pfb.hi i{background:var(--acid)}
+  .pfb .d{font-size:10px;font-weight:600;margin-top:1px}
+  .pf-line{font-size:12.5px;font-weight:600;margin-top:10px;line-height:1.35}
+  .pf-mode{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .pm-lbl{font-size:13.5px;font-weight:600;flex:0 0 auto}
+  .pm-lbl.on{font-weight:700;text-decoration:underline;text-decoration-thickness:2.5px;text-underline-offset:3px}
+  .pm-track{position:relative;flex:1;height:44px;min-width:76px}
+  .pm-track::before{content:"";position:absolute;left:0;right:0;top:12px;height:20px;background:var(--paperw);border:var(--line);border-radius:8px}
+  .pm-knob{position:absolute;top:3px;right:0;width:38px;height:38px;background:var(--acid);border:var(--line);border-radius:9px;box-shadow:3px 3px 0 var(--ink)}
+  .pf-row{display:flex;align-items:center;justify-content:space-between;min-height:52px;font-size:15px;font-weight:700;padding:2px 14px}
+
+  /* ================= RÉGLAGES ================= */
+  .st-head{display:flex;align-items:center;gap:12px;padding:14px 16px 0}
+  .st-body{flex:1;display:flex;flex-direction:column;gap:16px;padding:14px 16px 0}
+  .st-group h3{font-size:16px;font-weight:700;margin-bottom:8px}
+  .st-card{background:var(--paperw);border:var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .st-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px;min-height:60px}
+  .st-row + .st-row{border-top:2.5px solid var(--ink)}
+  .st-lbl{font-size:14.5px;font-weight:600}
+  .st-val{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:700;padding:0 2px}
+  .st-size{display:flex;gap:6px}
+  .st-size button{width:46px;height:46px;border:2.5px solid var(--ink);border-radius:9px;background:var(--paperw);font-weight:900;display:flex;align-items:center;justify-content:center}
+  .st-size button.on{background:var(--acid);box-shadow:2px 2px 0 var(--ink)}
+  .st-size .s1{font-size:13px}
+  .st-size .s2{font-size:17px}
+  .st-size .s3{font-size:22px}
+  .st-foot{margin-top:auto;padding:16px;font-size:11.5px;font-weight:600;color:var(--ink-2);text-align:center}
+
+  /* ================= FIN DE SESSION ================= */
+  .fin{background:var(--lav)}
+  .fs-top{padding:22px 18px 0}
+  .fs-kicker{font-size:13px;font-weight:700}
+  .fs-top h2{font-size:32px;font-weight:700;letter-spacing:-0.02em;margin-top:4px}
+  .fs-score{position:relative;margin:26px 18px 0;background:var(--paperw);border:var(--line);border-radius:16px;box-shadow:8px 8px 0 var(--ink);padding:18px 16px 16px}
+  .fs-score .big{font-size:60px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+  .fs-score .lbl{font-size:14px;font-weight:700;margin-top:3px}
+  .fs-score .note{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-top:9px}
+  .fs-back{margin:16px 18px 0}
+  .fs-rows{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .fs-word{display:flex;align-items:center;gap:10px;background:var(--paperw);border:2.5px solid var(--ink);border-radius:11px;padding:8px 12px;min-height:52px}
+  .fs-word .jp{font-size:20px;font-weight:900;flex:0 0 auto}
+  .fs-word .rd{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+  .fs-word .when{font-size:12.5px;font-weight:700;background:var(--acid);border:2px solid var(--ink);border-radius:7px;padding:4px 8px;flex:0 0 auto}
+  .fs-next{margin:16px 18px 0;font-size:13.5px;font-weight:700;line-height:1.4}
+  .fs-ctas{margin-top:auto;padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px}
+  .fs-ctas .btn-primary{background:var(--ink);color:var(--acid)}
+  .fs-sec{min-height:52px;width:100%;background:var(--paperw);border:var(--line);border-radius:12px;box-shadow:var(--shadow);font-size:16px;font-weight:700}
+
   /* ---------- motion off ---------- */
   @media (prefers-reduced-motion: reduce){
     .pressable{transition:none}
@@ -346,7 +520,7 @@
 
 <header class="intro">
   <h1>Neo-pop <span class="jp-tag" lang="ja">ネオポップ</span></h1>
-  <p>Le langage Kodomo assumé en version adulte : contours encre, ombres dures, aplats acides — mais chiffres monumentaux, copy directe et densité d'un vrai outil.</p>
+  <p>Le langage Kodomo assumé en version adulte : contours encre, ombres dures, aplats acides, chiffres monumentaux, copy directe. Onze écrans, de la recherche à la matrice des kana : la densité d'un vrai outil.</p>
   <svg class="deco ast" width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><path d="M26 4v44M4 26h44M10 10l32 32M42 10L10 42" stroke="#17131f" stroke-width="7" stroke-linecap="round"/></svg>
   <span class="deco bar" aria-hidden="true"></span>
   <span class="deco dot" aria-hidden="true"></span>
@@ -581,6 +755,670 @@
             <span class="txt"><span class="name">Facile</span><span class="int">7 j</span></span>
           </button>
         </div>
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ KANA · MATRICE ============ -->
+  <section class="panel">
+    <span class="caption">Kana</span>
+    <article class="screen tall" aria-label="Matrice des kana">
+
+      <div class="kana-head">
+        <div class="kana-top">
+          <div class="seg" role="tablist" aria-label="Syllabaire">
+            <button class="on" role="tab" aria-selected="true" lang="ja">ひらがな</button>
+            <button role="tab" aria-selected="false" lang="ja">カタカナ</button>
+          </div>
+          <div class="kana-count"><b>32/46</b>apprises</div>
+        </div>
+        <ul class="kana-legend" aria-label="Légende des états">
+          <li><span class="klm ok" aria-hidden="true">✓</span> apprise</li>
+          <li><span class="klm mid" aria-hidden="true">●</span> en cours</li>
+          <li><span class="klm is-due" aria-hidden="true">dû</span> à revoir</li>
+          <li><span class="klm" aria-hidden="true"></span> nouvelle</li>
+        </ul>
+      </div>
+
+      <div class="kana-grid">
+        <button class="kc ok pressable" aria-label="あ, a, apprise"><span class="kg" lang="ja">あ</span><span class="kr">a</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="い, i, apprise"><span class="kg" lang="ja">い</span><span class="kr">i</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="う, u, apprise"><span class="kg" lang="ja">う</span><span class="kr">u</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="え, e, apprise"><span class="kg" lang="ja">え</span><span class="kr">e</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="お, o, apprise"><span class="kg" lang="ja">お</span><span class="kr">o</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="か, ka, apprise"><span class="kg" lang="ja">か</span><span class="kr">ka</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="き, ki, apprise"><span class="kg" lang="ja">き</span><span class="kr">ki</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="く, ku, apprise"><span class="kg" lang="ja">く</span><span class="kr">ku</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc is-due pressable" aria-label="け, ke, à revoir aujourd'hui"><span class="kg" lang="ja">け</span><span class="kr">ke</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kc ok pressable" aria-label="こ, ko, apprise"><span class="kg" lang="ja">こ</span><span class="kr">ko</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="さ, sa, apprise"><span class="kg" lang="ja">さ</span><span class="kr">sa</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="し, shi, apprise"><span class="kg" lang="ja">し</span><span class="kr">shi</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="す, su, apprise"><span class="kg" lang="ja">す</span><span class="kr">su</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="せ, se, apprise"><span class="kg" lang="ja">せ</span><span class="kr">se</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc is-due pressable" aria-label="そ, so, à revoir aujourd'hui"><span class="kg" lang="ja">そ</span><span class="kr">so</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kc ok pressable" aria-label="た, ta, apprise"><span class="kg" lang="ja">た</span><span class="kr">ta</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc is-due pressable" aria-label="ち, chi, à revoir aujourd'hui"><span class="kg" lang="ja">ち</span><span class="kr">chi</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kc ok pressable" aria-label="つ, tsu, apprise"><span class="kg" lang="ja">つ</span><span class="kr">tsu</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="て, te, apprise"><span class="kg" lang="ja">て</span><span class="kr">te</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="と, to, apprise"><span class="kg" lang="ja">と</span><span class="kr">to</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="な, na, apprise"><span class="kg" lang="ja">な</span><span class="kr">na</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="に, ni, apprise"><span class="kg" lang="ja">に</span><span class="kr">ni</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc is-due pressable" aria-label="ぬ, nu, à revoir aujourd'hui"><span class="kg" lang="ja">ぬ</span><span class="kr">nu</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kc ok pressable" aria-label="ね, ne, apprise"><span class="kg" lang="ja">ね</span><span class="kr">ne</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="の, no, apprise"><span class="kg" lang="ja">の</span><span class="kr">no</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="は, ha, apprise"><span class="kg" lang="ja">は</span><span class="kr">ha</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="ひ, hi, apprise"><span class="kg" lang="ja">ひ</span><span class="kr">hi</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="ふ, fu, apprise"><span class="kg" lang="ja">ふ</span><span class="kr">fu</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="へ, he, apprise"><span class="kg" lang="ja">へ</span><span class="kr">he</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="ほ, ho, apprise"><span class="kg" lang="ja">ほ</span><span class="kr">ho</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="ま, ma, apprise"><span class="kg" lang="ja">ま</span><span class="kr">ma</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc ok pressable" aria-label="み, mi, apprise"><span class="kg" lang="ja">み</span><span class="kr">mi</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kc mid pressable" aria-label="む, mu, en cours"><span class="kg" lang="ja">む</span><span class="kr">mu</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kc mid pressable" aria-label="め, me, en cours"><span class="kg" lang="ja">め</span><span class="kr">me</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kc mid pressable" aria-label="も, mo, en cours"><span class="kg" lang="ja">も</span><span class="kr">mo</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kc mid pressable" aria-label="や, ya, en cours"><span class="kg" lang="ja">や</span><span class="kr">ya</span><span class="ks" aria-hidden="true">●</span></button>
+        <span class="kc-void" aria-hidden="true"></span>
+        <button class="kc pressable" aria-label="ゆ, yu, nouvelle"><span class="kg" lang="ja">ゆ</span><span class="kr">yu</span></button>
+        <span class="kc-void" aria-hidden="true"></span>
+        <button class="kc pressable" aria-label="よ, yo, nouvelle"><span class="kg" lang="ja">よ</span><span class="kr">yo</span></button>
+        <button class="kc pressable" aria-label="ら, ra, nouvelle"><span class="kg" lang="ja">ら</span><span class="kr">ra</span></button>
+        <button class="kc pressable" aria-label="り, ri, nouvelle"><span class="kg" lang="ja">り</span><span class="kr">ri</span></button>
+        <button class="kc pressable" aria-label="る, ru, nouvelle"><span class="kg" lang="ja">る</span><span class="kr">ru</span></button>
+        <button class="kc pressable" aria-label="れ, re, nouvelle"><span class="kg" lang="ja">れ</span><span class="kr">re</span></button>
+        <button class="kc pressable" aria-label="ろ, ro, nouvelle"><span class="kg" lang="ja">ろ</span><span class="kr">ro</span></button>
+        <button class="kc pressable" aria-label="わ, wa, nouvelle"><span class="kg" lang="ja">わ</span><span class="kr">wa</span></button>
+        <span class="kc-void" aria-hidden="true"></span>
+        <span class="kc-void" aria-hidden="true"></span>
+        <span class="kc-void" aria-hidden="true"></span>
+        <button class="kc pressable" aria-label="を, wo, nouvelle"><span class="kg" lang="ja">を</span><span class="kr">wo</span></button>
+        <button class="kc pressable" aria-label="ん, n, nouvelle"><span class="kg" lang="ja">ん</span><span class="kr">n</span></button>
+      </div>
+
+      <div class="kana-cta">
+        <button class="btn-primary pressable">
+          Réviser les kana dues
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3.5l10 5.5-10 5.5z" fill="#f2e51c" stroke="#f2e51c" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button class="active" aria-current="page">
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ KANA DÉTAIL ============ -->
+  <section class="panel">
+    <span class="caption">Kana détail</span>
+    <article class="screen" aria-label="Fiche du kana a">
+
+      <div class="word-top">
+        <button class="sq-btn pressable" aria-label="Retour à la matrice">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#17131f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="tag">Hiragana</span>
+      </div>
+
+      <div class="hero kd-hero">
+        <div lang="ja">
+          <div class="kj">あ</div>
+        </div>
+        <button class="say pressable">
+          <svg class="icon" width="18" height="16" viewBox="0 0 18 16" aria-hidden="true"><path d="M2 5.5h3L9.5 2v12L5 10.5H2z" fill="#17131f"/><path d="M12.5 5a4.2 4.2 0 010 6M14.8 3a7.4 7.4 0 010 10" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>
+          a
+        </button>
+        <div class="hero-tags">
+          <span class="tag">Voyelle</span>
+          <span class="tag" lang="ja">あ<span lang="fr">&nbsp;· rangée 1</span></span>
+        </div>
+      </div>
+
+      <div class="word-body">
+
+        <div>
+          <span class="sec-label">Ordre des traits</span>
+          <div class="kd-strokes">
+            <div class="kd-box">
+              <svg viewBox="0 0 168 168" role="img" aria-label="Tracé de あ en 3 traits numérotés">
+                <path d="M84 8V160M8 84H160" stroke="#b6b2c0" stroke-width="2" stroke-dasharray="6 7" fill="none"/>
+                <path d="M44 46C60 41 84 40 104 43" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <path d="M72 20C74 52 70 86 50 126" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <path d="M100 48C96 76 80 98 58 112C44 121 45 136 62 140C82 144 100 130 101 111C102 95 87 87 75 93C68 96 66 100 68 106" fill="none" stroke="#17131f" stroke-width="8" stroke-linecap="round"/>
+                <circle cx="44" cy="46" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <circle cx="72" cy="20" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <circle cx="100" cy="48" r="5" fill="#ff57a8" stroke="#17131f" stroke-width="2.5"/>
+                <g font-family="Space Grotesk" font-size="12" font-weight="700" fill="#17131f" text-anchor="middle">
+                  <circle cx="24" cy="32" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="24" y="36.5">1</text>
+                  <circle cx="96" cy="14" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="96" y="18.5">2</text>
+                  <circle cx="132" cy="44" r="10" fill="#fff" stroke="#17131f" stroke-width="2.5"/><text x="132" y="48.5">3</text>
+                </g>
+              </svg>
+            </div>
+            <div class="kd-notes">
+              <span class="tag">3 traits</span>
+              <p class="kd-note">Départ de chaque trait marqué en rose.</p>
+              <p class="kd-note">Du haut vers le bas, de gauche à droite.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mnemo">
+          <p class="quote">« Un “a” cursif qui a poussé une antenne. Tu le vois, tu l'entends. »</p>
+          <div class="meta">
+            <span class="author">par YonaYona</span>
+            <button class="vote pressable" aria-label="Voter pour ce mnémonique, 214 votes">
+              <svg class="icon" width="13" height="12" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>
+              214
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="sec-label">Kana proches</span>
+          <div class="kd-near-row">
+            <button class="kc ok pressable" aria-label="お, o, apprise"><span class="kg" lang="ja">お</span><span class="kr">o</span><span class="ks" aria-hidden="true">✓</span></button>
+            <button class="kc mid pressable" aria-label="め, me, en cours"><span class="kg" lang="ja">め</span><span class="kr">me</span><span class="ks" aria-hidden="true">●</span></button>
+            <button class="kc is-due pressable" aria-label="ぬ, nu, à revoir aujourd'hui"><span class="kg" lang="ja">ぬ</span><span class="kr">nu</span><span class="ks" aria-hidden="true">dû</span></button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="word-cta">
+        <button class="btn-primary pressable">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 15c3-1 5-2.5 7-5.5M13 3l2 2-3.5 3.5-2-2z" fill="none" stroke="#17131f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Pratiquer le tracé
+        </button>
+      </div>
+
+    </article>
+  </section>
+
+  <!-- ============ KANJI · PARCOURIR ============ -->
+  <section class="panel">
+    <span class="caption">Kanji · parcourir</span>
+    <article class="screen" aria-label="Parcourir les kanji par niveau">
+
+      <div class="kj-head">
+        <div class="kj-row1">
+          <h2 class="h2">Kanji</h2>
+          <div class="seg" role="group" aria-label="Trier par">
+            <button class="on">Fréquence</button>
+            <button>Traits</button>
+          </div>
+        </div>
+        <div class="kj-chips" role="group" aria-label="Niveau JLPT">
+          <button class="fchip on" aria-pressed="true">N5</button>
+          <button class="fchip" aria-pressed="false">N4</button>
+          <button class="fchip" aria-pressed="false">N3</button>
+          <button class="fchip" aria-pressed="false">N2</button>
+          <button class="fchip" aria-pressed="false">N1</button>
+        </div>
+      </div>
+
+      <div class="kj-prog">
+        <div class="kj-line"><b>82</b><span>/103 appris au N5</span></div>
+        <div class="gseg" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="103" aria-label="82 kanji appris sur 103">
+          <i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i>
+        </div>
+        <p class="kj-note">3 dus aujourd'hui · 21 jamais vus</p>
+      </div>
+
+      <div class="kj-grid">
+        <button class="kt is-due pressable" aria-label="日, à revoir aujourd'hui"><span class="g" lang="ja">日</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kt ok pressable" aria-label="一, appris"><span class="g" lang="ja">一</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="人, appris"><span class="g" lang="ja">人</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="大, appris"><span class="g" lang="ja">大</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="年, appris"><span class="g" lang="ja">年</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt mid pressable" aria-label="中, en cours"><span class="g" lang="ja">中</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kt ok pressable" aria-label="会, appris"><span class="g" lang="ja">会</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt mid pressable" aria-label="国, en cours"><span class="g" lang="ja">国</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kt is-due pressable" aria-label="学, à revoir aujourd'hui"><span class="g" lang="ja">学</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kt mid pressable" aria-label="生, en cours"><span class="g" lang="ja">生</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kt ok pressable" aria-label="山, appris"><span class="g" lang="ja">山</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="川, appris"><span class="g" lang="ja">川</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="口, appris"><span class="g" lang="ja">口</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt mid pressable" aria-label="車, en cours"><span class="g" lang="ja">車</span><span class="ks" aria-hidden="true">●</span></button>
+        <button class="kt pressable" aria-label="門, jamais vu"><span class="g" lang="ja">門</span></button>
+        <button class="kt ok pressable" aria-label="火, appris"><span class="g" lang="ja">火</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="水, appris"><span class="g" lang="ja">水</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt is-due pressable" aria-label="金, à revoir aujourd'hui"><span class="g" lang="ja">金</span><span class="ks" aria-hidden="true">dû</span></button>
+        <button class="kt ok pressable" aria-label="土, appris"><span class="g" lang="ja">土</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="木, appris"><span class="g" lang="ja">木</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt ok pressable" aria-label="本, appris"><span class="g" lang="ja">本</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt pressable" aria-label="半, jamais vu"><span class="g" lang="ja">半</span></button>
+        <button class="kt ok pressable" aria-label="分, appris"><span class="g" lang="ja">分</span><span class="ks" aria-hidden="true">✓</span></button>
+        <button class="kt pressable" aria-label="力, jamais vu"><span class="g" lang="ja">力</span></button>
+      </div>
+
+      <p class="kj-foot">Trié par fréquence dans la presse.</p>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ PAQUETS ============ -->
+  <section class="panel">
+    <span class="caption">Paquets</span>
+    <article class="screen" aria-label="Paquets de révision">
+
+      <div class="pk-head">
+        <h2 class="h2">Réviser</h2>
+        <p class="pk-sub">16 dues au total. 12 minutes, grand max.</p>
+      </div>
+
+      <div class="pk-list">
+        <div class="pk-deck">
+          <span class="pk-num" aria-hidden="true">12</span>
+          <div class="pk-info">
+            <div class="pk-name">Kanji N5</div>
+            <div class="pk-meta">12 dues · 5 nouvelles</div>
+          </div>
+          <button class="pk-go pressable" aria-label="Réviser le paquet Kanji N5">Réviser</button>
+        </div>
+        <div class="pk-deck">
+          <span class="pk-num" aria-hidden="true">4</span>
+          <div class="pk-info">
+            <div class="pk-name">Vocabulaire cuisine</div>
+            <div class="pk-meta">4 dues · 0 nouvelle</div>
+          </div>
+          <button class="pk-go pressable" aria-label="Réviser le paquet Vocabulaire cuisine">Réviser</button>
+        </div>
+        <div class="pk-deck">
+          <span class="pk-num done" aria-hidden="true">✓</span>
+          <div class="pk-info">
+            <div class="pk-name">Kana</div>
+            <div class="pk-meta">À jour. Prochaine fournée demain.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="pk-h3">Paquets de la communauté</h3>
+      <div class="pk-cmy">
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Kanji des panneaux de gare</span></div>
+          <p class="cmy-meta">par TokyoLine · 214 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>412</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>3,1 k</span>
+          </div>
+        </button>
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Onomatopées du quotidien</span></div>
+          <p class="cmy-meta">par MojiMoji · 120 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>286</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>1,8 k</span>
+          </div>
+        </button>
+      </div>
+      <button class="pk-browse pressable">Tout parcourir <span class="chev" aria-hidden="true">›</span></button>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ COMMUNAUTÉ ============ -->
+  <section class="panel">
+    <span class="caption">Communauté</span>
+    <article class="screen" aria-label="Paquets partagés par la communauté">
+
+      <div class="cm-head">
+        <h2 class="h2">Communauté</h2>
+        <p>Les paquets des autres. Prends, note, améliore.</p>
+      </div>
+
+      <div class="cm-chips" role="group" aria-label="Filtrer les paquets">
+        <button class="fchip on" aria-pressed="true">Populaires</button>
+        <button class="fchip" aria-pressed="false">Récents</button>
+        <button class="fchip" aria-pressed="false">En français</button>
+      </div>
+
+      <div class="cm-list">
+        <button class="cmy pressable">
+          <div class="cmy-top">
+            <span class="cmy-name">Kanji des panneaux de gare</span>
+            <span class="cmy-ver"><svg class="icon" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.5l2.5 2.5L8.5 2.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifié</span>
+          </div>
+          <p class="cmy-meta">par TokyoLine · 214 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>412</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>3,1 k</span>
+          </div>
+        </button>
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Vocabulaire du konbini</span></div>
+          <p class="cmy-meta">par MatchaLatte · 88 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>351</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>2,4 k</span>
+          </div>
+        </button>
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Onomatopées du quotidien</span></div>
+          <p class="cmy-meta">par MojiMoji · 120 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>286</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>1,8 k</span>
+          </div>
+        </button>
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Keigo de survie au bureau</span></div>
+          <p class="cmy-meta">par ShachoSan · 64 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>190</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>950</span>
+          </div>
+        </button>
+        <button class="cmy pressable">
+          <div class="cmy-top"><span class="cmy-name">Verbes en る qui piègent</span></div>
+          <p class="cmy-meta">par GodanGang · 52 cartes</p>
+          <div class="cmy-stats">
+            <span class="st"><svg class="icon" width="12" height="11" viewBox="0 0 13 12" aria-hidden="true"><path d="M6.5 1l5.5 9.5H1z" fill="#17131f"/></svg>158</span>
+            <span class="st"><svg class="icon" width="12" height="13" viewBox="0 0 12 13" aria-hidden="true"><path d="M6 1v7M3 5.5L6 8.5 9 5.5" fill="none" stroke="#17131f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11.5h8" stroke="#17131f" stroke-width="2" stroke-linecap="round"/></svg>720</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="cm-cta">
+        <button class="btn-primary pressable">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="#17131f" stroke-width="2.8" stroke-linecap="round"/></svg>
+          Proposer un paquet
+        </button>
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ PROFIL ============ -->
+  <section class="panel">
+    <span class="caption">Profil</span>
+    <article class="screen" aria-label="Profil et statistiques">
+
+      <div class="pf-head">
+        <div>
+          <h2 class="h2">Egon</h2>
+          <p class="pf-sub">Apprend depuis mars 2026.</p>
+        </div>
+        <span class="stick">Série&nbsp;: 8 jours</span>
+      </div>
+
+      <div class="pf-stats">
+        <div class="pf-stat wide"><b>412</b><span>cartes apprises</span></div>
+        <div class="pf-stat g"><b>91&thinsp;%</b><span>de précision</span></div>
+        <div class="pf-stat v"><b>34 min</b><span>cette semaine</span></div>
+      </div>
+
+      <div class="pf-card">
+        <span class="sec-label">Charge à venir</span>
+        <div class="pf-bars" role="img" aria-label="Prévision de révisions : demain 18 cartes, puis 11, 9, 14, 5, 3 et 4 sur les six jours suivants">
+          <div class="pfb hi"><b>18</b><i style="height:56px"></i><span class="d">+1</span></div>
+          <div class="pfb"><b>11</b><i style="height:36px"></i><span class="d">+2</span></div>
+          <div class="pfb"><b>9</b><i style="height:30px"></i><span class="d">+3</span></div>
+          <div class="pfb"><b>14</b><i style="height:44px"></i><span class="d">+4</span></div>
+          <div class="pfb"><b>5</b><i style="height:18px"></i><span class="d">+5</span></div>
+          <div class="pfb"><b>3</b><i style="height:12px"></i><span class="d">+6</span></div>
+          <div class="pfb"><b>4</b><i style="height:15px"></i><span class="d">+7</span></div>
+        </div>
+        <p class="pf-line">Demain&nbsp;: 18 · Dans 7 j&nbsp;: 64 au total.</p>
+      </div>
+
+      <div class="pf-card">
+        <span class="sec-label">Mode</span>
+        <div class="pf-mode">
+          <span class="pm-lbl">Dictionnaire</span>
+          <button class="pm-track pressable" role="switch" aria-checked="true" aria-label="Mode, position actuelle : Apprentissage">
+            <i class="pm-knob"></i>
+          </button>
+          <span class="pm-lbl on">Apprentissage</span>
+        </div>
+        <p class="pf-line">Apprentissage&nbsp;: file de révision, nouvelles cartes et stats activées.</p>
+      </div>
+
+      <button class="pf-card pf-row pressable">Réglages <span class="chev" aria-hidden="true">›</span></button>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5C9.2 3.2 6.6 2.8 3.5 3.2v13.6c3.1-.4 5.7 0 7.5 1.3 1.8-1.3 4.4-1.7 7.5-1.3V3.2c-3.1-.4-5.7 0-7.5 1.3zM11 4.5v13.6" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Dico
+        </button>
+        <button>
+          <span class="kana-glyph" lang="ja">あ</span>
+          Kana
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="3" width="13" height="9.5" rx="2" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M3.5 8v8.5a2.5 2.5 0 002.5 2.5h9.5" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Réviser
+        </button>
+        <button>
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M19 10a7 7 0 01-7 7c-1.1 0-2.2-.2-3.1-.7L4 18l1.6-3.7A7.4 7.4 0 015 10a7 7 0 0114 0z" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linejoin="round"/></svg>
+          Communauté
+        </button>
+        <button class="active" aria-current="page">
+          <svg class="icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="7.5" r="3.6" fill="none" stroke="#17131f" stroke-width="2.2"/><path d="M4.5 19c.8-3.4 3.4-5.2 6.5-5.2s5.7 1.8 6.5 5.2" fill="none" stroke="#17131f" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Profil
+        </button>
+      </nav>
+
+    </article>
+  </section>
+
+  <!-- ============ RÉGLAGES ============ -->
+  <section class="panel">
+    <span class="caption">Réglages</span>
+    <article class="screen" aria-label="Réglages de l'application">
+
+      <div class="st-head">
+        <button class="sq-btn pressable" aria-label="Retour au profil">
+          <svg class="icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4L6.5 10l6 6" fill="none" stroke="#17131f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 class="h2">Réglages</h2>
+      </div>
+
+      <div class="st-body">
+
+        <div class="st-group">
+          <h3>Affichage</h3>
+          <div class="st-card">
+            <div class="st-row">
+              <span class="st-lbl">Thème</span>
+              <div class="seg mini" role="group" aria-label="Thème">
+                <button class="on" aria-pressed="true">Clair</button>
+                <button aria-pressed="false">Sombre</button>
+                <button aria-pressed="false">Auto</button>
+              </div>
+            </div>
+            <div class="st-row">
+              <span class="st-lbl">Taille du japonais</span>
+              <div class="st-size" role="group" aria-label="Taille du japonais">
+                <button class="s1" lang="ja" aria-pressed="false" aria-label="Petite">あ</button>
+                <button class="s2 on" lang="ja" aria-pressed="true" aria-label="Moyenne">あ</button>
+                <button class="s3" lang="ja" aria-pressed="false" aria-label="Grande">あ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="st-group">
+          <h3>Lecture</h3>
+          <div class="st-card">
+            <div class="st-row">
+              <span class="st-lbl">Furigana automatique</span>
+              <button class="tgl on pressable" role="switch" aria-checked="true" aria-label="Furigana automatique"><i aria-hidden="true"></i></button>
+            </div>
+            <div class="st-row">
+              <span class="st-lbl">Voix TTS</span>
+              <button class="st-val pressable" aria-label="Voix TTS : Kyoko">Kyoko <span class="chev" aria-hidden="true">›</span></button>
+            </div>
+            <div class="st-row">
+              <span class="st-lbl">Langue des définitions</span>
+              <button class="st-val pressable" aria-label="Langue des définitions : français">Français <span class="chev" aria-hidden="true">›</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="st-group">
+          <h3>Révisions</h3>
+          <div class="st-card">
+            <div class="st-row">
+              <span class="st-lbl">Notifications de révision</span>
+              <button class="tgl on pressable" role="switch" aria-checked="true" aria-label="Notifications de révision"><i aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="st-group">
+          <h3>Données</h3>
+          <div class="st-card">
+            <div class="st-row">
+              <span class="st-lbl">Packs hors-ligne</span>
+              <button class="st-val pressable" aria-label="Packs hors-ligne : 2 téléchargés">2 téléchargés <span class="chev" aria-hidden="true">›</span></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="st-foot">jibiki 0.9.2 · dictionnaire libre, mémoire durable</p>
+
+    </article>
+  </section>
+
+  <!-- ============ FIN DE SESSION ============ -->
+  <section class="panel">
+    <span class="caption">Fin de session</span>
+    <article class="screen fin" aria-label="Synthèse de fin de session">
+
+      <div class="fs-top">
+        <p class="fs-kicker">Kanji N5 · 20 cartes · 9 min</p>
+        <h2>Session terminée.</h2>
+      </div>
+
+      <div class="fs-score">
+        <span class="sticker">20/20</span>
+        <div class="big">85&thinsp;%</div>
+        <div class="lbl">de précision</div>
+        <div class="progress" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Précision : 85 pour cent"><i style="width:85%"></i></div>
+        <p class="note">17 du premier coup, 3 à repasser.</p>
+      </div>
+
+      <div class="fs-back">
+        <span class="sec-label">3 cartes reviennent bientôt</span>
+        <div class="fs-rows">
+          <div class="fs-word">
+            <span class="jp" lang="ja">勉強</span>
+            <span class="rd">benkyō · étude</span>
+            <span class="when">10 min</span>
+          </div>
+          <div class="fs-word">
+            <span class="jp" lang="ja">咲く</span>
+            <span class="rd">saku · fleurir</span>
+            <span class="when">demain</span>
+          </div>
+          <div class="fs-word">
+            <span class="jp" lang="ja">花見</span>
+            <span class="rd">hanami · pique-nique fleuri</span>
+            <span class="when">demain</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="fs-next">Prochaine fournée&nbsp;: demain, 18 cartes. Ou continue sur ta lancée.</p>
+
+      <div class="fs-ctas">
+        <button class="btn-primary pressable">
+          <svg class="icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 3v12M3 9h12" stroke="#f2e51c" stroke-width="2.8" stroke-linecap="round"/></svg>
+          Étudier plus
+        </button>
+        <button class="fs-sec pressable">Retour aux paquets</button>
       </div>
 
     </article>
