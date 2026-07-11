@@ -7,6 +7,12 @@ and assembling the daily queue under the user's new-card limit.
 
 from __future__ import annotations
 
+import hashlib
+import io
+import json
+import sqlite3
+import time
+import zipfile
 from datetime import timedelta
 
 from django.db import transaction
@@ -363,6 +369,94 @@ def export_tsv(user, lang: str = "en") -> str:
         tags = f"jibiki::{c.item_type}"
         lines.append(f"{_clean(front)}\t{_clean(back)}\t{tags}")
     return "\n".join(lines) + "\n"
+
+
+def export_apkg(user, lang: str = "en") -> bytes:
+    """Build a small, standards-compliant Anki package without a runtime dependency.
+
+    The package deliberately contains one basic note type and one card per Jibiki
+    card. Source context is kept on the back so an export remains useful even
+    after the original reader page is gone.
+    """
+    cards = list(
+        Card.objects.filter(user=user)
+        .select_related("word", "kanji", "kana")
+        .prefetch_related("word__forms", "word__senses__glosses", "kanji__meanings")
+        .order_by("item_type", "id")
+    )
+    now = int(time.time())
+    deck_id = 1_700_000_000_000
+    model_id = 1_700_000_000_001
+    db = sqlite3.connect(":memory:")
+    db.executescript(
+        """
+        CREATE TABLE col (id integer primary key, crt integer not null, mod integer not null,
+          scm integer not null, ver integer not null, dty integer not null, usn integer not null,
+          ls integer not null, conf text not null, models text not null, decks text not null,
+          dconf text not null, tags text not null);
+        CREATE TABLE notes (id integer primary key, guid text not null, mid integer not null,
+          mod integer not null, usn integer not null, tags text not null, flds text not null,
+          sfld integer not null, csum integer not null, flags integer not null, data text not null);
+        CREATE TABLE cards (id integer primary key, nid integer not null, did integer not null,
+          ord integer not null, mod integer not null, usn integer not null, type integer not null,
+          queue integer not null, due integer not null, iv integer not null, factor integer not null,
+          reps integer not null, lapses integer not null, left integer not null, odue integer not null,
+          odid integer not null, flags integer not null, data text not null);
+        CREATE TABLE revlog (id integer primary key, cid integer not null, usn integer not null,
+          ease integer not null, iv integer not null, lastIvl integer not null, factor integer not null,
+          time integer not null, type integer not null);
+        CREATE TABLE graves (usn integer not null, oid integer not null, type integer not null);
+        """
+    )
+    model = {
+        str(model_id): {
+            "id": model_id,
+            "name": "Jibiki",
+            "type": 0,
+            "mod": now,
+            "usn": -1,
+            "sortf": 0,
+            "did": deck_id,
+            "tmpls": [{"name": "Jibiki", "ord": 0, "qfmt": "{{Front}}", "afmt": "{{FrontSide}}<hr id=answer>{{Back}}", "bqfmt": "", "bafmt": "", "did": None}],
+            "flds": [{"name": "Front", "ord": 0, "sticky": False, "rtl": False, "font": "Arial", "size": 20}, {"name": "Back", "ord": 1, "sticky": False, "rtl": False, "font": "Arial", "size": 20}],
+            "css": ".card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }",
+            "latexPre": "\\documentclass[12pt]{article}\n\\begin{document}\n",
+            "latexPost": "\\end{document}",
+            "latexsvg": False,
+            "req": [[0, "all", [0]]],
+        }
+    }
+    deck = {str(deck_id): {"id": deck_id, "name": "Jibiki", "desc": "", "dyn": 0, "extendNew": 0, "extendRev": 0, "conf": 1, "mid": model_id}}
+    db.execute(
+        "INSERT INTO col VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (1, now // 86400, now, now, 11, 0, -1, now * 1000, json.dumps({"nextPos": 1, "sortType": "noteFld", "newSpread": 0, "collapseTime": 1200, "curDeck": deck_id, "activeDecks": [deck_id], "schedVer": 2, "dayLearnFirst": 0, "sched2021": False}), json.dumps(model), json.dumps(deck), json.dumps({"1": {"id": 1, "name": "Default", "new": 20, "rev": 200, "maxTaken": 60, "perDay": 200, "delDay": 5, "ints": [1, 4], "initialFactor": 2500, "fuzz": 0.05, "lapse": {"delays": [10], "mult": 0, "minInt": 1, "leechFails": 8}}}), "{}"),
+    )
+    for index, card in enumerate(cards, start=1):
+        front = _front(card)
+        back = _back(card, lang)
+        context = []
+        if card.source_sentence:
+            context.append(f"<div class=source-sentence>{card.source_sentence}</div>")
+        if card.source_title:
+            context.append(f"<div class=source-title>{card.source_title}</div>")
+        if card.source_url:
+            context.append(f"<div class=source-url>{card.source_url}</div>")
+        back = "<br>".join([back, *context]) if context else back
+        note_id = now * 1000 + index
+        card_id = note_id + 500_000_000
+        guid = hashlib.sha1(f"jibiki:{user.pk}:{card.item_type}:{card.item_ref}".encode()).hexdigest()[:10]
+        fields = f"{front}\x1f{back}"
+        checksum = int(hashlib.sha1(front.encode()).hexdigest()[:8], 16)
+        db.execute("INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)", (note_id, guid, model_id, now, -1, "", fields, front, checksum, 0, ""))
+        db.execute("INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (card_id, note_id, deck_id, 0, now, -1, 0, 0 if card.state == State.NEW else 2, index, 0, 0, card.reps, card.lapses, 0, 0, 0, 0, ""))
+    db.commit()
+    collection = db.serialize()
+    db.close()
+    package = io.BytesIO()
+    with zipfile.ZipFile(package, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("collection.anki2", collection)
+        archive.writestr("media", "{}")
+    return package.getvalue()
 
 
 def _front(card) -> str:

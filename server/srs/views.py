@@ -23,6 +23,7 @@ from .services import (
     build_queue,
     bulk_add,
     card_states,
+    export_apkg,
     export_tsv,
     optimize_readiness,
     optimize_user,
@@ -327,4 +328,17 @@ class ExportView(APIView):
         tsv = export_tsv(request.user, lang=lang)
         resp = HttpResponse(tsv, content_type="text/tab-separated-values; charset=utf-8")
         resp["Content-Disposition"] = 'attachment; filename="jibiki-deck.tsv"'
+        return resp
+
+
+class ApkgExportView(APIView):
+    """The user's deck as a portable Anki package."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        lang = getattr(getattr(request.user, "profile", None), "mnemonic_language", "en")
+        package = export_apkg(request.user, lang=lang)
+        resp = HttpResponse(package, content_type="application/zip")
+        resp["Content-Disposition"] = 'attachment; filename="jibiki-deck.apkg"'
         return resp

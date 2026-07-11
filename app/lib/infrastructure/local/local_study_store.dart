@@ -32,20 +32,41 @@ class LocalStudyStore implements StudyStore {
   String _id() => _uuid.v4();
 
   @override
-  Future<StudyCard> addCard(ItemType type, String ref) async {
+  Future<StudyCard> addCard(
+    ItemType type,
+    String ref, {
+    String sourceSentence = '',
+    String sourceUrl = '',
+    String sourceTitle = '',
+    String sourceMedia = '',
+  }) async {
     final now = _now;
     await _user.execute(
-      'INSERT INTO cards (item_type, item_ref, state, due, created_at, updated_at, deleted) '
-      'VALUES (?, ?, 0, ?, ?, ?, 0) ON CONFLICT(item_type, item_ref) DO UPDATE SET '
+      'INSERT INTO cards (item_type, item_ref, state, due, source_sentence, source_url, source_title, source_media, created_at, updated_at, deleted) '
+      'VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, 0) ON CONFLICT(item_type, item_ref) DO UPDATE SET '
       'state = 0, step = NULL, stability = NULL, difficulty = NULL, due = excluded.due, '
-      'last_review = NULL, reps = 0, lapses = 0, updated_at = excluded.updated_at, deleted = 0',
-      [type.wire, ref, now, now, now],
+      'last_review = NULL, reps = 0, lapses = 0, source_sentence = CASE WHEN excluded.source_sentence != \'\' THEN excluded.source_sentence ELSE cards.source_sentence END, source_url = CASE WHEN excluded.source_url != \'\' THEN excluded.source_url ELSE cards.source_url END, source_title = CASE WHEN excluded.source_title != \'\' THEN excluded.source_title ELSE cards.source_title END, source_media = CASE WHEN excluded.source_media != \'\' THEN excluded.source_media ELSE cards.source_media END, updated_at = excluded.updated_at, deleted = 0',
+      [
+        type.wire,
+        ref,
+        now,
+        sourceSentence,
+        sourceUrl,
+        sourceTitle,
+        sourceMedia,
+        now,
+        now
+      ],
     );
     await _op('bulk_add', {
       'items': [
         {'item_type': type.wire, 'ref': ref},
       ],
       'known': false,
+      'source_sentence': sourceSentence,
+      'source_url': sourceUrl,
+      'source_title': sourceTitle,
+      'source_media': sourceMedia,
     });
     return _card((await _row(type, ref))!);
   }

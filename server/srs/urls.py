@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     AddCardView,
+    ApkgExportView,
     BulkAddView,
     CardDetailView,
     CardListView,
@@ -25,6 +26,7 @@ urlpatterns = [
     path("stats", StatsView.as_view(), name="srs_stats"),
     path("optimize", OptimizeView.as_view(), name="srs_optimize"),
     path("export", ExportView.as_view(), name="srs_export"),
+    path("export/apkg", ApkgExportView.as_view(), name="srs_export_apkg"),
     path("add", AddCardView.as_view(), name="srs_add"),
     path("add/bulk", BulkAddView.as_view(), name="srs_add_bulk"),
     path("set", SetStatusView.as_view(), name="srs_set"),

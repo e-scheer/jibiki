@@ -174,7 +174,22 @@ def _apply_op(user, kind: str, payload: dict, performed_at) -> None:
         items = payload["items"]
         if not isinstance(items, list):
             raise OpRejected("invalid")
-        services.bulk_add(user, items, known=bool(payload.get("known")), now=performed_at)
+        context = {
+            field: payload.get(field, "")
+            for field in ("source_sentence", "source_url", "source_title", "source_media")
+        }
+        if any(context.values()):
+            for item in items:
+                card, _ = services.add_card(
+                    user,
+                    item["item_type"],
+                    item["ref"],
+                    context=context,
+                )
+                if card is None:
+                    raise OpRejected("unknown_item")
+        else:
+            services.bulk_add(user, items, known=bool(payload.get("known")), now=performed_at)
     elif kind == "deck_enroll":
         from .decks import deck_by_id, enroll
 

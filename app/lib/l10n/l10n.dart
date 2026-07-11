@@ -39,7 +39,8 @@ const _legacyFrench = <String, String>{
   'Use at least 8 characters': 'Utilisez au moins 8 caractères',
   'WaniKani integration': 'Intégration WaniKani',
   'Read-only import with a preview': 'Import en lecture seule avec aperçu',
-  'Jibiki never changes your WaniKani account and never imports without your confirmation. Different SRS calendars stay separate.': 'Jibiki ne modifie jamais votre compte WaniKani et n’importe rien sans confirmation. Les calendriers SRS restent séparés.',
+  'Jibiki never changes your WaniKani account and never imports without your confirmation. Different SRS calendars stay separate.':
+      'Jibiki ne modifie jamais votre compte WaniKani et n’importe rien sans confirmation. Les calendriers SRS restent séparés.',
   'WaniKani API token': 'Jeton API WaniKani',
   'Paste your read-only token': 'Collez votre jeton en lecture seule',
   'Known from': 'Considérer comme connu à partir de',
@@ -59,11 +60,24 @@ const _legacyFrench = <String, String>{
   'Source captured from reading': 'Source capturée pendant la lecture',
   'Where should we place you?': 'Où devons-nous vous placer ?',
   'Start fresh': 'Commencer de zéro',
-  'Everything begins in the new queue.': 'Tout commence dans la file des nouveautés.',
+  'Everything begins in the new queue.':
+      'Tout commence dans la file des nouveautés.',
   'I know hiragana': 'Je connais les hiragana',
-  'Mark the basic hiragana as known.': 'Marquer les hiragana de base comme connus.',
+  'Mark the basic hiragana as known.':
+      'Marquer les hiragana de base comme connus.',
   'I know specific characters': 'Je connais certains caractères',
-  'Paste kana or kanji you already read.': 'Collez les kana ou kanji que vous lisez déjà.',
+  'Paste kana or kanji you already read.':
+      'Collez les kana ou kanji que vous lisez déjà.',
   'Known characters': 'Caractères connus',
   'Example: 日本語かな': 'Exemple : 日本語かな',
+  'Capture source': 'Capturer la source',
+  'Capture reading context': 'Capturer le contexte de lecture',
+  'Source sentence': 'Phrase source',
+  'Paste the sentence from your reader':
+      'Collez la phrase depuis votre lecteur',
+  'Source title': 'Titre de la source',
+  'Source URL': 'URL de la source',
+  'Paste': 'Coller',
+  'Capture': 'Capturer',
+  'Source captured': 'Source capturée',
 };

@@ -25,7 +25,8 @@ class StudyService implements StudyStore {
 
   @override
   Future<StudyQueue> queue({int? newLimit}) async {
-    final data = (await _api.get(ApiConfig.studyQueue, query: {if (newLimit != null) 'new_limit': newLimit})) as Map;
+    final data = (await _api.get(ApiConfig.studyQueue,
+        query: {if (newLimit != null) 'new_limit': newLimit})) as Map;
     List<StudyCard> parse(String key) => ((data[key] as List?) ?? const [])
         .map((e) => StudyCard.fromJson((e as Map).cast<String, dynamic>()))
         .toList();
@@ -44,8 +45,22 @@ class StudyService implements StudyStore {
   }
 
   @override
-  Future<StudyCard> addCard(ItemType type, String ref) async {
-    final data = await _api.post(ApiConfig.studyAdd, data: {'item_type': type.wire, 'ref': ref});
+  Future<StudyCard> addCard(
+    ItemType type,
+    String ref, {
+    String sourceSentence = '',
+    String sourceUrl = '',
+    String sourceTitle = '',
+    String sourceMedia = '',
+  }) async {
+    final data = await _api.post(ApiConfig.studyAdd, data: {
+      'item_type': type.wire,
+      'ref': ref,
+      if (sourceSentence.isNotEmpty) 'source_sentence': sourceSentence,
+      if (sourceUrl.isNotEmpty) 'source_url': sourceUrl,
+      if (sourceTitle.isNotEmpty) 'source_title': sourceTitle,
+      if (sourceMedia.isNotEmpty) 'source_media': sourceMedia,
+    });
     return StudyCard.fromJson((data as Map).cast<String, dynamic>());
   }
 
@@ -69,7 +84,9 @@ class StudyService implements StudyStore {
     bool known = false,
   }) async {
     final data = await _api.post(ApiConfig.studyAddBulk, data: {
-      'items': [for (final it in items) {'item_type': it.type.wire, 'ref': it.ref}],
+      'items': [
+        for (final it in items) {'item_type': it.type.wire, 'ref': it.ref}
+      ],
       'known': known,
     });
     return (data as Map).cast<String, dynamic>();
@@ -79,12 +96,15 @@ class StudyService implements StudyStore {
   /// mark which items are already seen (state 0-1) or known (state >= 2).
   @override
   Future<Map<String, int>> states({ItemType? type}) async {
-    final data = await _api.get(ApiConfig.studyStates, query: {if (type != null) 'item_type': type.wire});
-    return (data as Map).map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
+    final data = await _api.get(ApiConfig.studyStates,
+        query: {if (type != null) 'item_type': type.wire});
+    return (data as Map)
+        .map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
   }
 
   @override
-  Future<StudyCard> review(int cardId, Rating rating, {int durationMs = 0}) async {
+  Future<StudyCard> review(int cardId, Rating rating,
+      {int durationMs = 0}) async {
     final data = await _api.post(
       ApiConfig.studyCardReview(cardId),
       data: {'rating': rating.value, 'duration_ms': durationMs},
@@ -95,8 +115,11 @@ class StudyService implements StudyStore {
 
   @override
   Future<List<StudyCard>> cards({ItemType? type}) async {
-    final data = await _api.get(ApiConfig.studyCards, query: {if (type != null) 'item_type': type.wire});
-    return (data as List).map((e) => StudyCard.fromJson((e as Map).cast<String, dynamic>())).toList();
+    final data = await _api.get(ApiConfig.studyCards,
+        query: {if (type != null) 'item_type': type.wire});
+    return (data as List)
+        .map((e) => StudyCard.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   @override
@@ -118,7 +141,9 @@ class StudyService implements StudyStore {
   @override
   Future<List<Deck>> decks() async {
     final data = await _api.get(ApiConfig.studyDecks);
-    return (data as List).map((e) => Deck.fromJson((e as Map).cast<String, dynamic>())).toList();
+    return (data as List)
+        .map((e) => Deck.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   @override
@@ -129,21 +154,23 @@ class StudyService implements StudyStore {
 
   @override
   Future<StudyQueue> deckQueue(String id, {int? newLimit}) async {
-    final data =
-        (await _api.get(ApiConfig.deckQueue(id), query: {if (newLimit != null) 'new_limit': newLimit})) as Map;
+    final data = (await _api.get(ApiConfig.deckQueue(id),
+        query: {if (newLimit != null) 'new_limit': newLimit})) as Map;
     List<StudyCard> parse(String key) => ((data[key] as List?) ?? const [])
         .map((e) => StudyCard.fromJson((e as Map).cast<String, dynamic>()))
         .toList();
     return StudyQueue(
       due: parse('due'),
       newCards: parse('new'),
-      counts: ((data['counts'] as Map?) ?? const {}).map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
+      counts: ((data['counts'] as Map?) ?? const {})
+          .map((k, v) => MapEntry(k.toString(), (v as num).toInt())),
     );
   }
 
   @override
   Future<bool> setFavorite(int cardId, bool value) async {
-    final data = await _api.post(ApiConfig.cardFavorite(cardId), data: {'value': value});
+    final data =
+        await _api.post(ApiConfig.cardFavorite(cardId), data: {'value': value});
     return (data as Map)['favorite'] as bool? ?? value;
   }
 }

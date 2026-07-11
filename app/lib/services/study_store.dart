@@ -9,7 +9,14 @@ import 'study_service.dart';
 abstract class StudyStore {
   Future<StudyQueue> queue({int? newLimit});
   Future<StudyStats> stats();
-  Future<StudyCard> addCard(ItemType type, String ref);
+  Future<StudyCard> addCard(
+    ItemType type,
+    String ref, {
+    String sourceSentence = '',
+    String sourceUrl = '',
+    String sourceTitle = '',
+    String sourceMedia = '',
+  });
   Future<String> setStatus(ItemType type, String ref, String status);
   Future<Map<String, dynamic>> bulkAdd(
     List<({ItemType type, String ref})> items, {

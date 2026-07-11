@@ -1,9 +1,11 @@
 import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../models/enums.dart';
 import '../../models/word.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
@@ -45,6 +47,11 @@ class _WordDetail extends StatelessWidget {
         actions: word == null
             ? null
             : [
+                IconButton(
+                  tooltip: context.trText('Capture source'),
+                  icon: const Icon(Icons.content_copy_outlined),
+                  onPressed: () => _capture(context, word),
+                ),
                 ReportItemAction(
                     type: ReportItemType.word,
                     itemRef: '${word.id}',
@@ -64,6 +71,34 @@ class _WordDetail extends StatelessWidget {
                     : _content(context, word, lang),
       ),
     );
+  }
+
+  Future<void> _capture(BuildContext context, WordEntry word) async {
+    final captured = await showDialog<_CaptureResult>(
+      context: context,
+      builder: (_) => const _CaptureDialog(),
+    );
+    if (captured == null || !context.mounted) return;
+    try {
+      await context.read<StudyRepository>().addCard(
+            ItemType.word,
+            '${word.id}',
+            sourceSentence: captured.sentence,
+            sourceUrl: captured.url,
+            sourceTitle: captured.title,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.trText('Source captured'))),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$error')),
+        );
+      }
+    }
   }
 
   Widget _content(BuildContext context, WordEntry word, String lang) {
@@ -191,6 +226,103 @@ class _WordDetail extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CaptureResult {
+  const _CaptureResult(this.sentence, this.url, this.title);
+  final String sentence;
+  final String url;
+  final String title;
+}
+
+class _CaptureDialog extends StatefulWidget {
+  const _CaptureDialog();
+
+  @override
+  State<_CaptureDialog> createState() => _CaptureDialogState();
+}
+
+class _CaptureDialogState extends State<_CaptureDialog> {
+  final _sentence = TextEditingController();
+  final _url = TextEditingController();
+  final _title = TextEditingController();
+
+  @override
+  void dispose() {
+    _sentence.dispose();
+    _url.dispose();
+    _title.dispose();
+    super.dispose();
+  }
+
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data?.text?.trim().isNotEmpty == true) {
+      _sentence.text = data!.text!.trim();
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        title: Text(context.trText('Capture reading context')),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _sentence,
+                maxLines: 4,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: context.trText('Source sentence'),
+                  hintText:
+                      context.trText('Paste the sentence from your reader'),
+                  suffixIcon: IconButton(
+                    tooltip: context.trText('Paste'),
+                    onPressed: _paste,
+                    icon: const Icon(Icons.content_paste),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _title,
+                decoration: InputDecoration(
+                  labelText: context.trText('Source title'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _url,
+                keyboardType: TextInputType.url,
+                decoration: InputDecoration(
+                  labelText: context.trText('Source URL'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.trText('Cancel')),
+          ),
+          FilledButton(
+            onPressed: _sentence.text.trim().isEmpty
+                ? null
+                : () => Navigator.pop(
+                      context,
+                      _CaptureResult(
+                        _sentence.text.trim(),
+                        _url.text.trim(),
+                        _title.text.trim(),
+                      ),
+                    ),
+            child: Text(context.trText('Capture')),
+          ),
+        ],
+      );
 }
 
 /// A flat, hairline-separated kanji row (IG-style list item, no Material Card).

@@ -1,3 +1,5 @@
+import io
+import zipfile
 from datetime import timedelta
 
 import pytest
@@ -7,6 +9,7 @@ from srs.fsrs import DEFAULT_PARAMETERS
 from srs.models import Card
 from srs.services import (
     add_card,
+    export_apkg,
     export_tsv,
     optimize_readiness,
     optimize_user,
@@ -71,3 +74,38 @@ def test_export_endpoint(seeded, api):
     assert resp["Content-Type"].startswith("text/tab-separated-values")
     body = resp.content.decode()
     assert "#columns" in body and "あ\t" in body
+
+
+def test_export_apkg_contains_collection_and_media(seeded, user):
+    add_card(user, "kana", "あ")
+    package = export_apkg(user, lang="en")
+    with zipfile.ZipFile(io.BytesIO(package)) as archive:
+        assert {"collection.anki2", "media"}.issubset(archive.namelist())
+        assert archive.read("collection.anki2").startswith(b"SQLite format 3")
+
+
+def test_export_apkg_endpoint(seeded, api):
+    api.post("/api/v1/study/add", {"item_type": "kana", "ref": "あ"}, format="json")
+    resp = api.get("/api/v1/study/export/apkg")
+    assert resp.status_code == 200
+    assert resp["Content-Type"].startswith("application/zip")
+    with zipfile.ZipFile(io.BytesIO(resp.content)) as archive:
+        assert "collection.anki2" in archive.namelist()
+
+
+def test_capture_context_is_returned_on_card(seeded, api):
+    response = api.post(
+        "/api/v1/study/add",
+        {
+            "item_type": "kana",
+            "ref": "あ",
+            "source_sentence": "A source sentence.",
+            "source_title": "Reader",
+            "source_url": "https://example.test/1",
+        },
+        format="json",
+    )
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["source_sentence"] == "A source sentence."
+    assert payload["source_title"] == "Reader"

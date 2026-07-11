@@ -43,7 +43,8 @@ Le premier lot applique les trois garde-fous les plus immédiats :
 
 Le bouton WaniKani se trouve dans Réglages > Intégrations. Le rafraîchissement
 automatique prépare un nouvel aperçu; il n'applique jamais silencieusement des
-cartes. L'import `.apkg`, le pont Yomitan natif et jpdb restent les prochains
+cartes. La capture presse-papiers est disponible depuis une fiche mot, et
+`GET /api/v1/study/export/apkg` produit un paquet Anki portable. Le pont Yomitan
 connecteurs, branchés sur ce même contrat de contexte.
 
 ## Faisabilité des connecteurs
