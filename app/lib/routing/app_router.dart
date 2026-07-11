@@ -15,6 +15,7 @@ import '../views/feedback/feedback_view.dart';
 import '../views/onboarding/onboarding_view.dart';
 import '../views/settings/offline_storage_view.dart';
 import '../views/settings/settings_view.dart';
+import '../views/settings/wanikani_view.dart';
 import '../views/shell/home_shell.dart';
 import '../views/shell/splash_view.dart';
 import '../views/study/session_view.dart';
@@ -75,6 +76,9 @@ GoRouter buildRouter(AppState app) {
       GoRoute(
           path: '/settings/storage',
           builder: (_, __) => const OfflineStorageView()),
+      GoRoute(
+          path: '/settings/integrations/wanikani',
+          builder: (_, __) => const WaniKaniView()),
       GoRoute(path: '/feedback', builder: (_, __) => const FeedbackView()),
       GoRoute(
           path: '/submissions', builder: (_, __) => const MySubmissionsView()),

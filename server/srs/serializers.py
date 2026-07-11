@@ -29,6 +29,10 @@ class CardSerializer(serializers.ModelSerializer):
             "lapses",
             "created_at",
             "item",
+            "source_sentence",
+            "source_url",
+            "source_title",
+            "source_media",
         ]
 
     def get_item(self, card: Card) -> dict | None:
@@ -61,6 +65,10 @@ class ReviewLogSerializer(serializers.ModelSerializer):
 class AddCardSerializer(serializers.Serializer):
     item_type = serializers.ChoiceField(choices=ItemType.choices)
     ref = serializers.CharField()
+    source_sentence = serializers.CharField(max_length=4000, required=False, allow_blank=True)
+    source_url = serializers.URLField(max_length=2000, required=False, allow_blank=True)
+    source_title = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    source_media = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
 
 class SetStatusSerializer(AddCardSerializer):
@@ -106,6 +114,10 @@ class SyncCardSerializer(serializers.ModelSerializer):
             "favorite",
             "created_at",
             "updated_at",
+            "source_sentence",
+            "source_url",
+            "source_title",
+            "source_media",
         ]
 
 

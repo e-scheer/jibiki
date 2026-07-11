@@ -2,12 +2,14 @@ import '../core/languages.dart';
 import '../infrastructure/packs/pack_manager.dart';
 import '../infrastructure/packs/pack_manifest.dart';
 import '../models/enums.dart';
+import '../repositories/study_repository.dart';
 import 'app_state.dart';
 import 'base_view_model.dart';
 
 /// One optional download offered on the onboarding data step.
 class PackOffer {
-  PackOffer({required this.id, required this.title, required this.blurb, this.info});
+  PackOffer(
+      {required this.id, required this.title, required this.blurb, this.info});
 
   final String id;
   final String title;
@@ -19,17 +21,20 @@ class PackOffer {
 }
 
 class OnboardingViewModel extends BaseViewModel {
-  OnboardingViewModel(this._app, this._packs) {
+  OnboardingViewModel(this._app, this._packs, this._study) {
     _mode = _app.mode;
     _language = _app.mnemonicLanguage;
   }
 
   final AppState _app;
   final PackManager? _packs;
+  final StudyRepository _study;
 
   late AppMode _mode;
   late String _language;
   int _step = 0;
+  String _placement = 'fresh';
+  String _knownCharacters = '';
   List<PackOffer> _offers = [];
   bool _offersLoaded = false;
 
@@ -41,6 +46,8 @@ class OnboardingViewModel extends BaseViewModel {
 
   /// The data step only exists where packs do (mobile).
   bool get hasDataStep => _packs != null;
+  String get placement => _placement;
+  String get knownCharacters => _knownCharacters;
 
   void selectMode(AppMode m) {
     _mode = m;
@@ -52,6 +59,16 @@ class OnboardingViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  void selectPlacement(String value) {
+    _placement = value;
+    notifyListeners();
+  }
+
+  void setKnownCharacters(String value) {
+    _knownCharacters = value;
+    notifyListeners();
+  }
+
   void toggleOffer(PackOffer offer, bool value) {
     offer.selected = value;
     notifyListeners();
@@ -60,8 +77,13 @@ class OnboardingViewModel extends BaseViewModel {
   /// Advance to the data step and (re)build the offers for the chosen
   /// language. Manifest sizes come in when the server answers; the offers
   /// render immediately either way.
-  Future<void> goToDataStep() async {
+  Future<void> goToPlacementStep() async {
     _step = 1;
+    notifyListeners();
+  }
+
+  Future<void> goToDataStep() async {
+    _step = 2;
     notifyListeners();
     final packs = _packs;
     if (packs == null) return;
@@ -132,12 +154,35 @@ class OnboardingViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  void backToPlacementStep() {
+    _step = 1;
+    notifyListeners();
+  }
+
   /// Persist the profile; when [download] is set, fire the selected pack
   /// downloads and let them run in the background (progress lives in
   /// Settings → Offline & storage). Navigation home happens immediately.
   Future<bool> finish({bool download = false}) async {
-    await runGuarded(
-        () => _app.completeOnboarding(mode: _mode, mnemonicLanguage: _language));
+    if (_placement != 'fresh') {
+      final known = _placement == 'kana'
+          ? 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'
+          : _knownCharacters;
+      final items = <({ItemType type, String ref})>[];
+      for (final char in known.runes.map(String.fromCharCode).toSet()) {
+        final code = char.runes.single;
+        final isKana = code >= 0x3040 && code <= 0x30ff;
+        final isKanji = code >= 0x3400 && code <= 0x9fff;
+        if (!isKana && !isKanji) continue;
+        final type = isKana ? ItemType.kana : ItemType.kanji;
+        items.add((type: type, ref: char));
+      }
+      if (items.isNotEmpty) {
+        await runGuarded(() => _study.bulkAdd(items, known: true));
+        if (hasError) return false;
+      }
+    }
+    await runGuarded(() =>
+        _app.completeOnboarding(mode: _mode, mnemonicLanguage: _language));
     if (hasError) return false;
     final packs = _packs;
     if (download && packs != null) {

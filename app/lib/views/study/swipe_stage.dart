@@ -366,6 +366,31 @@ class _AnswerBlock extends StatelessWidget {
                 color: jc.body,
                 height: 1.35,
                 fontWeight: FontWeight.w500)),
+        if (card.sourceSentence.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: jc.surfaceAlt,
+              borderRadius: BorderRadius.circular(Radii.md),
+            ),
+            child: Text(card.sourceSentence,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: jc.body, fontSize: 13, height: 1.35)),
+          ),
+        ],
+        if (card.sourceTitle.isNotEmpty || card.sourceUrl.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              card.sourceTitle.isNotEmpty
+                  ? context.trText('Source: ${card.sourceTitle}')
+                  : context.trText('Source captured from reading'),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: jc.muted, fontSize: 11),
+            ),
+          ),
         const SizedBox(height: 12),
         SpeechButton(text: _cardSpeech(card), size: 26),
       ],

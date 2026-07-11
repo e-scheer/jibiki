@@ -43,18 +43,42 @@ def resolve_item(item_type: str, ref: str):
     return None
 
 
-def add_card(user, item_type: str, ref: str) -> tuple[Card | None, bool]:
+def add_card(
+    user,
+    item_type: str,
+    ref: str,
+    context: dict | None = None,
+) -> tuple[Card | None, bool]:
     """Add a study item for the user (idempotent). Returns (card, created)."""
     item = resolve_item(item_type, ref)
     if item is None:
         return None, False
     field = {ItemType.WORD: "word", ItemType.KANJI: "kanji", ItemType.KANA: "kana"}[item_type]
+    context = context or {}
     card, created = Card.objects.get_or_create(
         user=user,
         item_type=item_type,
         **{field: item},
-        defaults={"due": timezone.now(), "state": State.NEW},
+        defaults={
+            "due": timezone.now(),
+            "state": State.NEW,
+            "source_sentence": context.get("source_sentence", ""),
+            "source_url": context.get("source_url", ""),
+            "source_title": context.get("source_title", ""),
+            "source_media": context.get("source_media", ""),
+        },
     )
+    if not created and context:
+        changed = False
+        for field in ("source_sentence", "source_url", "source_title", "source_media"):
+            value = context.get(field, "")
+            if value and not getattr(card, field):
+                setattr(card, field, value)
+                changed = True
+        if changed:
+            card.save(update_fields=[
+                "source_sentence", "source_url", "source_title", "source_media", "updated_at"
+            ])
     return card, created
 
 

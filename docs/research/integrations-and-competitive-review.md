@@ -28,6 +28,24 @@ Priorités proposées :
    avant une API non officielle. Ne jamais stocker les mots de passe ni scraper
    une session utilisateur.
 
+## Premier lot livré
+
+Le premier lot applique les trois garde-fous les plus immédiats :
+
+- l'onboarding propose un placement neuf, kana connus ou caractères connus saisis
+  manuellement, sans imposer un redémarrage à zéro;
+- le connecteur WaniKani est en lecture seule, chiffre le jeton, produit un aperçu
+  avec reconnus, ambigus, ignorés, cartes nouvelles et charge estimée, puis attend
+  une action d'import explicite ou une annulation;
+- les cartes acceptent maintenant une phrase source, une URL, un titre et un média,
+  afin que les futures captures Yomitan, presse-papiers et jpdb restent
+  contextuelles jusque dans les révisions hors ligne.
+
+Le bouton WaniKani se trouve dans Réglages > Intégrations. Le rafraîchissement
+automatique prépare un nouvel aperçu; il n'applique jamais silencieusement des
+cartes. L'import `.apkg`, le pont Yomitan natif et jpdb restent les prochains
+connecteurs, branchés sur ce même contrat de contexte.
+
 ## Faisabilité des connecteurs
 
 | Outil | Surface disponible | Ce que Jibiki devrait faire | Risque |

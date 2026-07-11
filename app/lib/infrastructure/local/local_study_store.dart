@@ -440,6 +440,10 @@ class LocalStudyStore implements StudyStore {
           type == ItemType.word ? await _dictionary.word(int.parse(ref)) : null,
       kanji: type == ItemType.kanji ? await _dictionary.kanji(ref) : null,
       kana: type == ItemType.kana ? await _dictionary.kanaDetail(ref) : null,
+      sourceSentence: row['source_sentence'] as String? ?? '',
+      sourceUrl: row['source_url'] as String? ?? '',
+      sourceTitle: row['source_title'] as String? ?? '',
+      sourceMedia: row['source_media'] as String? ?? '',
     );
   }
 

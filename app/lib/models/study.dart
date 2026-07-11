@@ -17,6 +17,10 @@ class StudyCard {
     this.word,
     this.kanji,
     this.kana,
+    this.sourceSentence = '',
+    this.sourceUrl = '',
+    this.sourceTitle = '',
+    this.sourceMedia = '',
   });
 
   final int id;
@@ -30,6 +34,10 @@ class StudyCard {
   final WordEntry? word;
   final KanjiEntry? kanji;
   final KanaEntry? kana;
+  final String sourceSentence;
+  final String sourceUrl;
+  final String sourceTitle;
+  final String sourceMedia;
 
   bool get isNew => state == 0;
 
@@ -43,13 +51,15 @@ class StudyCard {
   /// The reading revealed on the back (empty for kana, where romaji is the answer).
   String get reading => switch (itemType) {
         ItemType.word => word?.primaryReading ?? '',
-        ItemType.kanji => [...?kanji?.kunReadings, ...?kanji?.onReadings].take(3).join('  '),
+        ItemType.kanji =>
+          [...?kanji?.kunReadings, ...?kanji?.onReadings].take(3).join('  '),
         ItemType.kana => kana?.romaji ?? '',
       };
 
   String meaning(String lang) => switch (itemType) {
         ItemType.word => word?.summaryGloss(lang) ?? '',
-        ItemType.kanji => (kanji?.meaningsFor(lang) ?? const []).take(3).join('; '),
+        ItemType.kanji =>
+          (kanji?.meaningsFor(lang) ?? const []).take(3).join('; '),
         ItemType.kana => kana?.romaji ?? '',
       };
 
@@ -64,9 +74,19 @@ class StudyCard {
       due: DateTime.tryParse(j['due'] as String? ?? '') ?? DateTime.now(),
       reps: (j['reps'] as num?)?.toInt() ?? 0,
       lapses: (j['lapses'] as num?)?.toInt() ?? 0,
-      word: type == ItemType.word && item != null ? WordEntry.fromJson(item) : null,
-      kanji: type == ItemType.kanji && item != null ? KanjiEntry.fromJson(item) : null,
-      kana: type == ItemType.kana && item != null ? KanaEntry.fromJson(item) : null,
+      word: type == ItemType.word && item != null
+          ? WordEntry.fromJson(item)
+          : null,
+      kanji: type == ItemType.kanji && item != null
+          ? KanjiEntry.fromJson(item)
+          : null,
+      kana: type == ItemType.kana && item != null
+          ? KanaEntry.fromJson(item)
+          : null,
+      sourceSentence: j['source_sentence'] as String? ?? '',
+      sourceUrl: j['source_url'] as String? ?? '',
+      sourceTitle: j['source_title'] as String? ?? '',
+      sourceMedia: j['source_media'] as String? ?? '',
     );
   }
 }

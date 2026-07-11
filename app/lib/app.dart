@@ -31,6 +31,7 @@ import 'routing/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/dictionary_service.dart';
 import 'services/feedback_service.dart';
+import 'services/integration_service.dart';
 import 'services/mnemonic_deck_service.dart';
 import 'services/mnemonic_service.dart';
 import 'services/study_service.dart';
@@ -185,6 +186,7 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         Provider.value(value: _mnemonicRepo),
         Provider.value(value: _mnemonicDeckRepo),
         Provider.value(value: _authRepo),
+        Provider(create: (_) => WaniKaniService(_api)),
         Provider(create: (_) => FeedbackService(_api)),
         ChangeNotifierProvider.value(value: _app),
       ],

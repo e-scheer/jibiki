@@ -67,6 +67,12 @@ class ApiConfig {
   static String studyCardReview(int id) => '/api/v1/study/cards/$id/review';
   static String studyCard(int id) => '/api/v1/study/cards/$id';
 
+  static const String waniKani = '/api/v1/integrations/wanikani';
+  static const String waniKaniConnect = '/api/v1/integrations/wanikani/connect';
+  static const String waniKaniSync = '/api/v1/integrations/wanikani/sync';
+  static const String waniKaniImport = '/api/v1/integrations/wanikani/import';
+  static const String waniKaniCancel = '/api/v1/integrations/wanikani/cancel';
+
   // Trailing slash: the list is the collection root under a slashed include.
   static const String mnemonics = '/api/v1/mnemonics/';
   static const String mnemonicCreate = '/api/v1/mnemonics/create';

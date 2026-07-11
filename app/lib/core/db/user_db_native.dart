@@ -82,7 +82,8 @@ class UserDb {
 
   static Future<UserDb> open(String path) async {
     final handshake = ReceivePort();
-    await Isolate.spawn(_worker, handshake.sendPort, debugName: 'jibiki-user-db');
+    await Isolate.spawn(_worker, handshake.sendPort,
+        debugName: 'jibiki-user-db');
     final commands = await handshake.first as SendPort;
     final db = UserDb._(commands);
     await db._request<void>({'op': 'open', 'path': path});
@@ -91,7 +92,8 @@ class UserDb {
 
   Future<List<Map<String, Object?>>> select(String sql,
       [List<Object?> params = const []]) async {
-    final rows = await _request<List>({'op': 'select', 'sql': sql, 'params': params});
+    final rows =
+        await _request<List>({'op': 'select', 'sql': sql, 'params': params});
     return rows.cast<Map<String, Object?>>();
   }
 
@@ -103,7 +105,8 @@ class UserDb {
   Future<void> tx(List<(String, List<Object?>)> statements) => _request<void>({
         'op': 'tx',
         'statements': [
-          for (final (sql, params) in statements) {'sql': sql, 'params': params},
+          for (final (sql, params) in statements)
+            {'sql': sql, 'params': params},
         ],
       });
 
@@ -145,14 +148,16 @@ class UserDb {
             });
           case 'execute':
             final d = _db(db);
-            d.execute(msg['sql'] as String, (msg['params'] as List).cast<Object?>());
+            d.execute(
+                msg['sql'] as String, (msg['params'] as List).cast<Object?>());
             reply.send({'result': d.lastInsertRowId});
           case 'tx':
             final d = _db(db);
             d.execute('BEGIN IMMEDIATE');
             try {
               for (final s in (msg['statements'] as List).cast<Map>()) {
-                d.execute(s['sql'] as String, (s['params'] as List).cast<Object?>());
+                d.execute(
+                    s['sql'] as String, (s['params'] as List).cast<Object?>());
               }
               d.execute('COMMIT');
             } catch (_) {
@@ -181,17 +186,29 @@ class UserDb {
 
   static void _migrate(Database db) {
     final version = db.select('PRAGMA user_version').first.columnAt(0) as int;
-    if (version >= 1) return;
-    db.execute('BEGIN');
-    try {
-      for (final stmt in _schema) {
-        db.execute(stmt);
+    if (version == 0) {
+      db.execute('BEGIN');
+      try {
+        for (final stmt in _schema) {
+          db.execute(stmt);
+        }
+        db.execute('PRAGMA user_version = 1');
+        db.execute('COMMIT');
+      } catch (_) {
+        db.execute('ROLLBACK');
+        rethrow;
       }
-      db.execute('PRAGMA user_version = 1');
-      db.execute('COMMIT');
-    } catch (_) {
-      db.execute('ROLLBACK');
-      rethrow;
+    }
+    if (version <= 1) {
+      db.execute(
+          'ALTER TABLE cards ADD COLUMN source_sentence TEXT NOT NULL DEFAULT \'\'');
+      db.execute(
+          'ALTER TABLE cards ADD COLUMN source_url TEXT NOT NULL DEFAULT \'\'');
+      db.execute(
+          'ALTER TABLE cards ADD COLUMN source_title TEXT NOT NULL DEFAULT \'\'');
+      db.execute(
+          'ALTER TABLE cards ADD COLUMN source_media TEXT NOT NULL DEFAULT \'\'');
+      db.execute('PRAGMA user_version = 2');
     }
   }
 }

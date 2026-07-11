@@ -16,6 +16,7 @@ dependencies = [
     "pillow>=11.0",              # decode + downscale user mnemonic images, strip EXIF/GPS on ingest
     "django-storages[s3]>=1.14", # prod media → Cloudflare R2 / S3 (zero-egress); pulls boto3
     "django-cors-headers>=4.6",  # the Flutter web build talks to the API cross-origin in dev
+    "cryptography>=43.0",
     "pycountry>=26.2.16",
 ]
 

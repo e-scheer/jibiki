@@ -26,6 +26,7 @@ def api_root(_request):
                 "profile": "/api/v1/auth/me",
                 "dictionary": "/api/v1/dict/",
                 "study": "/api/v1/study/",
+                "integrations": "/api/v1/integrations/",
                 "mnemonics": "/api/v1/mnemonics/",
             },
         }
@@ -41,6 +42,7 @@ urlpatterns = [
     # Provider redirect/callback endpoints (social login) live under allauth.urls.
     path("accounts/", include("allauth.urls")),
     path("api/v1/auth/", include("accounts.urls")),  # domain profile (me)
+    path("api/v1/integrations/", include("integrations.urls")),
     path("api/v1/dict/", include("dictionary.urls")),
     path("api/v1/content/", include("contentpacks.urls")),
     path("api/v1/study/", include("srs.urls")),

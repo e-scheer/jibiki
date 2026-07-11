@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "srs",
     "mnemonics",
     "feedback",
+    "integrations",
 ]
 
 MIDDLEWARE = [

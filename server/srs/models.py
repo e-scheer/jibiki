@@ -62,6 +62,14 @@ class Card(models.Model):
     lapses = models.PositiveIntegerField(default=0)
     favorite = models.BooleanField(default=False)
 
+    # Optional provenance from a reader/dictionary capture. Keeping this on the
+    # card makes reviews useful after the original browser tab is gone and gives
+    # Yomitan, jpdb and a future mobile share action one stable contract.
+    source_sentence = models.TextField(blank=True)
+    source_url = models.URLField(blank=True)
+    source_title = models.CharField(max_length=200, blank=True)
+    source_media = models.CharField(max_length=200, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     # Sync cursor: /study/sync sends every card with updated_at past the
     # client's watermark. Any save() bumps it; update_fields callers must

@@ -495,13 +495,16 @@ class SyncEngine extends ChangeNotifier {
       }
       statements.add((
         'INSERT INTO cards (item_type, item_ref, server_id, stability, difficulty, '
-            'state, step, due, last_review, reps, lapses, favorite, created_at, '
-            'updated_at, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0) '
+            'state, step, due, last_review, reps, lapses, favorite, source_sentence, '
+            'source_url, source_title, source_media, created_at, updated_at, deleted) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0) '
             'ON CONFLICT(item_type, item_ref) DO UPDATE SET '
             'server_id = excluded.server_id, stability = excluded.stability, '
             'difficulty = excluded.difficulty, state = excluded.state, '
             'step = excluded.step, due = excluded.due, last_review = excluded.last_review, '
             'reps = excluded.reps, lapses = excluded.lapses, favorite = excluded.favorite, '
+            'source_sentence = excluded.source_sentence, source_url = excluded.source_url, '
+            'source_title = excluded.source_title, source_media = excluded.source_media, '
             'updated_at = excluded.updated_at, deleted = 0',
         [
           card['item_type'],
@@ -516,6 +519,10 @@ class SyncEngine extends ChangeNotifier {
           card['reps'],
           card['lapses'],
           card['favorite'] == true ? 1 : 0,
+          card['source_sentence'] ?? '',
+          card['source_url'] ?? '',
+          card['source_title'] ?? '',
+          card['source_media'] ?? '',
           _parseMs(card['created_at']) ?? 0,
           _parseMs(card['updated_at']) ?? 0,
         ],

@@ -73,6 +73,10 @@ class AddCardView(APIView):
             request.user,
             serializer.validated_data["item_type"],
             serializer.validated_data["ref"],
+            context={
+                key: serializer.validated_data.get(key, "")
+                for key in ("source_sentence", "source_url", "source_title", "source_media")
+            },
         )
         if card is None:
             return Response({"detail": _("Unknown study item.")}, status=status.HTTP_404_NOT_FOUND)

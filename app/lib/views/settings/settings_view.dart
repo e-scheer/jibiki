@@ -166,6 +166,15 @@ class _Settings extends StatelessWidget {
               subtitle: Text(context.l10n.personalisedSchedulingHelp),
               onTap: () => _optimize(context, vm),
             ),
+            if (app.isAuthenticated)
+              ListTile(
+                leading: const Icon(Icons.integration_instructions_outlined),
+                title: Text(context.trText('WaniKani integration')),
+                subtitle: Text(context.trText(
+                    'Import known kanji and vocabulary with a reviewable preview.')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/settings/integrations/wanikani'),
+              ),
             const Divider(),
             _section(context, context.l10n.account),
             if (app.isAuthenticated) ...[

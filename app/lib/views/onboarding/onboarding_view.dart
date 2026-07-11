@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/languages.dart';
 import '../../infrastructure/packs/pack_manager.dart';
 import '../../models/enums.dart';
+import '../../repositories/study_repository.dart';
 import '../widgets/language_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
@@ -17,8 +18,8 @@ class OnboardingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) =>
-          OnboardingViewModel(ctx.read<AppState>(), ctx.read<PackManager?>()),
+      create: (ctx) => OnboardingViewModel(ctx.read<AppState>(),
+          ctx.read<PackManager?>(), ctx.read<StudyRepository>()),
       child: const _Onboarding(),
     );
   }
@@ -34,7 +35,11 @@ class _Onboarding extends StatelessWidget {
       body: SafeArea(
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
-          child: vm.step == 0 ? const _ProfileStep() : const _DataStep(),
+          child: switch (vm.step) {
+            0 => const _ProfileStep(),
+            1 => const _PlacementStep(),
+            _ => const _DataStep(),
+          },
         ),
       ),
     );
@@ -112,11 +117,7 @@ class _ProfileStep extends StatelessWidget {
           onPressed: vm.isLoading
               ? null
               : () async {
-                  if (vm.hasDataStep) {
-                    await vm.goToDataStep();
-                  } else {
-                    await vm.finish();
-                  }
+                  await vm.goToPlacementStep();
                 },
           child: vm.isLoading
               ? const SizedBox(
@@ -124,7 +125,7 @@ class _ProfileStep extends StatelessWidget {
                   width: 20,
                   child: CircularProgressIndicator(
                       strokeWidth: 2, color: Colors.white))
-              : Text(vm.hasDataStep ? 'Continue' : 'Start learning'),
+              : Text(context.trText('Continue')),
         ),
       ],
     );
@@ -148,7 +149,7 @@ class _DataStep extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: vm.backToProfileStep,
+              onPressed: vm.backToPlacementStep,
             ),
           ],
         ),
@@ -194,6 +195,99 @@ class _DataStep extends StatelessWidget {
         TextButton(
           onPressed: vm.isLoading ? null : () => vm.finish(),
           child: Text(context.trText('Skip - download later in Settings')),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlacementStep extends StatelessWidget {
+  const _PlacementStep();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<OnboardingViewModel>();
+    final jc = context.jc;
+    return ListView(
+      key: const ValueKey('step-placement'),
+      padding: const EdgeInsets.all(24),
+      children: [
+        IconButton(
+          alignment: Alignment.centerLeft,
+          icon: const Icon(Icons.arrow_back),
+          onPressed: vm.backToProfileStep,
+        ),
+        Text(context.trText('Where should we place you?'),
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Text(
+            context.trText(
+                'Start fresh, skip what you already know, or type a few characters. '
+                'You can change this later.'),
+            style: TextStyle(color: jc.muted, height: 1.4)),
+        const SizedBox(height: 18),
+        RadioGroup<String>(
+          groupValue: vm.placement,
+          onChanged: (value) {
+            if (value != null) vm.selectPlacement(value);
+          },
+          child: Column(
+            children: [
+              for (final option in const [
+                ('fresh', 'Start fresh', 'Everything begins in the new queue.'),
+                (
+                  'kana',
+                  'I know hiragana',
+                  'Mark the basic hiragana as known.'
+                ),
+                (
+                  'custom',
+                  'I know specific characters',
+                  'Paste kana or kanji you already read.'
+                ),
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: RadioListTile<String>(
+                    value: option.$1,
+                    title: Text(context.trText(option.$2)),
+                    subtitle: Text(context.trText(option.$3)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (vm.placement == 'custom') ...[
+          const SizedBox(height: 6),
+          TextField(
+            onChanged: vm.setKnownCharacters,
+            decoration: InputDecoration(
+              labelText: context.trText('Known characters'),
+              hintText: context.trText('Example: 日本語かな'),
+            ),
+          ),
+        ],
+        const SizedBox(height: 20),
+        FilledButton(
+          onPressed: vm.isLoading
+              ? null
+              : () async {
+                  if (vm.hasDataStep) {
+                    await vm.goToDataStep();
+                  } else {
+                    await vm.finish();
+                  }
+                },
+          child: vm.isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : Text(context
+                  .trText(vm.hasDataStep ? 'Continue' : 'Start learning')),
         ),
       ],
     );
