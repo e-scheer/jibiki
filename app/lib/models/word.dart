@@ -85,14 +85,18 @@ class Sense {
             .toList(),
       );
 
-  /// Glosses in the requested language, falling back to English then to all.
+  List<String> exactGlossesFor(String language) => glosses
+      .where((g) => g.language == language && g.text.trim().isNotEmpty)
+      .map((g) => g.text)
+      .toList();
+
+  bool hasGlossFor(String language) => exactGlossesFor(language).isNotEmpty;
+
+  /// Glosses in the requested language, falling back to English when available.
   List<String> glossesFor(String lang) {
-    final wanted =
-        glosses.where((g) => g.language == lang).map((g) => g.text).toList();
+    final wanted = exactGlossesFor(lang);
     if (wanted.isNotEmpty) return wanted;
-    final en =
-        glosses.where((g) => g.language == 'en').map((g) => g.text).toList();
-    return en.isNotEmpty ? en : glosses.map((g) => g.text).toList();
+    return exactGlossesFor('en');
   }
 }
 
@@ -123,8 +127,9 @@ class WordEntry {
 
   /// A compact one-line meaning for list rows and card backs.
   String summaryGloss(String lang) {
+    final displayLanguage = glossLanguageFor(lang);
     for (final s in senses) {
-      final g = s.glossesFor(lang);
+      final g = s.exactGlossesFor(displayLanguage);
       if (g.isNotEmpty) return g.take(3).join('; ');
     }
     return '';
@@ -133,10 +138,30 @@ class WordEntry {
   /// Meanings that have at least one definition in [lang] or its English
   /// fallback. Some JMdict records contain metadata-only sense rows; they are
   /// useful to preserve in the pack but must not render as empty numbered rows.
-  List<Sense> sensesFor(String lang) => [
-        for (final sense in senses)
-          if (sense.glossesFor(lang).isNotEmpty) sense,
-      ];
+  List<Sense> sensesFor(String lang) {
+    final displayLanguage = glossLanguageFor(lang);
+    return [
+      for (final sense in senses)
+        if (sense.hasGlossFor(displayLanguage)) sense,
+    ];
+  }
+
+  /// Select one language for the whole entry instead of falling back per sense.
+  /// This prevents a partly translated entry from showing English and French in
+  /// the same numbered list. If the requested language is incomplete, English
+  /// wins when it covers at least as many meaningful senses.
+  String glossLanguageFor(String requested) {
+    final meaningful = senses
+        .where((sense) => sense.glosses.any((g) => g.text.trim().isNotEmpty))
+        .toList();
+    if (meaningful.isEmpty || requested == 'en') return requested;
+    final requestedCount =
+        meaningful.where((sense) => sense.hasGlossFor(requested)).length;
+    if (requestedCount == meaningful.length) return requested;
+    final englishCount =
+        meaningful.where((sense) => sense.hasGlossFor('en')).length;
+    return englishCount >= requestedCount ? 'en' : requested;
+  }
 
   factory WordEntry.fromJson(Map<String, dynamic> j) => WordEntry(
         id: (j['id'] as num).toInt(),

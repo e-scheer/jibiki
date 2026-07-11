@@ -103,6 +103,7 @@ class _WordDetail extends StatelessWidget {
 
   Widget _content(BuildContext context, WordEntry word, String lang) {
     final jc = context.jc;
+    final glossLanguage = word.glossLanguageFor(lang);
     final senses = word.sensesFor(lang);
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -163,7 +164,7 @@ class _WordDetail extends StatelessWidget {
         ...senses
             .asMap()
             .entries
-            .map((e) => _sense(context, e.key + 1, e.value, lang)),
+            .map((e) => _sense(context, e.key + 1, e.value, glossLanguage)),
         if (word.kanjiBreakdown.isNotEmpty) ...[
           const SizedBox(height: 20),
           Text(context.trText('Kanji in this word'),

@@ -68,6 +68,33 @@ void main() {
       expect(w.sensesFor('en'), hasLength(1));
       expect(w.sensesFor('en').single.glossesFor('en'), ['door']);
     });
+
+    test('glossLanguageFor avoids mixing partial translations per word', () {
+      final w = WordEntry.fromJson({
+        'id': 3,
+        'is_common': false,
+        'headword': '扉',
+        'primary_reading': 'とびら',
+        'kanji': const [],
+        'readings': const [],
+        'senses': [
+          {
+            'pos': const [],
+            'glosses': [
+              {'language': 'en', 'text': 'door'},
+            ],
+          },
+          {
+            'pos': const [],
+            'glosses': [
+              {'language': 'fr', 'text': 'porte'},
+            ],
+          },
+        ],
+      });
+      expect(w.glossLanguageFor('fr'), 'en');
+      expect(w.sensesFor('fr').every((s) => s.hasGlossFor('en')), isTrue);
+    });
   });
 
   group('StudyCard.fromJson', () {
