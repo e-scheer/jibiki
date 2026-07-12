@@ -203,7 +203,10 @@ class DrawingPad extends StatelessWidget {
       decoration: BoxDecoration(
         color: jc.surface,
         borderRadius: BorderRadius.circular(Radii.lg),
-        border: Border.all(color: jc.hairline),
+        border: Border.all(color: jc.ink, width: 3),
+        boxShadow: [
+          BoxShadow(color: jc.ink, blurRadius: 0, offset: const Offset(6, 6))
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(

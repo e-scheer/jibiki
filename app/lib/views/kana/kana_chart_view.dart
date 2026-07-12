@@ -1,8 +1,9 @@
-import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
+import '../../l10n/l10n.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
 import '../../repositories/dictionary_repository.dart';
@@ -11,6 +12,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/kana_viewmodel.dart';
 import '../learn/learn_carousel_view.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
 import '../widgets/status_views.dart';
@@ -29,20 +31,23 @@ class KanaChartView extends StatelessWidget {
   }
 }
 
-/// Passed down to each cell: which chars are already carded (for the badge), and,
-/// in select mode, which are picked plus how to toggle them.
 class _Selection {
-  const _Selection(
-      {required this.active,
-      required this.chars,
-      required this.states,
-      required this.onToggle});
+  const _Selection({
+    required this.active,
+    required this.chars,
+    required this.states,
+    required this.dueChars,
+    required this.onToggle,
+  });
+
   final bool active;
   final Set<String> chars;
   final Map<String, int> states;
+  final Set<String> dueChars;
   final void Function(List<KanaEntry> entries) onToggle;
 
-  bool contains(String c) => chars.contains(c);
+  bool contains(String char) => chars.contains(char);
+  bool isDue(String char) => dueChars.contains(char);
 }
 
 class _KanaChart extends StatefulWidget {
@@ -53,7 +58,6 @@ class _KanaChart extends StatefulWidget {
 }
 
 class _KanaChartState extends State<_KanaChart> {
-  // Extra kana shown below the main gojūon table.
   static const _extras = {
     'dakuten': 'Dakuten ゛',
     'handakuten': 'Handakuten ゜',
@@ -64,12 +68,7 @@ class _KanaChartState extends State<_KanaChart> {
   bool _busy = false;
   final Set<String> _selected = {};
   Map<String, int> _states = const {};
-
-  void _changeScript(KanaViewModel vm, String s) {
-    if (s == vm.script) return;
-    setState(() => _selected.clear());
-    vm.setScript(s);
-  }
+  Set<String> _dueChars = const {};
 
   @override
   void initState() {
@@ -77,24 +76,41 @@ class _KanaChartState extends State<_KanaChart> {
     _loadStates();
   }
 
+  void _changeScript(KanaViewModel vm, String script) {
+    if (script == vm.script) return;
+    setState(() => _selected.clear());
+    vm.setScript(script);
+  }
+
   Future<void> _loadStates() async {
     try {
-      final s = await context
-          .read<StudyRepository>()
-          .studyStates(type: ItemType.kana);
-      if (mounted) setState(() => _states = s);
+      final repository = context.read<StudyRepository>();
+      final statesFuture = repository.studyStates(type: ItemType.kana);
+      final cardsFuture = repository.cards(type: ItemType.kana);
+      final states = await statesFuture;
+      final cards = await cardsFuture;
+      final now = DateTime.now();
+      final due = {
+        for (final card in cards)
+          if (!card.isNew && !card.due.isAfter(now)) card.itemRef,
+      };
+      if (mounted) {
+        setState(() {
+          _states = states;
+          _dueChars = due;
+        });
+      }
     } catch (_) {
-      // No study state (e.g. offline) just means no badges - never block the chart.
+      // Study state is supplementary. The reference chart stays available.
     }
   }
 
   void _toggleCell(List<KanaEntry> entries) {
-    Haptics.tick();
     setState(() {
-      final chars = entries.map((e) => e.char);
-      final allIn = chars.every(_selected.contains);
-      for (final c in chars) {
-        allIn ? _selected.remove(c) : _selected.add(c);
+      final chars = entries.map((entry) => entry.char);
+      final allSelected = chars.every(_selected.contains);
+      for (final char in chars) {
+        allSelected ? _selected.remove(char) : _selected.add(char);
       }
     });
   }
@@ -108,21 +124,25 @@ class _KanaChartState extends State<_KanaChart> {
 
   void _selectAllVisible(KanaViewModel vm) {
     Haptics.tick();
-    setState(() => _selected.addAll(vm.current.map((k) => k.char)));
+    setState(() => _selected.addAll(vm.current.map((entry) => entry.char)));
   }
 
   Future<void> _bulk(bool known) async {
     if (_selected.isEmpty || _busy) return;
     Haptics.medium();
     setState(() => _busy = true);
-    final items = [for (final c in _selected) (type: ItemType.kana, ref: c)];
+    final items = [
+      for (final char in _selected) (type: ItemType.kana, ref: char),
+    ];
     try {
-      final summary =
-          await context.read<StudyRepository>().bulkAdd(items, known: known);
+      final summary = await context.read<StudyRepository>().bulkAdd(
+            items,
+            known: known,
+          );
       if (!mounted) return;
       await _loadStates();
       if (!mounted) return;
-      final n = summary['resolved'] ?? items.length;
+      final count = summary['resolved'] ?? items.length;
       setState(() {
         _selecting = false;
         _selected.clear();
@@ -130,86 +150,51 @@ class _KanaChartState extends State<_KanaChart> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(known ? 'Marked $n as known' : 'Added $n to study')),
+          content: Text(
+            known ? 'Marked $count as known' : 'Added $count to study',
+          ),
+        ),
       );
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(context.trText('Could not update your deck'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.trText('Could not update your deck')),
+        ),
+      );
     }
+  }
+
+  void _openMnemonics(KanaViewModel vm) {
+    final language = context.read<AppState>().mnemonicLanguage;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LearnCarouselView(
+          items: vm.current,
+          language: language,
+          title: switch (vm.script) {
+            'hiragana' => 'Hiragana',
+            'katakana' => 'Katakana',
+            _ => 'Kana',
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<KanaViewModel>();
-    final sel = _Selection(
+    final selection = _Selection(
       active: _selecting,
       chars: _selected,
       states: _states,
+      dueChars: _dueChars,
       onToggle: _toggleCell,
     );
 
     return Scaffold(
-      appBar: AppBar(
-        leading: _selecting
-            ? IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: context.trText('Cancel'),
-                onPressed: _exitSelect)
-            : null,
-        title: Text(_selecting ? '${_selected.length} selected' : 'Kana'),
-        actions: _selecting
-            ? [
-                TextButton(
-                  onPressed:
-                      vm.current.isEmpty ? null : () => _selectAllVisible(vm),
-                  child: Text(context.trText('Select all')),
-                ),
-              ]
-            : [
-                if (vm.current.isNotEmpty)
-                  IconButton(
-                    tooltip: context.trText('Select kana'),
-                    icon: const Icon(Icons.checklist_rounded),
-                    onPressed: _enterSelect,
-                  ),
-                if (vm.current.isNotEmpty)
-                  IconButton(
-                    tooltip: context.trText('Learn with mnemonics'),
-                    icon: const Icon(Icons.auto_stories_outlined),
-                    onPressed: () {
-                      final lang = context.read<AppState>().mnemonicLanguage;
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => LearnCarouselView(
-                          items: vm.current,
-                          language: lang,
-                          title: switch (vm.script) {
-                            'hiragana' => 'Hiragana',
-                            'katakana' => 'Katakana',
-                            _ => 'Kana',
-                          },
-                        ),
-                      ));
-                    },
-                  ),
-                IconButton(
-                  tooltip: context.trText('Settings'),
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => context.push('/settings'),
-                ),
-              ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: _ScriptToggle(
-              script: vm.script,
-              onChanged: (s) => _changeScript(vm, s),
-            ),
-          ),
-        ),
-      ),
       bottomNavigationBar: _selecting
           ? SelectionActionBar(
               count: _selected.length,
@@ -218,122 +203,468 @@ class _KanaChartState extends State<_KanaChart> {
               onAdd: () => _bulk(false),
             )
           : null,
-      body: vm.isLoading
-          ? const LoadingView()
-          : vm.hasError
-              ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-              : AnimatedSwitcher(
-                  duration: Motion.timed(context, Motion.fast),
-                  switchInCurve: Motion.out,
-                  switchOutCurve: Motion.out,
-                  // A clean, quick crossfade between scripts. The three matrices
-                  // share the same rows, so heights match and nothing jumps - no
-                  // more half-sliding matrices ghosting over each other.
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: ListView(
-                    key: ValueKey(vm.script),
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
-                    children: [
-                      if (!_selecting)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            context.trText(
-                                'Tap the checklist to pick kana, then mark the ones you know or add the rest to learn.'),
-                            style: TextStyle(
-                                color: context.jc.muted, fontSize: 12.5),
-                          ),
-                        ),
-                      _KanaMatrix(items: vm.byKind('gojuon'), sel: sel),
-                      for (final entry in _extras.entries)
-                        if (vm.byKind(entry.key).isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 22, bottom: 6),
-                            child: Text(entry.value,
-                                style: context.text.titleMedium),
-                          ),
-                          _KanaMatrix(items: vm.byKind(entry.key), sel: sel),
-                        ],
-                    ],
+      body: SafeArea(
+        child: vm.isLoading
+            ? const _KanaLoadingSkeleton()
+            : vm.hasError
+                ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                : AnimatedSwitcher(
+                    duration: Motion.timed(context, Motion.fast),
+                    switchInCurve: Motion.out,
+                    switchOutCurve: Motion.out,
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
+                    child: _KanaLayout(
+                      key: ValueKey(vm.script),
+                      vm: vm,
+                      selection: selection,
+                      selecting: _selecting,
+                      selectedCount: _selected.length,
+                      extras: _extras,
+                      onScriptChanged: (script) => _changeScript(vm, script),
+                      onSelect: _enterSelect,
+                      onCancelSelection: _exitSelect,
+                      onSelectAll: () => _selectAllVisible(vm),
+                      onMnemonics: () => _openMnemonics(vm),
+                    ),
                   ),
-                ),
+      ),
     );
   }
 }
 
-/// A flat pill toggle where the vermilion selection **slides** between segments
-/// (a single moving pill) instead of snapping colour, so the active script reads
-/// as one continuous control. Collapses to an instant move under reduce-motion.
-class _ScriptToggle extends StatelessWidget {
-  const _ScriptToggle({required this.script, required this.onChanged});
-  final String script;
-  final ValueChanged<String> onChanged;
+class _KanaLayout extends StatelessWidget {
+  const _KanaLayout({
+    super.key,
+    required this.vm,
+    required this.selection,
+    required this.selecting,
+    required this.selectedCount,
+    required this.extras,
+    required this.onScriptChanged,
+    required this.onSelect,
+    required this.onCancelSelection,
+    required this.onSelectAll,
+    required this.onMnemonics,
+  });
 
-  static const _opts = [
-    (value: 'hiragana', label: 'Hiragana'),
-    (value: 'katakana', label: 'Katakana'),
-    (value: 'both', label: 'Both'),
-  ];
+  final KanaViewModel vm;
+  final _Selection selection;
+  final bool selecting;
+  final int selectedCount;
+  final Map<String, String> extras;
+  final ValueChanged<String> onScriptChanged;
+  final VoidCallback onSelect;
+  final VoidCallback onCancelSelection;
+  final VoidCallback onSelectAll;
+  final VoidCallback onMnemonics;
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
-    final index =
-        _opts.indexWhere((o) => o.value == script).clamp(0, _opts.length - 1);
-    // -1 (first) … +1 (last): the alignment the pill slides to.
-    final x = -1.0 + index * (2.0 / (_opts.length - 1));
+    return BoundedContent(
+      maxWidth: context.isExpanded ? 940 : 560,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tablet = constraints.maxWidth >= 760;
+          if (!tablet) {
+            return ListView(
+              padding: const EdgeInsets.only(top: 12, bottom: 28),
+              children: [
+                _KanaPrimary(
+                  vm: vm,
+                  selection: selection,
+                  selecting: selecting,
+                  selectedCount: selectedCount,
+                  onScriptChanged: onScriptChanged,
+                  onCancelSelection: onCancelSelection,
+                  onSelectAll: onSelectAll,
+                ),
+                _KanaTools(
+                  selecting: selecting,
+                  onSelect: onSelect,
+                  onCancelSelection: onCancelSelection,
+                  onMnemonics: onMnemonics,
+                ),
+                _KanaExtras(
+                  vm: vm,
+                  selection: selection,
+                  extras: extras,
+                ),
+              ],
+            );
+          }
 
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-          color: jc.surfaceAlt, borderRadius: BorderRadius.circular(Radii.md)),
-      child: SizedBox(
-        height: 34,
-        child: Stack(
-          children: [
-            // The single pill that glides to the selected segment.
-            AnimatedAlign(
-              alignment: Alignment(x, 0),
-              duration: Motion.timed(context, Motion.base),
-              curve: Motion.outStrong,
-              child: FractionallySizedBox(
-                widthFactor: 1 / _opts.length,
-                heightFactor: 1,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: jc.brand,
-                      borderRadius: BorderRadius.circular(Radii.sm)),
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(18, 20, 18, 32),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 410,
+                    child: _KanaPrimary(
+                      vm: vm,
+                      selection: selection,
+                      selecting: selecting,
+                      selectedCount: selectedCount,
+                      onScriptChanged: onScriptChanged,
+                      onCancelSelection: onCancelSelection,
+                      onSelectAll: onSelectAll,
+                    ),
+                  ),
+                  const SizedBox(width: 28),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        NeoCard(
+                          tone: NeoTone.lavender,
+                          shadow: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _copy(context, 'Kana studio', 'Studio kana'),
+                                style: const TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _copy(
+                                  context,
+                                  'Open a glyph for its sound, origin and community mnemonics.',
+                                  'Ouvrez un glyphe pour son son, son origine et les mnémos de la communauté.',
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  height: 1.35,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _KanaTools(
+                          selecting: selecting,
+                          onSelect: onSelect,
+                          onCancelSelection: onCancelSelection,
+                          onMnemonics: onMnemonics,
+                        ),
+                        _KanaExtras(
+                          vm: vm,
+                          selection: selection,
+                          extras: extras,
+                          inset: 0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _KanaPrimary extends StatelessWidget {
+  const _KanaPrimary({
+    required this.vm,
+    required this.selection,
+    required this.selecting,
+    required this.selectedCount,
+    required this.onScriptChanged,
+    required this.onCancelSelection,
+    required this.onSelectAll,
+  });
+
+  final KanaViewModel vm;
+  final _Selection selection;
+  final bool selecting;
+  final int selectedCount;
+  final ValueChanged<String> onScriptChanged;
+  final VoidCallback onCancelSelection;
+  final VoidCallback onSelectAll;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _KanaHeader(
+          vm: vm,
+          selection: selection,
+          onScriptChanged: onScriptChanged,
+        ),
+        if (selecting)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _copy(
+                      context,
+                      '$selectedCount selected',
+                      '$selectedCount sélectionnés',
+                    ),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: onSelectAll,
+                  child:
+                      Text(_copy(context, 'Select all', 'Tout sélectionner')),
+                ),
+                IconButton(
+                  tooltip: _copy(context, 'Cancel', 'Annuler'),
+                  onPressed: onCancelSelection,
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 9, 14, 0),
+          child: _KanaMatrix(
+            items: vm.byKind('gojuon'),
+            selection: selection,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
+          child: _ReviewKanaButton(
+            onTap: () => context.push('/session'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _KanaHeader extends StatelessWidget {
+  const _KanaHeader({
+    required this.vm,
+    required this.selection,
+    required this.onScriptChanged,
+  });
+
+  final KanaViewModel vm;
+  final _Selection selection;
+  final ValueChanged<String> onScriptChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final learned = vm.current
+        .where((entry) => (selection.states[entry.char] ?? -1) >= 2)
+        .length;
+    final total = vm.current.length;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: NeoSegmentedControl<String>(
+                  selected: vm.script,
+                  onChanged: onScriptChanged,
+                  segments: [
+                    const NeoSegment('hiragana', 'ひらがな'),
+                    const NeoSegment('katakana', 'カタカナ'),
+                    NeoSegment('both', _copy(context, 'Both', 'Les deux')),
+                  ],
                 ),
               ),
-            ),
-            Positioned.fill(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final o in _opts)
-                    Expanded(
-                      child: Pressable(
-                        label: o.label,
-                        selected: script == o.value,
-                        haptic: false,
-                        onTap: () {
-                          Haptics.tick();
-                          onChanged(o.value);
-                        },
-                        child: AnimatedDefaultTextStyle(
-                          duration: Motion.timed(context, Motion.base),
-                          curve: Motion.out,
-                          style: TextStyle(
-                            color: script == o.value ? Colors.white : jc.muted,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12.5,
-                          ),
-                          child: Center(child: Text(o.label)),
-                        ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 62,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$learned/$total',
+                      maxLines: 1,
+                      style: const TextStyle(
+                        fontSize: 21,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      _copy(context, 'learned', 'apprises'),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        height: 1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 11,
+            runSpacing: 7,
+            children: [
+              _LegendItem(
+                color: context.jc.lime,
+                mark: '✓',
+                label: _copy(context, 'learned', 'apprise'),
+              ),
+              _LegendItem(
+                color: context.jc.acid,
+                mark: '●',
+                label: _copy(context, 'in progress', 'en cours'),
+              ),
+              _LegendItem(
+                color: context.jc.magenta,
+                mark: _copy(context, 'due', 'dû'),
+                label: _copy(context, 'to review', 'à revoir'),
+              ),
+              _LegendItem(
+                color: context.jc.surface,
+                label: _copy(context, 'new', 'nouvelle'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.color, required this.label, this.mark = ''});
+
+  final Color color;
+  final String label;
+  final String mark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 17,
+          height: 17,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: context.jc.ink, width: 2),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: mark.isEmpty
+              ? null
+              : Text(
+                  mark,
+                  style: TextStyle(
+                    fontSize: mark.length > 1 ? 6.5 : 8.5,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+        ),
+      ],
+    );
+  }
+}
+
+class _KanaTools extends StatelessWidget {
+  const _KanaTools({
+    required this.selecting,
+    required this.onSelect,
+    required this.onCancelSelection,
+    required this.onMnemonics,
+  });
+
+  final bool selecting;
+  final VoidCallback onSelect;
+  final VoidCallback onCancelSelection;
+  final VoidCallback onMnemonics;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: _KanaToolButton(
+              icon: selecting ? Icons.close_rounded : Icons.checklist_rounded,
+              label: selecting
+                  ? _copy(context, 'Cancel', 'Annuler')
+                  : _copy(context, 'Select', 'Sélectionner'),
+              onTap: selecting ? onCancelSelection : onSelect,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _KanaToolButton(
+              icon: Icons.auto_stories_outlined,
+              label: _copy(context, 'Mnemonics', 'Mnémos'),
+              onTap: onMnemonics,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KanaToolButton extends StatelessWidget {
+  const _KanaToolButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: context.jc.surface,
+          border: Border.all(color: context.jc.ink, width: 2.5),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 7),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ],
@@ -343,18 +674,97 @@ class _ScriptToggle extends StatelessWidget {
   }
 }
 
-/// A canonical kana matrix, vowel columns (a/i/u/e/o) × consonant rows, used
-/// for gojūon, dakuten and handakuten alike, so any set is found "where is it" at
-/// a glance. Rows are derived from the data (so g/z/d/b, p… order themselves);
-/// each cell shows one script, or both side by side in "Both" mode. ん (no vowel)
-/// sits on its own line.
+class _KanaExtras extends StatelessWidget {
+  const _KanaExtras({
+    required this.vm,
+    required this.selection,
+    required this.extras,
+    this.inset = 14,
+  });
+
+  final KanaViewModel vm;
+  final _Selection selection;
+  final Map<String, String> extras;
+  final double inset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: inset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final extra in extras.entries)
+            if (vm.byKind(extra.key).isNotEmpty) ...[
+              const SizedBox(height: 18),
+              Text(
+                extra.value,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 8),
+              _KanaMatrix(
+                items: vm.byKind(extra.key),
+                selection: selection,
+              ),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewKanaButton extends StatelessWidget {
+  const _ReviewKanaButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          color: context.jc.ink,
+          border: Border.all(color: context.jc.ink, width: 3),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: context.jc.ink,
+              blurRadius: 0,
+              offset: const Offset(4, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _copy(context, 'Review due kana', 'Réviser les kana dues'),
+              style: TextStyle(
+                color: context.jc.acid,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.play_arrow_rounded, color: context.jc.acid, size: 21),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _KanaMatrix extends StatelessWidget {
-  const _KanaMatrix({required this.items, required this.sel});
+  const _KanaMatrix({required this.items, required this.selection});
+
   final List<KanaEntry> items;
-  final _Selection sel;
+  final _Selection selection;
 
   static const _vowels = ['a', 'i', 'u', 'e', 'o'];
-  static const _rowLabel = {'a': ''}; // vowel-only row has no consonant label
 
   String _vowelOf(String romaji) {
     if (romaji.isEmpty) return '';
@@ -364,95 +774,201 @@ class _KanaMatrix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
-    // key "row+vowel" → entries (1 per script; 2 in Both mode, hiragana first).
     final byKey = <String, List<KanaEntry>>{};
-    final noVowel = <KanaEntry>[]; // ん / ン
-    final rowMinOrder = <String, int>{};
-    for (final k in items) {
-      final v = _vowelOf(k.romaji);
-      if (v.isEmpty) {
-        noVowel.add(k);
+    final noVowel = <KanaEntry>[];
+    final rowOrder = <String, int>{};
+
+    for (final kana in items) {
+      final vowel = _vowelOf(kana.romaji);
+      if (vowel.isEmpty) {
+        noVowel.add(kana);
         continue;
       }
-      (byKey['${k.row}$v'] ??= <KanaEntry>[]).add(k);
-      final cur = rowMinOrder[k.row];
-      if (cur == null || k.order < cur) rowMinOrder[k.row] = k.order;
-    }
-    for (final list in byKey.values) {
-      list.sort(
-          (a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
-    }
-    noVowel
-        .sort((a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1));
-    final rows = rowMinOrder.keys.toList()
-      ..sort((a, b) => rowMinOrder[a]!.compareTo(rowMinOrder[b]!));
-
-    final headerStyle =
-        TextStyle(color: jc.muted, fontWeight: FontWeight.w800, fontSize: 12);
-
-    Widget cell(List<KanaEntry>? entries) {
-      if (entries == null || entries.isEmpty) {
-        return const Expanded(
-            child: Padding(
-                padding: EdgeInsets.all(2.5), child: SizedBox(height: 56)));
+      (byKey['${kana.row}$vowel'] ??= []).add(kana);
+      final currentOrder = rowOrder[kana.row];
+      if (currentOrder == null || kana.order < currentOrder) {
+        rowOrder[kana.row] = kana.order;
       }
-      final picked =
-          sel.active && entries.map((e) => e.char).every(sel.contains);
-      // Study status = the furthest-along state among this cell's glyphs.
-      int? maxState;
-      for (final e in entries) {
-        final s = sel.states[e.char];
-        if (s != null && (maxState == null || s > maxState)) maxState = s;
-      }
-      return Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(2.5),
-          child: KanaCell(
-            entries: entries,
-            selected: picked,
-            mark: studyMarkFor(maxState),
-            onTap: sel.active
-                ? () => sel.onToggle(entries)
-                : () => context.push('/kana/${entries.first.char}'),
-          ),
-        ),
+    }
+
+    for (final entries in byKey.values) {
+      entries.sort(
+        (a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1),
       );
     }
+    noVowel.sort(
+      (a, b) => (a.isHiragana ? 0 : 1).compareTo(b.isHiragana ? 0 : 1),
+    );
+    final rows = rowOrder.keys.toList()
+      ..sort((a, b) => rowOrder[a]!.compareTo(rowOrder[b]!));
+    final slots = <List<KanaEntry>?>[
+      for (final row in rows)
+        for (final vowel in _vowels) byKey['$row$vowel'],
+      if (noVowel.isNotEmpty) noVowel,
+    ];
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            const SizedBox(width: 20),
-            for (final v in _vowels)
-              Expanded(
-                  child:
-                      Center(child: Text(v.toUpperCase(), style: headerStyle))),
-          ],
-        ),
-        const SizedBox(height: 4),
-        for (final r in rows)
-          Row(
-            children: [
-              SizedBox(
-                width: 20,
-                child: Center(
-                    child: Text(_rowLabel[r] ?? r.toUpperCase(),
-                        style: headerStyle)),
-              ),
-              for (final v in _vowels) cell(byKey['$r$v']),
-            ],
-          ),
-        if (noVowel.isNotEmpty)
-          Row(
-            children: [
-              const SizedBox(width: 20),
-              cell(noVowel),
-              const Expanded(flex: 4, child: SizedBox()),
-            ],
-          ),
-      ],
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: slots.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5,
+        crossAxisSpacing: 3,
+        mainAxisSpacing: 3,
+        mainAxisExtent: 56,
+      ),
+      itemBuilder: (context, index) {
+        final entries = slots[index];
+        if (entries == null || entries.isEmpty) return const _KanaVoidCell();
+
+        final selected = selection.active &&
+            entries.map((entry) => entry.char).every(selection.contains);
+        int? furthestState;
+        var due = false;
+        for (final entry in entries) {
+          final state = selection.states[entry.char];
+          if (state != null &&
+              (furthestState == null || state > furthestState)) {
+            furthestState = state;
+          }
+          due = due || selection.isDue(entry.char);
+        }
+        return KanaCell(
+          entries: entries,
+          selected: selected,
+          mark: studyMarkFor(furthestState),
+          due: due,
+          onTap: selection.active
+              ? () => selection.onToggle(entries)
+              : () => context.push('/kana/${entries.first.char}'),
+        );
+      },
     );
   }
 }
+
+class _KanaVoidCell extends StatelessWidget {
+  const _KanaVoidCell();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedRoundedBorderPainter(color: context.jc.muted),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _DashedRoundedBorderPainter extends CustomPainter {
+  const _DashedRoundedBorderPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          const Radius.circular(10),
+        ),
+      );
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.65)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, (distance + 5).clamp(0, metric.length)),
+          paint,
+        );
+        distance += 9;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRoundedBorderPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+class _KanaLoadingSkeleton extends StatelessWidget {
+  const _KanaLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return BoundedContent(
+      maxWidth: 420,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
+        children: [
+          Row(
+            children: [
+              const Expanded(child: _SkeletonBox(height: 56)),
+              const SizedBox(width: 10),
+              _SkeletonBox(width: 62, height: 40, color: context.jc.surfaceAlt),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Wrap(
+            spacing: 9,
+            runSpacing: 7,
+            children: [
+              _SkeletonBox(width: 72, height: 17),
+              _SkeletonBox(width: 78, height: 17),
+              _SkeletonBox(width: 72, height: 17),
+              _SkeletonBox(width: 68, height: 17),
+            ],
+          ),
+          const SizedBox(height: 10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 46,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              crossAxisSpacing: 3,
+              mainAxisSpacing: 3,
+              mainAxisExtent: 56,
+            ),
+            itemBuilder: (_, index) => _SkeletonBox(
+              height: 56,
+              color: index < 22
+                  ? context.jc.lime.withValues(alpha: 0.38)
+                  : context.jc.surfaceAlt,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({this.width, required this.height, this.color});
+
+  final double? width;
+  final double height;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: color ?? context.jc.surfaceAlt,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: context.jc.ink.withValues(alpha: 0.28),
+          width: 2,
+        ),
+      ),
+    );
+  }
+}
+
+String _copy(BuildContext context, String english, String french) =>
+    Localizations.localeOf(context).languageCode == 'fr' ? french : english;

@@ -37,22 +37,37 @@ account; contributed mnemonics accumulate and are never deleted.
 
 ## Brand Personality
 
-**Warm and encouraging, on a clean, content-first base.** The interface should feel
-like a knowledgeable, supportive study partner: confident and uncluttered - the
-content (the character, the reading, the mnemonic) is the loudest thing - but
-warmed by an accent colour, typography, and imagery rather than by decoration or
+**Bold, encouraging and content-first.** The interface feels like a knowledgeable
+study partner with the energy of a well-made Japanese culture magazine. Characters,
+readings and mnemonics remain the loudest content. Strong outlines, offset shadows
+and vivid colour make actions and state changes immediately legible without adding
 gamified noise.
 
-Three words: **warm, encouraging, uncluttered.** Emotional goal: steady momentum
-and quiet confidence, not test anxiety and not childish reward-chasing. Voice:
-plain, specific, human; it celebrates real progress without hype.
+Three words: **bold, clear, encouraging.** Emotional goal: visible momentum and
+confidence, not test anxiety or childish reward-chasing. Voice remains plain,
+specific and human. It celebrates real progress without hype.
 
-**Visual direction (resolve the specifics in DESIGN.md):** repositioning *warmer*
-than the current cold "Instagram" blue-on-white system. The warmth is carried by a
-**warm accent** - the heritage vermilion (朱, the red-orange of torii gates and
-hanko seals) is the natural candidate for a Japanese tool - sitting on a
-true-neutral base. Warmth must **not** come from the body background (see
-anti-references).
+**Visual direction:** Neo-pop geometry inspired by `design-explorations/10-neopop.html`.
+The default palette combines cold off-white, near-black ink, Klein blue, acid
+yellow, magenta, lime and lavender. Colour is token-based rather than hard-coded in
+components. Users can switch complete palettes like an editor theme, including the
+more harmonious analogue palette from `12-neopop-harmonie.html`.
+
+The HTML exploration is the visual contract for the production UI, including its
+3 px outlines, offset shadows, compact radii, colour blocks, segmented controls,
+status marks, loading states and pressed translations. The primary navigation is
+Dictionary, Kana, Review, Community and Profile. Kanji browsing belongs inside the
+dictionary flow; drawing and pack creation belong inside the community flow.
+
+The dictionary landing is also the daily return loop: search remains first, then
+the due-review callout, a tappable word of the day and a compact recent-history
+strip. History is local-first and useful without an account. Kana and kanji browse
+screens use dense, shadow-free matrices so progress colours stay readable; hard
+shadows are reserved for hierarchy and actions rather than repeated on every cell.
+
+Settings expose the complete display system. Light, dark and automatic appearance
+can be combined with a runtime palette, currently Neo-pop and Harmonie, while the
+same semantic colour roles preserve hierarchy and interaction states.
 
 ## Anti-references
 
@@ -61,10 +76,9 @@ anti-references).
 - **WaniKani's rigidity** - locked pace, crimson "textbook" feel, proprietary and
   English-only.
 - **Anki's dated, cluttered power-user UI.**
-- **The generic "cream + AI" SaaS aesthetic** - warm-neutral beige/sand/paper body
-  backgrounds, identical icon-heading-text card grids, tiny all-caps tracked
-  eyebrows above every section. Warmth in jibiki never comes from a cream
-  background.
+- **The generic "cream + AI" SaaS aesthetic** - warm-neutral beige, sand or paper
+  body backgrounds, identical icon-heading-text card grids, and tiny tracked
+  eyebrows above every section.
 
 ## Design Principles
 
@@ -82,6 +96,14 @@ anti-references).
    never a "done for today" gate. The learner sets the pace, not the app.
 6. **One spectrum, not three apps.** Dictionary ↔ Learning is a set of feature
    flags on one codebase, changeable anytime - not separate modes or code paths.
+7. **Motion explains cause and effect.** Page changes, loading, selection and
+   grading use short, GPU-friendly transitions and haptic feedback. Reduced-motion
+   preferences always collapse non-essential movement.
+8. **One layout system, three densities.** Phones use compact bottom navigation;
+   tablets gain a premium rail and bounded editorial columns; expanded windows use
+   the same components without stretching reading content.
+9. **Palettes are data.** Components consume semantic colour tokens so a complete
+   palette can change at runtime without altering hierarchy, contrast or meaning.
 
 ## Accessibility & Inclusion
 

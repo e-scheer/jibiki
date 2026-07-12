@@ -1,13 +1,13 @@
-import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:jibiki/l10n/l10n.dart';
 
+import '../../core/breakpoints.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/drawing_canvas.dart';
+import '../widgets/pressable.dart';
 import '../widgets/stroke_order_view.dart';
+import 'study_chrome.dart';
 
-/// Write-recall practice (DEEP_SEARCH feature): recall the character from its
-/// meaning, trace it with a fading KanjiVG guide, then reveal the stroke-order
-/// animation to self-check.
 class WritingPracticeView extends StatefulWidget {
   const WritingPracticeView({
     super.key,
@@ -42,118 +42,64 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
     Haptics.light();
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(context.trText('Stroke order'), style: ctx.text.titleMedium),
-            const SizedBox(height: 8),
-            StrokeOrderView(
-                paths: widget.strokePaths,
-                viewBox: widget.strokeViewBox,
-                size: 220),
-            if (widget.reading.isNotEmpty)
-              Text(widget.reading,
-                  style: TextStyle(
-                      color: ctx.jc.brand, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
-            FilledButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.trText('Got it'))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    return Scaffold(
-      appBar:
-          AppBar(title: Text(context.trText('Write · ${widget.character}'))),
-      body: SafeArea(
+      isScrollControlled: true,
+      backgroundColor: context.jc.lavender,
+      builder: (ctx) => SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Prompt: recall from meaning + reading.
               Container(
-                padding: const EdgeInsets.all(16),
+                width: 42,
+                height: 5,
                 decoration: BoxDecoration(
-                  color: jc.surfaceAlt,
-                  borderRadius: BorderRadius.circular(Radii.md),
+                  color: ctx.jc.ink,
+                  borderRadius: BorderRadius.circular(3),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(context.trText('Write the character for'),
-                              style:
-                                  TextStyle(color: jc.muted, fontSize: 12.5)),
-                          const SizedBox(height: 4),
-                          Text(widget.meaning, style: context.text.titleLarge),
-                          if (widget.reading.isNotEmpty)
-                            Text(widget.reading,
-                                style: TextStyle(
-                                    color: jc.brand,
-                                    fontWeight: FontWeight.w600)),
-                        ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ctx.trText('Stroke order'),
+                      style: ctx.text.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    if (!_showGuide)
-                      Text(widget.character,
-                          style: TextStyle(
-                              fontSize: 40,
-                              color: jc.hairline,
-                              fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 340),
-                    child: DrawingCanvas(
-                      controller: _controller,
-                      guidePaths: widget.strokePaths,
-                      guideViewBox: widget.strokeViewBox,
-                      showGuide: _showGuide,
-                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _Tool(
-                      icon: Icons.undo, label: 'Undo', onTap: _controller.undo),
-                  const SizedBox(width: 8),
-                  _Tool(
-                      icon: Icons.layers_clear_outlined,
-                      label: 'Clear',
-                      onTap: _controller.clear),
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    label: Text(context.trText('Guide')),
-                    selected: _showGuide,
-                    onSelected: (v) => setState(() => _showGuide = v),
-                  ),
+                  StudySticker(widget.character, color: ctx.jc.acid),
                 ],
               ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: _reveal,
-                style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52)),
-                icon: const Icon(Icons.gesture),
-                label: Text(context.trText('Reveal stroke order')),
+              const SizedBox(height: 16),
+              StudyPanel(
+                shadow: 6,
+                padding: const EdgeInsets.all(12),
+                child: StrokeOrderView(
+                  paths: widget.strokePaths,
+                  viewBox: widget.strokeViewBox,
+                  size: 220,
+                ),
+              ),
+              if (widget.reading.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Text(
+                  widget.reading,
+                  style: TextStyle(
+                    color: ctx.jc.ink,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 18),
+              StudyActionButton(
+                label: ctx.trText('Got it'),
+                color: ctx.jc.lime,
+                icon: Icons.check_rounded,
+                onTap: () => Navigator.pop(ctx),
               ),
             ],
           ),
@@ -161,23 +107,224 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: context.jc.lavender,
+        body: SafeArea(
+          child: BoundedContent(
+            maxWidth: context.isExpanded ? 920 : Breakpoints.maxContent,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                context.isExpanded ? 28 : 18,
+                14,
+                context.isExpanded ? 28 : 18,
+                18,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.trText('Writing'),
+                              style: context.text.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.8,
+                              ),
+                            ),
+                            Text(
+                              context
+                                  .trText('Recall it, then check the strokes.'),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox.square(
+                        dimension: 44,
+                        child: Pressable(
+                          label: context.trText('Close'),
+                          onTap: () => Navigator.pop(context),
+                          child: const StudyPanel(
+                            shadow: 4,
+                            radius: 10,
+                            padding: EdgeInsets.zero,
+                            child: Icon(Icons.close_rounded),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  StudyPanel(
+                    color: context.jc.acid,
+                    shadow: 4,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.trText('Write the character for'),
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                widget.meaning,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              if (widget.reading.isNotEmpty)
+                                Text(
+                                  widget.reading,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (!_showGuide)
+                          Text(
+                            widget.character,
+                            style: TextStyle(
+                              fontFamily:
+                                  JpFonts.variant(widget.character.hashCode),
+                              fontSize: 48,
+                              color: context.jc.ink,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Expanded(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 390),
+                        child: StudyPanel(
+                          shadow: 8,
+                          radius: 16,
+                          padding: EdgeInsets.zero,
+                          child: DrawingCanvas(
+                            controller: _controller,
+                            guidePaths: widget.strokePaths,
+                            guideViewBox: widget.strokeViewBox,
+                            showGuide: _showGuide,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _Tool(
+                          icon: Icons.undo_rounded,
+                          label: context.trText('Undo'),
+                          onTap: _controller.undo,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _Tool(
+                          icon: Icons.layers_clear_outlined,
+                          label: context.trText('Clear'),
+                          onTap: _controller.clear,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _Tool(
+                          icon: _showGuide
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_outlined,
+                          label: context.trText('Guide'),
+                          selected: _showGuide,
+                          onTap: () => setState(() => _showGuide = !_showGuide),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  StudyActionButton(
+                    label: context.trText('Reveal stroke order'),
+                    icon: Icons.gesture_rounded,
+                    color: context.jc.ink,
+                    foreground: context.jc.acid,
+                    onTap: _reveal,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _Tool extends StatelessWidget {
-  const _Tool({required this.icon, required this.label, required this.onTap});
+  const _Tool({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool selected;
 
   @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18, color: context.jc.body),
-      label: Text(label),
-      onPressed: () {
-        Haptics.tick();
-        onTap();
-      },
-    );
-  }
+  Widget build(BuildContext context) => SizedBox(
+        height: 48,
+        child: Pressable(
+          label: label,
+          selected: selected,
+          onTap: () {
+            Haptics.tick();
+            onTap();
+          },
+          child: StudyPanel(
+            color: selected ? context.jc.acid : context.jc.surface,
+            radius: 10,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }

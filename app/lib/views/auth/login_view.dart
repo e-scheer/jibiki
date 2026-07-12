@@ -7,6 +7,8 @@ import '../../core/dev_login.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import 'auth_chrome.dart';
+import '../widgets/neo_pop.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -73,123 +75,135 @@ class _LoginFormState extends State<_LoginForm> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
-    return Scaffold(
-      appBar: context.canPop()
-          ? AppBar(
-              leading: const BackButton(),
-              title: Text(context.trText('Sign in')),
-            )
-          : null,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(context.trText('字'),
-                        style: TextStyle(
-                            fontSize: 56,
-                            color: context.jc.brand,
-                            fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 4),
-                    Text(context.trText('Welcome back'),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 28),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: InputDecoration(
-                          labelText: context.trText('Email'),
-                          prefixIcon: const Icon(Icons.mail_outline)),
-                      validator: (v) => (v == null || !v.contains('@'))
-                          ? context.trText('Enter a valid email')
-                          : null,
+    return AuthChrome(
+      eyebrow: context.trText('YOUR SPACE'),
+      headline: context.trText('Welcome back.'),
+      description: context.trText(
+        'Your dictionary, reviews and community picks are waiting for you.',
+      ),
+      onBack: context.canPop() ? () => context.pop() : null,
+      form: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    context.trText('Sign in'),
+                    style: context.text.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.8,
                     ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: true,
-                      autofillHints: const [AutofillHints.password],
-                      decoration: InputDecoration(
-                          labelText: context.trText('Password'),
-                          prefixIcon: const Icon(Icons.lock_outline)),
-                      validator: (v) => (v == null || v.length < 6)
-                          ? context.trText('At least 6 characters')
-                          : null,
-                      onFieldSubmitted: (_) => _submit(),
-                    ),
-                    if (vm.hasError) ...[
-                      const SizedBox(height: 12),
-                      Text(vm.error!,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.error)),
-                    ],
-                    if (DevLogin.enabled) ...[
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Text(context.trText('DEV'),
-                              style: TextStyle(
-                                  color: context.jc.muted,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1)),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                for (final a in DevLogin.accounts)
-                                  ActionChip(
-                                    label: Text(a.label),
-                                    onPressed: () {
-                                      Haptics.tick();
-                                      _fill(a);
-                                    },
-                                  ),
-                              ],
+                  ),
+                ),
+                Text(
+                  '字',
+                  style: TextStyle(
+                    color: context.jc.brand,
+                    fontSize: 48,
+                    height: 0.9,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.trText('Pick up exactly where you stopped.'),
+              style: TextStyle(
+                  color: context.jc.body, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 24),
+            AuthField(
+              controller: _email,
+              label: context.trText('Email'),
+              icon: Icons.mail_outline_rounded,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              validator: (v) => (v == null || !v.contains('@'))
+                  ? context.trText('Enter a valid email')
+                  : null,
+            ),
+            const SizedBox(height: 18),
+            AuthField(
+              controller: _password,
+              label: context.trText('Password'),
+              icon: Icons.lock_outline_rounded,
+              obscureText: true,
+              autofillHints: const [AutofillHints.password],
+              validator: (v) => (v == null || v.length < 6)
+                  ? context.trText('At least 6 characters')
+                  : null,
+              onFieldSubmitted: (_) => _submit(),
+            ),
+            if (vm.hasError) ...[
+              const SizedBox(height: 16),
+              AuthInlineError(vm.error!),
+            ],
+            if (DevLogin.enabled) ...[
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  NeoBadge(context.trText('DEV'), tone: NeoTone.magenta),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final account in DevLogin.accounts)
+                          NeoCard(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            shadow: 2,
+                            radius: 8,
+                            onTap: () => _fill(account),
+                            child: Text(
+                              account.label,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: 22),
-                    FilledButton(
-                      onPressed: vm.isLoading ? null : _submit,
-                      child: vm.isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(context.trText('Sign in')),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => context.go('/register'),
-                      child: const Text("New here? Create an account"),
-                    ),
-                    // The paid app works fully offline; an account only adds
-                    // sync + community. Signing up later uploads the whole
-                    // local history, nothing is lost by starting here.
-                    TextButton(
-                      onPressed: vm.isLoading ? null : _continueWithoutAccount,
-                      child:
-                          Text(context.trText('Continue without an account')),
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 24),
+            NeoPrimaryButton(
+              label: context.trText('Sign in'),
+              icon: Icons.arrow_forward_rounded,
+              tone: NeoTone.acid,
+              busy: vm.isLoading,
+              onTap: _submit,
+            ),
+            const SizedBox(height: 14),
+            NeoCard(
+              shadow: 3,
+              radius: 10,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              onTap: () => context.go('/register'),
+              child: Center(
+                child: Text(
+                  context.trText('New here? Create an account'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
                 ),
               ),
             ),
-          ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: vm.isLoading ? null : _continueWithoutAccount,
+              child: Text(context.trText('Continue without an account')),
+            ),
+          ],
         ),
       ),
     );

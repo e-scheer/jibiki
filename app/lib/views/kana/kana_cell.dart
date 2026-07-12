@@ -5,12 +5,9 @@ import '../../theme/app_theme.dart';
 import '../widgets/pressable.dart';
 import '../widgets/study_mark.dart';
 
-/// One cell in the kana matrix: the glyph(s) over their romaji, carrying study +
-/// selection state. Purely presentational - the matrix decides `selected`,
-/// `mark`, and what a tap does. In "Both" mode it shows hiragana then katakana
-/// (muted) side by side. Soft filled tiles (no per-cell borders) keep the grid
-/// calm; the selected tile lifts with the vermilion wash + ring, and a press
-/// gives a real button response via [Pressable].
+/// One compact cell in the kana matrix. Its full background communicates study
+/// state, while selection only strengthens the outline. Cells never cast a
+/// shadow because density comes from their shared 3 px grid rhythm.
 class KanaCell extends StatelessWidget {
   const KanaCell({
     super.key,
@@ -18,18 +15,35 @@ class KanaCell extends StatelessWidget {
     required this.selected,
     required this.mark,
     required this.onTap,
+    this.due = false,
   });
 
-  final List<KanaEntry> entries; // 1 (single script) or 2 (Both: hiragana, katakana)
+  final List<KanaEntry>
+      entries; // 1 (single script) or 2 (Both: hiragana, katakana)
   final bool selected;
   final StudyMark mark;
   final VoidCallback onTap;
+  final bool due;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
     final both = entries.length > 1;
     final romaji = entries.first.romaji;
+    final background = due
+        ? jc.magenta
+        : mark == StudyMark.known
+            ? jc.lime
+            : mark == StudyMark.seen
+                ? jc.acid
+                : jc.surface;
+    final status = due
+        ? 'dû'
+        : mark == StudyMark.known
+            ? '✓'
+            : mark == StudyMark.seen
+                ? '●'
+                : '';
 
     return Pressable(
       label: '${entries.map((e) => e.char).join(' ')} $romaji',
@@ -40,11 +54,11 @@ class KanaCell extends StatelessWidget {
         curve: Motion.out,
         height: 56,
         decoration: BoxDecoration(
-          color: selected ? jc.brandSoft : jc.surfaceAlt,
-          borderRadius: BorderRadius.circular(Radii.md),
+          color: background,
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected ? jc.brand : Colors.transparent,
-            width: 1.5,
+            color: jc.ink,
+            width: selected ? 3.5 : 2.5,
           ),
         ),
         child: Stack(
@@ -59,29 +73,63 @@ class KanaCell extends StatelessWidget {
                       children: [
                         Text(entries[0].char,
                             style: TextStyle(
-                                fontSize: 19, fontWeight: FontWeight.w600, height: 1, color: jc.ink)),
-                        const SizedBox(width: 6),
+                                fontFamily: 'NotoSansJP',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                height: 1,
+                                color: jc.ink)),
+                        const SizedBox(width: 5),
                         Text(entries[1].char,
                             style: TextStyle(
-                                fontSize: 19, fontWeight: FontWeight.w600, height: 1, color: jc.muted)),
+                                fontFamily: 'NotoSansJP',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                height: 1,
+                                color: jc.ink)),
                       ],
                     )
                   else
                     Text(entries.first.char,
                         style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.w600, height: 1, color: jc.ink)),
-                  const SizedBox(height: 4),
+                            fontFamily: 'NotoSansJP',
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            height: 1,
+                            color: jc.ink)),
+                  const SizedBox(height: 2),
                   Text(romaji,
                       style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
                           height: 1,
-                          color: jc.muted)),
+                          color: jc.ink)),
                 ],
               ),
             ),
-            if (mark != StudyMark.none) Positioned(top: 5, right: 5, child: StudyDot(mark: mark)),
+            if (status.isNotEmpty)
+              Positioned(
+                top: due ? 4 : 3,
+                right: 5,
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: jc.ink,
+                    fontSize: due
+                        ? 8.5
+                        : mark == StudyMark.seen
+                            ? 8
+                            : 10,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            if (selected)
+              Positioned(
+                left: 4,
+                bottom: 3,
+                child: Icon(Icons.check_box_rounded, size: 13, color: jc.ink),
+              ),
           ],
         ),
       ),

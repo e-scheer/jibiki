@@ -29,10 +29,10 @@ Rating _ratingFor(Offset o) {
 }
 
 Color ratingColor(BuildContext c, Rating r) => switch (r) {
-      Rating.again => c.jc.ratingAgain,
-      Rating.hard => c.jc.ratingHard,
-      Rating.good => c.jc.ratingGood,
-      Rating.easy => c.jc.ratingEasy,
+      Rating.again => c.jc.coral,
+      Rating.hard => c.jc.acid,
+      Rating.good => c.jc.lime,
+      Rating.easy => c.jc.brand,
     };
 
 String ratingArrow(Rating r) => switch (r) {
@@ -81,10 +81,11 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
 
   // Drives both the settle (spring) and the throw (eased tween) by interpolating
   // _drag between these anchors; _animCurve is null for the raw spring value.
-  late final AnimationController _return = AnimationController(vsync: this, duration: Motion.base);
+  late final AnimationController _return =
+      AnimationController(vsync: this, duration: Motion.base);
   // Snappy flip, the answer should appear quickly.
-  late final AnimationController _flip =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+  late final AnimationController _flip = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 300));
   Offset _animFrom = Offset.zero;
   Offset _animTo = Offset.zero;
   Curve? _animCurve;
@@ -103,7 +104,8 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
     _return.addListener(() {
       if (!_animating) return;
       final raw = _return.value;
-      final t = _animCurve == null ? raw : _animCurve!.transform(raw.clamp(0.0, 1.0));
+      final t =
+          _animCurve == null ? raw : _animCurve!.transform(raw.clamp(0.0, 1.0));
       setState(() => _drag = Offset.lerp(_animFrom, _animTo, t)!);
       widget.onProgress?.call(_progress(_drag).clamp(0.0, 1.0));
     });
@@ -140,11 +142,13 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
     }
   }
 
-  Size get _size => (context.findRenderObject() as RenderBox?)?.size ?? const Size(360, 520);
+  Size get _size =>
+      (context.findRenderObject() as RenderBox?)?.size ?? const Size(360, 520);
 
   double _progress(Offset o) {
     final s = _size;
-    return math.max(o.dx.abs() / (s.width * 0.42), o.dy.abs() / (s.height * 0.34));
+    return math.max(
+        o.dx.abs() / (s.width * 0.42), o.dy.abs() / (s.height * 0.34));
   }
 
   void _onPanUpdate(DragUpdateDetails d) {
@@ -166,7 +170,8 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
     final v = d.velocity.pixelsPerSecond;
     // Commit on distance OR on a decisive flick: a quick throw grades even before
     // the card crosses the distance threshold, the way a swipe deck should feel.
-    if (_progress(_drag) >= 1 || (v.distance > 1000 && _progress(_drag) > 0.35)) {
+    if (_progress(_drag) >= 1 ||
+        (v.distance > 1000 && _progress(_drag) > 0.35)) {
       _flingOut(_ratingFor(_drag), v);
     } else {
       _snapBack(v);
@@ -188,7 +193,9 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
     _animating = true;
     // Release velocity projected onto the drag→centre axis, in [0,1]/s, so the
     // settle carries the finger's momentum instead of restarting from rest.
-    final vNorm = dist == 0 ? 0.0 : (velocity.dx * -_drag.dx + velocity.dy * -_drag.dy) / (dist * dist);
+    final vNorm = dist == 0
+        ? 0.0
+        : (velocity.dx * -_drag.dx + velocity.dy * -_drag.dy) / (dist * dist);
     _return.animateWith(SpringSimulation(_snapSpring, 0.0, 1.0, vNorm));
   }
 
@@ -258,7 +265,9 @@ class _SwipeCardState extends State<SwipeCard> with TickerProviderStateMixin {
                     ..rotateY(t * math.pi),
                   child: Transform(
                     alignment: Alignment.center,
-                    transform: showBack ? (Matrix4.identity()..rotateY(math.pi)) : Matrix4.identity(),
+                    transform: showBack
+                        ? (Matrix4.identity()..rotateY(math.pi))
+                        : Matrix4.identity(),
                     child: _CardShell(dir: dir, progress: prog, child: face),
                   ),
                 );
@@ -284,12 +293,14 @@ class _CardShell extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: jc.surface,
-        borderRadius: BorderRadius.circular(Radii.xl),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: wash != null ? wash.withValues(alpha: (0.35 + progress * 0.65).clamp(0.0, 1.0)) : jc.hairline,
-          width: wash != null ? 2.5 : 1,
+          color: jc.ink,
+          width: 3,
         ),
-        boxShadow: Shadows.lifted(context),
+        boxShadow: [
+          BoxShadow(color: jc.ink, blurRadius: 0, offset: const Offset(8, 8))
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -297,8 +308,11 @@ class _CardShell extends StatelessWidget {
         children: [
           RepaintBoundary(child: child),
           if (wash != null)
-            IgnorePointer(child: _DirectionalWash(dir: dir!, color: wash, progress: progress)),
-          if (wash != null) _Stamp(rating: dir!, color: wash, progress: progress),
+            IgnorePointer(
+                child: _DirectionalWash(
+                    dir: dir!, color: wash, progress: progress)),
+          if (wash != null)
+            _Stamp(rating: dir!, color: wash, progress: progress),
         ],
       ),
     );
@@ -309,7 +323,8 @@ class _CardShell extends StatelessWidget {
 /// leans into the grade instead of tinting uniformly. Stronger, more directional
 /// than a flat overlay: it reads like the card is being pulled that way.
 class _DirectionalWash extends StatelessWidget {
-  const _DirectionalWash({required this.dir, required this.color, required this.progress});
+  const _DirectionalWash(
+      {required this.dir, required this.color, required this.progress});
   final Rating dir;
   final Color color;
   final double progress;
@@ -327,7 +342,10 @@ class _DirectionalWash extends StatelessWidget {
         gradient: LinearGradient(
           begin: begin,
           end: end,
-          colors: [color.withValues(alpha: (progress * 0.3).clamp(0.0, 0.3)), Colors.transparent],
+          colors: [
+            color.withValues(alpha: (progress * 0.3).clamp(0.0, 0.3)),
+            Colors.transparent
+          ],
           stops: const [0.0, 0.72],
         ),
       ),
@@ -339,7 +357,8 @@ class _DirectionalWash extends StatelessWidget {
 /// drag direction, set on an opaque plate with a coloured halo so the label stays
 /// crisp over the glyph beneath it.
 class _Stamp extends StatelessWidget {
-  const _Stamp({required this.rating, required this.color, required this.progress});
+  const _Stamp(
+      {required this.rating, required this.color, required this.progress});
   final Rating rating;
   final Color color;
   final double progress;
@@ -368,23 +387,40 @@ class _Stamp extends StatelessWidget {
             child: Transform.scale(
               scale: 0.72 + 0.42 * t,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                 decoration: BoxDecoration(
-                  color: context.jc.surface.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(Radii.md),
-                  border: Border.all(color: color, width: 3.5),
+                  color: color,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: context.jc.ink, width: 3),
                   boxShadow: [
-                    BoxShadow(color: color.withValues(alpha: 0.28), blurRadius: 18, offset: const Offset(0, 6)),
+                    BoxShadow(
+                      color: context.jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(5, 5),
+                    ),
                   ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(ratingIcon(rating), color: color, size: 26),
+                    Icon(
+                      ratingIcon(rating),
+                      color: rating == Rating.easy
+                          ? context.jc.surface
+                          : context.jc.ink,
+                      size: 24,
+                    ),
                     const SizedBox(width: 9),
                     Text(
                       rating.label.toUpperCase(),
-                      style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 23, letterSpacing: 1.5),
+                      style: TextStyle(
+                          color: rating == Rating.easy
+                              ? context.jc.surface
+                              : context.jc.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          letterSpacing: 0.9),
                     ),
                   ],
                 ),

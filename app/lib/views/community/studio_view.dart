@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../theme/app_theme.dart';
+import '../widgets/neo_pop.dart';
 
 /// The Studio tab, the home of the mnemonic-drawing ecosystem: your active pack,
 /// browsing & applying community packs, your own drawings, and creating packs.
@@ -13,108 +14,155 @@ class StudioView extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.trText('Studio')),
-        actions: [
-          IconButton(
-            tooltip: context.trText('Settings'),
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+      body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-                gradient: jc.instaLinear,
-                borderRadius: BorderRadius.circular(Radii.lg)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.trText('Mnemonic packs'),
-                    style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white)),
-                const SizedBox(height: 2),
-                Text(
-                  context.trText(
-                      'Every character shows a drawing by default. Swap the whole pack, or draw your own; it then appears everywhere you study.'),
-                  style: const TextStyle(
-                      color: Colors.white, fontSize: 13.5, height: 1.35),
-                ),
-                const SizedBox(height: 14),
-                Row(
+          NeoPageHeader(
+            title: context.trText('Studio'),
+            subtitle: context.trText(
+              'Draw characters, build packs and shape the community library.',
+            ),
+            tone: NeoTone.magenta,
+            trailing: NeoIconButton(
+              icon: Icons.settings_outlined,
+              label: context.trText('Settings'),
+              tone: NeoTone.paper,
+              onTap: () => context.push('/settings'),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: NeoContent(
+                maxWidth: 760,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: jc.ink),
-                        onPressed: () {
-                          Haptics.light();
-                          context.push('/decks/community');
-                        },
-                        child: Text(context.trText('Browse packs')),
+                    NeoCard(
+                      tone: NeoTone.blue,
+                      shadow: 6,
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: jc.acid,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: jc.ink, width: 2.5),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.auto_awesome, size: 25),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  context.trText('Mnemonic packs'),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            context.trText(
+                              'Swap the whole visual memory system, or draw your own. The active art follows you everywhere you study.',
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: NeoPrimaryButton(
+                                  label: context.trText('Browse packs'),
+                                  icon: Icons.explore_outlined,
+                                  tone: NeoTone.acid,
+                                  onTap: () => context.push('/decks/community'),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: NeoPrimaryButton(
+                                  label: context.trText('Create'),
+                                  icon: Icons.add,
+                                  tone: NeoTone.paper,
+                                  onTap: () => context.push('/decks/new'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white),
-                        ),
-                        onPressed: () {
-                          Haptics.light();
-                          context.push('/decks/new');
-                        },
-                        child: Text(context.trText('Create')),
+                    const SizedBox(height: 24),
+                    NeoSectionTitle(context.trText('Your work')),
+                    _Tile(
+                      icon: Icons.brush_outlined,
+                      tone: NeoTone.lime,
+                      title: 'My drawings',
+                      subtitle: 'Everything you\'ve drawn, with review status.',
+                      onTap: () => context.push('/submissions'),
+                    ),
+                    _Tile(
+                      icon: Icons.collections_bookmark_outlined,
+                      tone: NeoTone.lavender,
+                      title: 'My packs',
+                      subtitle: 'Drafts, in review and published.',
+                      onTap: () => context.push('/decks/community?tab=mine'),
+                    ),
+                    _Tile(
+                      icon: Icons.add_box_outlined,
+                      tone: NeoTone.acid,
+                      title: 'Create a pack',
+                      subtitle: 'Bundle your drawings and share them.',
+                      onTap: () => context.push('/decks/new'),
+                    ),
+                    const SizedBox(height: 18),
+                    NeoSectionTitle(context.trText('How it works')),
+                    const NeoCard(
+                      tone: NeoTone.paper,
+                      shadow: 4,
+                      padding: EdgeInsets.fromLTRB(14, 16, 14, 6),
+                      child: Column(
+                        children: [
+                          _Step(
+                            n: '1',
+                            tone: NeoTone.magenta,
+                            text:
+                                'Open any kana or kanji and tap Draw to make a mnemonic.',
+                          ),
+                          _Step(
+                            n: '2',
+                            tone: NeoTone.lime,
+                            text:
+                                'Your drawing becomes active for that character everywhere.',
+                          ),
+                          _Step(
+                            n: '3',
+                            tone: NeoTone.acid,
+                            text:
+                                'Bundle drawings into a pack and share it, or apply someone else\'s.',
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-          const SizedBox(height: 22),
-          Text(context.trText('Your work'), style: context.text.titleMedium),
-          const SizedBox(height: 10),
-          _Tile(
-            icon: Icons.brush_outlined,
-            title: 'My drawings',
-            subtitle: 'Everything you\'ve drawn, with review status.',
-            onTap: () => context.push('/submissions'),
-          ),
-          _Tile(
-            icon: Icons.collections_bookmark_outlined,
-            title: 'My packs',
-            subtitle: 'Drafts, in review and published.',
-            onTap: () => context.push('/decks/community?tab=mine'),
-          ),
-          _Tile(
-            icon: Icons.add_box_outlined,
-            title: 'Create a pack',
-            subtitle: 'Bundle your drawings and share them.',
-            onTap: () => context.push('/decks/new'),
-          ),
-          const SizedBox(height: 22),
-          Text(context.trText('How it works'), style: context.text.titleMedium),
-          const SizedBox(height: 8),
-          const _Step(
-              n: '1',
-              text: 'Open any kana or kanji and tap Draw to make a mnemonic.'),
-          const _Step(
-              n: '2',
-              text:
-                  'Your drawing becomes the active one for that character, everywhere.'),
-          const _Step(
-              n: '3',
-              text:
-                  'Bundle drawings into a pack and share it, or apply someone else\'s.'),
         ],
       ),
     );
@@ -124,10 +172,12 @@ class StudioView extends StatelessWidget {
 class _Tile extends StatelessWidget {
   const _Tile(
       {required this.icon,
+      required this.tone,
       required this.title,
       required this.subtitle,
       required this.onTap});
   final IconData icon;
+  final NeoTone tone;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -137,55 +187,30 @@ class _Tile extends StatelessWidget {
     final jc = context.jc;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: jc.surface,
-        borderRadius: BorderRadius.circular(Radii.md),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.md),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Radii.md),
-              border: Border.all(color: jc.hairline),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: jc.brandSoft,
-                      borderRadius: BorderRadius.circular(Radii.sm)),
-                  child: Icon(icon, color: jc.brand, size: 22),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 15)),
-                      const SizedBox(height: 1),
-                      Text(subtitle,
-                          style: TextStyle(color: jc.muted, fontSize: 12.5)),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: jc.muted),
-              ],
-            ),
+      child: NeoListRow(
+        onTap: onTap,
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: tone.color(context),
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: jc.ink, width: 2.5),
           ),
+          child: Icon(icon, color: jc.ink, size: 22),
         ),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: Icon(Icons.chevron_right, color: jc.ink),
       ),
     );
   }
 }
 
 class _Step extends StatelessWidget {
-  const _Step({required this.n, required this.text});
+  const _Step({required this.n, required this.tone, required this.text});
   final String n;
+  final NeoTone tone;
   final String text;
 
   @override
@@ -197,22 +222,27 @@ class _Step extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: 32,
+            height: 32,
             alignment: Alignment.center,
-            decoration:
-                BoxDecoration(color: jc.brandSoft, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: tone.color(context),
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: jc.ink, width: 2.5),
+            ),
             child: Text(n,
-                style: TextStyle(
-                    color: jc.brandPressed,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
           ),
           const SizedBox(width: 10),
           Expanded(
               child: Text(text,
-                  style:
-                      TextStyle(color: jc.body, fontSize: 13.5, height: 1.35))),
+                  style: TextStyle(
+                    color: jc.body,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ))),
         ],
       ),
     );

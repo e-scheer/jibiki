@@ -38,6 +38,7 @@ import 'services/study_service.dart';
 import 'services/sync_service.dart';
 import 'sync/sync_engine.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_controller.dart';
 import 'viewmodels/app_state.dart';
 import 'views/widgets/sync_conflict_gate.dart';
 
@@ -104,12 +105,11 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
       AuthRepository(AuthService(_api), widget.session);
 
   late final AppState _app = AppState(_authRepo);
+  late final ThemeController _theme = ThemeController(widget.session);
   late final GoRouter _router = buildRouter(_app);
 
   // Built once, ColorScheme.fromSeed does real colour science; recomputing it on
   // every rebuild is pure waste.
-  final ThemeData _light = AppTheme.light();
-  final ThemeData _dark = AppTheme.dark();
 
   StreamSubscription<List<ConnectivityResult>>? _connectivity;
 
@@ -189,9 +189,11 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         Provider(create: (_) => WaniKaniService(_api)),
         Provider(create: (_) => FeedbackService(_api)),
         ChangeNotifierProvider.value(value: _app),
+        ChangeNotifierProvider.value(value: _theme),
       ],
       child: Builder(builder: (context) {
         final interfaceLanguage = context.watch<AppState>().interfaceLanguage;
+        final palette = context.watch<ThemeController>().palette;
         _api.setInterfaceLanguage(interfaceLanguage);
         return MaterialApp.router(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -199,8 +201,13 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           debugShowCheckedModeBanner: false,
-          theme: _light,
-          darkTheme: _dark,
+          theme: AppTheme.light(palette),
+          darkTheme: AppTheme.dark(palette),
+          themeMode: switch (context.watch<ThemeController>().mode) {
+            ThemeModeSetting.light => ThemeMode.light,
+            ThemeModeSetting.dark => ThemeMode.dark,
+            ThemeModeSetting.system => ThemeMode.system,
+          },
           routerConfig: _router,
           // Premium touch: tapping anywhere outside a field dismisses the keyboard.
           // Translucent so empty space is captured while buttons/fields still win

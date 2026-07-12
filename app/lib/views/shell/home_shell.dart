@@ -1,21 +1,18 @@
-import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../l10n/l10n.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
-import '../community/studio_view.dart';
-import '../dictionary/kanji_browse_view.dart';
+import '../community/community_decks_view.dart';
 import '../dictionary/search_view.dart';
 import '../kana/kana_chart_view.dart';
 import '../study/decks_view.dart';
+import '../study/statistics_view.dart';
 
-/// The signed-in home. Five tabs: Explore (search + browse) · Kana · Kanji ·
-/// Study · Studio (the mnemonic-drawing ecosystem). Settings lives behind a gear
-/// icon on the tab app bars, not as a tab.
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
@@ -30,52 +27,39 @@ class HomeShell extends StatelessWidget {
 
 class _Shell extends StatefulWidget {
   const _Shell();
+
   @override
   State<_Shell> createState() => _ShellState();
 }
 
 class _ShellState extends State<_Shell> {
+  static const _reviewIndex = 2;
+  static const _tabs = [
+    SearchView(),
+    KanaChartView(),
+    DecksView(),
+    CommunityDecksView(),
+    StatisticsView(),
+  ];
+  static const _destinations = [
+    _Destination(_NavGlyphKind.book, 'Dico', 'Dico'),
+    _Destination(_NavGlyphKind.kana, 'Kana', 'Kana'),
+    _Destination(_NavGlyphKind.review, 'Review', 'Réviser'),
+    _Destination(_NavGlyphKind.community, 'Community', 'Communauté'),
+    _Destination(_NavGlyphKind.profile, 'Profile', 'Profil'),
+  ];
+
   int _index = 0;
   bool _initialised = false;
   PageController? _pager;
 
-  static const _studyIndex = 3;
-  static const _tabs = [
-    SearchView(),
-    KanaChartView(),
-    KanjiBrowseView(),
-    DecksView(),
-    StudioView(),
-  ];
-
-  static const _dests = [
-    (icon: Icons.search, sel: Icons.search, label: 'Explore'),
-    (icon: Icons.grid_view_outlined, sel: Icons.grid_view, label: 'Kana'),
-    (icon: Icons.translate_outlined, sel: Icons.translate, label: 'Kanji'),
-    (icon: Icons.school_outlined, sel: Icons.school, label: 'Study'),
-    (icon: Icons.palette_outlined, sel: Icons.palette, label: 'Studio'),
-  ];
-
-  Widget _navIcon(int i,
-      {required bool selected, required int due, required bool showBadge}) {
-    final d = _dests[i];
-    final icon = Icon(selected ? d.sel : d.icon);
-    if (i != _studyIndex) return icon;
-    return Badge(
-        isLabelVisible: showBadge,
-        label: Text(context.trText('$due')),
-        child: icon);
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_initialised) {
-      // Learning mode opens on the review dashboard; everyone else on Explore.
-      _index = context.read<AppState>().mode.showsReviewFirst ? _studyIndex : 0;
-      _pager = PageController(initialPage: _index);
-      _initialised = true;
-    }
+    if (_initialised) return;
+    _index = context.read<AppState>().mode.showsReviewFirst ? _reviewIndex : 0;
+    _pager = PageController(initialPage: _index);
+    _initialised = true;
   }
 
   @override
@@ -84,45 +68,42 @@ class _ShellState extends State<_Shell> {
     super.dispose();
   }
 
-  // One entry point for both navs. Compact drives the swipeable PageView (jump →
-  // onPageChanged → _onPageSettled); wide has no live pager (IndexedStack), so it
-  // just sets the tab. A tap jumps instantly rather than animating through the
-  // intermediate tabs (which would also build each one).
-  void _go(int i) {
-    if (i == _index) return;
+  void _go(int index) {
+    if (index == _index) return;
     final pager = _pager;
-    if (pager != null && pager.hasClients) {
-      pager.jumpToPage(i);
+    if (context.win.isCompact && pager != null && pager.hasClients) {
+      if (Motion.enabled(context)) {
+        pager.animateToPage(
+          index,
+          duration: Motion.timed(context, Motion.base),
+          curve: Motion.outStrong,
+        );
+      } else {
+        pager.jumpToPage(index);
+      }
     } else {
-      _onPageSettled(i);
+      _onPageSettled(index);
     }
   }
 
-  void _onPageSettled(int i) {
-    if (i == _index) return;
-    Haptics.tick();
-    setState(() => _index = i);
-    if (i == _studyIndex) context.read<DashboardViewModel>().load();
+  void _onPageSettled(int index) {
+    if (index == _index) return;
+    setState(() => _index = index);
+    if (index == _reviewIndex) context.read<DashboardViewModel>().load();
   }
 
-  // After a wide→compact switch (rotation) the PageView reattaches at its old page
-  // while _index moved via the rail; nudge it back so the bar and content agree.
   void _syncPager() {
     final pager = _pager;
-    if (pager != null &&
-        pager.hasClients &&
-        (pager.page?.round() ?? _index) != _index) {
-      pager.jumpToPage(_index);
-    }
+    if (pager == null || !pager.hasClients) return;
+    if ((pager.page?.round() ?? _index) != _index) pager.jumpToPage(_index);
   }
 
   @override
   Widget build(BuildContext context) {
     final mode = context.watch<AppState>().mode;
     final due = context.watch<DashboardViewModel>().stats.dueNow;
-    final showBadge = mode.showsDueBadge && due > 0;
+    final showDue = mode.showsDueBadge && due > 0;
 
-    // Compact (phones portrait): bottom bar + a swipeable, keep-alive PageView.
     if (context.win.isCompact) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _syncPager();
@@ -132,47 +113,29 @@ class _ShellState extends State<_Shell> {
           controller: _pager,
           onPageChanged: _onPageSettled,
           physics: const _SnappyPageScrollPhysics(),
-          children: [
-            for (final tab in _tabs) _KeepAlive(child: tab),
-          ],
+          children: [for (final tab in _tabs) _KeepAlive(child: tab)],
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _index,
-          onDestinationSelected: _go,
-          destinations: [
-            for (var i = 0; i < _dests.length; i++)
-              NavigationDestination(
-                icon: _navIcon(i,
-                    selected: false, due: due, showBadge: showBadge),
-                selectedIcon:
-                    _navIcon(i, selected: true, due: due, showBadge: showBadge),
-                label: _dests[i].label,
-              ),
-          ],
+        bottomNavigationBar: _NeoBottomNavigation(
+          index: _index,
+          due: showDue ? due : 0,
+          destinations: _destinations,
+          onSelect: _go,
         ),
       );
     }
 
-    // Medium+ (landscape phones, tablets, desktop): a side rail beside an
-    // IndexedStack. No PageController here, so the rail's selection and the shown
-    // tab can never drift apart the way a resized PageView's can on rotation. The
-    // rail frees the scarce vertical space landscape needs and reads native on a
-    // tablet; it extends with labels + brand mark on truly wide screens.
-    final extended =
-        MediaQuery.sizeOf(context).width >= Breakpoints.railExtended;
+    final extended = context.win == WindowSize.expanded;
     return Scaffold(
       body: SafeArea(
         child: Row(
           children: [
-            _NavRail(
+            _NeoNavigationRail(
               index: _index,
+              due: showDue ? due : 0,
               extended: extended,
+              destinations: _destinations,
               onSelect: _go,
-              iconBuilder: (i, selected) => _navIcon(i,
-                  selected: selected, due: due, showBadge: showBadge),
-              labels: [for (final d in _dests) d.label],
             ),
-            VerticalDivider(width: 1, thickness: 1, color: context.jc.hairline),
             Expanded(child: IndexedStack(index: _index, children: _tabs)),
           ],
         ),
@@ -181,79 +144,48 @@ class _ShellState extends State<_Shell> {
   }
 }
 
-/// The wide-screen navigation: a Material 3 rail styled to match the bottom bar
-/// (transparent indicator, vermilion when selected, quiet otherwise). Scrolls if
-/// a short landscape phone can't fit every destination, extends with labels and a
-/// brand mark on tablet/desktop widths.
-class _NavRail extends StatelessWidget {
-  const _NavRail({
+class _NeoBottomNavigation extends StatelessWidget {
+  const _NeoBottomNavigation({
     required this.index,
-    required this.extended,
+    required this.due,
+    required this.destinations,
     required this.onSelect,
-    required this.iconBuilder,
-    required this.labels,
   });
 
   final int index;
-  final bool extended;
+  final int due;
+  final List<_Destination> destinations;
   final ValueChanged<int> onSelect;
-  final Widget Function(int i, bool selected) iconBuilder;
-  final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
-    return LayoutBuilder(
-      builder: (context, c) => SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: c.maxHeight),
-          child: IntrinsicHeight(
-            child: NavigationRail(
-              backgroundColor: jc.canvas,
-              selectedIndex: index,
-              onDestinationSelected: onSelect,
-              extended: extended,
-              labelType: extended
-                  ? NavigationRailLabelType.none
-                  : NavigationRailLabelType.selected,
-              groupAlignment: -0.75,
-              useIndicator: false,
-              leading: extended
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 8, bottom: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(context.trText('字'),
-                              style: TextStyle(
-                                  fontSize: 26,
-                                  color: jc.brand,
-                                  fontWeight: FontWeight.w700)),
-                          const SizedBox(width: 8),
-                          Text(context.trText('jibiki'),
-                              style: TextStyle(
-                                  fontSize: 17,
-                                  color: jc.ink,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3)),
-                        ],
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.jc.surface,
+          border: Border(top: BorderSide(color: context.jc.ink, width: 3)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
+            child: SizedBox(
+              height: 56,
+              child: Row(
+                children: [
+                  for (var i = 0; i < destinations.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 4),
+                    Expanded(
+                      child: _NeoNavButton(
+                        destination: destinations[i],
+                        selected: index == i,
+                        due: i == _ShellState._reviewIndex ? due : 0,
+                        onTap: () => onSelect(i),
                       ),
-                    )
-                  : null,
-              selectedIconTheme: IconThemeData(color: jc.brand, size: 26),
-              unselectedIconTheme: IconThemeData(color: jc.muted, size: 25),
-              selectedLabelTextStyle: TextStyle(
-                  color: jc.brand, fontWeight: FontWeight.w700, fontSize: 12.5),
-              unselectedLabelTextStyle: TextStyle(
-                  color: jc.muted, fontWeight: FontWeight.w600, fontSize: 12.5),
-              destinations: [
-                for (var i = 0; i < labels.length; i++)
-                  NavigationRailDestination(
-                    icon: iconBuilder(i, false),
-                    selectedIcon: iconBuilder(i, true),
-                    label: Text(labels[i]),
-                  ),
-              ],
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
@@ -262,10 +194,374 @@ class _NavRail extends StatelessWidget {
   }
 }
 
-/// Keeps a tab mounted once it's first built, so swiping away and back doesn't
-/// reset its scroll offset or re-fire its initial requests.
+class _NeoNavigationRail extends StatelessWidget {
+  const _NeoNavigationRail({
+    required this.index,
+    required this.due,
+    required this.extended,
+    required this.destinations,
+    required this.onSelect,
+  });
+
+  final int index;
+  final int due;
+  final bool extended;
+  final List<_Destination> destinations;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    return RepaintBoundary(
+      child: Container(
+        width: extended ? 224 : 88,
+        decoration: BoxDecoration(
+          color: jc.surface,
+          border: Border(right: BorderSide(color: jc.ink, width: 3)),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              extended ? 16 : 10,
+              18,
+              extended ? 16 : 10,
+              18,
+            ),
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(minHeight: constraints.maxHeight - 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _RailBrand(extended: extended),
+                  const SizedBox(height: 34),
+                  for (var i = 0; i < destinations.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 10),
+                    SizedBox(
+                      height: 58,
+                      child: _NeoNavButton(
+                        destination: destinations[i],
+                        selected: index == i,
+                        due: i == _ShellState._reviewIndex ? due : 0,
+                        horizontal: extended,
+                        onTap: () => onSelect(i),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RailBrand extends StatelessWidget {
+  const _RailBrand({required this.extended});
+
+  final bool extended;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment:
+          extended ? MainAxisAlignment.start : MainAxisAlignment.center,
+      children: [
+        if (!extended)
+          Text(
+            '字',
+            style: TextStyle(
+              color: context.jc.brand,
+              fontFamily: 'NotoSansJP',
+              fontSize: 28,
+              height: 1,
+              fontWeight: FontWeight.w900,
+            ),
+          )
+        else ...[
+          Text(
+            context.trText('jibiki'),
+            style: const TextStyle(
+              fontSize: 22,
+              height: 1,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Transform.rotate(
+            angle: 0.2,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: context.jc.acid,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _NeoNavButton extends StatefulWidget {
+  const _NeoNavButton({
+    required this.destination,
+    required this.selected,
+    required this.due,
+    required this.onTap,
+    this.horizontal = false,
+  });
+
+  final _Destination destination;
+  final bool selected;
+  final int due;
+  final VoidCallback onTap;
+  final bool horizontal;
+
+  @override
+  State<_NeoNavButton> createState() => _NeoNavButtonState();
+}
+
+class _NeoNavButtonState extends State<_NeoNavButton> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    final label = widget.destination.label(context);
+    final icon = _NavIcon(
+      kind: widget.destination.kind,
+      due: widget.due,
+    );
+    final labelWidget = Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.fade,
+      softWrap: false,
+      style: TextStyle(
+        color: jc.ink,
+        fontSize: widget.horizontal ? 13 : 10.5,
+        height: 1,
+        fontWeight: widget.selected ? FontWeight.w900 : FontWeight.w700,
+      ),
+    );
+
+    return Semantics(
+      button: true,
+      selected: widget.selected,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _setPressed(true),
+        onTapCancel: () => _setPressed(false),
+        onTapUp: (_) => _setPressed(false),
+        onTap: () {
+          Haptics.tick();
+          widget.onTap();
+        },
+        child: AnimatedContainer(
+          duration: Motion.timed(context, const Duration(milliseconds: 120)),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(
+            _pressed && widget.selected ? 4 : 0,
+            _pressed && widget.selected ? 4 : 0,
+            0,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.horizontal ? 14 : 2,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: widget.selected ? jc.acid : Colors.transparent,
+            border:
+                widget.selected ? Border.all(color: jc.ink, width: 2.5) : null,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: widget.selected && !_pressed
+                ? [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: widget.horizontal
+              ? Row(
+                  children: [
+                    icon,
+                    const SizedBox(width: 12),
+                    Expanded(child: labelWidget),
+                  ],
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    icon,
+                    const SizedBox(height: 3),
+                    FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavIcon extends StatelessWidget {
+  const _NavIcon({required this.kind, required this.due});
+
+  final _NavGlyphKind kind;
+  final int due;
+
+  @override
+  Widget build(BuildContext context) {
+    final glyph = kind == _NavGlyphKind.kana
+        ? Text(
+            'あ',
+            style: TextStyle(
+              color: context.jc.ink,
+              fontFamily: 'NotoSansJP',
+              fontSize: 19,
+              height: 1.05,
+              fontWeight: FontWeight.w900,
+            ),
+          )
+        : CustomPaint(
+            size: const Size.square(22),
+            painter: _NavGlyphPainter(kind: kind, color: context.jc.ink),
+          );
+    if (due <= 0) return SizedBox.square(dimension: 22, child: glyph);
+    return SizedBox(
+      width: 30,
+      height: 22,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(left: 0, top: 0, child: glyph),
+          Positioned(
+            right: -2,
+            top: -7,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.jc.magenta,
+                border: Border.all(color: context.jc.ink, width: 2),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                due > 99 ? '99+' : '$due',
+                style: const TextStyle(
+                  fontSize: 8.5,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavGlyphPainter extends CustomPainter {
+  const _NavGlyphPainter({required this.kind, required this.color});
+
+  final _NavGlyphKind kind;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    switch (kind) {
+      case _NavGlyphKind.book:
+        final path = Path()
+          ..moveTo(11, 4.5)
+          ..cubicTo(9.2, 3.2, 6.6, 2.8, 3.5, 3.2)
+          ..lineTo(3.5, 16.8)
+          ..cubicTo(6.6, 16.4, 9.2, 16.8, 11, 18.1)
+          ..cubicTo(12.8, 16.8, 15.4, 16.4, 18.5, 16.8)
+          ..lineTo(18.5, 3.2)
+          ..cubicTo(15.4, 2.8, 12.8, 3.2, 11, 4.5)
+          ..lineTo(11, 18.1);
+        canvas.drawPath(path, paint);
+      case _NavGlyphKind.review:
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(5.5, 3, 13, 9.5),
+            const Radius.circular(2),
+          ),
+          paint,
+        );
+        final path = Path()
+          ..moveTo(3.5, 8)
+          ..lineTo(3.5, 16.5)
+          ..quadraticBezierTo(3.5, 19, 6, 19)
+          ..lineTo(15.5, 19);
+        canvas.drawPath(path, paint);
+      case _NavGlyphKind.community:
+        final path = Path()
+          ..moveTo(19, 10)
+          ..cubicTo(19, 13.9, 15.9, 17, 12, 17)
+          ..cubicTo(10.9, 17, 9.8, 16.8, 8.9, 16.3)
+          ..lineTo(4, 18)
+          ..lineTo(5.6, 14.3)
+          ..cubicTo(5.2, 13, 5, 11.6, 5, 10)
+          ..cubicTo(5, 6.1, 8.1, 3, 12, 3)
+          ..cubicTo(15.9, 3, 19, 6.1, 19, 10)
+          ..close();
+        canvas.drawPath(path, paint);
+      case _NavGlyphKind.profile:
+        canvas.drawCircle(const Offset(11, 7.5), 3.6, paint);
+        final path = Path()
+          ..moveTo(4.5, 19)
+          ..cubicTo(5.3, 15.6, 7.9, 13.8, 11, 13.8)
+          ..cubicTo(14.1, 13.8, 16.7, 15.6, 17.5, 19);
+        canvas.drawPath(path, paint);
+      case _NavGlyphKind.kana:
+        break;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_NavGlyphPainter oldDelegate) =>
+      oldDelegate.kind != kind || oldDelegate.color != color;
+}
+
+enum _NavGlyphKind { book, kana, review, community, profile }
+
+class _Destination {
+  const _Destination(this.kind, this.english, this.french);
+
+  final _NavGlyphKind kind;
+  final String english;
+  final String french;
+
+  String label(BuildContext context) =>
+      Localizations.localeOf(context).languageCode == 'fr' ? french : english;
+}
+
 class _KeepAlive extends StatefulWidget {
   const _KeepAlive({required this.child});
+
   final Widget child;
 
   @override
@@ -284,8 +580,6 @@ class _KeepAliveState extends State<_KeepAlive>
   }
 }
 
-/// A slightly firmer page fling so tab-to-tab swipes feel crisp rather than
-/// loose, matching the app's tight, snappy motion language.
 class _SnappyPageScrollPhysics extends ScrollPhysics {
   const _SnappyPageScrollPhysics({super.parent});
 
@@ -293,9 +587,10 @@ class _SnappyPageScrollPhysics extends ScrollPhysics {
   _SnappyPageScrollPhysics applyTo(ScrollPhysics? ancestor) =>
       _SnappyPageScrollPhysics(parent: buildParent(ancestor));
 
-  // Lighter mass + stiffer than the default, critically damped: the page snaps
-  // home crisply without an overshoot wobble.
   @override
-  SpringDescription get spring =>
-      SpringDescription.withDampingRatio(mass: 0.5, stiffness: 200, ratio: 1.0);
+  SpringDescription get spring => SpringDescription.withDampingRatio(
+        mass: 0.5,
+        stiffness: 200,
+        ratio: 1,
+      );
 }

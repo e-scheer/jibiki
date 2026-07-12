@@ -2,6 +2,8 @@ import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../sync/sync_engine.dart';
+import '../../theme/app_theme.dart';
+import 'neo_pop.dart';
 
 class SyncConflictGate extends StatefulWidget {
   const SyncConflictGate({super.key, required this.sync, required this.child});
@@ -69,45 +71,110 @@ Future<void> showSyncConflictDialog(
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(
-        anotherAccount
-            ? 'Data from another account'
-            : 'Choose which progress to keep',
-      ),
-      content: Text(
-        anotherAccount
-            ? 'This device still contains progress linked to another account. '
-                'It cannot be uploaded to the account you just opened. You can '
-                'load this account from the cloud or stay offline for now.'
-            : 'This device has ${conflict.localCards} cards and '
-                '${conflict.localReviews} reviews. The cloud has '
-                '${conflict.cloudCards} cards and ${conflict.cloudReviews} reviews.\n\n'
-                'Keeping one version replaces the other. This cannot be undone.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: Text(context.trText('Not now')),
-        ),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.cloud_outlined),
-          label: Text(context.trText('Keep cloud')),
-          onPressed: () async {
-            Navigator.pop(dialogContext);
-            await sync.resolveConflict(SyncResolution.cloud);
-          },
-        ),
-        if (!anotherAccount)
-          FilledButton.icon(
-            icon: const Icon(Icons.phone_android_outlined),
-            label: Text(context.trText('Keep this device')),
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await sync.resolveConflict(SyncResolution.local);
-            },
+    barrierColor: context.jc.ink.withValues(alpha: 0.62),
+    builder: (dialogContext) => Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: NeoCard(
+          tone: anotherAccount ? NeoTone.coral : NeoTone.lavender,
+          shadow: 6,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: dialogContext.jc.surface,
+                      borderRadius: BorderRadius.circular(11),
+                      border:
+                          Border.all(color: dialogContext.jc.ink, width: 2.5),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      anotherAccount
+                          ? Icons.person_off_outlined
+                          : Icons.sync_problem_outlined,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      anotherAccount
+                          ? 'Data from another account'
+                          : 'Choose which progress to keep',
+                      style: dialogContext.text.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w900, height: 1.05),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: dialogContext.jc.surface,
+                  borderRadius: BorderRadius.circular(11),
+                  border: Border.all(color: dialogContext.jc.ink, width: 2.5),
+                ),
+                child: Text(
+                  anotherAccount
+                      ? 'This device still contains progress linked to another account. '
+                          'It cannot be uploaded to the account you just opened. You can '
+                          'load this account from the cloud or stay offline for now.'
+                      : 'This device has ${conflict.localCards} cards and '
+                          '${conflict.localReviews} reviews. The cloud has '
+                          '${conflict.cloudCards} cards and ${conflict.cloudReviews} reviews.\n\n'
+                          'Keeping one version replaces the other. This cannot be undone.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              NeoPrimaryButton(
+                label: context.trText('Keep cloud'),
+                icon: Icons.cloud_outlined,
+                tone: NeoTone.blue,
+                onTap: () async {
+                  Navigator.pop(dialogContext);
+                  await sync.resolveConflict(SyncResolution.cloud);
+                },
+              ),
+              if (!anotherAccount) ...[
+                const SizedBox(height: 10),
+                NeoPrimaryButton(
+                  label: context.trText('Keep this device'),
+                  icon: Icons.phone_android_outlined,
+                  tone: NeoTone.acid,
+                  onTap: () async {
+                    Navigator.pop(dialogContext);
+                    await sync.resolveConflict(SyncResolution.local);
+                  },
+                ),
+              ],
+              const SizedBox(height: 10),
+              NeoPrimaryButton(
+                label: context.trText('Not now'),
+                tone: NeoTone.paper,
+                onTap: () => Navigator.pop(dialogContext),
+              ),
+            ],
           ),
-      ],
+        ),
+      ),
     ),
   );
 }

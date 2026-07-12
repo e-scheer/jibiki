@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import 'drawing_pad.dart';
 
@@ -111,17 +112,70 @@ class _DrawMascotViewState extends State<DrawMascotView> {
     if (_paint.isEmpty) return;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.trText('Clear the drawing?')),
-        content: Text(context.trText('This removes everything on the canvas.')),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(context.trText('Cancel'))),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(context.trText('Clear'))),
-        ],
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: NeoCard(
+            tone: NeoTone.lavender,
+            shadow: 7,
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const NeoBadge('CLEAR', tone: NeoTone.coral, rotate: -2),
+                const SizedBox(height: 16),
+                Text(
+                  context.trText('Clear the drawing?'),
+                  style: context.text.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.trText('This removes everything on the canvas.'),
+                  style: TextStyle(
+                    color: context.jc.body,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: NeoCard(
+                        shadow: 3,
+                        onTap: () => Navigator.pop(dialogContext, false),
+                        child: Center(
+                          child: Text(
+                            context.trText('Cancel'),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: NeoCard(
+                        tone: NeoTone.coral,
+                        shadow: 4,
+                        onTap: () => Navigator.pop(dialogContext, true),
+                        child: Center(
+                          child: Text(
+                            context.trText('Clear'),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
     if (ok == true) {
@@ -139,111 +193,265 @@ class _DrawMascotViewState extends State<DrawMascotView> {
       // The hint field sits at the top, above the keyboard, so we let the keyboard
       // overlay the bottom instead of resizing (and squashing) the canvas.
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text(context.trText('Draw · ${widget.character}')),
-        actions: [
-          IconButton(
-            tooltip: _showGuide ? 'Hide guide' : 'Show guide',
-            icon: Icon(_showGuide
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined),
-            onPressed: () => setState(() => _showGuide = !_showGuide),
-          ),
-          // Undo / redo live in the app bar so the toolbar can give the brushes
-          // and colours the room they deserve.
-          ListenableBuilder(
-            listenable: _paint,
-            builder: (_, __) => Row(
-              children: [
-                IconButton(
-                  tooltip: context.trText('Undo'),
-                  icon: const Icon(Icons.undo),
-                  onPressed: _paint.canUndo
-                      ? () {
-                          Haptics.tick();
-                          _paint.undo();
-                        }
-                      : null,
-                ),
-                IconButton(
-                  tooltip: context.trText('Redo'),
-                  icon: const Icon(Icons.redo),
-                  onPressed: _paint.canRedo
-                      ? () {
-                          Haptics.tick();
-                          _paint.redo();
-                        }
-                      : null,
-                ),
-              ],
-            ),
-          ),
-          // Save listens to BOTH the drawing and the hint field so it enables the
-          // moment there's a stroke + a hint, without a full-page setState.
+      backgroundColor: context.jc.canvas,
+      body: Column(
+        children: [
           ListenableBuilder(
             listenable: Listenable.merge([_paint, _word]),
-            builder: (_, __) => TextButton(
-              onPressed: _canSave ? _save : null,
-              child: _saving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(context.trText('Save')),
+            builder: (_, __) => _StudioTop(
+              character: widget.character,
+              saving: _saving,
+              canSave: _canSave,
+              onBack: () => Navigator.of(context).pop(),
+              onSave: _save,
             ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+          ListenableBuilder(
+            listenable: _paint,
+            builder: (_, __) => _UtilityStrip(
+              showGuide: _showGuide,
+              canUndo: _paint.canUndo,
+              canRedo: _paint.canRedo,
+              onGuide: () => setState(() => _showGuide = !_showGuide),
+              onUndo: () {
+                Haptics.tick();
+                _paint.undo();
+              },
+              onRedo: () {
+                Haptics.tick();
+                _paint.redo();
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
+            child: NeoCard(
+              shadow: 3,
+              padding: const EdgeInsets.all(3),
               child: TextField(
                 controller: _word,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  labelText: context.trText('It looks like…'),
-                  hintText: context.trText('e.g. a unicorn / une licorne'),
-                  prefixIcon: const Icon(Icons.lightbulb_outline),
+                  hintText: context.trText('It looks like…'),
+                  prefixIcon: const Icon(Icons.lightbulb_outline_rounded),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: false,
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: RepaintBoundary(
-                        key: _boundaryKey,
-                        child: DrawingPad(
-                          controller: _paint,
-                          character: widget.character,
-                          showGuide: _showGuide,
-                        ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 2, 18, 10),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: RepaintBoundary(
+                      key: _boundaryKey,
+                      child: DrawingPad(
+                        controller: _paint,
+                        character: widget.character,
+                        showGuide: _showGuide,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-            _Toolbar(
-              controller: _paint,
-              swatches: swatches,
-              onPickColor: (c) {
-                Haptics.tick();
-                _paint.setColor(c);
-              },
-              onClear: _confirmClear,
-            ),
-          ],
-        ),
+          ),
+          _Toolbar(
+            controller: _paint,
+            swatches: swatches,
+            onPickColor: (color) {
+              Haptics.tick();
+              _paint.setColor(color);
+            },
+            onClear: _confirmClear,
+          ),
+        ],
       ),
     );
   }
+}
+
+class _StudioTop extends StatelessWidget {
+  const _StudioTop({
+    required this.character,
+    required this.saving,
+    required this.canSave,
+    required this.onBack,
+    required this.onSave,
+  });
+
+  final String character;
+  final bool saving;
+  final bool canSave;
+  final VoidCallback onBack;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.jc.magenta,
+          border: Border(bottom: BorderSide(color: context.jc.ink, width: 3)),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+            child: Row(
+              children: [
+                NeoIconButton(
+                  icon: Icons.arrow_back_rounded,
+                  label: context.trText('Back'),
+                  onTap: onBack,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.trText('Draw · $character'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        context.trText('Turn the glyph into a memory.'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                NeoCard(
+                  tone: canSave ? NeoTone.acid : NeoTone.paper,
+                  shadow: canSave ? 4 : 0,
+                  radius: 9,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 11,
+                  ),
+                  onTap: canSave ? onSave : null,
+                  child: saving
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_rounded, size: 18),
+                            const SizedBox(width: 5),
+                            Text(
+                              context.trText('Save'),
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _UtilityStrip extends StatelessWidget {
+  const _UtilityStrip({
+    required this.showGuide,
+    required this.canUndo,
+    required this.canRedo,
+    required this.onGuide,
+    required this.onUndo,
+    required this.onRedo,
+  });
+
+  final bool showGuide;
+  final bool canUndo;
+  final bool canRedo;
+  final VoidCallback onGuide;
+  final VoidCallback onUndo;
+  final VoidCallback onRedo;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        color: context.jc.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Row(
+          children: [
+            NeoBadge(
+              showGuide
+                  ? context.trText('GUIDE ON')
+                  : context.trText('GUIDE OFF'),
+              tone: showGuide ? NeoTone.lime : NeoTone.paper,
+            ),
+            const Spacer(),
+            _StudioIconAction(
+              icon: showGuide
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              label: showGuide ? 'Hide guide' : 'Show guide',
+              onTap: onGuide,
+            ),
+            const SizedBox(width: 8),
+            _StudioIconAction(
+              icon: Icons.undo_rounded,
+              label: context.trText('Undo'),
+              onTap: canUndo ? onUndo : null,
+            ),
+            const SizedBox(width: 8),
+            _StudioIconAction(
+              icon: Icons.redo_rounded,
+              label: context.trText('Redo'),
+              onTap: canRedo ? onRedo : null,
+            ),
+          ],
+        ),
+      );
+}
+
+class _StudioIconAction extends StatelessWidget {
+  const _StudioIconAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+        opacity: onTap == null ? 0.35 : 1,
+        child: SizedBox.square(
+          dimension: 38,
+          child: NeoCard(
+            shadow: onTap == null ? 0 : 2,
+            radius: 8,
+            padding: EdgeInsets.zero,
+            onTap: onTap,
+            semanticLabel: label,
+            child: Icon(icon, size: 18),
+          ),
+        ),
+      );
 }
 
 class _Toolbar extends StatelessWidget {
@@ -267,8 +475,8 @@ class _Toolbar extends StatelessWidget {
       builder: (context, _) {
         return Container(
           decoration: BoxDecoration(
-            color: jc.canvas,
-            border: Border(top: BorderSide(color: jc.hairline)),
+            color: jc.lavender,
+            border: Border(top: BorderSide(color: jc.ink, width: 3)),
           ),
           child: SafeArea(
             top: false,
@@ -277,23 +485,20 @@ class _Toolbar extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SegmentedButton<DrawingLayer>(
+                  NeoSegmentedControl<DrawingLayer>(
                     segments: [
                       for (final layer in DrawingLayer.values)
-                        ButtonSegment(
-                          value: layer,
-                          icon: Icon(layer.icon, size: 18),
-                          label: Text(layer.label),
-                          tooltip: layer == DrawingLayer.below
-                              ? 'Draw behind the guide'
-                              : 'Draw in front of the guide',
+                        NeoSegment(
+                          layer,
+                          layer.label,
+                          icon: layer.icon,
                         ),
                     ],
-                    selected: {controller.layer},
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selection) {
+                    selected: controller.layer,
+                    height: 48,
+                    onChanged: (layer) {
                       Haptics.tick();
-                      controller.setLayer(selection.single);
+                      controller.setLayer(layer);
                     },
                   ),
                   const SizedBox(height: 10),
@@ -317,7 +522,7 @@ class _Toolbar extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                           ],
-                          Container(width: 1, height: 40, color: jc.hairline),
+                          Container(width: 2.5, height: 40, color: jc.ink),
                           const SizedBox(width: 8),
                           _BrushButton(
                             icon: Icons.auto_fix_normal,
@@ -435,7 +640,7 @@ class _BrushButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final fg = selected ? Colors.white : jc.ink;
+    final fg = jc.ink;
     return Pressable(
       label: label,
       selected: selected,
@@ -445,8 +650,18 @@ class _BrushButton extends StatelessWidget {
         width: 60,
         padding: const EdgeInsets.symmetric(vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? jc.brand : jc.surfaceAlt,
+          color: selected ? jc.acid : jc.surface,
+          border: Border.all(color: jc.ink, width: 2.5),
           borderRadius: BorderRadius.circular(Radii.md),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(3, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -500,7 +715,11 @@ class _Swatch extends StatelessWidget {
             color: color,
             shape: BoxShape.circle,
             // A hairline keeps white / pale swatches legible on the surface.
-            border: Border.all(color: jc.hairline, width: 1),
+            border: Border.all(color: jc.ink, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                  color: jc.ink, blurRadius: 0, offset: const Offset(3, 3))
+            ],
           ),
         ),
       ),
@@ -531,9 +750,9 @@ class _MiniSlider extends StatelessWidget {
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 4,
-              activeTrackColor: jc.brand,
-              inactiveTrackColor: jc.surfaceAlt,
-              thumbColor: jc.brand,
+              activeTrackColor: jc.ink,
+              inactiveTrackColor: jc.surface,
+              thumbColor: jc.acid,
               overlayShape: SliderComponentShape.noOverlay,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
@@ -562,19 +781,16 @@ class _ToolButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final color = enabled ? jc.ink : jc.muted.withValues(alpha: 0.4);
-    final button = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(Radii.sm),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Radii.sm),
-          onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.all(9),
-            child: Icon(icon, size: 22, color: color),
-          ),
-        ),
+    final button = Opacity(
+      opacity: enabled ? 1 : 0.35,
+      child: NeoCard(
+        tone: NeoTone.coral,
+        shadow: enabled ? 3 : 0,
+        radius: 8,
+        padding: const EdgeInsets.all(9),
+        onTap: enabled ? onTap : null,
+        semanticLabel: tooltip,
+        child: Icon(icon, size: 20, color: color),
       ),
     );
     return tooltip == null ? button : Tooltip(message: tooltip!, child: button);

@@ -14,6 +14,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/word_detail_viewmodel.dart';
 import '../feedback/report_item_sheet.dart';
 import '../widgets/study_status_bar.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
 import '../widgets/tappable_japanese.dart';
@@ -42,33 +43,53 @@ class _WordDetail extends StatelessWidget {
     final lang = context.watch<AppState>().mnemonicLanguage;
     final word = vm.word;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.trText('Word')),
-        actions: word == null
-            ? null
-            : [
-                IconButton(
-                  tooltip: context.trText('Capture source'),
-                  icon: const Icon(Icons.content_copy_outlined),
-                  onPressed: () => _capture(context, word),
-                ),
-                ReportItemAction(
-                    type: ReportItemType.word,
-                    itemRef: '${word.id}',
-                    label: word.headword),
-              ],
-      ),
       bottomNavigationBar: word == null
           ? null
           : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
-      body: BoundedContent(
-        child: vm.isLoading
-            ? const LoadingView()
-            : vm.hasError
-                ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-                : word == null
-                    ? const SizedBox.shrink()
-                    : _content(context, word, lang),
+      body: SafeArea(
+        child: Column(
+          children: [
+            BoundedContent(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                child: Row(
+                  children: [
+                    NeoIconButton(
+                      icon: Icons.arrow_back_rounded,
+                      label: context.trText('Back'),
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                    const Spacer(),
+                    if (word != null) ...[
+                      NeoIconButton(
+                        icon: Icons.content_copy_outlined,
+                        label: context.trText('Capture source'),
+                        onTap: () => _capture(context, word),
+                      ),
+                      const SizedBox(width: 8),
+                      ReportItemAction(
+                        type: ReportItemType.word,
+                        itemRef: '${word.id}',
+                        label: word.headword,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: BoundedContent(
+                child: vm.isLoading
+                    ? const LoadingView()
+                    : vm.hasError
+                        ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                        : word == null
+                            ? const SizedBox.shrink()
+                            : _content(context, word, lang),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,83 +127,94 @@ class _WordDetail extends StatelessWidget {
     final glossLanguage = word.glossLanguageFor(lang);
     final senses = word.sensesFor(lang);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: TappableJapanese(word.headword,
+        NeoCard(
+          tone: NeoTone.magenta,
+          shadow: 6,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            children: [
+              if (word.primaryReading.isNotEmpty &&
+                  word.primaryReading != word.headword)
+                TappableJapanese(word.primaryReading,
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: jc.ink,
+                        fontWeight: FontWeight.w800)),
+              TappableJapanese(word.headword,
                   affordance: false,
                   style: const TextStyle(
-                      fontSize: 44, fontWeight: FontWeight.w600, height: 1.1)),
-            ),
-            SpeechButton(
-              text: word.primaryReading.isNotEmpty
-                  ? word.primaryReading
-                  : word.headword,
-              size: 28,
-            ),
-          ],
-        ),
-        if (word.primaryReading.isNotEmpty &&
-            word.primaryReading != word.headword)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                TappableJapanese(word.primaryReading,
-                    style: TextStyle(fontSize: 20, color: jc.muted)),
-                if (_pitchOf(word).isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(
-                        color: jc.surfaceAlt,
-                        borderRadius: BorderRadius.circular(Radii.sm)),
-                    child: Text(context.trText('pitch ${_pitchOf(word)}'),
-                        style: TextStyle(
-                            fontSize: 11.5,
-                            color: jc.body,
-                            fontWeight: FontWeight.w600)),
-                  ),
+                      fontSize: 76, fontWeight: FontWeight.w900, height: 1.08)),
+              const SizedBox(height: 4),
+              SpeechButton(
+                text: word.primaryReading.isNotEmpty
+                    ? word.primaryReading
+                    : word.headword,
+                size: 25,
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (word.isCommon)
+                    NeoBadge(context.trText('common'), tone: NeoTone.lime),
+                  if (word.jlpt != null)
+                    NeoBadge('JLPT N${word.jlpt}', tone: NeoTone.acid),
+                  if (_pitchOf(word).isNotEmpty)
+                    NeoBadge(context.trText('pitch ${_pitchOf(word)}')),
                 ],
-              ],
-            ),
+              ),
+            ],
           ),
-        const SizedBox(height: 8),
-        Wrap(spacing: 6, children: [
-          if (word.isCommon) TagChip('common', color: jc.success),
-          if (word.jlpt != null) TagChip('JLPT N${word.jlpt}'),
-        ]),
+        ),
         const SizedBox(height: 20),
-        Text(context.trText('Meanings'), style: context.text.titleMedium),
-        const SizedBox(height: 8),
-        ...senses
-            .asMap()
-            .entries
-            .map((e) => _sense(context, e.key + 1, e.value, glossLanguage)),
+        NeoSectionTitle(context.trText('Meanings')),
+        NeoCard(
+          child: Column(
+            children: [
+              for (final entry in senses.asMap().entries)
+                _sense(context, entry.key + 1, entry.value, glossLanguage),
+            ],
+          ),
+        ),
         if (word.kanjiBreakdown.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text(context.trText('Kanji in this word'),
-              style: context.text.titleMedium),
-          const SizedBox(height: 8),
-          ...word.kanjiBreakdown.map((k) => _KanjiRow(
-                literal: k.literal,
-                meaning: k.meaningsFor(lang).take(3).join(', '),
-                readings:
-                    [...k.kunReadings, ...k.onReadings].take(4).join('  '),
-                onTap: () => context.push('/kanji/${k.literal}'),
-              )),
+          const SizedBox(height: 22),
+          NeoSectionTitle(context.trText('Kanji in this word')),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (var i = 0; i < word.kanjiBreakdown.length; i++)
+                SizedBox(
+                  width: context.isWide ? 210 : double.infinity,
+                  child: _KanjiRow(
+                    literal: word.kanjiBreakdown[i].literal,
+                    meaning: word.kanjiBreakdown[i]
+                        .meaningsFor(lang)
+                        .take(3)
+                        .join(', '),
+                    readings: [
+                      ...word.kanjiBreakdown[i].kunReadings,
+                      ...word.kanjiBreakdown[i].onReadings
+                    ].take(4).join('  '),
+                    tone: [NeoTone.lime, NeoTone.acid, NeoTone.lavender][i % 3],
+                    onTap: () => context
+                        .push('/kanji/${word.kanjiBreakdown[i].literal}'),
+                  ),
+                ),
+            ],
+          ),
         ],
         if (word.examples.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text(context.trText('Examples'), style: context.text.titleMedium),
-          const SizedBox(height: 8),
-          ...word.examples.map((e) => _ExampleRow(example: e)),
+          const SizedBox(height: 22),
+          NeoSectionTitle(context.trText('Examples')),
+          for (final example in word.examples) ...[
+            _ExampleRow(example: example),
+            const SizedBox(height: 10),
+          ],
         ],
       ],
     );
@@ -266,64 +298,144 @@ class _CaptureDialogState extends State<_CaptureDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        title: Text(context.trText('Capture reading context')),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _sentence,
-                maxLines: 4,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: context.trText('Source sentence'),
-                  hintText:
-                      context.trText('Paste the sentence from your reader'),
-                  suffixIcon: IconButton(
-                    tooltip: context.trText('Paste'),
-                    onPressed: _paste,
-                    icon: const Icon(Icons.content_paste),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _title,
-                decoration: InputDecoration(
-                  labelText: context.trText('Source title'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _url,
-                keyboardType: TextInputType.url,
-                decoration: InputDecoration(
-                  labelText: context.trText('Source URL'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.trText('Cancel')),
-          ),
-          FilledButton(
-            onPressed: _sentence.text.trim().isEmpty
-                ? null
-                : () => Navigator.pop(
-                      context,
-                      _CaptureResult(
-                        _sentence.text.trim(),
-                        _url.text.trim(),
-                        _title.text.trim(),
+  Widget build(BuildContext context) {
+    final canCapture = _sentence.text.trim().isNotEmpty;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: NeoCard(
+          shadow: 6,
+          padding: const EdgeInsets.all(18),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.trText('Capture reading context'),
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ),
-            child: Text(context.trText('Capture')),
+                    NeoIconButton(
+                      icon: Icons.close_rounded,
+                      label: context.trText('Close'),
+                      onTap: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _sentence,
+                  maxLines: 4,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: context.trText('Source sentence'),
+                    hintText:
+                        context.trText('Paste the sentence from your reader'),
+                    suffixIcon: IconButton(
+                      tooltip: context.trText('Paste'),
+                      onPressed: _paste,
+                      icon: const Icon(Icons.content_paste),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _title,
+                  decoration: InputDecoration(
+                    labelText: context.trText('Source title'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _url,
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    labelText: context.trText('Source URL'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _CaptureDialogButton(
+                        label: context.trText('Cancel'),
+                        onTap: () => Navigator.pop(context),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _CaptureDialogButton(
+                        label: context.trText('Capture'),
+                        tone: NeoTone.blue,
+                        enabled: canCapture,
+                        onTap: () => Navigator.pop(
+                          context,
+                          _CaptureResult(
+                            _sentence.text.trim(),
+                            _url.text.trim(),
+                            _title.text.trim(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CaptureDialogButton extends StatelessWidget {
+  const _CaptureDialogButton({
+    required this.label,
+    required this.onTap,
+    this.tone = NeoTone.paper,
+    this.enabled = true,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final NeoTone tone;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+        opacity: enabled ? 1 : 0.45,
+        child: SizedBox(
+          height: 50,
+          child: NeoCard(
+            tone: tone,
+            shadow: enabled ? 3 : 0,
+            radius: 10,
+            padding: EdgeInsets.zero,
+            onTap: enabled ? onTap : null,
+            semanticLabel: label,
+            child: Center(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ),
       );
 }
 
@@ -333,43 +445,44 @@ class _KanjiRow extends StatelessWidget {
       {required this.literal,
       required this.meaning,
       required this.readings,
+      required this.tone,
       required this.onTap});
   final String literal;
   final String meaning;
   final String readings;
+  final NeoTone tone;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    return InkWell(
+    return NeoCard(
+      tone: tone,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            Text(literal,
-                style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(meaning,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w600)),
-                  if (readings.isNotEmpty)
-                    Text(readings,
-                        style: TextStyle(color: jc.muted, fontSize: 13)),
-                ],
-              ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Text(literal,
+              style:
+                  const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(meaning,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600)),
+                if (readings.isNotEmpty)
+                  Text(readings,
+                      style: TextStyle(color: jc.muted, fontSize: 13)),
+              ],
             ),
-            Icon(Icons.chevron_right, color: jc.muted),
-          ],
-        ),
+          ),
+          Icon(Icons.chevron_right, color: jc.muted),
+        ],
       ),
     );
   }
@@ -383,8 +496,8 @@ class _ExampleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return NeoCard(
+      tone: NeoTone.paper,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

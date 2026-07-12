@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../study/study_chrome.dart';
 
-/// A flat, pinned bottom action bar, the Instagram-appropriate replacement for a
-/// Material FAB (Instagram has no FABs). Sits in the Scaffold's
-/// `bottomNavigationBar` slot on detail screens: a hairline top border over the
-/// canvas and one full-width primary button.
 class AddToStudyBar extends StatelessWidget {
   const AddToStudyBar({
     super.key,
@@ -21,36 +18,22 @@ class AddToStudyBar extends StatelessWidget {
   final String labelAdded;
 
   @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    return Container(
-      decoration: BoxDecoration(
-        color: jc.canvas,
-        border: Border(top: BorderSide(color: jc.hairline)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: SizedBox(
-            height: 48,
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: added ? null : onAdd,
-              style: added
-                  ? FilledButton.styleFrom(
-                      backgroundColor: jc.success,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: jc.success,
-                      disabledForegroundColor: Colors.white,
-                    )
-                  : null,
-              icon: Icon(added ? Icons.check : Icons.add, size: 20),
-              label: Text(added ? labelAdded : labelAdd),
+  Widget build(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: context.jc.canvas,
+          border: Border(top: BorderSide(color: context.jc.ink, width: 2.5)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: StudyActionButton(
+              label: added ? labelAdded : labelAdd,
+              icon: added ? Icons.check_rounded : Icons.add_rounded,
+              color: added ? context.jc.lime : context.jc.acid,
+              onTap: added ? null : onAdd,
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

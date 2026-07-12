@@ -9,7 +9,8 @@ import '../../models/study.dart';
 String answerLabel(StudyCard c, String lang) => switch (c.itemType) {
       ItemType.kana => c.kana?.romaji ?? '',
       ItemType.kanji => _firstMeaning(c, lang),
-      ItemType.word => (c.word?.summaryGloss(lang) ?? '').split(';').first.trim(),
+      ItemType.word =>
+        (c.word?.summaryGloss(lang) ?? '').split(';').first.trim(),
     };
 
 /// The quiz prompt (the big text you answer from): the Japanese glyph for
@@ -24,7 +25,9 @@ String quizAnswer(StudyCard c, String lang, StudyDirection dir) =>
 /// The question line above the prompt, phrased for the direction being tested.
 String quizQuestion(ItemType t, StudyDirection dir) {
   if (dir.isRecall) {
-    return t == ItemType.kana ? 'Which kana reads like this?' : 'Which one means this?';
+    return t == ItemType.kana
+        ? 'Which kana reads like this?'
+        : 'Which one means this?';
   }
   return t == ItemType.kana ? 'How do you read this?' : 'What does this mean?';
 }
@@ -41,7 +44,9 @@ String _firstMeaning(StudyCard c, String lang) {
 /// The kana string the Listen game asks you to rebuild: a word's reading, a
 /// kanji's first reading (okurigana dots stripped), or the kana glyph itself.
 String listenTarget(StudyCard c) => switch (c.itemType) {
-      ItemType.word => (c.word?.primaryReading.isNotEmpty ?? false) ? c.word!.primaryReading : c.front,
+      ItemType.word => (c.word?.primaryReading.isNotEmpty ?? false)
+          ? c.word!.primaryReading
+          : c.front,
       ItemType.kanji => _kanjiReading(c),
       ItemType.kana => c.front,
     };

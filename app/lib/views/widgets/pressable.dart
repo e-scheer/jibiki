@@ -20,7 +20,7 @@ class Pressable extends StatefulWidget {
     required this.onTap,
     this.label,
     this.selected = false,
-    this.pressedScale = 0.96,
+    this.pressedScale = 1,
     this.haptic = true,
   });
 
@@ -66,11 +66,18 @@ class _PressableState extends State<Pressable> {
                 widget.onTap!();
               }
             : null,
-        child: AnimatedScale(
-          scale: _down ? widget.pressedScale : 1.0,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: _down ? 1 : 0),
           duration: Motion.timed(context, Motion.fast),
           curve: Motion.out,
           child: widget.child,
+          builder: (context, value, child) => Transform.translate(
+            offset: Offset(4 * value, 4 * value),
+            child: Transform.scale(
+              scale: 1 - (1 - widget.pressedScale) * value,
+              child: child,
+            ),
+          ),
         ),
       ),
     );

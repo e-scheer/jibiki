@@ -20,10 +20,12 @@ class QuizStage extends StatefulWidget {
     required this.vm,
     required this.lang,
     this.direction = StudyDirection.recognize,
+    this.onRated,
   });
   final ReviewViewModel vm;
   final String lang;
   final StudyDirection direction;
+  final void Function(StudyCard card, Rating rating)? onRated;
 
   @override
   State<QuizStage> createState() => _QuizStageState();
@@ -64,6 +66,7 @@ class _QuizStageState extends State<QuizStage>
 
   Future<void> _pick(String option) async {
     if (_locked) return;
+    final card = widget.vm.current!;
     setState(() {
       _picked = option;
       _locked = true;
@@ -73,7 +76,9 @@ class _QuizStageState extends State<QuizStage>
     // Linger longer on a miss so the revealed reading has time to land.
     await Future.delayed(Duration(milliseconds: correct ? 850 : 1500));
     if (!mounted) return;
-    widget.vm.rate(correct ? Rating.good : Rating.again);
+    final rating = correct ? Rating.good : Rating.again;
+    widget.onRated?.call(card, rating);
+    widget.vm.rate(rating);
   }
 
   /// Eased 0..1 entrance value for the option at [i], offset so later rows trail
@@ -186,9 +191,11 @@ class _Prompt extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: jc.surface,
-        borderRadius: BorderRadius.circular(Radii.xl),
-        border: Border.all(color: jc.hairline),
-        boxShadow: Shadows.soft(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: jc.ink, width: 3),
+        boxShadow: [
+          BoxShadow(color: jc.ink, blurRadius: 0, offset: const Offset(8, 8))
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       child: Column(
@@ -209,7 +216,8 @@ class _Prompt extends StatelessWidget {
                       // A glyph gets the rotating JP face; a meaning phrase
                       // (recall) is Latin and set smaller so a long gloss
                       // doesn't shrink to nothing under FittedBox.
-                      fontFamily: isJp ? JpFonts.variant(card.id + card.reps) : null,
+                      fontFamily:
+                          isJp ? JpFonts.variant(card.id + card.reps) : null,
                       fontSize: isJp ? 88 : 40,
                       fontWeight: FontWeight.w700,
                       height: 1.05,
@@ -274,27 +282,9 @@ class _OptionTile extends StatelessWidget {
     final jc = context.jc;
     // (tile bg, label colour, border, chip bg, chip fg)
     final (bg, fg, border, chipBg, chipFg) = switch (state) {
-      _OptState.idle => (
-          jc.surface,
-          jc.ink,
-          jc.hairline,
-          jc.surfaceAlt,
-          jc.body
-        ),
-      _OptState.correct => (
-          jc.ratingGood.withValues(alpha: 0.14),
-          jc.ink,
-          jc.ratingGood,
-          jc.ratingGood,
-          Colors.white
-        ),
-      _OptState.wrong => (
-          jc.ratingAgain.withValues(alpha: 0.14),
-          jc.ink,
-          jc.ratingAgain,
-          jc.ratingAgain,
-          Colors.white
-        ),
+      _OptState.idle => (jc.surface, jc.ink, jc.ink, jc.surfaceAlt, jc.body),
+      _OptState.correct => (jc.lime, jc.ink, jc.ink, jc.lime, jc.ink),
+      _OptState.wrong => (jc.coral, jc.ink, jc.ink, jc.coral, jc.ink),
       _OptState.dimmed => (
           jc.surface,
           jc.muted,
@@ -321,7 +311,16 @@ class _OptionTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(color: border, width: 1.5),
+          border: Border.all(color: border, width: 2.5),
+          boxShadow: state == _OptState.idle
+              ? null
+              : [
+                  BoxShadow(
+                    color: jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(3, 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [

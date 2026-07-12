@@ -218,11 +218,10 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                             gridDelegate:
                                 const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent:
-                                  88, // ~4 across on phones, denser on tablets
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 0.9,
+                              maxCrossAxisExtent: 68,
+                              mainAxisSpacing: 6,
+                              crossAxisSpacing: 6,
+                              childAspectRatio: 0.72,
                             ),
                             itemCount: list.length,
                             itemBuilder: (_, i) {
@@ -260,14 +259,22 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: on ? jc.brand : jc.surfaceAlt,
-            borderRadius: BorderRadius.circular(Radii.pill),
+            color: on ? jc.acid : jc.surface,
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: jc.ink, width: 2.5),
+            boxShadow: on
+                ? [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ]
+                : null,
           ),
           child: Text(label,
               style: TextStyle(
-                  color: on ? Colors.white : jc.body,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13)),
+                  color: jc.ink, fontWeight: FontWeight.w700, fontSize: 13)),
         ),
       ),
     );
@@ -294,9 +301,8 @@ class _KanjiTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final meaning = kanji.meaningsFor(lang);
-    // Soft filled tile (no per-tile border) to match the kana chart: a calm grid
-    // where the glyph is the loudest thing. Selected lifts with the vermilion
-    // wash + ring; a press gives a real button response via Pressable.
+    // Dense matrix cells stay flat. Repeating a hard shadow across a six-column
+    // grid turns the state colors into noise and diverges from the HTML contract.
     return Pressable(
       label: '${kanji.literal} ${meaning.isNotEmpty ? meaning.first : ''}',
       selected: selected,
@@ -307,36 +313,27 @@ class _KanjiTile extends StatelessWidget {
         curve: Motion.out,
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: selected ? jc.brandSoft : jc.surfaceAlt,
-          borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(
-              color: selected ? jc.brand : Colors.transparent, width: 1.5),
+          color: selected
+              ? jc.acid
+              : mark == StudyMark.known
+                  ? jc.lime
+                  : mark == StudyMark.seen
+                      ? jc.magenta
+                      : jc.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: jc.ink, width: 2.5),
         ),
         child: Stack(
           children: [
             Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(kanji.literal,
-                      style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600,
-                          height: 1,
-                          color: jc.ink)),
-                  const SizedBox(height: 5),
-                  Text(
-                    meaning.isNotEmpty ? meaning.first : '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w500,
-                        color: jc.muted,
-                        height: 1.1),
-                  ),
-                ],
+              child: Text(
+                kanji.literal,
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                  color: jc.ink,
+                ),
               ),
             ),
             if (mark != StudyMark.none)

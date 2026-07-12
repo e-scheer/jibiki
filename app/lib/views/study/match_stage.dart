@@ -17,9 +17,15 @@ import 'study_prompts.dart';
 /// the pair. Clearing the board grades the whole batch Good in one step (via
 /// [ReviewViewModel.rateMany]) so the board never rebuilds mid-round.
 class MatchStage extends StatefulWidget {
-  const MatchStage({super.key, required this.vm, required this.lang});
+  const MatchStage({
+    super.key,
+    required this.vm,
+    required this.lang,
+    this.onRated,
+  });
   final ReviewViewModel vm;
   final String lang;
+  final void Function(List<StudyCard> cards, Rating rating)? onRated;
 
   @override
   State<MatchStage> createState() => _MatchStageState();
@@ -91,6 +97,7 @@ class _MatchStageState extends State<MatchStage> {
     await Future.delayed(
         const Duration(milliseconds: 550)); // let the last pair land
     if (!mounted) return;
+    widget.onRated?.call(_batch, Rating.good);
     widget.vm.rateMany(_batch, Rating.good);
   }
 
@@ -184,11 +191,12 @@ class _PairPips extends StatelessWidget {
             padding: const EdgeInsets.only(left: 5),
             child: AnimatedContainer(
               duration: Motion.timed(context, Motion.fast),
-              width: 8,
-              height: 8,
+              width: 12,
+              height: 12,
               decoration: BoxDecoration(
-                color: i < done ? jc.brand : jc.hairline,
-                shape: BoxShape.circle,
+                color: i < done ? jc.lime : jc.surface,
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(color: jc.ink, width: 2),
               ),
             ),
           ),
@@ -273,9 +281,9 @@ class _Back extends StatelessWidget {
     final jc = context.jc;
     return Container(
       decoration: BoxDecoration(
-        color: jc.brandSoft,
+        color: jc.lavender,
         borderRadius: BorderRadius.circular(Radii.md),
-        border: Border.all(color: jc.hairline),
+        border: Border.all(color: jc.ink, width: 2.5),
       ),
       alignment: Alignment.center,
       child: Container(
@@ -298,13 +306,13 @@ class _Face extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final bg = matched ? jc.ratingGood.withValues(alpha: 0.14) : jc.surface;
-    final border = matched ? jc.ratingGood.withValues(alpha: 0.5) : jc.brand;
+    final bg = matched ? jc.lime : jc.surface;
+    final border = jc.ink;
     return Container(
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(Radii.md),
-        border: Border.all(color: border, width: matched ? 1.5 : 2),
+        border: Border.all(color: border, width: 2.5),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Stack(

@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
 import '../widgets/status_views.dart';
+import '../widgets/neo_pop.dart';
 import 'deck_card.dart';
 
 /// Browse community packs of mnemonics, or your own. A pack is a shareable set of
@@ -26,7 +27,24 @@ class CommunityDecksView extends StatelessWidget {
       initialIndex: initialTab,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(context.trText('Packs')),
+          backgroundColor: context.jc.magenta,
+          foregroundColor: context.jc.ink,
+          toolbarHeight: 82,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.trText('Community')),
+              const SizedBox(height: 3),
+              Text(
+                context.trText('Shared packs. Take, rate and improve.'),
+                style: TextStyle(
+                  color: context.jc.ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
           actions: [
             IconButton(
               tooltip: context.trText('Create a pack'),
@@ -34,23 +52,76 @@ class CommunityDecksView extends StatelessWidget {
               onPressed: () => context.push('/decks/new'),
             ),
           ],
-          bottom: TabBar(
-            labelColor: context.jc.ink,
-            unselectedLabelColor: context.jc.muted,
-            indicatorColor: context.jc.ink,
-            indicatorWeight: 1.5,
-            tabs: const [Tab(text: 'Community'), Tab(text: 'Mine')],
-          ),
         ),
-        body: TabBarView(
+        body: Column(
           children: [
-            _DecksTab(language: lang, mine: false),
-            const _DecksTab(language: null, mine: true),
+            Container(
+              color: context.jc.canvas,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: TabBar(
+                labelColor: context.jc.ink,
+                unselectedLabelColor: context.jc.ink,
+                labelPadding: EdgeInsets.zero,
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: context.jc.acid,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                tabs: [
+                  _FilterTab(label: context.trText('Popular')),
+                  _FilterTab(label: context.trText('My packs')),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _DecksTab(language: lang, mine: false),
+                  const _DecksTab(language: null, mine: true),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+              child: NeoPrimaryButton(
+                label: context.trText('Propose a pack'),
+                icon: Icons.add_rounded,
+                tone: NeoTone.magenta,
+                onTap: () => context.push('/decks/new'),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _FilterTab extends StatelessWidget {
+  const _FilterTab({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+        ),
+      );
 }
 
 class _DecksTab extends StatelessWidget {
@@ -86,7 +157,10 @@ class _DecksGrid extends StatelessWidget {
     }
     if (vm.isLoading && vm.decks.isEmpty) {
       return const SkeletonCardGrid(
-          count: 6, crossAxisCount: 2, childAspectRatio: 0.72);
+        count: 6,
+        maxCrossAxisExtent: 540,
+        childAspectRatio: 3.45,
+      );
     }
     if (vm.decks.isEmpty) {
       return EmptyHint(
@@ -105,10 +179,10 @@ class _DecksGrid extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 220,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 0.72,
+          maxCrossAxisExtent: 540,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 12,
+          mainAxisExtent: 106,
         ),
         itemCount: vm.decks.length,
         itemBuilder: (_, i) {

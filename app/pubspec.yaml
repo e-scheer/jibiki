@@ -49,22 +49,22 @@ dev_dependencies:
   # Generate launcher icons (Android adaptive + monochrome, iOS, web).
   flutter_launcher_icons: ^0.14.1
 
-# The app icon: white 字 on the vermilion 朱 seal (see scripts/gen_icon.py).
+# The app icon: white 字 on the NeoPop Klein blue field.
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
-  adaptive_icon_background: "#D4402A"
+  adaptive_icon_background: "#2B36E3"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   adaptive_icon_monochrome: "assets/icon/icon_monochrome.png"
   remove_alpha_ios: true
   web:
     generate: true
     image_path: "assets/icon/icon.png"
-    background_color: "#D4402A"
-    theme_color: "#D4402A"
+    background_color: "#2B36E3"
+    theme_color: "#2B36E3"
 
-# Launch screen: the vermilion 字 on a crisp white surface (matches the app).
+# Launch screen: the Klein blue 字 on a crisp white surface.
 flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#0C0A09"

@@ -13,6 +13,8 @@ class SessionStore {
   static const _kCachedUser = 'cached_user';
   static const _kLocalOnly = 'local_only';
   static const _kLocalProfile = 'local_profile';
+  static const _kThemePalette = 'theme_palette';
+  static const _kThemeMode = 'theme_mode';
 
   static Future<SessionStore> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -52,7 +54,18 @@ class SessionStore {
   /// Local-only users still pick a mode/mnemonic language at onboarding -
   /// persisted here instead of a server profile.
   String? get localProfile => _prefs.getString(_kLocalProfile);
-  Future<void> setLocalProfile(String json) => _prefs.setString(_kLocalProfile, json);
+  Future<void> setLocalProfile(String json) =>
+      _prefs.setString(_kLocalProfile, json);
+
+  /// Visual palettes are a device preference, like an editor theme. Keeping this
+  /// outside the account profile makes a theme change instant and available to
+  /// local-only users too.
+  String get themePalette => _prefs.getString(_kThemePalette) ?? 'neopop';
+  Future<void> setThemePalette(String value) =>
+      _prefs.setString(_kThemePalette, value);
+  String get themeMode => _prefs.getString(_kThemeMode) ?? 'system';
+  Future<void> setThemeMode(String value) =>
+      _prefs.setString(_kThemeMode, value);
 
   Future<void> clear() async {
     await _prefs.remove(_kToken);

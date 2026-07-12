@@ -1,5 +1,5 @@
-"""Generate jibiki's app icon from the brand glyph 字 (a hanko-style seal):
-white 字 on vermilion 朱. Emits the master icon, the Android adaptive foreground,
+"""Generate jibiki's NeoPop app icon from the brand glyph 字:
+white 字 on Klein blue. Emits the master icon, the Android adaptive foreground,
 and a monochrome (themed-icon) layer. Run: python scripts/gen_icon.py"""
 
 import os
@@ -12,7 +12,7 @@ OUT = os.path.join(HERE, "assets", "icon")
 os.makedirs(OUT, exist_ok=True)
 
 SIZE = 1024
-VERMILION = (212, 64, 42, 255)  # #D4402A - the brand seal red
+BRAND = (43, 54, 227, 255)  # #2B36E3, Klein blue
 WHITE = (255, 255, 255, 255)
 GLYPH = "字"
 
@@ -50,8 +50,8 @@ def _draw_glyph(img: Image.Image, color, target_frac: float) -> None:
 
 
 def master() -> None:
-    """Full-bleed vermilion seal + white 字 (iOS / legacy Android mask this)."""
-    img = Image.new("RGBA", (SIZE, SIZE), VERMILION)
+    """Full-bleed Klein blue with a white glyph."""
+    img = Image.new("RGBA", (SIZE, SIZE), BRAND)
     _draw_glyph(img, WHITE, 0.60)
     img.save(os.path.join(OUT, "icon.png"))
 
@@ -71,10 +71,9 @@ def monochrome() -> None:
 
 
 def splash() -> None:
-    """Launch screen glyph: vermilion 字 on transparent, so on a white splash it
-    matches the app's crisp white surface (no jarring colour flash)."""
+    """Launch screen glyph in Klein blue on transparent."""
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    _draw_glyph(img, VERMILION, 0.34)
+    _draw_glyph(img, BRAND, 0.34)
     img.save(os.path.join(OUT, "splash.png"))
 
 

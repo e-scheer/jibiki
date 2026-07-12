@@ -109,7 +109,10 @@ class _ReadingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: jc.surface,
         borderRadius: BorderRadius.circular(Radii.md),
-        border: Border.all(color: jc.hairline),
+        border: Border.all(color: jc.ink, width: 2.5),
+        boxShadow: [
+          BoxShadow(color: jc.ink, blurRadius: 0, offset: const Offset(4, 4))
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

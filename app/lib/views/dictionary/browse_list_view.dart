@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/breakpoints.dart';
 import '../../models/kanji.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../theme/app_theme.dart';
@@ -10,6 +11,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/browse_viewmodel.dart';
 import '../widgets/status_views.dart';
 import '../widgets/word_tile.dart';
+import '../widgets/neo_pop.dart';
 
 /// A read-only browse of one dictionary category (words or kanji). Reachable from
 /// the Explore landing, deliberately NOT flashcards.
@@ -48,33 +50,38 @@ class _Browse extends StatelessWidget {
       body = vm.kanji.isEmpty
           ? const EmptyHint(
               icon: Icons.grid_view_outlined, title: 'Nothing here')
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent:
-                    88, // ~4 across on phones, denser on tablets
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 0.82,
+          : BoundedContent(
+              maxWidth: 920,
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: context.isWide ? 104 : 88,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.82,
+                ),
+                itemCount: vm.kanji.length,
+                itemBuilder: (_, i) =>
+                    _KanjiCell(kanji: vm.kanji[i], lang: lang),
               ),
-              itemCount: vm.kanji.length,
-              itemBuilder: (_, i) => _KanjiCell(kanji: vm.kanji[i], lang: lang),
             );
     } else {
       body = vm.words.isEmpty
           ? const EmptyHint(
               icon: Icons.menu_book_outlined, title: 'Nothing here')
-          : ListView.separated(
-              itemCount: vm.words.length,
-              separatorBuilder: (_, __) =>
-                  Divider(height: 1, color: context.jc.hairline),
-              itemBuilder: (_, i) {
-                final w = vm.words[i];
-                return WordTile(
-                    word: w,
-                    lang: lang,
-                    onTap: () => context.push('/word/${w.id}'));
-              },
+          : BoundedContent(
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 26),
+                itemCount: vm.words.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 9),
+                itemBuilder: (_, i) {
+                  final w = vm.words[i];
+                  return WordTile(
+                      word: w,
+                      lang: lang,
+                      onTap: () => context.push('/word/${w.id}'));
+                },
+              ),
             );
     }
 
@@ -92,40 +99,66 @@ class _KanjiCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
     final meaning = kanji.meaningsFor(lang);
-    return Material(
-      color: jc.surface,
-      borderRadius: BorderRadius.circular(Radii.md),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Radii.md),
-        onTap: () => context.push('/kanji/${kanji.literal}'),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: jc.hairline),
+    final tones = [
+      NeoTone.paper,
+      NeoTone.lavender,
+      NeoTone.lime,
+      NeoTone.acid,
+    ];
+    final tone = tones[kanji.literal.runes.fold<int>(0, (a, b) => a + b) % 4];
+    return NeoCard(
+      tone: tone,
+      shadow: 0,
+      radius: 10,
+      padding: const EdgeInsets.all(6),
+      onTap: () => context.push('/kanji/${kanji.literal}'),
+      semanticLabel: '${kanji.literal}, ${meaning.take(1).join()}',
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(kanji.literal,
+              style:
+                  const TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 2),
+          Text(
+            meaning.isNotEmpty ? meaning.first : '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10.5,
+              color: context.jc.body,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(kanji.literal,
-                  style: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 2),
-              Text(
-                meaning.isNotEmpty ? meaning.first : '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 10.5, color: jc.muted),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
+}
+
+class _RadicalCell extends StatelessWidget {
+  const _RadicalCell({required this.literal, required this.onTap});
+
+  final String literal;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => NeoCard(
+        tone: NeoTone.paper,
+        shadow: 0,
+        radius: 9,
+        padding: EdgeInsets.zero,
+        onTap: onTap,
+        semanticLabel: context.trText('Radical $literal'),
+        child: Center(
+          child: Text(
+            literal,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+          ),
+        ),
+      );
 }
 
 /// Pick a radical/key, then browse every kanji that contains it.
@@ -157,7 +190,6 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
     final radicals = _radicals;
     return Scaffold(
       appBar: AppBar(title: Text(context.trText('By radical'))),
@@ -166,23 +198,22 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
           : radicals == null
               ? const SkeletonCardGrid(
                   count: 18, crossAxisCount: 6, childAspectRatio: 1)
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent:
-                        60, // ~6 across on phones, more on tablets
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: radicals.length,
-                  itemBuilder: (_, i) {
-                    final lit = radicals[i]['literal']?.toString() ?? '';
-                    return Material(
-                      color: jc.surface,
-                      borderRadius: BorderRadius.circular(Radii.sm),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(Radii.sm),
+              : BoundedContent(
+                  maxWidth: 920,
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 60,
+                      mainAxisSpacing: 6,
+                      crossAxisSpacing: 6,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: radicals.length,
+                    itemBuilder: (_, i) {
+                      final lit = radicals[i]['literal']?.toString() ?? '';
+                      return _RadicalCell(
+                        literal: lit,
                         onTap: () =>
                             Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => BrowseListView(
@@ -190,19 +221,9 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
                                 title: 'Kanji with $lit', contains: lit),
                           ),
                         )),
-                        child: Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(Radii.sm),
-                            border: Border.all(color: jc.hairline),
-                          ),
-                          child: Text(lit,
-                              style: const TextStyle(
-                                  fontSize: 22, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
     );
   }

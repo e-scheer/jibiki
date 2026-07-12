@@ -40,7 +40,7 @@ class KanjiOriginSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: jc.surface,
             borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: jc.hairline),
+            border: Border.all(color: jc.ink, width: 2.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +186,7 @@ class KanaOriginSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: jc.surface,
             borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: jc.hairline),
+            border: Border.all(color: jc.ink, width: 2.5),
           ),
           child: Column(
             children: [
@@ -235,7 +235,7 @@ class KanaGrammarSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: jc.surface,
             borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: jc.hairline),
+            border: Border.all(color: jc.ink, width: 2.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

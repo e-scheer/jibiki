@@ -1,5 +1,5 @@
-import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/speech.dart';
@@ -7,13 +7,11 @@ import '../../models/kana.dart';
 import '../../models/mnemonic.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/net_image.dart';
 import '../widgets/pressable.dart';
 import 'draw_mascot_view.dart';
 
-/// A read/learn experience (not flashcards): swipe between characters, see the
-/// mnemonic illustration + word, hear it, and draw your own mascot. Mirrors the
-/// "memory hint" apps the user referenced (り → licorne, い → ivoire…).
 class LearnCarouselView extends StatefulWidget {
   const LearnCarouselView({
     super.key,
@@ -33,8 +31,9 @@ class LearnCarouselView extends StatefulWidget {
 }
 
 class _LearnCarouselViewState extends State<LearnCarouselView> {
-  late final PageController _pager =
-      PageController(initialPage: widget.initialIndex);
+  late final PageController _pager = PageController(
+    initialPage: widget.initialIndex,
+  );
   late int _index = widget.initialIndex;
 
   @override
@@ -43,47 +42,56 @@ class _LearnCarouselViewState extends State<LearnCarouselView> {
     super.dispose();
   }
 
-  void _goto(int i) {
-    _pager.animateToPage(i,
-        duration: Motion.timed(context, Motion.base), curve: Motion.out);
+  void _goTo(int index) {
+    _pager.animateToPage(
+      index,
+      duration: Motion.timed(context, Motion.base),
+      curve: Motion.out,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: Column(
-        children: [
-          _Strip(items: widget.items, index: _index, onTap: _goto),
-          Expanded(
-            child: PageView.builder(
-              controller: _pager,
-              itemCount: widget.items.length,
-              onPageChanged: (i) {
-                setState(() => _index = i);
-                Haptics.tick();
-              },
-              itemBuilder: (_, i) => LearnPage(
-                key: ValueKey(widget.items[i].char),
-                item: widget.items[i],
-                language: widget.language,
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: context.jc.canvas,
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: widget.title,
+              subtitle:
+                  '${_index + 1}/${widget.items.length} · ${widget.items[_index].romaji.toUpperCase()}',
+              tone: NeoTone.lime,
+              leading: NeoIconButton(
+                icon: Icons.arrow_back_rounded,
+                label: context.trText('Back'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+              trailing:
+                  const NeoBadge('LEARN', tone: NeoTone.magenta, rotate: 2),
+            ),
+            _Strip(items: widget.items, index: _index, onTap: _goTo),
+            Expanded(
+              child: PageView.builder(
+                controller: _pager,
+                itemCount: widget.items.length,
+                onPageChanged: (index) {
+                  setState(() => _index = index);
+                  Haptics.tick();
+                },
+                itemBuilder: (_, index) => LearnPage(
+                  key: ValueKey(widget.items[index].char),
+                  item: widget.items[index],
+                  language: widget.language,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      backgroundColor: jc.canvas,
-    );
-  }
+          ],
+        ),
+      );
 }
 
-/// The kana quick-jump bar. One vermilion pill marks the current character and
-/// *slides* between items as the selection moves (tap or page swipe), like a
-/// toggle, instead of blinking on in place. Fixed-width cells make the slide exact
-/// and let the bar keep the active kana centred as it scrolls.
 class _Strip extends StatefulWidget {
   const _Strip({required this.items, required this.index, required this.onTap});
+
   final List<KanaEntry> items;
   final int index;
   final ValueChanged<int> onTap;
@@ -93,9 +101,8 @@ class _Strip extends StatefulWidget {
 }
 
 class _StripState extends State<_Strip> {
-  static const double _cell = 50; // per-item width
-  static const double _pad = 12; // ListView-style horizontal padding
-  static const double _inset = 4; // gap between the pill and its cell edges
+  static const double _cell = 54;
+  static const double _padding = 12;
   final _scroll = ScrollController();
 
   @override
@@ -105,9 +112,9 @@ class _StripState extends State<_Strip> {
   }
 
   @override
-  void didUpdateWidget(covariant _Strip old) {
-    super.didUpdateWidget(old);
-    if (widget.index != old.index) _center();
+  void didUpdateWidget(covariant _Strip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.index != oldWidget.index) _center();
   }
 
   @override
@@ -116,84 +123,92 @@ class _StripState extends State<_Strip> {
     super.dispose();
   }
 
-  /// Scroll so the active cell sits centred, matching where the pill slides to.
   void _center({bool jump = false}) {
     if (!_scroll.hasClients) return;
-    final target = (_pad + widget.index * _cell + _cell / 2) -
+    final target = (_padding + widget.index * _cell + _cell / 2) -
         _scroll.position.viewportDimension / 2;
-    final to = target.clamp(0.0, _scroll.position.maxScrollExtent);
+    final offset = target.clamp(0.0, _scroll.position.maxScrollExtent);
     if (jump || !Motion.enabled(context)) {
-      _scroll.jumpTo(to);
+      _scroll.jumpTo(offset);
     } else {
-      _scroll.animateTo(to, duration: Motion.base, curve: Motion.out);
+      _scroll.animateTo(offset, duration: Motion.base, curve: Motion.out);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    return SizedBox(
-      height: 44,
-      child: SingleChildScrollView(
-        controller: _scroll,
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: _pad),
-        child: SizedBox(
-          width: widget.items.length * _cell,
-          child: Stack(
-            children: [
-              // The sliding highlight, behind the labels.
-              AnimatedPositioned(
-                duration: Motion.timed(context, Motion.base),
-                curve: Motion.out,
-                top: 8,
-                bottom: 8,
-                left: widget.index * _cell + _inset,
-                width: _cell - _inset * 2,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: jc.brand,
-                      borderRadius: BorderRadius.circular(Radii.pill)),
-                ),
-              ),
-              Row(
-                children: [
-                  for (var i = 0; i < widget.items.length; i++)
-                    SizedBox(
-                      width: _cell,
-                      child: Pressable(
-                        label: widget.items[i].romaji,
-                        selected: i == widget.index,
-                        onTap: () => widget.onTap(i),
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: Motion.timed(context, Motion.base),
-                            curve: Motion.out,
-                            style: TextStyle(
-                              color:
-                                  i == widget.index ? Colors.white : jc.muted,
-                              fontWeight: i == widget.index
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                              fontSize: i == widget.index ? 14 : 12.5,
-                            ),
-                            child: Text(widget.items[i].romaji.toUpperCase()),
+  Widget build(BuildContext context) => Container(
+        height: 66,
+        decoration: BoxDecoration(
+          color: context.jc.surface,
+          border: Border(bottom: BorderSide(color: context.jc.ink, width: 3)),
+        ),
+        child: ListView.builder(
+          controller: _scroll,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(_padding, 8, _padding, 10),
+          itemCount: widget.items.length,
+          itemBuilder: (_, index) {
+            final selected = index == widget.index;
+            return SizedBox(
+              width: _cell,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Pressable(
+                  label: widget.items[index].romaji,
+                  selected: selected,
+                  pressedScale: 0.94,
+                  onTap: () => widget.onTap(index),
+                  child: AnimatedContainer(
+                    duration: Motion.timed(context, Motion.fast),
+                    decoration: BoxDecoration(
+                      color: selected ? context.jc.acid : context.jc.canvas,
+                      border: Border.all(color: context.jc.ink, width: 2.5),
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: selected
+                          ? [
+                              BoxShadow(
+                                color: context.jc.ink,
+                                blurRadius: 0,
+                                offset: const Offset(3, 3),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.items[index].char,
+                          style: const TextStyle(
+                            fontFamily: 'NotoSansJP',
+                            fontSize: 17,
+                            height: 1,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.items[index].romaji.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 8.5,
+                            height: 1,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            );
+          },
         ),
-      ),
-    );
-  }
+      );
 }
 
 class LearnPage extends StatefulWidget {
   const LearnPage({super.key, required this.item, required this.language});
+
   final KanaEntry item;
   final String language;
 
@@ -214,11 +229,14 @@ class _LearnPageState extends State<LearnPage> {
   Future<void> _load() async {
     try {
       final list = await context.read<MnemonicRepository>().list(
-          character: widget.item.char, language: widget.language, kind: 'kana');
+            character: widget.item.char,
+            language: widget.language,
+            kind: 'kana',
+          );
       Mnemonic? pick;
-      for (final m in list) {
-        if (m.hasImage) {
-          pick = m;
+      for (final mnemonic in list) {
+        if (mnemonic.hasImage) {
+          pick = mnemonic;
           break;
         }
       }
@@ -233,8 +251,11 @@ class _LearnPageState extends State<LearnPage> {
     Haptics.light();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-          builder: (_) => DrawMascotView(
-              character: widget.item.char, language: widget.language)),
+        builder: (_) => DrawMascotView(
+          character: widget.item.char,
+          language: widget.language,
+        ),
+      ),
     );
     if (saved == true) {
       setState(() => _loading = true);
@@ -244,117 +265,294 @@ class _LearnPageState extends State<LearnPage> {
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
     final item = widget.item;
     final word = _top?.story ?? '';
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: jc.brandSoft,
-                borderRadius: BorderRadius.circular(Radii.xl),
-              ),
-              clipBehavior: Clip.antiAlias,
-              alignment: Alignment.center,
-              child: _loading
-                  ? const CircularProgressIndicator()
-                  : (_top?.hasImage ?? false)
-                      ? NetImage(
-                          url: _top!.imageUrl,
-                          fit: BoxFit.contain,
-                          cacheWidth: 900,
-                          semanticLabel: 'Mnemonic drawing for ${item.char}',
-                          errorBuilder: (_) => _Glyph(char: item.char),
-                        )
-                      : _Glyph(char: item.char),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(item.romaji,
-              style: TextStyle(
-                  fontSize: 30, fontWeight: FontWeight.w800, color: jc.ink)),
-          if (word.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(word,
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(color: jc.body, fontSize: 14.5, height: 1.35)),
-            ),
-          const SizedBox(height: 16),
-          _BottomBar(
-              char: item.char,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 980),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 720;
+            final visual = _MnemonicVisual(
+              item: item,
+              mnemonic: _top,
+              loading: _loading,
+            );
+            final details = _LearnDetails(
+              item: item,
+              word: word,
               onSay: () => Speech.instance.say(item.char),
-              onDraw: _draw),
-        ],
+              onDraw: _draw,
+            );
+            if (wide) {
+              return Padding(
+                padding: const EdgeInsets.all(26),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 7, child: visual),
+                    const SizedBox(width: 24),
+                    Expanded(flex: 5, child: Center(child: details)),
+                  ],
+                ),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+              child: Column(
+                children: [
+                  Expanded(child: visual),
+                  const SizedBox(height: 18),
+                  details,
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
+}
+
+class _MnemonicVisual extends StatelessWidget {
+  const _MnemonicVisual({
+    required this.item,
+    required this.mnemonic,
+    required this.loading,
+  });
+
+  final KanaEntry item;
+  final Mnemonic? mnemonic;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: context.jc.lime,
+          border: Border.all(color: context.jc.ink, width: 3),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: context.jc.ink,
+              blurRadius: 0,
+              offset: const Offset(6, 6),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (loading)
+              _VisualSkeleton(character: item.char)
+            else if (mnemonic?.hasImage ?? false)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: NetImage(
+                  url: mnemonic!.imageUrl,
+                  fit: BoxFit.contain,
+                  cacheWidth: 900,
+                  semanticLabel: 'Mnemonic drawing for ${item.char}',
+                  errorBuilder: (_) => _Glyph(character: item.char),
+                ),
+              )
+            else
+              _Glyph(character: item.char),
+            Positioned(
+              left: 12,
+              top: 12,
+              child: NeoBadge(
+                mnemonic?.hasImage ?? false ? 'COMMUNITY' : 'KANA',
+                tone: NeoTone.magenta,
+                rotate: -2,
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _VisualSkeleton extends StatelessWidget {
+  const _VisualSkeleton({required this.character});
+  final String character;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            character,
+            style: TextStyle(
+              color: context.jc.surface.withValues(alpha: 0.52),
+              fontFamily: 'NotoSansJP',
+              fontSize: 190,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          NeoCard(
+            tone: NeoTone.paper,
+            shadow: 3,
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox.square(
+                  dimension: 17,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  context.trText('Loading…'),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w900),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
 }
 
 class _Glyph extends StatelessWidget {
-  const _Glyph({required this.char});
-  final String char;
+  const _Glyph({required this.character});
+  final String character;
 
   @override
-  Widget build(BuildContext context) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Text(char,
+  Widget build(BuildContext context) => FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Padding(
+          padding: const EdgeInsets.all(42),
+          child: Text(
+            character,
             style: TextStyle(
-                fontSize: 200,
-                fontWeight: FontWeight.w700,
-                color: context.jc.brand)),
-      ),
-    );
-  }
+              fontFamily: 'NotoSansJP',
+              fontSize: 210,
+              fontWeight: FontWeight.w900,
+              color: context.jc.ink,
+            ),
+          ),
+        ),
+      );
 }
 
-class _BottomBar extends StatelessWidget {
-  const _BottomBar(
-      {required this.char, required this.onSay, required this.onDraw});
-  final String char;
+class _LearnDetails extends StatelessWidget {
+  const _LearnDetails({
+    required this.item,
+    required this.word,
+    required this.onSay,
+    required this.onDraw,
+  });
+
+  final KanaEntry item;
+  final String word;
   final VoidCallback onSay;
   final VoidCallback onDraw;
 
   @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: jc.surface,
-        borderRadius: BorderRadius.circular(Radii.pill),
-        border: Border.all(color: jc.hairline),
-        boxShadow: Shadows.soft(context),
-      ),
-      child: Row(
-        children: [
-          Text(char,
-              style: TextStyle(
-                  fontSize: 26, fontWeight: FontWeight.w700, color: jc.ink)),
-          const Spacer(),
-          IconButton(
-            onPressed: () {
-              Haptics.tick();
-              onSay();
-            },
-            icon: Icon(Icons.volume_up_rounded, color: jc.brand),
-            tooltip: context.trText('Play audio'),
-          ),
-          IconButton(
-            onPressed: onDraw,
-            icon: Icon(Icons.edit_outlined, color: jc.brand),
-            tooltip: context.trText('Draw a mascot'),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => NeoCard(
+        tone: NeoTone.lavender,
+        shadow: 5,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  item.char,
+                  style: const TextStyle(
+                    fontFamily: 'NotoSansJP',
+                    fontSize: 44,
+                    height: 0.9,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    item.romaji.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.7,
+                    ),
+                  ),
+                ),
+                const NeoBadge('SOUND', tone: NeoTone.acid),
+              ],
+            ),
+            if (word.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: context.jc.surface,
+                  border: Border.all(color: context.jc.ink, width: 2.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  word,
+                  style: TextStyle(
+                    color: context.jc.body,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: NeoCard(
+                    tone: NeoTone.paper,
+                    shadow: 3,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    onTap: () {
+                      Haptics.tick();
+                      onSay();
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.volume_up_rounded, size: 20),
+                        const SizedBox(width: 7),
+                        Text(
+                          context.trText('Listen'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: NeoCard(
+                    tone: NeoTone.acid,
+                    shadow: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    onTap: onDraw,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.edit_outlined, size: 20),
+                        const SizedBox(width: 7),
+                        Text(
+                          context.trText('Draw'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
 }

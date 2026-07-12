@@ -22,6 +22,7 @@ import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
 import '../widgets/stroke_order_view.dart';
 import '../widgets/word_tile.dart';
+import '../widgets/neo_pop.dart';
 
 /// The best single Japanese reading to speak for a kanji: the first kun reading
 /// (stripped of KANJIDIC's okurigana '.'/'-' markers), else the first on reading,
@@ -73,28 +74,46 @@ class _KanjiDetail extends StatelessWidget {
     final vm = context.watch<KanjiDetailViewModel>();
     final k = vm.kanji;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.trText('Kanji')),
-        actions: k == null
-            ? null
-            : [
-                ReportItemAction(
-                    type: ReportItemType.kanji,
-                    itemRef: k.literal,
-                    label: k.literal),
-              ],
-      ),
       bottomNavigationBar: k == null
           ? null
           : StudyStatusBar(status: vm.status, onSetStatus: vm.setStatus),
-      body: BoundedContent(
-        child: vm.isLoading
-            ? const LoadingView()
-            : vm.hasError
-                ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-                : k == null
-                    ? const SizedBox.shrink()
-                    : _content(context, k),
+      body: SafeArea(
+        child: Column(
+          children: [
+            BoundedContent(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                child: Row(
+                  children: [
+                    NeoIconButton(
+                      icon: Icons.arrow_back_rounded,
+                      label: context.trText('Back'),
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                    const Spacer(),
+                    if (k != null)
+                      ReportItemAction(
+                        type: ReportItemType.kanji,
+                        itemRef: k.literal,
+                        label: k.literal,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: BoundedContent(
+                child: vm.isLoading
+                    ? const LoadingView()
+                    : vm.hasError
+                        ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                        : k == null
+                            ? const SizedBox.shrink()
+                            : _content(context, k),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -105,46 +124,84 @@ class _KanjiDetail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
-        Center(
-          child: k.hasStrokes
-              ? StrokeOrderView(paths: k.strokePaths, viewBox: k.strokeViewbox)
-              : Text(k.literal,
-                  style: const TextStyle(
-                      fontSize: 96, fontWeight: FontWeight.w600, height: 1.05)),
-        ),
-        Center(
-            child: Text(k.meaningsFor(lang).join(', '),
-                style: const TextStyle(fontSize: 18))),
-        Center(
-            child: SpeechButton(
-                text: _readAloud(k), tooltip: context.trText('Play reading'))),
-        if (k.hasStrokes) ...[
-          const SizedBox(height: 12),
-          Center(
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => WritingPracticeView(
-                  character: k.literal,
-                  meaning: k.meaningsFor(lang).take(2).join(', '),
-                  reading:
-                      [...k.kunReadings, ...k.onReadings].take(2).join('  '),
-                  strokePaths: k.strokePaths,
-                  strokeViewBox: k.strokeViewbox,
+        NeoCard(
+          tone: NeoTone.magenta,
+          shadow: 6,
+          child: Column(
+            children: [
+              Center(
+                child: k.hasStrokes
+                    ? StrokeOrderView(
+                        paths: k.strokePaths, viewBox: k.strokeViewbox)
+                    : Text(k.literal,
+                        style: const TextStyle(
+                            fontSize: 96,
+                            fontWeight: FontWeight.w900,
+                            height: 1.05)),
+              ),
+              Center(
+                  child: Text(k.meaningsFor(lang).join(', '),
+                      style: const TextStyle(fontSize: 18))),
+              Center(
+                  child: SpeechButton(
+                      text: _readAloud(k),
+                      tooltip: context.trText('Play reading'))),
+              if (k.hasStrokes) ...[
+                const SizedBox(height: 12),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    child: NeoCard(
+                      tone: NeoTone.acid,
+                      shadow: 3,
+                      radius: 10,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => WritingPracticeView(
+                          character: k.literal,
+                          meaning: k.meaningsFor(lang).take(2).join(', '),
+                          reading: [...k.kunReadings, ...k.onReadings]
+                              .take(2)
+                              .join('  '),
+                          strokePaths: k.strokePaths,
+                          strokeViewBox: k.strokeViewbox,
+                        ),
+                      )),
+                      semanticLabel: context.trText('Practice writing'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.edit_outlined, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.trText('Practice writing'),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              )),
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: Text(context.trText('Practice writing')),
-            ),
+              ],
+              const SizedBox(height: 12),
+              Center(
+                child: Wrap(spacing: 6, children: [
+                  NeoBadge('${k.strokeCount} strokes'),
+                  if (k.jlpt != null)
+                    NeoBadge('JLPT N${k.jlpt}', tone: NeoTone.acid),
+                  if (k.grade != null)
+                    NeoBadge('Grade ${k.grade}', tone: NeoTone.lime),
+                  if (k.freqRank != null) NeoBadge('#${k.freqRank} freq'),
+                ]),
+              ),
+            ],
           ),
-        ],
-        const SizedBox(height: 12),
-        Center(
-          child: Wrap(spacing: 6, children: [
-            TagChip('${k.strokeCount} strokes'),
-            if (k.jlpt != null) TagChip('JLPT N${k.jlpt}'),
-            if (k.grade != null) TagChip('Grade ${k.grade}'),
-            if (k.freqRank != null) TagChip('#${k.freqRank} freq'),
-          ]),
         ),
         const SizedBox(height: 20),
         if (k.kunReadings.isNotEmpty) _readings(context, 'Kun', k.kunReadings),

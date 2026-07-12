@@ -1,13 +1,22 @@
+import 'dart:async';
+
 import '../models/enums.dart';
 import '../models/word.dart';
 import '../repositories/dictionary_repository.dart';
 import '../repositories/study_repository.dart';
+import '../services/recent_dictionary_history.dart';
 import 'base_view_model.dart';
 
 class WordDetailViewModel extends BaseViewModel {
-  WordDetailViewModel(this._dict, this._study, this.wordId);
+  WordDetailViewModel(
+    this._dict,
+    this._study,
+    this.wordId, {
+    RecentDictionaryHistory? history,
+  }) : _history = history ?? RecentDictionaryHistory();
   final DictionaryRepository _dict;
   final StudyRepository _study;
+  final RecentDictionaryHistory _history;
   final int wordId;
 
   WordEntry? _word;
@@ -19,8 +28,14 @@ class WordDetailViewModel extends BaseViewModel {
 
   Future<void> load() async {
     final w = await runGuarded(() => _dict.word(wordId));
-    if (w != null) _word = w;
-    final states = await runGuarded(() => _study.studyStates(type: ItemType.word), silent: true);
+    if (w != null) {
+      _word = w;
+      unawaited(_history.remember(w.id));
+    }
+    final states = await runGuarded(
+      () => _study.studyStates(type: ItemType.word),
+      silent: true,
+    );
     if (states != null) {
       final s = states[wordId.toString()];
       _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
@@ -35,7 +50,9 @@ class WordDetailViewModel extends BaseViewModel {
     _status = target;
     notifyListeners();
     final res = await runGuarded(
-        () => _study.setStatus(ItemType.word, wordId.toString(), target), silent: true);
+      () => _study.setStatus(ItemType.word, wordId.toString(), target),
+      silent: true,
+    );
     _status = res ?? prev;
     notifyListeners();
   }

@@ -23,9 +23,15 @@ const _fallbackKana = [
 /// shuffled tile bank into the empty cells. A correct build grades Good, a wrong
 /// one grades Again and shows the answer.
 class ListenStage extends StatefulWidget {
-  const ListenStage({super.key, required this.vm, required this.lang});
+  const ListenStage({
+    super.key,
+    required this.vm,
+    required this.lang,
+    this.onRated,
+  });
   final ReviewViewModel vm;
   final String lang;
+  final void Function(StudyCard card, Rating rating)? onRated;
 
   @override
   State<ListenStage> createState() => _ListenStageState();
@@ -92,13 +98,16 @@ class _ListenStageState extends State<ListenStage> {
   }
 
   Future<void> _check() async {
+    final card = widget.vm.current!;
     final assembled = _placed.map((i) => _bank[i]).join();
     _correct = assembled == _target;
     setState(() => _checked = true);
     _correct ? Haptics.success() : Haptics.medium();
     await Future.delayed(Duration(milliseconds: _correct ? 700 : 1600));
     if (!mounted) return;
-    widget.vm.rate(_correct ? Rating.good : Rating.again);
+    final rating = _correct ? Rating.good : Rating.again;
+    widget.onRated?.call(card, rating);
+    widget.vm.rate(rating);
   }
 
   @override
@@ -145,9 +154,11 @@ class _ListenStageState extends State<ListenStage> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: jc.surface,
-        borderRadius: BorderRadius.circular(Radii.xl),
-        border: Border.all(color: jc.hairline),
-        boxShadow: Shadows.soft(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: jc.ink, width: 3),
+        boxShadow: [
+          BoxShadow(color: jc.ink, blurRadius: 0, offset: const Offset(8, 8))
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -220,6 +231,12 @@ class _ListenStageState extends State<ListenStage> {
           width: double.infinity,
           child: FilledButton(
             onPressed: (full && !_checked) ? _check : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: context.jc.ink,
+              foregroundColor: context.jc.acid,
+              disabledBackgroundColor: context.jc.surfaceAlt,
+              disabledForegroundColor: context.jc.muted,
+            ),
             child: Text(context.trText('Check')),
           ),
         ),
@@ -356,9 +373,9 @@ class _BankTile extends StatelessWidget {
           height: 56,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: jc.surfaceAlt,
+            color: jc.acid,
             borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: jc.hairline),
+            border: Border.all(color: jc.ink, width: 2.5),
           ),
           child: Text(char,
               style: TextStyle(
@@ -389,9 +406,20 @@ class _ReplayButton extends StatelessWidget {
       child: Container(
         width: 88,
         height: 88,
-        decoration: BoxDecoration(color: jc.brandSoft, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: jc.acid,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: jc.ink, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: jc.ink,
+              blurRadius: 0,
+              offset: const Offset(4, 4),
+            ),
+          ],
+        ),
         alignment: Alignment.center,
-        child: Icon(Icons.volume_up_rounded, size: 40, color: jc.brand),
+        child: Icon(Icons.volume_up_rounded, size: 40, color: jc.ink),
       ),
     );
   }

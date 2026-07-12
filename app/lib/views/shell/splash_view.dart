@@ -5,9 +5,10 @@ import 'package:provider/provider.dart';
 import '../../core/api_config.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
+import '../widgets/neo_pop.dart';
 
 /// Shown while AppState.bootstrap() resolves the session on cold start. It echoes
-/// the native splash (vermilion 字 on white) so the hand-off from the OS launch
+/// the native splash (Klein blue 字 on white) so the hand-off from the OS launch
 /// screen into Flutter is seamless: the glyph breathes as the "still loading" cue.
 /// If the server can't be reached, it turns into an honest retry instead of
 /// bouncing a signed-in user to the login screen.
@@ -111,17 +112,33 @@ class _SplashViewState extends State<SplashView>
                   ),
                 ),
                 const SizedBox(height: 18),
-                FilledButton(
-                  onPressed: () => context.read<AppState>().bootstrap(),
-                  child: Text(context.trText('Try again')),
+                SizedBox(
+                  width: 240,
+                  child: NeoPrimaryButton(
+                    label: context.trText('Try again'),
+                    icon: Icons.refresh_rounded,
+                    onTap: () => context.read<AppState>().bootstrap(),
+                  ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 8),
                 // Escape hatch: never trap a user on the splash when the API is
                 // unreachable or the stored session is unusable - always let them
                 // drop it and reach the sign-in screen.
-                TextButton(
-                  onPressed: () => context.read<AppState>().logout(),
-                  child: Text(context.trText('Sign in instead')),
+                SizedBox(
+                  width: 240,
+                  child: NeoCard(
+                    shadow: 0,
+                    radius: 10,
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    onTap: () => context.read<AppState>().logout(),
+                    semanticLabel: context.trText('Sign in instead'),
+                    child: Center(
+                      child: Text(
+                        context.trText('Sign in instead'),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ],

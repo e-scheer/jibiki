@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/app_theme.dart';
+import '../study/study_chrome.dart';
 
-/// The bulk action bar shown while multi-selecting dictionary items: mark the
-/// picked items as already known, or add them to study as new. Shared by the kana
-/// chart and the kanji browser so "I know all of these" reads the same way.
 class SelectionActionBar extends StatelessWidget {
   const SelectionActionBar({
     super.key,
@@ -13,6 +12,7 @@ class SelectionActionBar extends StatelessWidget {
     required this.onKnown,
     required this.onAdd,
   });
+
   final int count;
   final bool busy;
   final VoidCallback onKnown;
@@ -20,46 +20,73 @@ class SelectionActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final jc = context.jc;
     final enabled = count > 0 && !busy;
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-        decoration: BoxDecoration(color: jc.canvas, border: Border(top: BorderSide(color: jc.hairline))),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Two "add" buttons side by side aren't self-explanatory; spell out how
-            // they differ so the choice is obvious.
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                '“Learn these” enter your reviews; “I know these” are marked done and skipped.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: jc.muted, fontSize: 12, height: 1.3),
+    return Container(
+      decoration: BoxDecoration(
+        color: context.jc.canvas,
+        border: Border(top: BorderSide(color: context.jc.ink, width: 2.5)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 9, 16, 11),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    count == 0 ? 'Select characters' : '$count selected',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      context.trText('Learn adds reviews. Known skips them.'),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.jc.body,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: enabled ? onAdd : null,
-                    child: Text(count > 0 ? 'Learn these ($count)' : 'Learn these'),
+              const SizedBox(height: 9),
+              Row(
+                children: [
+                  Expanded(
+                    child: StudyActionButton(
+                      label: count > 0 ? 'Learn ($count)' : 'Learn',
+                      icon: Icons.school_outlined,
+                      color: context.jc.acid,
+                      height: 52,
+                      shadow: 3,
+                      onTap: enabled ? onAdd : null,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: enabled ? onKnown : null,
-                    child: busy
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Text(count > 0 ? 'I know these ($count)' : 'I know these'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: StudyActionButton(
+                      label: count > 0 ? 'Known ($count)' : 'Known',
+                      icon: Icons.done_all_rounded,
+                      color: context.jc.lime,
+                      height: 52,
+                      shadow: 3,
+                      busy: busy,
+                      onTap: enabled ? onKnown : null,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

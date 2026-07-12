@@ -1,19 +1,22 @@
-import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:jibiki/l10n/l10n.dart';
 
 import '../../core/languages.dart';
 import '../../theme/app_theme.dart';
+import 'pressable.dart';
 
-/// Bottom-sheet picker for the mnemonic language. Open by design - every real
-/// ISO 639-1 language is selectable, so the community can start a language
-/// before we curate it (English stays the display backup) - but ONLY real
-/// languages: the list is the ISO catalog, never free text.
+/// NeoPop language picker. Every ISO 639-1 language stays selectable so a
+/// community can start contributing before a curated set exists.
 Future<String?> showMnemonicLanguagePicker(
-    BuildContext context, String current) {
+  BuildContext context,
+  String current,
+) {
   return showModalBottomSheet<String>(
     context: context,
-    showDragHandle: true,
     isScrollControlled: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: context.jc.ink.withValues(alpha: 0.52),
     builder: (ctx) => _LanguageSheet(current: current),
   );
 }
@@ -33,95 +36,314 @@ class _LanguageSheetState extends State<_LanguageSheet> {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
+    final media = MediaQuery.of(context);
     final query = _query.trim().toLowerCase();
     final all = allMnemonicLanguages;
     final featured = featuredMnemonicLanguages;
     final filtered = query.isEmpty
         ? null
         : [
-            for (final l in all)
-              if (l.nativeName.toLowerCase().contains(query) ||
-                  l.code.contains(query))
-                l,
+            for (final language in all)
+              if (language.nativeName.toLowerCase().contains(query) ||
+                  language.code.contains(query))
+                language,
           ];
 
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.75,
-      builder: (ctx, controller) => ListView(
-        controller: controller,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+    return AnimatedPadding(
+      duration: Motion.timed(context, Motion.base),
+      curve: Motion.out,
+      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: media.size.height * 0.88,
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: jc.canvas,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(color: jc.ink, width: 3),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(context.trText('Mnemonic language'),
-                    style: Theme.of(ctx).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(
-                  context.trText(
-                      'Mnemonics ride on sound, so they belong to a language. '
-                      'No content in yours yet? Draw the first - or ask for a '
-                      'curated set via Settings → Make jibiki better.'),
-                  style: TextStyle(color: jc.muted, fontSize: 13, height: 1.4),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: context.trText('Search languages…'),
-                    prefixIcon: const Icon(Icons.search),
-                    isDense: true,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(Radii.md)),
+                _SheetHeader(onQueryChanged: (value) {
+                  setState(() => _query = value);
+                }),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                    children: [
+                      if (filtered == null) ...[
+                        _SectionSticker(label: context.trText('Featured')),
+                        const SizedBox(height: 10),
+                        for (final language in featured) ...[
+                          _LanguageRow(
+                            language: language,
+                            selected: language.code == widget.current,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        const SizedBox(height: 10),
+                        _SectionSticker(label: context.trText('All languages')),
+                        const SizedBox(height: 10),
+                        for (final language in all)
+                          if (!featured.any((featured) =>
+                              featured.code == language.code)) ...[
+                            _LanguageRow(
+                              language: language,
+                              selected: language.code == widget.current,
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                      ] else if (filtered.isEmpty)
+                        _NoMatch(query: _query)
+                      else
+                        for (final language in filtered) ...[
+                          _LanguageRow(
+                            language: language,
+                            selected: language.code == widget.current,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                    ],
                   ),
-                  onChanged: (v) => setState(() => _query = v),
                 ),
               ],
             ),
           ),
-          if (filtered == null) ...[
-            _header(ctx, 'Featured'),
-            for (final l in featured) _tile(ctx, l),
-            _header(ctx, 'All languages'),
-            for (final l in all)
-              if (!featured.any((f) => f.code == l.code)) _tile(ctx, l),
-          ] else if (filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(context.trText('No language matches "$_query".'),
-                  style: TextStyle(color: jc.muted)),
-            )
-          else
-            for (final l in filtered) _tile(ctx, l),
-          const SizedBox(height: 16),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetHeader extends StatelessWidget {
+  const _SheetHeader({required this.onQueryChanged});
+
+  final ValueChanged<String> onQueryChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+      decoration: BoxDecoration(
+        color: jc.magenta,
+        border: Border(bottom: BorderSide(color: jc.ink, width: 3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            child: Container(
+              width: 48,
+              height: 5,
+              decoration: BoxDecoration(
+                color: jc.ink,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.trText('Mnemonic language'),
+            style: context.text.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: jc.ink,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.trText(
+              'Mnemonics ride on sound. Pick the language that makes the hint click for you.',
+            ),
+            style: TextStyle(
+              color: jc.ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: jc.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: jc.ink, width: 2.5),
+              boxShadow: [
+                BoxShadow(
+                  color: jc.ink,
+                  blurRadius: 0,
+                  offset: const Offset(4, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: context.trText('Search languages...'),
+                prefixIcon: const Icon(Icons.search, size: 21),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                filled: false,
+                contentPadding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+              onChanged: onQueryChanged,
+            ),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _header(BuildContext context, String title) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
-        child: Text(title,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(color: context.jc.muted)),
+class _SectionSticker extends StatelessWidget {
+  const _SectionSticker({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Transform.rotate(
+        angle: -0.025,
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: context.jc.acid,
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: context.jc.ink, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                color: context.jc.ink,
+                blurRadius: 0,
+                offset: const Offset(3, 3),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+          ),
+        ),
       );
+}
 
-  Widget _tile(BuildContext context, MnemonicLanguage lang) {
+class _LanguageRow extends StatelessWidget {
+  const _LanguageRow({required this.language, required this.selected});
+
+  final MnemonicLanguage language;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
     final jc = context.jc;
-    return ListTile(
-      dense: true,
-      title: Text(lang.nativeName),
-      subtitle: lang.seeded
-          ? null
-          : Text(context.trText('No content yet - be the first!'),
-              style: TextStyle(fontSize: 11, color: jc.muted)),
-      trailing: lang.code == widget.current
-          ? Icon(Icons.check, color: jc.brand)
-          : Text(lang.code, style: TextStyle(color: jc.muted, fontSize: 12)),
-      onTap: () => Navigator.pop(context, lang.code),
+    return Pressable(
+      label: language.nativeName,
+      selected: selected,
+      pressedScale: 1,
+      onTap: () => Navigator.pop(context, language.code),
+      child: AnimatedContainer(
+        duration: Motion.timed(context, Motion.fast),
+        constraints: const BoxConstraints(minHeight: 58),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? jc.acid : jc.surface,
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(color: jc.ink, width: 2.5),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(3, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? jc.lime : jc.lavender,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: jc.ink, width: 2),
+              ),
+              child: Text(
+                language.code.toUpperCase(),
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    language.nativeName,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  if (!language.seeded)
+                    Text(
+                      context.trText('No content yet, be the first!'),
+                      style: TextStyle(
+                        color: jc.body,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (selected)
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: jc.ink,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Icon(Icons.check, size: 18, color: jc.acid),
+              )
+            else
+              Text(
+                language.code,
+                style: TextStyle(
+                  color: jc.body,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
+}
+
+class _NoMatch extends StatelessWidget {
+  const _NoMatch({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: context.jc.lavender,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+        ),
+        child: Text(
+          context.trText('No language matches "$query".'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+      );
 }
