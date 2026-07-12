@@ -321,33 +321,73 @@ class _NeoNavigationRail extends StatelessWidget {
           border: Border(right: BorderSide(color: jc.ink, width: 3)),
         ),
         child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(6, 14, 6, 14),
-            child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(minHeight: constraints.maxHeight - 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const _RailBrand(),
-                  const SizedBox(height: 14),
-                  for (var i = 0; i < destinations.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 8),
-                    SizedBox(
-                      height: 62,
-                      child: _NeoNavButton(
-                        destination: destinations[i],
-                        selected: index == i,
-                        due: i == _ShellState._reviewIndex ? due : 0,
-                        onTap: () => onSelect(i),
+          builder: (context, constraints) {
+            const horizontal = 6.0;
+            const top = 14.0;
+            const brandSize = 46.0;
+            const brandGap = 14.0;
+            const itemHeight = 62.0;
+            const itemGap = 8.0;
+            final itemTop = top + brandSize + brandGap;
+            final contentHeight = itemTop +
+                destinations.length * itemHeight +
+                (destinations.length - 1) * itemGap +
+                14;
+            return SingleChildScrollView(
+              padding:
+                  const EdgeInsets.fromLTRB(horizontal, top, horizontal, 14),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 28,
+                  minWidth: constraints.maxWidth - horizontal * 2,
+                ),
+                child: SizedBox(
+                  height: contentHeight > constraints.maxHeight - 28
+                      ? contentHeight
+                      : constraints.maxHeight - 28,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AnimatedPositioned(
+                        duration: Motion.timed(
+                          context,
+                          const Duration(milliseconds: 260),
+                        ),
+                        curve: Motion.outStrong,
+                        left: 0,
+                        right: 0,
+                        top: itemTop + index * (itemHeight + itemGap),
+                        height: itemHeight,
+                        child: const IgnorePointer(
+                          child: _RailSelectionPill(),
+                        ),
                       ),
-                    ),
-                  ],
-                ],
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const _RailBrand(),
+                          const SizedBox(height: brandGap),
+                          for (var i = 0; i < destinations.length; i++) ...[
+                            if (i > 0) const SizedBox(height: itemGap),
+                            SizedBox(
+                              height: itemHeight,
+                              child: _NeoNavButton(
+                                destination: destinations[i],
+                                selected: index == i,
+                                showSelection: false,
+                                due: i == _ShellState._reviewIndex ? due : 0,
+                                onTap: () => onSelect(i),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -443,6 +483,26 @@ class _NeoNavButton extends StatelessWidget {
 
 class _NavSelectionPill extends StatelessWidget {
   const _NavSelectionPill();
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.jc.acid,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black,
+              blurRadius: 0,
+              offset: Offset(3, 3),
+            ),
+          ],
+        ),
+      );
+}
+
+class _RailSelectionPill extends StatelessWidget {
+  const _RailSelectionPill();
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
