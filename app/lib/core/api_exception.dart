@@ -1,4 +1,6 @@
-const authRequiredErrorMessage = '__AUTH_REQUIRED__';
+// This value may reach a last-resort error surface. Keep it user-safe even
+// though callers normally intercept it and open the dedicated sign-in sheet.
+const authRequiredErrorMessage = 'Please sign in to continue.';
 
 /// A normalized API error the UI can render, mapped from Dio failures.
 class ApiException implements Exception {

@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../core/api_exception.dart';
 import '../../core/speech.dart';
 import '../../data/kana_strokes.dart';
 import '../../models/enums.dart';
@@ -13,6 +15,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
+import '../auth/auth_required_sheet.dart';
 import '../feedback/report_item_sheet.dart';
 import '../widgets/drawing_canvas.dart';
 import '../widgets/mnemonic_panel.dart';
@@ -299,14 +302,42 @@ class _KanaDetailState extends State<_KanaDetail> {
     required _KanaDetailData data,
     required bool addBoth,
   }) async {
+    final appState = context.read<AppState>();
+    final canStudyLocally = appState.localOnly && !kIsWeb;
+    if (!appState.isAuthenticated && !canStudyLocally) {
+      await _showStudyAuthRequired(
+        context,
+        addBoth: addBoth && data.counterpart != null,
+      );
+      return;
+    }
+
     final study = context.read<StudyRepository>();
     var added = await mnemonic.addToStudy();
+    if (!context.mounted) return;
+    if (!added && mnemonic.error == authRequiredErrorMessage) {
+      mnemonic.clearError();
+      await _showStudyAuthRequired(
+        context,
+        addBoth: addBoth && data.counterpart != null,
+      );
+      return;
+    }
+
     if (added && addBoth && data.counterpart != null) {
       try {
         await study.addCard(
           ItemType.kana,
           data.counterpart!.char,
         );
+      } on ApiException catch (error) {
+        if (error.isUnauthorized) {
+          if (context.mounted) {
+            await _showStudyAuthRequired(context, addBoth: true);
+          }
+          return;
+        }
+        added = false;
       } catch (_) {
         added = false;
       }
@@ -332,6 +363,30 @@ class _KanaDetailState extends State<_KanaDetail> {
       ),
     );
   }
+
+  Future<void> _showStudyAuthRequired(
+    BuildContext context, {
+    required bool addBoth,
+  }) =>
+      showAuthRequiredSheet(
+        context,
+        title: _copy(
+          context,
+          addBoth ? 'Save both kana forms' : 'Save this kana',
+          addBoth
+              ? 'Enregistrer les deux formes du kana'
+              : 'Enregistrer ce kana',
+        ),
+        description: _copy(
+          context,
+          addBoth
+              ? 'Sign in to add both forms to your study deck and sync your progress.'
+              : 'Sign in to add this kana to your study deck and sync your progress.',
+          addBoth
+              ? 'Connectez-vous pour ajouter les deux formes à vos révisions et synchroniser votre progression.'
+              : 'Connectez-vous pour ajouter ce kana à vos révisions et synchroniser votre progression.',
+        ),
+      );
 }
 
 class _EmbeddedKanaDetailContent extends StatelessWidget {
