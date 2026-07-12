@@ -38,7 +38,15 @@ GoRouter buildRouter(AppState app) {
       }
       // Local-only (no account) counts as signed in: the paid app is fully
       // usable offline; login stays reachable to link an account later.
-      if (!app.canEnter) return atAuth ? null : '/login';
+      if (!app.canEnter) {
+        // The landing route still asks for an account, but deep links remain on
+        // their intended surface so an account-only panel can explain the gate
+        // without throwing the learner into a dead-end login page.
+        if (atAuth || loc == '/' || loc == '/splash') {
+          return atAuth ? null : '/login';
+        }
+        return null;
+      }
       if (!app.onboarded) return loc == '/onboarding' ? null : '/onboarding';
       if (app.localOnly && atAuth) {
         return null;

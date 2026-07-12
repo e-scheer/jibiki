@@ -6,6 +6,8 @@ import '../../l10n/l10n.dart';
 import '../../models/integration.dart';
 import '../../services/integration_service.dart';
 import '../../theme/app_theme.dart';
+import '../../viewmodels/app_state.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/jibiki_brand.dart';
 
@@ -26,7 +28,11 @@ class _WaniKaniViewState extends State<WaniKaniView> {
   @override
   void initState() {
     super.initState();
-    _load();
+    if (context.read<AppState>().isAuthenticated) {
+      _load();
+    } else {
+      _busy = false;
+    }
   }
 
   @override
@@ -212,6 +218,34 @@ class _WaniKaniViewState extends State<WaniKaniView> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<AppState>().isAuthenticated) {
+      return Scaffold(
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: context.trText('WaniKani integration'),
+              subtitle: context.trText('Read-only import with a preview'),
+              tone: NeoTone.magenta,
+              leading: NeoIconButton(
+                icon: Icons.arrow_back_rounded,
+                label: context.trText('Back'),
+                onTap: () => Navigator.of(context).maybePop(),
+              ),
+              trailing: const NeoBadge('蟹', tone: NeoTone.acid),
+            ),
+            Expanded(
+              child: AuthRequiredPanel(
+                title: context.trText('Sign in to connect WaniKani'),
+                description: context.trText(
+                  'Your import preview and study choices belong to your account.',
+                ),
+                icon: Icons.sync_rounded,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final status = _status;
     return Scaffold(
       backgroundColor: context.jc.canvas,

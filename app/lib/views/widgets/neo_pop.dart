@@ -65,7 +65,7 @@ class _NeoCardState extends State<NeoCard> {
   @override
   Widget build(BuildContext context) {
     final card = AnimatedContainer(
-      duration: Motion.timed(context, Motion.fast),
+      duration: Motion.timed(context, const Duration(milliseconds: 70)),
       curve: Motion.out,
       transform: Matrix4.translationValues(
         _down ? widget.shadow : 0,
@@ -436,20 +436,23 @@ class NeoSegment<T> {
 }
 
 /// The exact segmented control used by the NeoPop exploration: a hard outer
-/// frame, three compact cells and one acid selection with a tiny offset shadow.
-/// It deliberately has no Material indicator animation or sliding pill.
+/// frame, compact cells and one acid selection with a tiny offset shadow. The
+/// selection travels between cells instead of popping in place, so toggles
+/// read as one continuous control on touch and keyboard navigation.
 class NeoSegmentedControl<T> extends StatelessWidget {
   const NeoSegmentedControl({
     super.key,
     required this.segments,
     required this.selected,
     required this.onChanged,
+    this.enabled = true,
     this.height = 56,
   });
 
   final List<NeoSegment<T>> segments;
   final T selected;
   final ValueChanged<T> onChanged;
+  final bool enabled;
   final double height;
 
   @override
@@ -472,17 +475,63 @@ class NeoSegmentedControl<T> extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            for (final segment in segments)
-              Expanded(
-                child: _NeoSegmentButton<T>(
-                  segment: segment,
-                  selected: segment.value == selected,
-                  onTap: () => onChanged(segment.value),
+        child: LayoutBuilder(
+          builder: (context, _) {
+            final selectedIndex = segments.indexWhere(
+              (segment) => segment.value == selected,
+            );
+            final count = segments.length.clamp(1, 12);
+            final alignment = count == 1
+                ? 0.0
+                : -1.0 + (selectedIndex.clamp(0, count - 1) * 2 / (count - 1));
+            return Stack(
+              children: [
+                AnimatedAlign(
+                  duration: Motion.timed(
+                    context,
+                    const Duration(milliseconds: 230),
+                  ),
+                  curve: Motion.outStrong,
+                  alignment: Alignment(alignment, 0),
+                  child: FractionallySizedBox(
+                    widthFactor: 1 / count,
+                    heightFactor: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: jc.acid,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: jc.ink, width: 2.5),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 0,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-          ],
+                Row(
+                  children: [
+                    for (final segment in segments)
+                      Expanded(
+                        child: _NeoSegmentButton<T>(
+                          segment: segment,
+                          selected: segment.value == selected,
+                          enabled: enabled,
+                          showSelection: false,
+                          onTap: () => onChanged(segment.value),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -493,12 +542,16 @@ class _NeoSegmentButton<T> extends StatelessWidget {
   const _NeoSegmentButton({
     required this.segment,
     required this.selected,
+    this.enabled = true,
+    this.showSelection = true,
     required this.onTap,
   });
 
   final NeoSegment<T> segment;
   final bool selected;
-  final VoidCallback onTap;
+  final bool enabled;
+  final bool showSelection;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -507,16 +560,18 @@ class _NeoSegmentButton<T> extends StatelessWidget {
       label: segment.label,
       selected: selected,
       pressedScale: 1,
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       child: AnimatedContainer(
         duration: Motion.timed(context, Motion.fast),
         curve: Motion.out,
         margin: const EdgeInsets.symmetric(horizontal: 1),
         decoration: BoxDecoration(
-          color: selected ? jc.acid : Colors.transparent,
+          color: selected && showSelection ? jc.acid : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
-          border: selected ? Border.all(color: jc.ink, width: 2.5) : null,
-          boxShadow: selected
+          border: selected && showSelection
+              ? Border.all(color: jc.ink, width: 2.5)
+              : null,
+          boxShadow: selected && showSelection
               ? [
                   BoxShadow(
                     color: jc.ink,

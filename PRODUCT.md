@@ -78,7 +78,7 @@ Settings expose the complete display system. Light, dark and automatic appearanc
 can be combined with a runtime palette, currently Neo-pop and Harmonie, while the
 same semantic colour roles preserve hierarchy and interaction states.
 
-Tablet is a distinct workspace, not a stretched phone. A fixed 76 px rail remains
+Tablet is a distinct workspace, not a stretched phone. A fixed 84 px rail remains
 compact at every tablet width. At expanded widths the dictionary keeps a 340 px
 result list beside a persistent detail pane, and Kana keeps a 524 px matrix beside
 the selected glyph detail. The home dashboard becomes a dense three-column grid
@@ -116,7 +116,7 @@ removes the rail and uses a 55/45 card-and-grading split on a lavender field.
    grading use short, GPU-friendly transitions and haptic feedback. Reduced-motion
    preferences always collapse non-essential movement.
 8. **One layout system, three densities.** Phones use compact bottom navigation;
-   tablets use the fixed 76 px rail and persistent working panes; expanded windows
+   tablets use the fixed 84 px rail and persistent working panes; expanded windows
    use the dashboard grid and master-detail layouts without stretching reading
    content.
 9. **Palettes are data.** Components consume semantic colour tokens so a complete

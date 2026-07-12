@@ -118,7 +118,7 @@ class _PressableState extends State<Pressable> {
           onTap: _active ? _activate : null,
           child: TweenAnimationBuilder<double>(
             tween: Tween(end: _down ? 1 : 0),
-            duration: Motion.timed(context, const Duration(milliseconds: 120)),
+            duration: Motion.timed(context, const Duration(milliseconds: 70)),
             curve: Curves.easeOut,
             child: paintedChild,
             builder: (context, value, child) => Transform.translate(

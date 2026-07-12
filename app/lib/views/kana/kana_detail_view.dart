@@ -216,7 +216,10 @@ class _KanaDetailState extends State<_KanaDetail> {
               }
               final data = snapshot.data;
               if (data == null) return _DetailSkeleton(char: widget.char);
-              return _DetailContent(data: data);
+              return _DetailContent(
+                data: data,
+                onSelectKana: widget.onSelectKana,
+              );
             },
           ),
         ),
@@ -265,7 +268,10 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
             key: PageStorageKey('kana-detail-${data.focused.char}'),
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
             children: [
-              _TabletKanaHero(data: data),
+              _TabletKanaHero(
+                data: data,
+                onSelectKana: onSelectKana,
+              ),
               const SizedBox(height: 14),
               _WritingGuide(kana: data.focused),
               const SizedBox(height: 16),
@@ -288,6 +294,7 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => _KanaWritingPracticePage(
                         kana: data.focused,
+                        startWithGuide: false,
                       ),
                     ),
                   ),
@@ -311,15 +318,16 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
 }
 
 class _TabletKanaHero extends StatelessWidget {
-  const _TabletKanaHero({required this.data});
+  const _TabletKanaHero({required this.data, this.onSelectKana});
 
   final _KanaDetailData data;
+  final ValueChanged<String>? onSelectKana;
 
   @override
   Widget build(BuildContext context) {
     final kana = data.focused;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(
         color: context.jc.lime,
         border: Border.all(color: context.jc.ink, width: 3),
@@ -335,13 +343,13 @@ class _TabletKanaHero extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 116,
+            width: 96,
             child: Text(
               kana.char,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'ZenKakuGothicNew',
-                fontSize: 96,
+                fontSize: 78,
                 height: 1,
                 fontWeight: FontWeight.w900,
               ),
@@ -398,6 +406,13 @@ class _TabletKanaHero extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (data.counterpart != null) ...[
+                  const SizedBox(height: 10),
+                  _KanaScriptSwitcher(
+                    data: data,
+                    onSelectKana: onSelectKana,
+                  ),
+                ],
               ],
             ),
           ),
@@ -420,7 +435,7 @@ class _EmbeddedDetailSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            height: 154,
+            height: 124,
             decoration: BoxDecoration(
               color: context.jc.lime,
               border: Border.all(color: context.jc.ink, width: 3),
@@ -492,9 +507,10 @@ class _EmbeddedDetailError extends StatelessWidget {
 }
 
 class _DetailContent extends StatelessWidget {
-  const _DetailContent({required this.data});
+  const _DetailContent({required this.data, this.onSelectKana});
 
   final _KanaDetailData data;
+  final ValueChanged<String>? onSelectKana;
 
   @override
   Widget build(BuildContext context) {
@@ -533,7 +549,7 @@ class _DetailContent extends StatelessWidget {
             28,
           ),
           children: [
-            _DetailTopBar(data: data),
+            _DetailTopBar(data: data, onSelectKana: onSelectKana),
             const SizedBox(height: 12),
             if (tablet)
               Row(
@@ -557,9 +573,10 @@ class _DetailContent extends StatelessWidget {
 }
 
 class _DetailTopBar extends StatelessWidget {
-  const _DetailTopBar({required this.data});
+  const _DetailTopBar({required this.data, this.onSelectKana});
 
   final _KanaDetailData data;
+  final ValueChanged<String>? onSelectKana;
 
   @override
   Widget build(BuildContext context) {
@@ -571,7 +588,11 @@ class _DetailTopBar extends StatelessWidget {
           onTap: () => context.pop(),
         ),
         const Spacer(),
-        _Tag(label: data.focused.isHiragana ? 'Hiragana' : 'Katakana'),
+        if (data.counterpart != null)
+          _KanaScriptSwitcher(
+            data: data,
+            onSelectKana: onSelectKana,
+          ),
         const SizedBox(width: 6),
         ReportItemAction(
           type: ReportItemType.kana,
@@ -579,6 +600,39 @@ class _DetailTopBar extends StatelessWidget {
           label: data.focused.char,
         ),
       ],
+    );
+  }
+}
+
+class _KanaScriptSwitcher extends StatelessWidget {
+  const _KanaScriptSwitcher({required this.data, this.onSelectKana});
+
+  final _KanaDetailData data;
+  final ValueChanged<String>? onSelectKana;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = data.focused.isHiragana ? 'hiragana' : 'katakana';
+    return SizedBox(
+      width: 190,
+      height: 42,
+      child: NeoSegmentedControl<String>(
+        height: 42,
+        selected: selected,
+        segments: const [
+          NeoSegment('hiragana', 'Hiragana'),
+          NeoSegment('katakana', 'Katakana'),
+        ],
+        onChanged: (target) {
+          if (target == selected || data.counterpart == null) return;
+          final next = data.counterpart!;
+          if (onSelectKana != null) {
+            onSelectKana!(next.char);
+          } else {
+            context.push('/kana/${next.char}');
+          }
+        },
+      ),
     );
   }
 }
@@ -595,20 +649,20 @@ class _KanaHero extends StatelessWidget {
       tone: NeoTone.lime,
       shadow: 6,
       radius: 14,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+      padding: const EdgeInsets.fromLTRB(14, 7, 14, 10),
       child: Column(
         children: [
           Text(
             kana.char,
             style: const TextStyle(
               fontFamily: 'ZenKakuGothicNew',
-              fontSize: 104,
+              fontSize: 84,
               height: 1.02,
               fontWeight: FontWeight.w900,
             ),
           ),
           Container(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: const BoxConstraints(minHeight: 40),
             decoration: BoxDecoration(
               color: context.jc.surface,
               border: Border.all(color: context.jc.ink, width: 2.5),
@@ -734,9 +788,33 @@ class _WritingGuide extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Tag(
-                    label: _copy(context, 'Trace it', 'À tracer'),
-                    color: context.jc.magenta,
+                  NeoCard(
+                    tone: NeoTone.magenta,
+                    shadow: 3,
+                    radius: 9,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 9,
+                    ),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => _KanaWritingPracticePage(
+                          kana: kana,
+                          startWithGuide: true,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.gesture_rounded, size: 17),
+                        const SizedBox(width: 6),
+                        Text(
+                          _copy(context, 'Trace it', 'À tracer'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -1102,10 +1180,9 @@ class _TwinTag extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const _Tag({required this.label, this.color});
+  const _Tag({required this.label});
 
   final String label;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -1114,7 +1191,7 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color ?? context.jc.surface,
+        color: context.jc.surface,
         border: Border.all(color: context.jc.ink, width: 2.5),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -1158,7 +1235,10 @@ class _DetailActions extends StatelessWidget {
                   icon: Icons.gesture_rounded,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => _KanaWritingPracticePage(kana: kana),
+                      builder: (_) => _KanaWritingPracticePage(
+                        kana: kana,
+                        startWithGuide: false,
+                      ),
                     ),
                   ),
                 ),
@@ -1181,9 +1261,13 @@ class _DetailActions extends StatelessWidget {
 }
 
 class _KanaWritingPracticePage extends StatefulWidget {
-  const _KanaWritingPracticePage({required this.kana});
+  const _KanaWritingPracticePage({
+    required this.kana,
+    this.startWithGuide = true,
+  });
 
   final KanaEntry kana;
+  final bool startWithGuide;
 
   @override
   State<_KanaWritingPracticePage> createState() =>
@@ -1192,7 +1276,7 @@ class _KanaWritingPracticePage extends StatefulWidget {
 
 class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
   final DrawingController _controller = DrawingController();
-  bool _showGuide = true;
+  late bool _showGuide = widget.startWithGuide;
 
   @override
   void dispose() {

@@ -142,6 +142,12 @@ class AppTheme {
         enabledBorder: _inputBorder(jc.ink, width: 2.5),
         focusedBorder: _inputBorder(jc.brand, width: 3),
         errorBorder: _inputBorder(jc.ratingAgain, width: 3),
+        focusedErrorBorder: _inputBorder(jc.ratingAgain, width: 3.5),
+        errorStyle: TextStyle(
+          color: jc.ratingAgain,
+          fontWeight: FontWeight.w800,
+          height: 1.15,
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

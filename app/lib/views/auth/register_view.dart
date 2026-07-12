@@ -54,7 +54,7 @@ class _RegisterFormState extends State<_RegisterForm> {
       description: context.trText(
         'Keep your progress, your study decks and your finds on every device.',
       ),
-      onBack: () => context.go('/login'),
+      onBack: vm.isLoading ? null : () => context.go('/login'),
       form: Form(
         key: _formKey,
         child: Column(
@@ -87,6 +87,7 @@ class _RegisterFormState extends State<_RegisterForm> {
               icon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const [AutofillHints.email],
+              enabled: !vm.isLoading,
               validator: (v) => (v == null || !v.contains('@'))
                   ? context.trText('Enter a valid email')
                   : null,
@@ -98,6 +99,7 @@ class _RegisterFormState extends State<_RegisterForm> {
               icon: Icons.lock_outline_rounded,
               obscureText: true,
               autofillHints: const [AutofillHints.newPassword],
+              enabled: !vm.isLoading,
               validator: (v) => (v == null || v.length < 8)
                   ? context.trText('Use at least 8 characters')
                   : null,

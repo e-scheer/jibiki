@@ -89,8 +89,8 @@ class ApiClient {
     if (resp == null) {
       return ApiException(
         _interfaceLanguage == 'fr'
-            ? 'Erreur réseau. Le service est-il accessible à ${ApiConfig.baseUrl} ?'
-            : 'Network error. Is the API reachable at ${ApiConfig.baseUrl}?',
+            ? 'Jibiki est momentanément inaccessible. Vérifiez votre connexion puis réessayez.'
+            : 'Jibiki is temporarily unreachable. Check your connection and try again.',
         statusCode: null,
       );
     }

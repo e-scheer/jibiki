@@ -141,7 +141,7 @@ class _ReportSheetState extends State<_ReportSheet> {
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomInset),
       child: NeoCard(
-        shadow: 7,
+        shadow: 4,
         radius: 18,
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
         child: authed ? _form(context) : _signInPrompt(context),
@@ -214,6 +214,7 @@ class _ReportSheetState extends State<_ReportSheet> {
                 _ReasonChip(
                   label: reason.label,
                   selected: _reason == reason,
+                  enabled: !_busy,
                   onTap: () => setState(() => _reason = reason),
                 ),
             ],
@@ -223,6 +224,7 @@ class _ReportSheetState extends State<_ReportSheet> {
             padding: const EdgeInsets.all(3),
             shadow: 3,
             child: TextField(
+              enabled: !_busy,
               minLines: 3,
               maxLines: 5,
               maxLength: 2000,
@@ -306,11 +308,13 @@ class _ReasonChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.enabled = true,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -338,7 +342,7 @@ class _ReasonChip extends StatelessWidget {
             color: context.jc.ink,
             fontWeight: FontWeight.w800,
           ),
-          onSelected: (_) => onTap(),
+          onSelected: enabled ? (_) => onTap() : null,
         ),
       );
 }

@@ -29,6 +29,8 @@ class SpeechButton extends StatelessWidget {
       builder: (context, playing, _) => IconButton(
         tooltip: tooltip,
         visualDensity: VisualDensity.compact,
+        constraints: const BoxConstraints.tightFor(width: 38, height: 38),
+        padding: EdgeInsets.zero,
         onPressed: enabled
             ? () {
                 Haptics.tick();

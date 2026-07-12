@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme/app_theme.dart';
+import '../../viewmodels/app_state.dart';
+import '../auth/auth_required_sheet.dart';
 import '../study/study_chrome.dart';
 import 'pressable.dart';
 
@@ -16,6 +19,7 @@ class StudyStatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accountReady = context.watch<AppState>().isAuthenticated;
     final learning = status == 'learning';
     final known = status == 'known';
     return Container(
@@ -37,7 +41,11 @@ class StudyStatusBar extends StatelessWidget {
                   label: learning ? 'Studying' : 'Study',
                   onTap: () {
                     Haptics.light();
-                    onSetStatus(learning ? 'none' : 'learning');
+                    if (accountReady) {
+                      onSetStatus(learning ? 'none' : 'learning');
+                    } else {
+                      showAuthRequiredSheet(context);
+                    }
                   },
                 ),
               ),
@@ -52,7 +60,11 @@ class StudyStatusBar extends StatelessWidget {
                   label: known ? 'Known' : 'I know it',
                   onTap: () {
                     Haptics.light();
-                    onSetStatus(known ? 'none' : 'known');
+                    if (accountReady) {
+                      onSetStatus(known ? 'none' : 'known');
+                    } else {
+                      showAuthRequiredSheet(context);
+                    }
                   },
                 ),
               ),

@@ -7,6 +7,8 @@ import '../../models/mnemonic_deck.dart';
 import '../../repositories/mnemonic_deck_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
+import '../../viewmodels/app_state.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/net_image.dart';
 import '../widgets/status_views.dart';
@@ -19,6 +21,33 @@ class DeckDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<AppState>().isAuthenticated) {
+      return Scaffold(
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: context.trText('Pack'),
+              subtitle: context.trText('Community mnemonic pack'),
+              tone: NeoTone.magenta,
+              leading: NeoIconButton(
+                icon: Icons.arrow_back_rounded,
+                label: context.trText('Back'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ),
+            Expanded(
+              child: AuthRequiredPanel(
+                title: context.trText('Sign in to open this pack'),
+                description: context.trText(
+                  'Keep your community picks and study actions connected to your account.',
+                ),
+                icon: Icons.collections_bookmark_outlined,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return ChangeNotifierProvider(
       create: (ctx) =>
           DeckDetailViewModel(ctx.read<MnemonicDeckRepository>(), deckId)

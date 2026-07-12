@@ -248,10 +248,12 @@ class MnemonicPanel extends StatelessWidget {
                           label: context.trText('Draw a mascot'),
                           icon: Icons.brush_outlined,
                           tone: NeoTone.lime,
-                          onTap: () {
-                            Navigator.pop(sheetCtx);
-                            _draw(context, vm);
-                          },
+                          onTap: submitting
+                              ? null
+                              : () {
+                                  Navigator.pop(sheetCtx);
+                                  _draw(context, vm);
+                                },
                         ),
                         const SizedBox(height: 18),
                         Text(
@@ -278,6 +280,7 @@ class MnemonicPanel extends StatelessWidget {
                           ),
                           child: TextField(
                             controller: controller,
+                            enabled: !submitting,
                             maxLines: 3,
                             decoration: InputDecoration(
                               hintText: context.trText(
@@ -317,7 +320,7 @@ class MnemonicPanel extends StatelessWidget {
                             semanticLabel: imageBytes == null
                                 ? 'Add a picture'
                                 : 'Change picture',
-                            onTap: pick,
+                            onTap: submitting ? null : pick,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

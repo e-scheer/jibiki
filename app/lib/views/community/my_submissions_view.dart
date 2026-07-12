@@ -8,6 +8,8 @@ import '../../models/mnemonic.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/my_submissions_viewmodel.dart';
+import '../../viewmodels/app_state.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/net_image.dart';
 import '../widgets/status_views.dart';
@@ -18,6 +20,33 @@ class MySubmissionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<AppState>().isAuthenticated) {
+      return Scaffold(
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: context.trText('My submissions'),
+              subtitle: context.trText('Your drawings and review status.'),
+              tone: NeoTone.magenta,
+              leading: NeoIconButton(
+                icon: Icons.arrow_back_rounded,
+                label: context.trText('Back'),
+                onTap: () => context.pop(),
+              ),
+            ),
+            Expanded(
+              child: AuthRequiredPanel(
+                title: context.trText('Sign in to see your drawings'),
+                description: context.trText(
+                  'Your submissions, packs and moderation updates stay together on your account.',
+                ),
+                icon: Icons.brush_outlined,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return ChangeNotifierProvider(
       create: (ctx) =>
           MySubmissionsViewModel(ctx.read<MnemonicRepository>())..load(),

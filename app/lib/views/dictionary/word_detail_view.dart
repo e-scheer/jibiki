@@ -16,6 +16,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/search_viewmodel.dart';
 import '../../viewmodels/word_detail_viewmodel.dart';
 import '../feedback/report_item_sheet.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/study_status_bar.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/speech_button.dart';
@@ -63,6 +64,7 @@ class _WordDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<WordDetailViewModel>();
     final lang = context.watch<AppState>().mnemonicLanguage;
+    final signedIn = context.read<AppState>().isAuthenticated;
     final word = vm.word;
     final content = vm.isLoading
         ? const LoadingView()
@@ -96,7 +98,12 @@ class _WordDetail extends StatelessWidget {
                       NeoIconButton(
                         icon: Icons.content_copy_outlined,
                         label: context.trText('Capture source'),
-                        onTap: () => _capture(context, word),
+                        onTap: signedIn
+                            ? () => _capture(context, word)
+                            : () => showAuthRequiredSheet(
+                                  context,
+                                  title: context.trText('Capture a context'),
+                                ),
                       ),
                       const SizedBox(width: 8),
                       ReportItemAction(
@@ -247,6 +254,7 @@ class _WordDetail extends StatelessWidget {
     WordDetailViewModel vm,
   ) {
     final senses = word.sensesFor(lang);
+    final signedIn = context.read<AppState>().isAuthenticated;
     final primaryKanji =
         word.kanjiBreakdown.isEmpty ? null : word.kanjiBreakdown.first;
     final related = _relatedWords(
@@ -285,9 +293,14 @@ class _WordDetail extends StatelessWidget {
                       ? 'Retirer du paquet'
                       : 'Enregistrer le mot',
                 ),
-                onTap: () => vm.setStatus(
-                  vm.status == 'learning' ? 'none' : 'learning',
-                ),
+                onTap: signedIn
+                    ? () => vm.setStatus(
+                          vm.status == 'learning' ? 'none' : 'learning',
+                        )
+                    : () => showAuthRequiredSheet(
+                          context,
+                          title: context.trText('Save this word'),
+                        ),
               ),
             ],
           ),
@@ -354,9 +367,14 @@ class _WordDetail extends StatelessWidget {
             vm.status == 'none' ? 'Ajouter au paquet' : 'Retirer du paquet',
           ),
           icon: vm.status == 'none' ? Icons.add_rounded : Icons.remove_rounded,
-          onTap: () => vm.setStatus(
-            vm.status == 'none' ? 'learning' : 'none',
-          ),
+          onTap: signedIn
+              ? () => vm.setStatus(
+                    vm.status == 'none' ? 'learning' : 'none',
+                  )
+              : () => showAuthRequiredSheet(
+                    context,
+                    title: context.trText('Save this word'),
+                  ),
         ),
       ],
     );

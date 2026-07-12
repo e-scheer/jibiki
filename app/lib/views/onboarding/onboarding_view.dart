@@ -527,53 +527,61 @@ class _ModeCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => NeoCard(
-        tone: selected ? NeoTone.acid : NeoTone.paper,
-        shadow: selected ? 6 : 4,
-        padding: const EdgeInsets.all(17),
-        onTap: onTap,
-        semanticLabel: mode.label,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: selected ? context.jc.surface : context.jc.lavender,
-                    border: Border.all(color: context.jc.ink, width: 2.5),
-                    borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: context.isWide ? 178 : 0,
+        ),
+        child: NeoCard(
+          tone: selected ? NeoTone.acid : NeoTone.paper,
+          shadow: selected ? 6 : 4,
+          padding: const EdgeInsets.all(17),
+          onTap: onTap,
+          semanticLabel: mode.label,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color:
+                          selected ? context.jc.surface : context.jc.lavender,
+                      border: Border.all(color: context.jc.ink, width: 2.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      switch (mode) {
+                        AppMode.dictionary => Icons.menu_book_outlined,
+                        AppMode.middle => Icons.balance_outlined,
+                        AppMode.learning => Icons.school_outlined,
+                      },
+                    ),
                   ),
-                  child: Icon(
-                    switch (mode) {
-                      AppMode.dictionary => Icons.menu_book_outlined,
-                      AppMode.middle => Icons.balance_outlined,
-                      AppMode.learning => Icons.school_outlined,
-                    },
-                  ),
-                ),
-                const Spacer(),
-                if (selected) const Icon(Icons.check_circle_rounded, size: 24),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Text(
-              mode.label,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 17),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              mode.blurb,
-              style: TextStyle(
-                color: context.jc.body,
-                fontSize: 13,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
+                  const Spacer(),
+                  if (selected)
+                    const Icon(Icons.check_circle_rounded, size: 24),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 15),
+              Text(
+                mode.label,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 17),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                mode.blurb,
+                style: TextStyle(
+                  color: context.jc.body,
+                  fontSize: 13,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       );
 }
@@ -594,42 +602,48 @@ class _PlacementCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => NeoCard(
-        tone: selected ? NeoTone.acid : NeoTone.paper,
-        shadow: selected ? 6 : 4,
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                NeoBadge('0$index',
-                    tone: selected ? NeoTone.ink : NeoTone.lavender),
-                const Spacer(),
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_off_rounded,
-                  size: 24,
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: context.jc.body,
-                fontSize: 13,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: context.isWide ? 156 : 0,
+        ),
+        child: NeoCard(
+          tone: selected ? NeoTone.acid : NeoTone.paper,
+          shadow: selected ? 6 : 4,
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  NeoBadge('0$index',
+                      tone: selected ? NeoTone.ink : NeoTone.lavender),
+                  const Spacer(),
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_off_rounded,
+                    size: 24,
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 15),
+              Text(
+                title,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: context.jc.body,
+                  fontSize: 13,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       );
 }

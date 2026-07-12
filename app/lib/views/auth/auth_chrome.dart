@@ -237,6 +237,7 @@ class AuthField extends StatelessWidget {
     this.keyboardType,
     this.autofillHints,
     this.obscureText = false,
+    this.enabled = true,
     this.validator,
     this.onFieldSubmitted,
   });
@@ -247,6 +248,7 @@ class AuthField extends StatelessWidget {
   final TextInputType? keyboardType;
   final Iterable<String>? autofillHints;
   final bool obscureText;
+  final bool enabled;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onFieldSubmitted;
 
@@ -263,33 +265,45 @@ class AuthField extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: context.jc.ink,
-                  blurRadius: 0,
-                  offset: const Offset(4, 4),
+          Opacity(
+            opacity: enabled ? 1 : .56,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: enabled
+                    ? [
+                        BoxShadow(
+                          color: context.jc.ink,
+                          blurRadius: 0,
+                          offset: const Offset(4, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: TextFormField(
+                controller: controller,
+                keyboardType: keyboardType,
+                autofillHints: autofillHints,
+                obscureText: obscureText,
+                enabled: enabled,
+                validator: validator,
+                onFieldSubmitted: onFieldSubmitted,
+                decoration: InputDecoration(
+                  hintText: label,
+                  prefixIcon: Icon(icon),
+                  disabledBorder: _authFieldBorder(context.jc.muted),
                 ),
-              ],
-            ),
-            child: TextFormField(
-              controller: controller,
-              keyboardType: keyboardType,
-              autofillHints: autofillHints,
-              obscureText: obscureText,
-              validator: validator,
-              onFieldSubmitted: onFieldSubmitted,
-              decoration: InputDecoration(
-                hintText: label,
-                prefixIcon: Icon(icon),
               ),
             ),
           ),
         ],
       );
 }
+
+InputBorder _authFieldBorder(Color color) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color, width: 2.5),
+    );
 
 class AuthInlineError extends StatelessWidget {
   const AuthInlineError(this.message, {super.key});

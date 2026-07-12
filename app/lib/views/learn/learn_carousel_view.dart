@@ -102,8 +102,8 @@ class _Strip extends StatefulWidget {
 }
 
 class _StripState extends State<_Strip> {
-  static const double _cell = 54;
-  static const double _padding = 12;
+  static const double _cell = 62;
+  static const double _padding = 16;
   final _scroll = ScrollController();
 
   @override
@@ -138,71 +138,83 @@ class _StripState extends State<_Strip> {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 66,
+        height: 74,
         decoration: BoxDecoration(
           color: context.jc.surface,
           border: Border(bottom: BorderSide(color: context.jc.ink, width: 3)),
         ),
-        child: ListView.builder(
-          controller: _scroll,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(_padding, 8, _padding, 10),
-          itemCount: widget.items.length,
-          itemBuilder: (_, index) {
-            final selected = index == widget.index;
-            return SizedBox(
-              width: _cell,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Pressable(
-                  label: widget.items[index].romaji,
-                  selected: selected,
-                  pressedScale: 0.94,
-                  onTap: () => widget.onTap(index),
-                  child: AnimatedContainer(
-                    duration: Motion.timed(context, Motion.fast),
-                    decoration: BoxDecoration(
-                      color: selected ? context.jc.acid : context.jc.canvas,
-                      border: Border.all(color: context.jc.ink, width: 2.5),
-                      borderRadius: BorderRadius.circular(9),
-                      boxShadow: selected
-                          ? [
-                              BoxShadow(
-                                color: context.jc.ink,
-                                blurRadius: 0,
-                                offset: const Offset(3, 3),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.items[index].char,
-                          style: const TextStyle(
-                            fontFamily: 'ZenKakuGothicNew',
-                            fontSize: 17,
-                            height: 1,
-                            fontWeight: FontWeight.w900,
+        child: ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (rect) => const LinearGradient(
+            colors: [
+              Colors.transparent,
+              Colors.black,
+              Colors.black,
+              Colors.transparent,
+            ],
+            stops: [0, .045, .955, 1],
+          ).createShader(rect),
+          child: ListView.builder(
+            controller: _scroll,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(_padding, 8, _padding, 10),
+            itemCount: widget.items.length,
+            itemBuilder: (_, index) {
+              final selected = index == widget.index;
+              return SizedBox(
+                width: _cell,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Pressable(
+                    label: widget.items[index].romaji,
+                    selected: selected,
+                    pressedScale: 0.94,
+                    onTap: () => widget.onTap(index),
+                    child: AnimatedContainer(
+                      duration: Motion.timed(context, Motion.fast),
+                      decoration: BoxDecoration(
+                        color: selected ? context.jc.acid : context.jc.canvas,
+                        border: Border.all(color: context.jc.ink, width: 2.5),
+                        borderRadius: BorderRadius.circular(9),
+                        boxShadow: selected
+                            ? [
+                                BoxShadow(
+                                  color: context.jc.ink,
+                                  blurRadius: 0,
+                                  offset: const Offset(3, 3),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.items[index].char,
+                            style: const TextStyle(
+                              fontFamily: 'ZenKakuGothicNew',
+                              fontSize: 17,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          widget.items[index].romaji.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 8.5,
-                            height: 1,
-                            fontWeight: FontWeight.w900,
+                          const SizedBox(height: 3),
+                          Text(
+                            widget.items[index].romaji.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 8.5,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       );
 }
@@ -294,7 +306,7 @@ class _LearnPageState extends State<LearnPage> {
                   children: [
                     Expanded(flex: 7, child: visual),
                     const SizedBox(width: 24),
-                    Expanded(flex: 5, child: Center(child: details)),
+                    Expanded(flex: 5, child: details),
                   ],
                 ),
               );

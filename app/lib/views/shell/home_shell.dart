@@ -81,7 +81,7 @@ class _ShellState extends State<_Shell> {
     if (index == 0) _homeTabKey.currentState?.showDashboard();
     if (index == _index) return;
     final pager = _pager;
-    if (context.win.isCompact && pager != null && pager.hasClients) {
+    if (pager != null && pager.hasClients) {
       if (Motion.enabled(context)) {
         pager.animateToPage(
           index,
@@ -144,7 +144,14 @@ class _ShellState extends State<_Shell> {
               destinations: _destinations,
               onSelect: _go,
             ),
-            Expanded(child: IndexedStack(index: _index, children: _tabs)),
+            Expanded(
+              child: PageView(
+                controller: _pager,
+                onPageChanged: _onPageSettled,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [for (final tab in _tabs) _KeepAlive(child: tab)],
+              ),
+            ),
           ],
         ),
       ),
@@ -237,23 +244,51 @@ class _NeoBottomNavigation extends StatelessWidget {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
-            child: SizedBox(
-              height: 56,
-              child: Row(
-                children: [
-                  for (var i = 0; i < destinations.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 4),
-                    Expanded(
-                      child: _NeoNavButton(
-                        destination: destinations[i],
-                        selected: index == i,
-                        due: i == _ShellState._reviewIndex ? due : 0,
-                        onTap: () => onSelect(i),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const gap = 4.0;
+                final itemWidth =
+                    (constraints.maxWidth - gap * (destinations.length - 1)) /
+                        destinations.length;
+                return SizedBox(
+                  height: 56,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AnimatedPositioned(
+                        duration: Motion.timed(
+                          context,
+                          const Duration(milliseconds: 230),
+                        ),
+                        curve: Motion.outStrong,
+                        left: index * (itemWidth + gap),
+                        top: 0,
+                        width: itemWidth,
+                        height: 56,
+                        child: const IgnorePointer(
+                          child: _NavSelectionPill(),
+                        ),
                       ),
-                    ),
-                  ],
-                ],
-              ),
+                      Row(
+                        children: [
+                          for (var i = 0; i < destinations.length; i++) ...[
+                            if (i > 0) const SizedBox(width: gap),
+                            Expanded(
+                              child: _NeoNavButton(
+                                destination: destinations[i],
+                                selected: index == i,
+                                showSelection: false,
+                                due: i == _ShellState._reviewIndex ? due : 0,
+                                onTap: () => onSelect(i),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -280,14 +315,14 @@ class _NeoNavigationRail extends StatelessWidget {
     final jc = context.jc;
     return RepaintBoundary(
       child: Container(
-        width: 76,
+        width: 84,
         decoration: BoxDecoration(
           color: jc.surface,
           border: Border(right: BorderSide(color: jc.ink, width: 3)),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(7, 14, 7, 14),
+            padding: const EdgeInsets.fromLTRB(6, 14, 6, 14),
             child: ConstrainedBox(
               constraints:
                   BoxConstraints(minHeight: constraints.maxHeight - 28),
@@ -295,11 +330,11 @@ class _NeoNavigationRail extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const _RailBrand(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   for (var i = 0; i < destinations.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 6),
+                    if (i > 0) const SizedBox(height: 8),
                     SizedBox(
-                      height: 56,
+                      height: 62,
                       child: _NeoNavButton(
                         destination: destinations[i],
                         selected: index == i,
@@ -330,12 +365,14 @@ class _NeoNavButton extends StatelessWidget {
   const _NeoNavButton({
     required this.destination,
     required this.selected,
+    this.showSelection = true,
     required this.due,
     required this.onTap,
   });
 
   final _Destination destination;
   final bool selected;
+  final bool showSelection;
   final int due;
   final VoidCallback onTap;
 
@@ -370,10 +407,12 @@ class _NeoNavButton extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? jc.acid : Colors.transparent,
-          border: selected ? Border.all(color: jc.ink, width: 2.5) : null,
+          color: selected && showSelection ? jc.acid : Colors.transparent,
+          border: selected && showSelection
+              ? Border.all(color: jc.ink, width: 2.5)
+              : null,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: selected && !pressed
+          boxShadow: selected && showSelection && !pressed
               ? [
                   BoxShadow(
                     color: jc.ink,
@@ -394,6 +433,26 @@ class _NeoNavButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NavSelectionPill extends StatelessWidget {
+  const _NavSelectionPill();
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.jc.acid,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black,
+              blurRadius: 0,
+              offset: Offset(3, 3),
+            ),
+          ],
+        ),
+      );
 }
 
 class _NavIcon extends StatelessWidget {

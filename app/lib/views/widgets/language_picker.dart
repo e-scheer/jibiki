@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jibiki/l10n/l10n.dart';
 
+import '../../core/breakpoints.dart';
 import '../../core/languages.dart';
 import '../../theme/app_theme.dart';
 import 'pressable.dart';
@@ -17,6 +18,9 @@ Future<String?> showMnemonicLanguagePicker(
     showDragHandle: false,
     backgroundColor: Colors.transparent,
     barrierColor: context.jc.ink.withValues(alpha: 0.52),
+    constraints: BoxConstraints(
+      maxWidth: context.isExpanded ? 640 : double.infinity,
+    ),
     builder: (ctx) => _LanguageSheet(current: current),
   );
 }
@@ -71,42 +75,57 @@ class _LanguageSheetState extends State<_LanguageSheet> {
                   setState(() => _query = value);
                 }),
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                    children: [
-                      if (filtered == null) ...[
-                        _SectionSticker(label: context.trText('Featured')),
-                        const SizedBox(height: 10),
-                        for (final language in featured) ...[
-                          _LanguageRow(
-                            language: language,
-                            selected: language.code == widget.current,
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        const SizedBox(height: 10),
-                        _SectionSticker(label: context.trText('All languages')),
-                        const SizedBox(height: 10),
-                        for (final language in all)
-                          if (!featured.any((featured) =>
-                              featured.code == language.code)) ...[
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (rect) => const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black,
+                        Colors.black,
+                        Colors.transparent,
+                      ],
+                      stops: [0, .035, .94, 1],
+                    ).createShader(rect),
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                      children: [
+                        if (filtered == null) ...[
+                          _SectionSticker(label: context.trText('Featured')),
+                          const SizedBox(height: 10),
+                          for (final language in featured) ...[
                             _LanguageRow(
                               language: language,
                               selected: language.code == widget.current,
                             ),
                             const SizedBox(height: 8),
                           ],
-                      ] else if (filtered.isEmpty)
-                        _NoMatch(query: _query)
-                      else
-                        for (final language in filtered) ...[
-                          _LanguageRow(
-                            language: language,
-                            selected: language.code == widget.current,
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                    ],
+                          const SizedBox(height: 10),
+                          _SectionSticker(
+                              label: context.trText('All languages')),
+                          const SizedBox(height: 10),
+                          for (final language in all)
+                            if (!featured.any((featured) =>
+                                featured.code == language.code)) ...[
+                              _LanguageRow(
+                                language: language,
+                                selected: language.code == widget.current,
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                        ] else if (filtered.isEmpty)
+                          _NoMatch(query: _query)
+                        else
+                          for (final language in filtered) ...[
+                            _LanguageRow(
+                              language: language,
+                              selected: language.code == widget.current,
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -206,27 +225,23 @@ class _SectionSticker extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Transform.rotate(
-        angle: -0.025,
-        alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            color: context.jc.acid,
-            borderRadius: BorderRadius.circular(9),
-            border: Border.all(color: context.jc.ink, width: 2.5),
-            boxShadow: [
-              BoxShadow(
-                color: context.jc.ink,
-                blurRadius: 0,
-                offset: const Offset(3, 3),
-              ),
-            ],
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
-          ),
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: context.jc.acid,
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: context.jc.ink,
+              blurRadius: 0,
+              offset: const Offset(3, 3),
+            ),
+          ],
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
         ),
       );
 }

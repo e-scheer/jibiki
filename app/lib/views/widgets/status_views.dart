@@ -2,6 +2,7 @@ import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../auth/auth_required_sheet.dart';
 import 'jibiki_brand.dart';
 import 'neo_pop.dart';
 
@@ -23,6 +24,10 @@ class ErrorRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final normalized = message.toLowerCase();
+    final authError = normalized.contains('authentication') ||
+        normalized.contains('credentials') ||
+        normalized.contains('sign in');
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -48,11 +53,20 @@ class ErrorRetry extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  message,
+                  authError
+                      ? context.trText('Sign in to continue here.')
+                      : message,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                if (onRetry != null) ...[
+                if (authError) ...[
+                  const SizedBox(height: 18),
+                  NeoPrimaryButton(
+                    label: context.trText('Sign in'),
+                    icon: Icons.arrow_forward_rounded,
+                    onTap: () => showAuthRequiredSheet(context),
+                  ),
+                ] else if (onRetry != null) ...[
                   const SizedBox(height: 18),
                   NeoPrimaryButton(
                     label: context.trText('Retry'),
@@ -190,8 +204,26 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
     }
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) =>
-          Opacity(opacity: 0.5 + 0.4 * _c.value, child: widget.child),
+      builder: (_, __) {
+        final sweep = -1.4 + _c.value * 2.8;
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (rect) => LinearGradient(
+            begin: Alignment(sweep - 0.7, 0),
+            end: Alignment(sweep + 0.7, 0),
+            colors: [
+              Colors.transparent,
+              Colors.white.withValues(alpha: 0.18),
+              Colors.transparent,
+            ],
+            stops: const [0, 0.5, 1],
+          ).createShader(rect),
+          child: Opacity(
+            opacity: 0.56 + 0.34 * _c.value,
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 }

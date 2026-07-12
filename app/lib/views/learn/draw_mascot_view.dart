@@ -211,6 +211,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
             listenable: _paint,
             builder: (_, __) => _UtilityStrip(
               showGuide: _showGuide,
+              enabled: !_saving,
               canUndo: _paint.canUndo,
               canRedo: _paint.canRedo,
               onGuide: () => setState(() => _showGuide = !_showGuide),
@@ -231,6 +232,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
               padding: const EdgeInsets.all(3),
               child: TextField(
                 controller: _word,
+                enabled: !_saving,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   hintText: context.trText('It looks like…'),
@@ -267,6 +269,7 @@ class _DrawMascotViewState extends State<DrawMascotView> {
           _Toolbar(
             controller: _paint,
             swatches: swatches,
+            enabled: !_saving,
             onPickColor: (color) {
               Haptics.tick();
               _paint.setColor(color);
@@ -378,6 +381,7 @@ class _UtilityStrip extends StatelessWidget {
     required this.onGuide,
     required this.onUndo,
     required this.onRedo,
+    this.enabled = true,
   });
 
   final bool showGuide;
@@ -386,6 +390,7 @@ class _UtilityStrip extends StatelessWidget {
   final VoidCallback onGuide;
   final VoidCallback onUndo;
   final VoidCallback onRedo;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -405,19 +410,19 @@ class _UtilityStrip extends StatelessWidget {
                   ? Icons.visibility_outlined
                   : Icons.visibility_off_outlined,
               label: showGuide ? 'Hide guide' : 'Show guide',
-              onTap: onGuide,
+              onTap: enabled ? onGuide : null,
             ),
             const SizedBox(width: 8),
             _StudioIconAction(
               icon: Icons.undo_rounded,
               label: context.trText('Undo'),
-              onTap: canUndo ? onUndo : null,
+              onTap: enabled && canUndo ? onUndo : null,
             ),
             const SizedBox(width: 8),
             _StudioIconAction(
               icon: Icons.redo_rounded,
               label: context.trText('Redo'),
-              onTap: canRedo ? onRedo : null,
+              onTap: enabled && canRedo ? onRedo : null,
             ),
           ],
         ),
@@ -458,12 +463,14 @@ class _Toolbar extends StatelessWidget {
     required this.swatches,
     required this.onPickColor,
     required this.onClear,
+    this.enabled = true,
   });
 
   final PaintController controller;
   final List<Color> swatches;
   final ValueChanged<Color> onPickColor;
   final VoidCallback onClear;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -493,6 +500,7 @@ class _Toolbar extends StatelessWidget {
                         ),
                     ],
                     selected: controller.layer,
+                    enabled: enabled,
                     height: 48,
                     onChanged: (layer) {
                       Haptics.tick();
@@ -513,6 +521,7 @@ class _Toolbar extends StatelessWidget {
                               label: b.label,
                               selected:
                                   !controller.erasing && controller.brush == b,
+                              enabled: enabled,
                               onTap: () {
                                 Haptics.tick();
                                 controller.setBrush(b);
@@ -526,6 +535,7 @@ class _Toolbar extends StatelessWidget {
                             icon: Icons.auto_fix_normal,
                             label: 'Eraser',
                             selected: controller.erasing,
+                            enabled: enabled,
                             onTap: () {
                               Haptics.tick();
                               controller.setErasing(!controller.erasing);
@@ -564,6 +574,7 @@ class _Toolbar extends StatelessWidget {
                             color: c,
                             selected:
                                 !controller.erasing && controller.color == c,
+                            enabled: enabled,
                             onTap: () => onPickColor(c),
                           );
                         },
@@ -579,7 +590,8 @@ class _Toolbar extends StatelessWidget {
                           value: controller.width.clamp(_minWidth, _maxWidth),
                           min: _minWidth,
                           max: _maxWidth,
-                          onChanged: controller.setWidth,
+                          onChanged: enabled ? controller.setWidth : (_) {},
+                          enabled: enabled,
                           leading: Container(
                             width: (controller.width / _maxWidth * 18)
                                 .clamp(4.0, 18.0),
@@ -596,7 +608,8 @@ class _Toolbar extends StatelessWidget {
                           value: controller.opacity.clamp(_minOpacity, 1.0),
                           min: _minOpacity,
                           max: 1.0,
-                          onChanged: controller.setOpacity,
+                          onChanged: enabled ? controller.setOpacity : (_) {},
+                          enabled: enabled,
                           leading:
                               Icon(Icons.opacity, size: 18, color: jc.muted),
                         ),
@@ -605,7 +618,7 @@ class _Toolbar extends StatelessWidget {
                       _ToolButton(
                         icon: Icons.delete_outline,
                         tooltip: context.trText('Clear'),
-                        enabled: controller.canUndo,
+                        enabled: enabled && controller.canUndo,
                         onTap: onClear,
                       ),
                     ],
@@ -629,51 +642,56 @@ class _BrushButton extends StatelessWidget {
       {required this.icon,
       required this.label,
       required this.selected,
-      required this.onTap});
+      required this.onTap,
+      this.enabled = true});
   final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
     final fg = jc.ink;
-    return Pressable(
-      label: label,
-      selected: selected,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.timed(context, Motion.fast),
-        width: 60,
-        padding: const EdgeInsets.symmetric(vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? jc.acid : jc.surface,
-          border: Border.all(color: jc.ink, width: 2.5),
-          borderRadius: BorderRadius.circular(Radii.md),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: jc.ink,
-                    blurRadius: 0,
-                    offset: const Offset(3, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 22, color: fg),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w600, color: fg),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+    return Opacity(
+      opacity: enabled ? 1 : .48,
+      child: Pressable(
+        label: label,
+        selected: selected,
+        onTap: enabled ? onTap : null,
+        child: AnimatedContainer(
+          duration: Motion.timed(context, Motion.fast),
+          width: 60,
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? jc.acid : jc.surface,
+            border: Border.all(color: jc.ink, width: 2.5),
+            borderRadius: BorderRadius.circular(Radii.md),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: fg),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                    fontSize: 11, fontWeight: FontWeight.w600, color: fg),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -682,42 +700,54 @@ class _BrushButton extends StatelessWidget {
 
 class _Swatch extends StatelessWidget {
   const _Swatch(
-      {required this.color, required this.selected, required this.onTap});
+      {required this.color,
+      required this.selected,
+      required this.onTap,
+      this.enabled = true});
   final Color color;
   final bool selected;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
     // Selection reads as a ring around the dot (with a gap), not a stamped check -
     // cleaner, and it never fights the swatch colour.
-    return Pressable(
-      label: 'Pen colour',
-      selected: selected,
-      pressedScale: 0.9,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.timed(context, Motion.fast),
-        curve: Motion.out,
-        width: 34,
-        height: 34,
-        padding: const EdgeInsets.all(3.5),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-              color: selected ? jc.ink : Colors.transparent, width: 2),
-        ),
-        child: Container(
+    return Opacity(
+      opacity: enabled ? 1 : .48,
+      child: Pressable(
+        label: 'Pen colour',
+        selected: selected,
+        pressedScale: 0.9,
+        onTap: enabled ? onTap : null,
+        child: AnimatedContainer(
+          duration: Motion.timed(context, Motion.fast),
+          curve: Motion.out,
+          width: 34,
+          height: 34,
+          padding: const EdgeInsets.all(3.5),
           decoration: BoxDecoration(
-            color: color,
             shape: BoxShape.circle,
-            // A hairline keeps white / pale swatches legible on the surface.
-            border: Border.all(color: jc.ink, width: 2.5),
-            boxShadow: [
-              BoxShadow(
-                  color: jc.ink, blurRadius: 0, offset: const Offset(3, 3))
-            ],
+            border: Border.all(
+                color: selected ? jc.magenta : Colors.transparent, width: 3),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              // A hairline keeps white / pale swatches legible on the surface.
+              border: Border.all(color: jc.ink, width: 2.5),
+              boxShadow: selected
+                  ? null
+                  : const [
+                      BoxShadow(
+                        color: Colors.black,
+                        blurRadius: 0,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
+            ),
           ),
         ),
       ),
@@ -733,10 +763,12 @@ class _MiniSlider extends StatelessWidget {
     required this.min,
     required this.max,
     required this.onChanged,
+    this.enabled = true,
   });
   final Widget leading;
   final double value, min, max;
   final ValueChanged<double> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -754,8 +786,12 @@ class _MiniSlider extends StatelessWidget {
               overlayShape: SliderComponentShape.noOverlay,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
-            child:
-                Slider(value: value, min: min, max: max, onChanged: onChanged),
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              onChanged: enabled ? onChanged : null,
+            ),
           ),
         ),
       ],

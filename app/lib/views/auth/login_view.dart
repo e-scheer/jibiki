@@ -7,7 +7,6 @@ import '../../core/dev_login.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/auth_viewmodel.dart';
-import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import 'auth_chrome.dart';
 
@@ -82,26 +81,18 @@ class _LoginFormState extends State<_LoginForm> {
       description: context.trText(
         'Your dictionary, reviews and community picks are waiting for you.',
       ),
-      onBack: context.canPop() ? () => context.pop() : null,
+      onBack: context.canPop() && !vm.isLoading ? () => context.pop() : null,
       form: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    context.trText('Sign in'),
-                    style: context.text.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.8,
-                    ),
-                  ),
-                ),
-                const JibikiBrandMark(size: 52),
-              ],
+            Text(
+              context.trText('Sign in'),
+              style: context.text.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.8,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -116,6 +107,7 @@ class _LoginFormState extends State<_LoginForm> {
               icon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const [AutofillHints.email],
+              enabled: !vm.isLoading,
               validator: (v) => (v == null || !v.contains('@'))
                   ? context.trText('Enter a valid email')
                   : null,
@@ -127,6 +119,7 @@ class _LoginFormState extends State<_LoginForm> {
               icon: Icons.lock_outline_rounded,
               obscureText: true,
               autofillHints: const [AutofillHints.password],
+              enabled: !vm.isLoading,
               validator: (v) => (v == null || v.length < 6)
                   ? context.trText('At least 6 characters')
                   : null,
@@ -155,7 +148,7 @@ class _LoginFormState extends State<_LoginForm> {
                             ),
                             shadow: 2,
                             radius: 8,
-                            onTap: () => _fill(account),
+                            onTap: vm.isLoading ? null : () => _fill(account),
                             child: Text(
                               account.label,
                               style: const TextStyle(
@@ -183,7 +176,7 @@ class _LoginFormState extends State<_LoginForm> {
               shadow: 3,
               radius: 10,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-              onTap: () => context.go('/register'),
+              onTap: vm.isLoading ? null : () => context.go('/register'),
               child: Center(
                 child: Text(
                   context.trText('New here? Create an account'),

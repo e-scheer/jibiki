@@ -565,19 +565,16 @@ class _WordOfTheDayCard extends StatelessWidget {
         Positioned(
           left: 16,
           top: -13,
-          child: Transform.rotate(
-            angle: -0.035,
-            child: _HardButton(
-              color: context.jc.magenta,
-              borderWidth: 2.5,
-              shadow: 3,
-              radius: 8,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: Text(
-                _copy(context, 'Word of the day', 'Mot du jour'),
-                style: const TextStyle(
-                    fontSize: 12, height: 1, fontWeight: FontWeight.w700),
-              ),
+          child: _HardButton(
+            color: context.jc.magenta,
+            borderWidth: 2.5,
+            shadow: 3,
+            radius: 8,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            child: Text(
+              _copy(context, 'Word of the day', 'Mot du jour'),
+              style: const TextStyle(
+                  fontSize: 12, height: 1, fontWeight: FontWeight.w700),
             ),
           ),
         ),

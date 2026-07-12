@@ -30,6 +30,7 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
   double _canvas = 109;
 
   bool _started = false;
+  bool _showNumbers = true;
 
   @override
   void initState() {
@@ -124,6 +125,8 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
                       progress: _controller.value,
                       ink: jc.ink,
                       guide: jc.ink.withValues(alpha: 0.12),
+                      numberColor: jc.magenta,
+                      showNumbers: _showNumbers,
                     ),
                   ),
                 ),
@@ -131,10 +134,27 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
             ),
           ),
         ),
-        TextButton.icon(
-          onPressed: _replay,
-          icon: const Icon(Icons.replay, size: 18),
-          label: Text(context.trText('Replay strokes')),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton.icon(
+              onPressed: _replay,
+              icon: const Icon(Icons.replay, size: 18),
+              label: Text(context.trText('Replay strokes')),
+            ),
+            TextButton.icon(
+              onPressed: () => setState(() => _showNumbers = !_showNumbers),
+              icon: Icon(
+                _showNumbers ? Icons.looks_one_outlined : Icons.visibility,
+                size: 17,
+              ),
+              label: Text(
+                _showNumbers
+                    ? context.trText('Hide numbers')
+                    : context.trText('Show numbers'),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -149,6 +169,8 @@ class _StrokePainter extends CustomPainter {
     required this.progress,
     required this.ink,
     required this.guide,
+    required this.numberColor,
+    required this.showNumbers,
   });
 
   final List<Path> strokes;
@@ -157,6 +179,8 @@ class _StrokePainter extends CustomPainter {
   final double progress; // 0..1 across all strokes
   final Color ink;
   final Color guide;
+  final Color numberColor;
+  final bool showNumbers;
 
   @override
   void paint(Canvas c, Size size) {
@@ -186,6 +210,26 @@ class _StrokePainter extends CustomPainter {
         c.drawPath(stroke, pen(guide)); // upcoming: faint guide
       }
     }
+    if (showNumbers) {
+      final numberStyle = TextStyle(
+        color: numberColor,
+        fontSize: 10 / scale,
+        fontWeight: FontWeight.w900,
+      );
+      for (var i = 0; i < metrics.length; i++) {
+        final first =
+            metrics[i].isEmpty ? null : metrics[i].first.getTangentForOffset(0);
+        if (first == null) continue;
+        final painter = TextPainter(
+          text: TextSpan(text: '${i + 1}', style: numberStyle),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        painter.paint(
+          c,
+          first.position - Offset(painter.width / 2, painter.height / 2),
+        );
+      }
+    }
   }
 
   Path _partial(int index, double frac) {
@@ -198,5 +242,9 @@ class _StrokePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_StrokePainter old) =>
-      old.progress != progress || old.strokes != strokes || old.ink != ink;
+      old.progress != progress ||
+      old.strokes != strokes ||
+      old.ink != ink ||
+      old.numberColor != numberColor ||
+      old.showNumbers != showNumbers;
 }

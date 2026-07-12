@@ -234,7 +234,7 @@ class DrawingPad extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 220,
                       fontWeight: FontWeight.w700,
-                      color: jc.ink.withValues(alpha: 0.08),
+                      color: jc.ink.withValues(alpha: 0.14),
                     ),
                   ),
                 ),

@@ -7,6 +7,7 @@ import '../../repositories/mnemonic_deck_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/status_views.dart';
 import '../widgets/neo_pop.dart';
 import 'deck_card.dart';
@@ -21,6 +22,28 @@ class CommunityDecksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<AppState>().isAuthenticated) {
+      return Scaffold(
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: context.trText('Community'),
+              subtitle: context.trText('Shared packs. Take, rate and improve.'),
+              tone: NeoTone.magenta,
+            ),
+            Expanded(
+              child: AuthRequiredPanel(
+                title: context.trText('Your community starts here'),
+                description: context.trText(
+                  'Sign in to explore, save and publish mnemonic packs with the community.',
+                ),
+                icon: Icons.groups_rounded,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final lang = context.read<AppState>().mnemonicLanguage;
     return DefaultTabController(
       length: 2,

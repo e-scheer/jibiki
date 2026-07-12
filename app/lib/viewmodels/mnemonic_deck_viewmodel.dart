@@ -15,7 +15,8 @@ class CommunityDecksViewModel extends BaseViewModel {
   List<MnemonicDeck> get decks => _decks;
 
   Future<void> load() async {
-    final r = await runGuarded(() => _repo.list(language: language, mine: mine));
+    final r =
+        await runGuarded(() => _repo.list(language: language, mine: mine));
     if (r != null) _decks = r;
   }
 
@@ -25,7 +26,10 @@ class CommunityDecksViewModel extends BaseViewModel {
     final res = await runGuarded(() => _repo.vote(d.id, target), silent: true);
     if (res != null) {
       final (score, myVote) = res;
-      _decks = _decks.map((e) => e.id == d.id ? e.copyWith(score: score, myVote: myVote) : e).toList();
+      _decks = _decks
+          .map((e) =>
+              e.id == d.id ? e.copyWith(score: score, myVote: myVote) : e)
+          .toList();
       notifyListeners();
     }
   }
@@ -89,8 +93,10 @@ class DeckBuilderViewModel extends BaseViewModel {
   final String language;
 
   String kind = 'kana';
+  String kanaScriptFilter = 'both';
   List<Mnemonic> _available = [];
-  List<Mnemonic> _filtered = const []; // cached: own drawings of the current kind
+  List<Mnemonic> _filtered =
+      const []; // cached: own drawings of the current kind
   final List<int> _selected = []; // ordered selection
 
   /// The user's own drawings matching the current kind (image-bearing first).
@@ -99,6 +105,8 @@ class DeckBuilderViewModel extends BaseViewModel {
   List<int> get selected => _selected;
   int get selectedCount => _selected.length;
   bool isSelected(int id) => _selected.contains(id);
+  bool get allVisibleSelected =>
+      _filtered.isNotEmpty && _filtered.every((m) => _selected.contains(m.id));
 
   Future<void> load() async {
     final r = await runGuarded(() => _mnemonics.mine());
@@ -116,8 +124,23 @@ class DeckBuilderViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  void setKanaScriptFilter(String filter) {
+    if (kanaScriptFilter == filter) return;
+    kanaScriptFilter = filter;
+    _selected.clear();
+    _recomputeFiltered();
+    notifyListeners();
+  }
+
   void _recomputeFiltered() {
-    _filtered = _available.where((m) => m.kind == kind).toList()
+    _filtered = _available.where((m) {
+      if (m.kind != kind) return false;
+      if (kind != 'kana' || kanaScriptFilter == 'both') return true;
+      final rune = m.character.runes.isEmpty ? null : m.character.runes.first;
+      if (rune == null) return false;
+      final hiragana = rune >= 0x3040 && rune <= 0x309f;
+      return kanaScriptFilter == 'hiragana' ? hiragana : !hiragana;
+    }).toList()
       ..sort((a, b) => (b.hasImage ? 1 : 0).compareTo(a.hasImage ? 1 : 0));
   }
 
@@ -126,6 +149,20 @@ class DeckBuilderViewModel extends BaseViewModel {
       _selected.remove(id);
     } else {
       _selected.add(id);
+    }
+    notifyListeners();
+  }
+
+  /// Select or clear the current filtered set in one deliberate action.
+  /// Keeping this on the view model makes the "some / all" affordance work
+  /// identically on phone and tablet without walking the grid from the UI.
+  void toggleAllVisible() {
+    if (allVisibleSelected) {
+      _selected.removeWhere((id) => _filtered.any((m) => m.id == id));
+    } else {
+      for (final mnemonic in _filtered) {
+        if (!_selected.contains(mnemonic.id)) _selected.add(mnemonic.id);
+      }
     }
     notifyListeners();
   }

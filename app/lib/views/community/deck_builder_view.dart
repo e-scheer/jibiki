@@ -8,6 +8,7 @@ import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/net_image.dart';
 import '../widgets/pressable.dart';
@@ -78,6 +79,33 @@ class _BuilderState extends State<_Builder> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.watch<AppState>().isAuthenticated) {
+      return Scaffold(
+        body: Column(
+          children: [
+            NeoPageHeader(
+              title: context.trText('New pack'),
+              subtitle: context.trText('Build a community mnemonic pack.'),
+              tone: NeoTone.magenta,
+              leading: NeoIconButton(
+                icon: Icons.arrow_back_rounded,
+                label: context.trText('Back'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ),
+            Expanded(
+              child: AuthRequiredPanel(
+                title: context.trText('Sign in to publish'),
+                description: context.trText(
+                  'Your drawings are ready to become a pack. Sign in to keep ownership and publish it safely.',
+                ),
+                icon: Icons.rocket_launch_outlined,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final vm = context.watch<DeckBuilderViewModel>();
     final jc = context.jc;
 
@@ -120,18 +148,21 @@ class _BuilderState extends State<_Builder> {
                         label: context.trText('Pack title'),
                         hint: context.trText('e.g. My hiragana mascots'),
                         textCapitalization: TextCapitalization.sentences,
+                        enabled: !_saving,
                       ),
                       const SizedBox(height: 14),
                       _NeoTextField(
                         controller: _description,
                         label: context.trText('Description (optional)'),
                         maxLines: 3,
+                        enabled: !_saving,
                       ),
                       const SizedBox(height: 18),
                       NeoSegmentedControl<String>(
                         height: 56,
                         selected: vm.kind,
                         onChanged: vm.setKind,
+                        enabled: !_saving,
                         segments: const [
                           NeoSegment('kana', 'Kana', icon: Icons.grid_view),
                           NeoSegment(
@@ -141,9 +172,24 @@ class _BuilderState extends State<_Builder> {
                           ),
                         ],
                       ),
+                      if (vm.kind == 'kana') ...[
+                        const SizedBox(height: 10),
+                        NeoSegmentedControl<String>(
+                          height: 46,
+                          selected: vm.kanaScriptFilter,
+                          onChanged: vm.setKanaScriptFilter,
+                          enabled: !_saving,
+                          segments: const [
+                            NeoSegment('both', 'Both'),
+                            NeoSegment('hiragana', 'Hiragana'),
+                            NeoSegment('katakana', 'Katakana'),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       _PublishToggle(
                         value: _publish,
+                        enabled: !_saving,
                         onChanged: (value) => setState(() => _publish = value),
                       ),
                       const SizedBox(height: 24),
@@ -151,9 +197,41 @@ class _BuilderState extends State<_Builder> {
                         context.trText(
                           'Your ${vm.kind == 'kanji' ? 'kanji' : 'kana'} drawings',
                         ),
-                        trailing: NeoBadge(
-                          '${vm.selectedCount}/${vm.available.length}',
-                          tone: NeoTone.lime,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            NeoBadge(
+                              '${vm.selectedCount}/${vm.available.length}',
+                              tone: NeoTone.lime,
+                            ),
+                            const SizedBox(width: 8),
+                            NeoCard(
+                              tone: vm.allVisibleSelected
+                                  ? NeoTone.lavender
+                                  : NeoTone.paper,
+                              shadow: 2,
+                              radius: 8,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 7,
+                              ),
+                              onTap: !_saving && vm.available.isNotEmpty
+                                  ? vm.toggleAllVisible
+                                  : null,
+                              semanticLabel: vm.allVisibleSelected
+                                  ? context.trText('Clear selection')
+                                  : context.trText('Select all'),
+                              child: Text(
+                                vm.allVisibleSelected
+                                    ? context.trText('Clear')
+                                    : context.trText('All'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (vm.isLoading && vm.available.isEmpty)
@@ -185,6 +263,7 @@ class _BuilderState extends State<_Builder> {
                             return _PickTile(
                               mnemonic: mnemonic,
                               selected: vm.isSelected(mnemonic.id),
+                              enabled: !_saving,
                               onTap: () => vm.toggle(mnemonic.id),
                             );
                           },
@@ -245,6 +324,7 @@ class _NeoTextField extends StatelessWidget {
     this.hint,
     this.maxLines = 1,
     this.textCapitalization = TextCapitalization.none,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -252,6 +332,7 @@ class _NeoTextField extends StatelessWidget {
   final String? hint;
   final int maxLines;
   final TextCapitalization textCapitalization;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -279,6 +360,7 @@ class _NeoTextField extends StatelessWidget {
           ),
           child: TextField(
             controller: controller,
+            enabled: enabled,
             maxLines: maxLines,
             textCapitalization: textCapitalization,
             decoration: InputDecoration(
@@ -298,10 +380,15 @@ class _NeoTextField extends StatelessWidget {
 }
 
 class _PublishToggle extends StatelessWidget {
-  const _PublishToggle({required this.value, required this.onChanged});
+  const _PublishToggle({
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   final bool value;
   final ValueChanged<bool> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +397,7 @@ class _PublishToggle extends StatelessWidget {
       tone: value ? NeoTone.lime : NeoTone.paper,
       shadow: 4,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      onTap: () => onChanged(!value),
+      onTap: enabled ? () => onChanged(!value) : null,
       semanticLabel: context.trText('Publish to the community'),
       child: Row(
         children: [
@@ -396,82 +483,88 @@ class _PickTile extends StatelessWidget {
     required this.mnemonic,
     required this.selected,
     required this.onTap,
+    this.enabled = true,
   });
 
   final Mnemonic mnemonic;
   final bool selected;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    return Pressable(
-      label: '${mnemonic.character} mnemonic',
-      selected: selected,
-      pressedScale: 1,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.timed(context, Motion.fast),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: selected ? jc.acid : jc.surface,
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(color: jc.ink, width: 2.5),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: jc.ink,
-                    blurRadius: 0,
-                    offset: const Offset(3, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            mnemonic.hasImage
-                ? NetImage(
-                    url: mnemonic.imageUrl,
-                    cacheWidth: 300,
-                    errorBuilder: (_) => _glyph(jc),
-                  )
-                : _glyph(jc),
-            Positioned(
-              left: 5,
-              bottom: 5,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: selected ? jc.acid : jc.surface,
-                  borderRadius: BorderRadius.circular(7),
-                  border: Border.all(color: jc.ink, width: 2),
-                ),
-                child: Text(
-                  mnemonic.character,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
-            if (selected)
+    return Opacity(
+      opacity: enabled ? 1 : .52,
+      child: Pressable(
+        label: '${mnemonic.character} mnemonic',
+        selected: selected,
+        pressedScale: 1,
+        onTap: enabled ? onTap : null,
+        child: AnimatedContainer(
+          duration: Motion.timed(context, Motion.fast),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: selected ? jc.acid : jc.surface,
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(color: jc.ink, width: 2.5),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              mnemonic.hasImage
+                  ? NetImage(
+                      url: mnemonic.imageUrl,
+                      cacheWidth: 300,
+                      errorBuilder: (_) => _glyph(jc),
+                    )
+                  : _glyph(jc),
               Positioned(
-                top: 5,
-                right: 5,
+                left: 5,
+                bottom: 5,
                 child: Container(
-                  width: 30,
-                  height: 30,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(
-                    color: jc.lime,
+                    color: selected ? jc.acid : jc.surface,
                     borderRadius: BorderRadius.circular(7),
                     border: Border.all(color: jc.ink, width: 2),
                   ),
-                  child: const Icon(Icons.check, size: 18),
+                  child: Text(
+                    mnemonic.character,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
               ),
-          ],
+              if (selected)
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: jc.lime,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(color: jc.ink, width: 2),
+                    ),
+                    child: const Icon(Icons.check, size: 18),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

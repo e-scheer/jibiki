@@ -12,6 +12,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/kana_viewmodel.dart';
 import '../learn/learn_carousel_view.dart';
+import '../auth/auth_required_sheet.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
@@ -277,11 +278,6 @@ class _KanaLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.sizeOf(context).width >= Breakpoints.expanded) {
-      if (vm.script == 'both') {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          onScriptChanged('hiragana');
-        });
-      }
       final basic = vm.byKind('gojuon');
       if (basic.isEmpty) {
         return EmptyHint(
@@ -446,7 +442,6 @@ class _KanaTabletWorkspace extends StatelessWidget {
                 selection: selection,
                 onScriptChanged: onScriptChanged,
                 inset: 0,
-                tabletContract: true,
               ),
               const SizedBox(height: 10),
               Expanded(
@@ -575,14 +570,12 @@ class _KanaHeader extends StatelessWidget {
     required this.selection,
     required this.onScriptChanged,
     this.inset = 14,
-    this.tabletContract = false,
   });
 
   final KanaViewModel vm;
   final _Selection selection;
   final ValueChanged<String> onScriptChanged;
   final double inset;
-  final bool tabletContract;
 
   @override
   Widget build(BuildContext context) {
@@ -604,8 +597,7 @@ class _KanaHeader extends StatelessWidget {
                   segments: [
                     const NeoSegment('hiragana', 'ひらがな'),
                     const NeoSegment('katakana', 'カタカナ'),
-                    if (!tabletContract)
-                      NeoSegment('both', _copy(context, 'Both', 'Les deux')),
+                    NeoSegment('both', _copy(context, 'Both', 'Les deux')),
                   ],
                 ),
               ),
@@ -768,8 +760,18 @@ class _KanaToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final signedIn = context.watch<AppState>().isAuthenticated;
     return Pressable(
-      onTap: onTap,
+      onTap: () {
+        if (signedIn) {
+          onTap();
+        } else {
+          showAuthRequiredSheet(
+            context,
+            title: _copy(context, 'Review your kana', 'Réviser vos kana'),
+          );
+        }
+      },
       child: Container(
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 8),
