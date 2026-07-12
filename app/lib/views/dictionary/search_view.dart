@@ -11,6 +11,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/browse_viewmodel.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
+import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
@@ -1024,28 +1025,31 @@ class _RecentWords extends StatelessWidget {
                         ),
                       ),
                     )
-                  : SingleChildScrollView(
+                  : HorizontalOverflowCue(
                       key: ValueKey(
                         visibleWords.map((e) => e.word.id).join(','),
                       ),
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          for (var i = 0; i < visibleWords.length; i++) ...[
-                            if (i > 0) const SizedBox(width: 8),
-                            _RecentWordButton(
-                              word: visibleWords[i].word,
-                              onTap: () {
-                                vm.rememberOpened(visibleWords[i].word);
-                                context.push(
-                                  '/word/${visibleWords[i].word.id}',
-                                );
-                              },
-                            ),
+                      edgeColor: context.jc.surface,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            for (var i = 0; i < visibleWords.length; i++) ...[
+                              if (i > 0) const SizedBox(width: 8),
+                              _RecentWordButton(
+                                word: visibleWords[i].word,
+                                onTap: () {
+                                  vm.rememberOpened(visibleWords[i].word);
+                                  context.push(
+                                    '/word/${visibleWords[i].word.id}',
+                                  );
+                                },
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
             ),

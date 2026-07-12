@@ -15,10 +15,20 @@ import 'deck_card.dart';
 /// Browse community packs of mnemonics, or your own. A pack is a shareable set of
 /// drawings, the "propose as a deck" side of the drawing ecosystem.
 class CommunityDecksView extends StatelessWidget {
-  const CommunityDecksView({super.key, this.initialTab = 0});
+  const CommunityDecksView(
+      {super.key, this.initialTab = 0, this.showBack = false});
 
   /// 0 = Community, 1 = Mine (deep-linked from "My submissions").
   final int initialTab;
+  final bool showBack;
+
+  Widget? _back(BuildContext context) => showBack
+      ? NeoIconButton(
+          icon: Icons.arrow_back_rounded,
+          label: context.trText('Back'),
+          onTap: () => context.canPop() ? context.pop() : context.go('/'),
+        )
+      : null;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +40,7 @@ class CommunityDecksView extends StatelessWidget {
               title: context.trText('Community'),
               subtitle: context.trText('Shared packs. Take, rate and improve.'),
               tone: NeoTone.magenta,
+              leading: _back(context),
             ),
             Expanded(
               child: AuthRequiredPanel(
@@ -57,6 +68,7 @@ class CommunityDecksView extends StatelessWidget {
                 'Shared packs. Take, rate and improve.',
               ),
               tone: NeoTone.magenta,
+              leading: _back(context),
               trailing: NeoIconButton(
                 icon: Icons.add_box_outlined,
                 label: context.trText('Create a pack'),
@@ -66,27 +78,30 @@ class CommunityDecksView extends StatelessWidget {
             Container(
               color: context.jc.canvas,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: TabBar(
-                labelColor: context.jc.ink,
-                unselectedLabelColor: context.jc.ink,
-                labelPadding: EdgeInsets.zero,
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicator: BoxDecoration(
-                  color: context.jc.acid,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.jc.ink,
-                      blurRadius: 0,
-                      offset: const Offset(2, 2),
-                    ),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: context.jc.surface,
+                  border: Border.all(color: context.jc.ink, width: 2.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  labelColor: context.jc.ink,
+                  unselectedLabelColor: context.jc.ink,
+                  labelPadding: EdgeInsets.zero,
+                  dividerColor: Colors.transparent,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorAnimation: TabIndicatorAnimation.elastic,
+                  indicator: BoxDecoration(
+                    color: context.jc.acid,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: context.jc.ink, width: 2.5),
+                  ),
+                  tabs: [
+                    _FilterTab(label: context.trText('Popular')),
+                    _FilterTab(label: context.trText('My packs')),
                   ],
                 ),
-                tabs: [
-                  _FilterTab(label: context.trText('Popular')),
-                  _FilterTab(label: context.trText('My packs')),
-                ],
               ),
             ),
             Expanded(
@@ -121,10 +136,6 @@ class _FilterTab extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         height: 42,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: context.jc.ink, width: 2.5),
-        ),
         child: Text(
           label,
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),

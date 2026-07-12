@@ -228,7 +228,7 @@ class _BrandPanel extends StatelessWidget {
   }
 }
 
-class AuthField extends StatelessWidget {
+class AuthField extends StatefulWidget {
   const AuthField({
     super.key,
     required this.controller,
@@ -253,11 +253,28 @@ class AuthField extends StatelessWidget {
   final ValueChanged<String>? onFieldSubmitted;
 
   @override
+  State<AuthField> createState() => _AuthFieldState();
+}
+
+class _AuthFieldState extends State<AuthField> {
+  bool _hasError = false;
+
+  String? _validate(String? value) {
+    final message = widget.validator?.call(value);
+    if (_hasError != (message != null)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _hasError = message != null);
+      });
+    }
+    return message;
+  }
+
+  @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            widget.label.toUpperCase(),
             style: const TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w900,
@@ -266,31 +283,47 @@ class AuthField extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           Opacity(
-            opacity: enabled ? 1 : .56,
-            child: Container(
+            opacity: widget.enabled ? 1 : .56,
+            child: AnimatedContainer(
+              duration: Motion.timed(context, Motion.fast),
               decoration: BoxDecoration(
+                color: _hasError
+                    ? context.jc.ratingAgain.withValues(alpha: .12)
+                    : context.jc.surface,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: enabled
+                boxShadow: widget.enabled
                     ? [
                         BoxShadow(
-                          color: context.jc.ink,
+                          color: _hasError
+                              ? context.jc.ratingAgain
+                              : context.jc.ink,
                           blurRadius: 0,
-                          offset: const Offset(4, 4),
+                          offset: const Offset(3, 3),
                         ),
                       ]
                     : null,
               ),
               child: TextFormField(
-                controller: controller,
-                keyboardType: keyboardType,
-                autofillHints: autofillHints,
-                obscureText: obscureText,
-                enabled: enabled,
-                validator: validator,
-                onFieldSubmitted: onFieldSubmitted,
+                controller: widget.controller,
+                keyboardType: widget.keyboardType,
+                autofillHints: widget.autofillHints,
+                obscureText: widget.obscureText,
+                enabled: widget.enabled,
+                validator: _validate,
+                onChanged: _hasError
+                    ? (value) {
+                        if (widget.validator?.call(value) == null) {
+                          setState(() => _hasError = false);
+                        }
+                      }
+                    : null,
+                onFieldSubmitted: widget.onFieldSubmitted,
                 decoration: InputDecoration(
-                  hintText: label,
-                  prefixIcon: Icon(icon),
+                  hintText: widget.label,
+                  prefixIcon: Icon(
+                    _hasError ? Icons.error_outline_rounded : widget.icon,
+                    color: _hasError ? context.jc.ratingAgain : null,
+                  ),
                   disabledBorder: _authFieldBorder(context.jc.muted),
                 ),
               ),

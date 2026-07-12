@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../auth/auth_required_sheet.dart';
-import '../study/study_chrome.dart';
-import 'pressable.dart';
+import 'neo_pop.dart';
 
 class StudyStatusBar extends StatefulWidget {
   const StudyStatusBar({
@@ -37,8 +36,11 @@ class _StudyStatusBarState extends State<StudyStatusBar> {
   @override
   Widget build(BuildContext context) {
     final accountReady = context.watch<AppState>().isAuthenticated;
-    final learning = widget.status == 'learning';
-    final known = widget.status == 'known';
+    final selected = switch (widget.status) {
+      'learning' => 'learning',
+      'known' => 'known',
+      _ => null,
+    };
     return Container(
       decoration: BoxDecoration(
         color: context.jc.canvas,
@@ -48,99 +50,39 @@ class _StudyStatusBarState extends State<StudyStatusBar> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatusChoice(
-                  selected: learning,
-                  enabled: !_busy,
-                  color: context.jc.acid,
-                  icon: learning ? Icons.school : Icons.school_outlined,
-                  label: learning ? 'Studying' : 'Study',
-                  onTap: () {
-                    Haptics.light();
-                    if (accountReady) {
-                      _setStatus(context, learning ? 'none' : 'learning');
-                    } else {
-                      showAuthRequiredSheet(context);
-                    }
-                  },
-                ),
+          child: NeoSegmentedControl<String?>(
+            height: 54,
+            enabled: !_busy,
+            selected: selected,
+            selectionColor:
+                selected == 'known' ? context.jc.lime : context.jc.acid,
+            segments: [
+              NeoSegment<String?>(
+                'learning',
+                selected == 'learning' ? 'Studying' : 'Study',
+                icon: selected == 'learning'
+                    ? Icons.school
+                    : Icons.school_outlined,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _StatusChoice(
-                  selected: known,
-                  enabled: !_busy,
-                  color: context.jc.lime,
-                  icon: known
-                      ? Icons.check_circle_rounded
-                      : Icons.check_circle_outline_rounded,
-                  label: known ? 'Known' : 'I know it',
-                  onTap: () {
-                    Haptics.light();
-                    if (accountReady) {
-                      _setStatus(context, known ? 'none' : 'known');
-                    } else {
-                      showAuthRequiredSheet(context);
-                    }
-                  },
-                ),
+              NeoSegment<String?>(
+                'known',
+                selected == 'known' ? 'Known' : 'I know it',
+                icon: selected == 'known'
+                    ? Icons.check_circle_rounded
+                    : Icons.check_circle_outline_rounded,
               ),
             ],
+            onChanged: (target) {
+              Haptics.light();
+              if (!accountReady) {
+                showAuthRequiredSheet(context);
+                return;
+              }
+              _setStatus(context, selected == target ? 'none' : target!);
+            },
           ),
         ),
       ),
     );
   }
-}
-
-class _StatusChoice extends StatelessWidget {
-  const _StatusChoice({
-    required this.selected,
-    required this.color,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.enabled = true,
-  });
-
-  final bool selected;
-  final Color color;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 52,
-        child: Pressable(
-          label: label,
-          selected: selected,
-          haptic: false,
-          onTap: enabled ? onTap : null,
-          child: StudyPanel(
-            color: selected ? color : context.jc.surface,
-            shadow: selected ? 3 : 0,
-            radius: 10,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 20),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
 }

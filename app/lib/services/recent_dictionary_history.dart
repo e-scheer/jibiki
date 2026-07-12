@@ -32,7 +32,7 @@ class RecentDictionaryHistory {
   }
 
   Future<void> remember(int wordId, {DateTime? at}) async {
-    final visits = await read();
+    final visits = (await read()).toList();
     visits.removeWhere((visit) => visit.wordId == wordId);
     visits.insert(
       0,

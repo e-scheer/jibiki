@@ -6,9 +6,15 @@ import '../repositories/study_repository.dart';
 import 'base_view_model.dart';
 
 class KanjiDetailViewModel extends BaseViewModel {
-  KanjiDetailViewModel(this._dict, this._study, this.literal);
+  KanjiDetailViewModel(
+    this._dict,
+    this._study,
+    this.literal, {
+    required bool loadStudyState,
+  }) : _loadStudyState = loadStudyState;
   final DictionaryRepository _dict;
   final StudyRepository _study;
+  final bool _loadStudyState;
   final String literal;
 
   KanjiEntry? _kanji;
@@ -20,7 +26,9 @@ class KanjiDetailViewModel extends BaseViewModel {
   List<WordEntry> get words {
     final k = _kanji;
     if (k == null) return const [];
-    return _words ??= k.words.map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>())).toList();
+    return _words ??= k.words
+        .map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   // none | learning | known - drives the detail Study / I-know-it toggles.
@@ -33,11 +41,16 @@ class KanjiDetailViewModel extends BaseViewModel {
       _kanji = k;
       _words = null; // invalidate cache for the new kanji
     }
-    final states = await runGuarded(() => _study.studyStates(type: ItemType.kanji), silent: true);
-    if (states != null) {
-      final s = states[literal];
-      _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
-      notifyListeners();
+    if (_loadStudyState && k != null) {
+      final states = await runGuarded(
+        () => _study.studyStates(type: ItemType.kanji),
+        silent: true,
+      );
+      if (states != null) {
+        final s = states[literal];
+        _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
+        notifyListeners();
+      }
     }
   }
 
@@ -47,7 +60,9 @@ class KanjiDetailViewModel extends BaseViewModel {
     final prev = _status;
     _status = target;
     notifyListeners();
-    final res = await runGuarded(() => _study.setStatus(ItemType.kanji, literal, target), silent: true);
+    final res = await runGuarded(
+        () => _study.setStatus(ItemType.kanji, literal, target),
+        silent: true);
     _status = res ?? prev;
     notifyListeners();
   }

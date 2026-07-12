@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
-import '../widgets/neo_pop.dart';
+import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/jibiki_brand.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import 'drawing_pad.dart';
 
@@ -511,37 +512,40 @@ class _Toolbar extends StatelessWidget {
                   // Brushes (the headline of the studio) + eraser.
                   SizedBox(
                     height: 58,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (final b in Brush.values) ...[
+                    child: HorizontalOverflowCue(
+                      edgeColor: jc.lavender,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            for (final b in Brush.values) ...[
+                              _BrushButton(
+                                icon: b.icon,
+                                label: b.label,
+                                selected: !controller.erasing &&
+                                    controller.brush == b,
+                                enabled: enabled,
+                                onTap: () {
+                                  Haptics.tick();
+                                  controller.setBrush(b);
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Container(width: 2.5, height: 40, color: jc.ink),
+                            const SizedBox(width: 8),
                             _BrushButton(
-                              icon: b.icon,
-                              label: b.label,
-                              selected:
-                                  !controller.erasing && controller.brush == b,
+                              icon: Icons.auto_fix_normal,
+                              label: 'Eraser',
+                              selected: controller.erasing,
                               enabled: enabled,
                               onTap: () {
                                 Haptics.tick();
-                                controller.setBrush(b);
+                                controller.setErasing(!controller.erasing);
                               },
                             ),
-                            const SizedBox(width: 8),
                           ],
-                          Container(width: 2.5, height: 40, color: jc.ink),
-                          const SizedBox(width: 8),
-                          _BrushButton(
-                            icon: Icons.auto_fix_normal,
-                            label: 'Eraser',
-                            selected: controller.erasing,
-                            enabled: enabled,
-                            onTap: () {
-                              Haptics.tick();
-                              controller.setErasing(!controller.erasing);
-                            },
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -550,19 +554,8 @@ class _Toolbar extends StatelessWidget {
                   // the strip scrolls - a quiet "there's more" cue.
                   SizedBox(
                     height: 36,
-                    child: ShaderMask(
-                      shaderCallback: (rect) => const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black,
-                          Colors.black,
-                          Colors.transparent
-                        ],
-                        stops: [0.0, 0.04, 0.9, 1.0],
-                      ).createShader(rect),
-                      blendMode: BlendMode.dstIn,
+                    child: HorizontalOverflowCue(
+                      edgeColor: jc.lavender,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.only(right: 28),
@@ -712,8 +705,6 @@ class _Swatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    // Selection reads as a ring around the dot (with a gap), not a stamped check -
-    // cleaner, and it never fights the swatch colour.
     return Opacity(
       opacity: enabled ? 1 : .48,
       child: Pressable(
@@ -721,22 +712,18 @@ class _Swatch extends StatelessWidget {
         selected: selected,
         pressedScale: 0.9,
         onTap: enabled ? onTap : null,
-        child: AnimatedContainer(
+        child: AnimatedScale(
           duration: Motion.timed(context, Motion.fast),
           curve: Motion.out,
-          width: 34,
-          height: 34,
-          padding: const EdgeInsets.all(3.5),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-                color: selected ? jc.magenta : Colors.transparent, width: 3),
-          ),
-          child: Container(
+          scale: selected ? 1.08 : 1,
+          child: AnimatedContainer(
+            duration: Motion.timed(context, Motion.fast),
+            curve: Motion.out,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
-              // A hairline keeps white / pale swatches legible on the surface.
               border: Border.all(color: jc.ink, width: 2.5),
               boxShadow: selected
                   ? null
@@ -747,6 +734,19 @@ class _Swatch extends StatelessWidget {
                         offset: Offset(3, 3),
                       ),
                     ],
+            ),
+            child: AnimatedSwitcher(
+              duration: Motion.timed(context, Motion.fast),
+              child: selected
+                  ? Icon(
+                      Icons.check_rounded,
+                      key: const ValueKey('selected'),
+                      size: 18,
+                      color: color.computeLuminance() > .56
+                          ? jc.ink
+                          : Colors.white,
+                    )
+                  : const SizedBox.shrink(key: ValueKey('not-selected')),
             ),
           ),
         ),

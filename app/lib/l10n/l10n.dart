@@ -68,6 +68,32 @@ const _legacyFrench = <String, String>{
   'I know specific characters': 'Je connais certains caractères',
   'Paste kana or kanji you already read.':
       'Collez les kana ou kanji que vous lisez déjà.',
+  'Choose the exact foundation you already know. You can change this later.':
+      'Choisissez précisément les bases que vous connaissez déjà. Vous pourrez les modifier plus tard.',
+  'Choose a starting point': 'Choisissez un point de départ',
+  'Kana you already know': 'Kana que vous connaissez déjà',
+  'Kanji by JLPT': 'Kanji par niveau JLPT',
+  'Hiragana': 'Hiragana',
+  'Katakana': 'Katakana',
+  'All kana': 'Tous les kana',
+  'Mark the full hiragana syllabary as known.':
+      'Marquer tout le syllabaire hiragana comme connu.',
+  'Mark the full katakana syllabary as known.':
+      'Marquer tout le syllabaire katakana comme connu.',
+  'Hiragana and katakana, including their variants.':
+      'Hiragana et katakana, avec toutes leurs variantes.',
+  'Canonical kanji for this level.': 'Les kanji canoniques de ce niveau.',
+  'N5 plus the canonical N4 kanji.': 'Le N5 avec les kanji canoniques du N4.',
+  'N5 through N3 from the canonical lists.':
+      'Du N5 au N3 selon les listes canoniques.',
+  'N5 through N2 from the canonical lists.':
+      'Du N5 au N2 selon les listes canoniques.',
+  'The complete canonical JLPT kanji ladder.':
+      'L’ensemble complet des kanji JLPT canoniques.',
+  'Only kana and kanji are counted.':
+      'Seuls les kana et les kanji sont comptés.',
+  'We could not load this level. Check your connection and try again.':
+      'Impossible de charger ce niveau. Vérifiez votre connexion et réessayez.',
   'Known characters': 'Caractères connus',
   'Example: 日本語かな': 'Exemple : 日本語かな',
   'Capture source': 'Capturer la source',

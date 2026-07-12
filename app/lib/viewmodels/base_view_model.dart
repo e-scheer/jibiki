@@ -27,6 +27,7 @@ abstract class BaseViewModel extends ChangeNotifier {
   @protected
   Future<T?> runGuarded<T>(Future<T> Function() action,
       {bool silent = false}) async {
+    if (_loading && !silent) return null;
     if (!silent) {
       _loading = true;
       _error = null;
@@ -35,10 +36,10 @@ abstract class BaseViewModel extends ChangeNotifier {
     try {
       return await action();
     } on ApiException catch (e) {
-      _error = e.message;
+      _error = e.isUnauthorized ? authRequiredErrorMessage : e.message;
       return null;
-    } catch (e) {
-      _error = e.toString();
+    } catch (_) {
+      _error = 'Something went wrong. Please try again.';
       return null;
     } finally {
       _loading = false;

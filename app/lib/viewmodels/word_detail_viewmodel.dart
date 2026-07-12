@@ -12,11 +12,14 @@ class WordDetailViewModel extends BaseViewModel {
     this._dict,
     this._study,
     this.wordId, {
+    required bool loadStudyState,
     RecentDictionaryHistory? history,
-  }) : _history = history ?? RecentDictionaryHistory();
+  })  : _loadStudyState = loadStudyState,
+        _history = history ?? RecentDictionaryHistory();
   final DictionaryRepository _dict;
   final StudyRepository _study;
   final RecentDictionaryHistory _history;
+  final bool _loadStudyState;
   final int wordId;
 
   WordEntry? _word;
@@ -32,14 +35,16 @@ class WordDetailViewModel extends BaseViewModel {
       _word = w;
       unawaited(_history.remember(w.id));
     }
-    final states = await runGuarded(
-      () => _study.studyStates(type: ItemType.word),
-      silent: true,
-    );
-    if (states != null) {
-      final s = states[wordId.toString()];
-      _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
-      notifyListeners();
+    if (_loadStudyState && w != null) {
+      final states = await runGuarded(
+        () => _study.studyStates(type: ItemType.word),
+        silent: true,
+      );
+      if (states != null) {
+        final s = states[wordId.toString()];
+        _status = s == null ? 'none' : (s >= 2 ? 'known' : 'learning');
+        notifyListeners();
+      }
     }
   }
 

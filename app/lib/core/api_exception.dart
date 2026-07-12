@@ -1,3 +1,5 @@
+const authRequiredErrorMessage = '__AUTH_REQUIRED__';
+
 /// A normalized API error the UI can render, mapped from Dio failures.
 class ApiException implements Exception {
   ApiException(this.message, {this.statusCode, this.fieldErrors});

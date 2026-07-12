@@ -295,6 +295,7 @@ class _KanaLayout extends StatelessWidget {
       return _KanaTabletWorkspace(
         vm: vm,
         selection: selection,
+        showBoth: vm.script == 'both',
         focusedChar: resolvedFocus,
         onFocused: onFocused,
         onScriptChanged: onScriptChanged,
@@ -413,6 +414,7 @@ class _KanaTabletWorkspace extends StatelessWidget {
   const _KanaTabletWorkspace({
     required this.vm,
     required this.selection,
+    required this.showBoth,
     required this.focusedChar,
     required this.onFocused,
     required this.onScriptChanged,
@@ -420,6 +422,7 @@ class _KanaTabletWorkspace extends StatelessWidget {
 
   final KanaViewModel vm;
   final _Selection selection;
+  final bool showBoth;
   final String focusedChar;
   final ValueChanged<String> onFocused;
   final ValueChanged<String> onScriptChanged;
@@ -476,8 +479,9 @@ class _KanaTabletWorkspace extends StatelessWidget {
               ),
             ),
             child: KanaDetailPane(
-              key: ValueKey(focusedChar),
+              key: ValueKey('$focusedChar-$showBoth'),
               char: focusedChar,
+              showBoth: showBoth,
               onSelectKana: onFocused,
             ),
           ),
@@ -850,8 +854,18 @@ class _ReviewKanaButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final signedIn = context.watch<AppState>().isAuthenticated;
     return Pressable(
-      onTap: onTap,
+      onTap: () {
+        if (signedIn) {
+          onTap();
+        } else {
+          showAuthRequiredSheet(
+            context,
+            title: _copy(context, 'Review your kana', 'Réviser vos kana'),
+          );
+        }
+      },
       child: Container(
         width: double.infinity,
         height: 56,
@@ -1038,48 +1052,51 @@ class _KanaLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BoundedContent(
-      maxWidth: 420,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
-        children: [
-          Row(
-            children: [
-              const Expanded(child: _SkeletonBox(height: 56)),
-              const SizedBox(width: 10),
-              _SkeletonBox(width: 62, height: 40, color: context.jc.surfaceAlt),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Wrap(
-            spacing: 9,
-            runSpacing: 7,
-            children: [
-              _SkeletonBox(width: 72, height: 17),
-              _SkeletonBox(width: 78, height: 17),
-              _SkeletonBox(width: 72, height: 17),
-              _SkeletonBox(width: 68, height: 17),
-            ],
-          ),
-          const SizedBox(height: 10),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 46,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-              mainAxisExtent: 56,
+    return SkeletonPulse(
+      child: BoundedContent(
+        maxWidth: 420,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 28),
+          children: [
+            Row(
+              children: [
+                const Expanded(child: _SkeletonBox(height: 56)),
+                const SizedBox(width: 10),
+                _SkeletonBox(
+                    width: 62, height: 40, color: context.jc.surfaceAlt),
+              ],
             ),
-            itemBuilder: (_, index) => _SkeletonBox(
-              height: 56,
-              color: index < 22
-                  ? context.jc.lime.withValues(alpha: 0.38)
-                  : context.jc.surfaceAlt,
+            const SizedBox(height: 12),
+            const Wrap(
+              spacing: 9,
+              runSpacing: 7,
+              children: [
+                _SkeletonBox(width: 72, height: 17),
+                _SkeletonBox(width: 78, height: 17),
+                _SkeletonBox(width: 72, height: 17),
+                _SkeletonBox(width: 68, height: 17),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 46,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                mainAxisExtent: 56,
+              ),
+              itemBuilder: (_, index) => _SkeletonBox(
+                height: 56,
+                color: index < 22
+                    ? context.jc.lime.withValues(alpha: 0.38)
+                    : context.jc.surfaceAlt,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

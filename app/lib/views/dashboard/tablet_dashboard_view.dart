@@ -16,9 +16,11 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
+import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
+import '../widgets/status_views.dart';
 
 /// The NeoPop 16 tablet home. It owns only the editorial and community data;
 /// review totals stay in the shell-level [DashboardViewModel] so the due badge
@@ -422,7 +424,7 @@ class _DueCard extends StatelessWidget {
         color: context.jc.acid,
         shadow: 6,
         padding: const EdgeInsets.all(20),
-        child: const _DueSkeleton(),
+        child: const SkeletonPulse(child: _DueSkeleton()),
       );
     }
     final minutes =
@@ -548,7 +550,7 @@ class _WordOfTheDayCard extends StatelessWidget {
                     onOpenDictionary(word.headword);
                   },
             child: vm.landingLoading && word == null
-                ? const _WordSkeleton()
+                ? const SkeletonPulse(child: _WordSkeleton())
                 : word == null
                     ? Center(
                         child: Text(
@@ -679,7 +681,7 @@ class _ForecastCard extends StatelessWidget {
       color: context.jc.surface,
       padding: EdgeInsets.fromLTRB(16, 14, 16, compact ? 12 : 14),
       child: vm.forecastLoading
-          ? const _ForecastSkeleton()
+          ? const SkeletonPulse(child: _ForecastSkeleton())
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -790,7 +792,9 @@ class _CommunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (vm.isLoading && decks.isEmpty) ...[
-            const Expanded(child: _CommunitySkeleton()),
+            const Expanded(
+              child: SkeletonPulse(child: _CommunitySkeleton()),
+            ),
           ] else if (decks.isEmpty) ...[
             Expanded(
               child: Center(
@@ -897,7 +901,7 @@ class _RecentCard extends StatelessWidget {
       padding:
           EdgeInsets.symmetric(horizontal: compact ? 13 : 18, vertical: 12),
       child: vm.landingLoading
-          ? const _RecentSkeleton()
+          ? const SkeletonPulse(child: _RecentSkeleton())
           : LayoutBuilder(
               builder: (context, constraints) {
                 final header = Row(
@@ -928,18 +932,21 @@ class _RecentCard extends StatelessWidget {
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600),
                       )
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            for (var i = 0; i < words.length; i++) ...[
-                              if (i > 0) const SizedBox(width: 8),
-                              _RecentWordButton(
-                                recent: words[i],
-                                onOpenDictionary: onOpenDictionary,
-                              ),
+                    : HorizontalOverflowCue(
+                        edgeColor: context.jc.surface,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for (var i = 0; i < words.length; i++) ...[
+                                if (i > 0) const SizedBox(width: 8),
+                                _RecentWordButton(
+                                  recent: words[i],
+                                  onOpenDictionary: onOpenDictionary,
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       );
                 if (compact || constraints.maxWidth < 500) {

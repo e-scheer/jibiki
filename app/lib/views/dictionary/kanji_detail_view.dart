@@ -48,6 +48,7 @@ class KanjiDetailView extends StatelessWidget {
             ctx.read<DictionaryRepository>(),
             ctx.read<StudyRepository>(),
             literal,
+            loadStudyState: ctx.read<AppState>().isAuthenticated,
           )..load(),
         ),
         ChangeNotifierProvider(

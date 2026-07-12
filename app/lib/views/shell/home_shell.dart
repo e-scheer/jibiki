@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,6 +46,7 @@ class _ShellState extends State<_Shell> {
   ];
 
   int _index = 0;
+  int? _navigationTarget;
   bool _initialised = false;
   PageController? _pager;
   final _homeTabKey = GlobalKey<_ResponsiveHomeTabState>();
@@ -80,6 +82,15 @@ class _ShellState extends State<_Shell> {
   void _go(int index) {
     if (index == 0) _homeTabKey.currentState?.showDashboard();
     if (index == _index) return;
+    setState(() {
+      _navigationTarget = index;
+      _index = index;
+    });
+    if (context.isWide) {
+      _navigationTarget = null;
+      if (index == _reviewIndex) context.read<DashboardViewModel>().load();
+      return;
+    }
     final pager = _pager;
     if (pager != null && pager.hasClients) {
       if (Motion.enabled(context)) {
@@ -97,12 +108,20 @@ class _ShellState extends State<_Shell> {
   }
 
   void _onPageSettled(int index) {
+    final target = _navigationTarget;
+    if (target != null && index != target) return;
+    if (target == index) {
+      _navigationTarget = null;
+      if (index == _reviewIndex) context.read<DashboardViewModel>().load();
+      return;
+    }
     if (index == _index) return;
     setState(() => _index = index);
     if (index == _reviewIndex) context.read<DashboardViewModel>().load();
   }
 
   void _syncPager() {
+    if (_navigationTarget != null) return;
     final pager = _pager;
     if (pager == null || !pager.hasClients) return;
     if ((pager.page?.round() ?? _index) != _index) pager.jumpToPage(_index);
@@ -145,10 +164,8 @@ class _ShellState extends State<_Shell> {
               onSelect: _go,
             ),
             Expanded(
-              child: PageView(
-                controller: _pager,
-                onPageChanged: _onPageSettled,
-                physics: const NeverScrollableScrollPhysics(),
+              child: IndexedStack(
+                index: _index,
                 children: [for (final tab in _tabs) _KeepAlive(child: tab)],
               ),
             ),
@@ -313,82 +330,75 @@ class _NeoNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    return RepaintBoundary(
-      child: Container(
-        width: 84,
-        decoration: BoxDecoration(
-          color: jc.surface,
-          border: Border(right: BorderSide(color: jc.ink, width: 3)),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            const horizontal = 6.0;
-            const top = 14.0;
-            const brandSize = 46.0;
-            const brandGap = 14.0;
-            const itemHeight = 62.0;
-            const itemGap = 8.0;
-            final itemTop = top + brandSize + brandGap;
-            final contentHeight = itemTop +
-                destinations.length * itemHeight +
-                (destinations.length - 1) * itemGap +
-                14;
-            return SingleChildScrollView(
-              padding:
-                  const EdgeInsets.fromLTRB(horizontal, top, horizontal, 14),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 28,
-                  minWidth: constraints.maxWidth - horizontal * 2,
-                ),
-                child: SizedBox(
-                  height: contentHeight > constraints.maxHeight - 28
-                      ? contentHeight
-                      : constraints.maxHeight - 28,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      AnimatedPositioned(
-                        duration: Motion.timed(
-                          context,
-                          const Duration(milliseconds: 260),
-                        ),
-                        curve: Motion.outStrong,
-                        left: 0,
-                        right: 0,
-                        top: itemTop + index * (itemHeight + itemGap),
-                        height: itemHeight,
-                        child: const IgnorePointer(
-                          child: _RailSelectionPill(),
+    return Container(
+      width: 76,
+      decoration: BoxDecoration(
+        color: jc.surface,
+        border: Border(right: BorderSide(color: jc.ink, width: 3)),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const horizontal = 7.0;
+          const top = 14.0;
+          const brandSize = 46.0;
+          const brandGap = 12.0;
+          const itemHeight = 56.0;
+          const itemGap = 6.0;
+          const itemTop = brandSize + brandGap;
+          final contentHeight = itemTop +
+              destinations.length * itemHeight +
+              (destinations.length - 1) * itemGap +
+              14;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(horizontal, top, horizontal, 14),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 28,
+                minWidth: constraints.maxWidth - horizontal * 2,
+              ),
+              child: SizedBox(
+                height: contentHeight > constraints.maxHeight - 28
+                    ? contentHeight
+                    : constraints.maxHeight - 28,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: _RailSlidingSelection(
+                          index: index,
+                          top: itemTop,
+                          itemHeight: itemHeight,
+                          slotHeight: itemHeight + itemGap,
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const _RailBrand(),
-                          const SizedBox(height: brandGap),
-                          for (var i = 0; i < destinations.length; i++) ...[
-                            if (i > 0) const SizedBox(height: itemGap),
-                            SizedBox(
-                              height: itemHeight,
-                              child: _NeoNavButton(
-                                destination: destinations[i],
-                                selected: index == i,
-                                showSelection: false,
-                                due: i == _ShellState._reviewIndex ? due : 0,
-                                onTap: () => onSelect(i),
-                              ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const _RailBrand(),
+                        const SizedBox(height: brandGap),
+                        for (var i = 0; i < destinations.length; i++) ...[
+                          if (i > 0) const SizedBox(height: itemGap),
+                          SizedBox(
+                            height: itemHeight,
+                            child: _NeoNavButton(
+                              destination: destinations[i],
+                              selected: index == i,
+                              showSelection: false,
+                              due: i == _ShellState._reviewIndex ? due : 0,
+                              onTap: () => onSelect(i),
                             ),
-                          ],
+                          ),
                         ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -402,7 +412,7 @@ class _RailBrand extends StatelessWidget {
       const Center(child: JibikiBrandMark(size: 46));
 }
 
-class _NeoNavButton extends StatelessWidget {
+class _NeoNavButton extends StatefulWidget {
   const _NeoNavButton({
     required this.destination,
     required this.selected,
@@ -418,12 +428,19 @@ class _NeoNavButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_NeoNavButton> createState() => _NeoNavButtonState();
+}
+
+class _NeoNavButtonState extends State<_NeoNavButton> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final label = destination.label(context);
+    final label = widget.destination.label(context);
     final icon = _NavIcon(
-      kind: destination.kind,
-      due: due,
+      kind: widget.destination.kind,
+      due: widget.due,
     );
     final labelWidget = Text(
       label,
@@ -434,46 +451,55 @@ class _NeoNavButton extends StatelessWidget {
         color: jc.ink,
         fontSize: 10.5,
         height: 1,
-        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+        fontWeight: widget.selected ? FontWeight.w900 : FontWeight.w700,
       ),
     );
 
-    return Pressable.builder(
-      label: label,
-      selected: selected,
-      focusRadius: 10,
-      onTap: onTap,
-      builder: (context, pressed) => AnimatedScale(
-        duration: Motion.timed(context, const Duration(milliseconds: 120)),
-        curve: Curves.easeOut,
-        scale: selected ? 1.04 : 1,
-        child: AnimatedContainer(
-          duration: Motion.timed(context, const Duration(milliseconds: 120)),
-          curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-          decoration: BoxDecoration(
-            color: selected && showSelection ? jc.acid : Colors.transparent,
-            border: selected && showSelection
-                ? Border.all(color: jc.ink, width: 2.5)
-                : null,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: selected && showSelection && !pressed
-                ? [
-                    BoxShadow(
-                      color: jc.ink,
-                      blurRadius: 0,
-                      offset: const Offset(3, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              icon,
-              const SizedBox(height: 3),
-              FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
-            ],
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Pressable.builder(
+        label: label,
+        selected: widget.selected,
+        focusRadius: 10,
+        onTap: widget.onTap,
+        builder: (context, pressed) => Transform.scale(
+          scale: widget.selected
+              ? 1.08
+              : _hovered
+                  ? 1.055
+                  : 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+            decoration: BoxDecoration(
+              color: widget.selected && widget.showSelection
+                  ? jc.acid
+                  : _hovered
+                      ? jc.acid.withValues(alpha: .2)
+                      : Colors.transparent,
+              border: widget.selected && widget.showSelection
+                  ? Border.all(color: jc.ink, width: 2.5)
+                  : null,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: widget.selected && widget.showSelection && !pressed
+                  ? [
+                      BoxShadow(
+                        color: jc.ink,
+                        blurRadius: 0,
+                        offset: const Offset(3, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                const SizedBox(height: 3),
+                FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
+              ],
+            ),
           ),
         ),
       ),
@@ -501,24 +527,124 @@ class _NavSelectionPill extends StatelessWidget {
       );
 }
 
-class _RailSelectionPill extends StatelessWidget {
-  const _RailSelectionPill();
+class _RailSlidingSelection extends StatefulWidget {
+  const _RailSlidingSelection({
+    required this.index,
+    required this.top,
+    required this.itemHeight,
+    required this.slotHeight,
+  });
+
+  final int index;
+  final double top;
+  final double itemHeight;
+  final double slotHeight;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.jc.acid,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: context.jc.ink, width: 2.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black,
-              blurRadius: 0,
-              offset: Offset(3, 3),
-            ),
-          ],
+  State<_RailSlidingSelection> createState() => _RailSlidingSelectionState();
+}
+
+class _RailSlidingSelectionState extends State<_RailSlidingSelection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+  late Animation<double> _position =
+      AlwaysStoppedAnimation(widget.index.toDouble());
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller.duration =
+        Motion.timed(context, const Duration(milliseconds: 280));
+  }
+
+  @override
+  void didUpdateWidget(covariant _RailSlidingSelection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.index == oldWidget.index) return;
+    final from = _position.value;
+    if (kIsWeb) {
+      _controller.stop();
+      _position = AlwaysStoppedAnimation(widget.index.toDouble());
+      return;
+    }
+    if (!Motion.enabled(context)) {
+      _controller.stop();
+      _position = AlwaysStoppedAnimation(widget.index.toDouble());
+      return;
+    }
+    _position = Tween<double>(
+      begin: from,
+      end: widget.index.toDouble(),
+    ).animate(CurvedAnimation(parent: _controller, curve: Motion.outStrong));
+    _controller.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+        painter: _RailSelectionPainter(
+          position: _position,
+          top: widget.top,
+          itemHeight: widget.itemHeight,
+          slotHeight: widget.slotHeight,
+          ink: context.jc.ink,
+          acid: context.jc.acid,
         ),
       );
+}
+
+class _RailSelectionPainter extends CustomPainter {
+  _RailSelectionPainter({
+    required this.position,
+    required this.top,
+    required this.itemHeight,
+    required this.slotHeight,
+    required this.ink,
+    required this.acid,
+  }) : super(repaint: position);
+
+  final Animation<double> position;
+  final double top;
+  final double itemHeight;
+  final double slotHeight;
+  final Color ink;
+  final Color acid;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = top + position.value * slotHeight;
+    final rect = Rect.fromLTWH(0, y, size.width, itemHeight);
+    final radius = const Radius.circular(10);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.shift(const Offset(3, 3)), radius),
+      Paint()..color = ink,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, radius),
+      Paint()..color = acid,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.deflate(1.25), radius),
+      Paint()
+        ..color = ink
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RailSelectionPainter oldDelegate) =>
+      oldDelegate.top != top ||
+      oldDelegate.itemHeight != itemHeight ||
+      oldDelegate.slotHeight != slotHeight ||
+      oldDelegate.ink != ink ||
+      oldDelegate.acid != acid ||
+      oldDelegate.position != position;
 }
 
 class _NavIcon extends StatelessWidget {

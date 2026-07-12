@@ -6,6 +6,7 @@ import '../../core/breakpoints.dart';
 import '../../core/languages.dart';
 import '../../infrastructure/packs/pack_manager.dart';
 import '../../models/enums.dart';
+import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
@@ -24,6 +25,7 @@ class OnboardingView extends StatelessWidget {
           ctx.read<AppState>(),
           ctx.read<PackManager?>(),
           ctx.read<StudyRepository>(),
+          ctx.read<DictionaryRepository>(),
         ),
         child: const _Onboarding(),
       );
@@ -153,13 +155,15 @@ class _ProfileStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        _ResponsiveWrap(
+        _EqualHeightGrid(
+          itemExtent: 204,
           itemCount: AppMode.values.length,
           itemBuilder: (index) {
             final mode = AppMode.values[index];
             return _ModeCard(
               mode: mode,
               selected: vm.mode == mode,
+              enabled: !vm.isLoading,
               onTap: () => vm.selectMode(mode),
             );
           },
@@ -193,18 +197,22 @@ class _ProfileStep extends StatelessWidget {
                     _SelectionTag(
                       label: language.nativeName,
                       selected: vm.language == language.code,
-                      onTap: () => vm.selectLanguage(language.code),
+                      onTap: vm.isLoading
+                          ? null
+                          : () => vm.selectLanguage(language.code),
                     ),
                   _SelectionTag(
                     label: context.trText('More…'),
                     icon: Icons.language_rounded,
-                    onTap: () async {
-                      final picked = await showMnemonicLanguagePicker(
-                        context,
-                        vm.language,
-                      );
-                      if (picked != null) vm.selectLanguage(picked);
-                    },
+                    onTap: vm.isLoading
+                        ? null
+                        : () async {
+                            final picked = await showMnemonicLanguagePicker(
+                              context,
+                              vm.language,
+                            );
+                            if (picked != null) vm.selectLanguage(picked);
+                          },
                   ),
                 ],
               ),
@@ -235,13 +243,80 @@ class _PlacementStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<OnboardingViewModel>();
-    const options = [
-      ('fresh', 'Start fresh', 'Everything begins in the new queue.'),
-      ('kana', 'I know hiragana', 'Mark the basic hiragana as known.'),
+    const startingOptions = [
       (
-        'custom',
-        'I know specific characters',
-        'Paste kana or kanji you already read.',
+        value: OnboardingPlacement.fresh,
+        badge: 'NEW',
+        title: 'Start fresh',
+        subtitle: 'Everything begins in the new queue.',
+        icon: Icons.auto_awesome_rounded,
+      ),
+      (
+        value: OnboardingPlacement.specific,
+        badge: 'YOU',
+        title: 'I know specific characters',
+        subtitle: 'Paste kana or kanji you already read.',
+        icon: Icons.edit_note_rounded,
+      ),
+    ];
+    const kanaOptions = [
+      (
+        value: OnboardingPlacement.hiragana,
+        badge: 'あ',
+        title: 'Hiragana',
+        subtitle: 'Mark the full hiragana syllabary as known.',
+        icon: Icons.text_fields_rounded,
+      ),
+      (
+        value: OnboardingPlacement.katakana,
+        badge: 'ア',
+        title: 'Katakana',
+        subtitle: 'Mark the full katakana syllabary as known.',
+        icon: Icons.text_fields_rounded,
+      ),
+      (
+        value: OnboardingPlacement.allKana,
+        badge: 'かカ',
+        title: 'All kana',
+        subtitle: 'Hiragana and katakana, including their variants.',
+        icon: Icons.grid_view_rounded,
+      ),
+    ];
+    const jlptOptions = [
+      (
+        value: OnboardingPlacement.jlpt5,
+        badge: 'N5',
+        title: 'JLPT N5',
+        subtitle: 'Canonical kanji for this level.',
+        icon: Icons.school_outlined,
+      ),
+      (
+        value: OnboardingPlacement.jlpt4,
+        badge: 'N4',
+        title: 'JLPT N4',
+        subtitle: 'N5 plus the canonical N4 kanji.',
+        icon: Icons.school_outlined,
+      ),
+      (
+        value: OnboardingPlacement.jlpt3,
+        badge: 'N3',
+        title: 'JLPT N3',
+        subtitle: 'N5 through N3 from the canonical lists.',
+        icon: Icons.school_outlined,
+      ),
+      (
+        value: OnboardingPlacement.jlpt2,
+        badge: 'N2',
+        title: 'JLPT N2',
+        subtitle: 'N5 through N2 from the canonical lists.',
+        icon: Icons.school_outlined,
+      ),
+      (
+        value: OnboardingPlacement.jlpt1,
+        badge: 'N1',
+        title: 'JLPT N1',
+        subtitle: 'The complete canonical JLPT kanji ladder.',
+        icon: Icons.school_outlined,
       ),
     ];
     return _StepScroll(
@@ -251,34 +326,37 @@ class _PlacementStep extends StatelessWidget {
           sticker: context.trText('YOUR LEVEL'),
           title: context.trText('Where should we place you?'),
           subtitle: context.trText(
-            'Start fresh, skip what you already know, or type a few characters. You can change this later.',
+            'Choose the exact foundation you already know. You can change this later.',
           ),
-          onBack: vm.backToProfileStep,
+          showBack: true,
+          onBack: vm.isLoading ? null : vm.backToProfileStep,
         ),
         const SizedBox(height: 22),
-        _ResponsiveWrap(
-          itemCount: options.length,
-          itemBuilder: (index) {
-            final option = options[index];
-            return _PlacementCard(
-              title: context.trText(option.$2),
-              subtitle: context.trText(option.$3),
-              index: index + 1,
-              selected: vm.placement == option.$1,
-              onTap: () => vm.selectPlacement(option.$1),
-            );
-          },
+        NeoSectionTitle(context.trText('Choose a starting point')),
+        const SizedBox(height: 10),
+        _PlacementGrid(options: startingOptions, vm: vm),
+        const SizedBox(height: 22),
+        NeoSectionTitle(context.trText('Kana you already know')),
+        const SizedBox(height: 10),
+        _PlacementGrid(options: kanaOptions, vm: vm),
+        const SizedBox(height: 22),
+        NeoSectionTitle(
+          context.trText('Kanji by JLPT'),
+          trailing: const NeoBadge('N5 → N1', tone: NeoTone.lavender),
         ),
+        const SizedBox(height: 10),
+        _PlacementGrid(options: jlptOptions, vm: vm),
         AnimatedSize(
           duration: Motion.timed(context, Motion.base),
           curve: Motion.out,
-          child: vm.placement == 'custom'
+          child: vm.placement == OnboardingPlacement.specific
               ? Padding(
                   padding: const EdgeInsets.only(top: 22),
                   child: NeoCard(
                     tone: NeoTone.lavender,
                     shadow: 4,
                     child: TextField(
+                      enabled: !vm.isLoading,
                       onChanged: vm.setKnownCharacters,
                       style: const TextStyle(
                         fontFamily: 'ZenKakuGothicNew',
@@ -289,12 +367,35 @@ class _PlacementStep extends StatelessWidget {
                         labelText: context.trText('Known characters'),
                         hintText: context.trText('Example: 日本語かな'),
                         prefixIcon: const Icon(Icons.edit_outlined),
+                        suffixText: '${vm.specificCharacterCount}',
+                        helperText: context.trText(
+                          'Only kana and kanji are counted.',
+                        ),
                       ),
                     ),
                   ),
                 )
               : const SizedBox.shrink(),
         ),
+        if (vm.hasError) ...[
+          const SizedBox(height: 18),
+          NeoCard(
+            tone: NeoTone.coral,
+            shadow: 3,
+            child: Row(
+              children: [
+                const Icon(Icons.cloud_off_outlined),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    context.trText(vm.error!),
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 30),
         Row(
           children: [
@@ -302,11 +403,14 @@ class _PlacementStep extends StatelessWidget {
               Expanded(
                 child: NeoCard(
                   shadow: 3,
-                  onTap: vm.backToProfileStep,
-                  child: Center(
-                    child: Text(
-                      context.trText('Back'),
-                      style: const TextStyle(fontWeight: FontWeight.w900),
+                  onTap: vm.isLoading ? null : vm.backToProfileStep,
+                  child: Opacity(
+                    opacity: vm.isLoading ? .5 : 1,
+                    child: Center(
+                      child: Text(
+                        context.trText('Back'),
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
                     ),
                   ),
                 ),
@@ -321,13 +425,15 @@ class _PlacementStep extends StatelessWidget {
                 ),
                 icon: Icons.arrow_forward_rounded,
                 busy: vm.isLoading,
-                onTap: () async {
-                  if (vm.hasDataStep) {
-                    await vm.goToDataStep();
-                  } else {
-                    await vm.finish();
-                  }
-                },
+                onTap: vm.canContinuePlacement
+                    ? () async {
+                        if (vm.hasDataStep) {
+                          await vm.goToDataStep();
+                        } else {
+                          await vm.finish();
+                        }
+                      }
+                    : null,
               ),
             ),
           ],
@@ -335,6 +441,39 @@ class _PlacementStep extends StatelessWidget {
       ],
     );
   }
+}
+
+typedef _PlacementOption = ({
+  OnboardingPlacement value,
+  String badge,
+  String title,
+  String subtitle,
+  IconData icon,
+});
+
+class _PlacementGrid extends StatelessWidget {
+  const _PlacementGrid({required this.options, required this.vm});
+
+  final List<_PlacementOption> options;
+  final OnboardingViewModel vm;
+
+  @override
+  Widget build(BuildContext context) => _EqualHeightGrid(
+        itemCount: options.length,
+        itemExtent: 168,
+        itemBuilder: (index) {
+          final option = options[index];
+          return _PlacementCard(
+            title: context.trText(option.title),
+            subtitle: context.trText(option.subtitle),
+            badge: option.badge,
+            icon: option.icon,
+            selected: vm.placement == option.value,
+            enabled: !vm.isLoading,
+            onTap: () => vm.selectPlacement(option.value),
+          );
+        },
+      );
 }
 
 class _DataStep extends StatelessWidget {
@@ -352,7 +491,8 @@ class _DataStep extends StatelessWidget {
           subtitle: context.trText(
             'The essentials are already on your phone. Kana, JLPT kanji and everyday words work with no connection. Add more now or later in Settings.',
           ),
-          onBack: vm.backToPlacementStep,
+          showBack: true,
+          onBack: vm.isLoading ? null : vm.backToPlacementStep,
         ),
         const SizedBox(height: 22),
         if (!vm.offersLoaded)
@@ -399,7 +539,7 @@ class _DataStep extends StatelessWidget {
                       : Icons.arrow_forward_rounded,
                   busy: vm.isLoading,
                   tone: NeoTone.acid,
-                  onTap: () => vm.finish(download: true),
+                  onTap: vm.isLoading ? null : () => vm.finish(download: true),
                 ),
                 const SizedBox(height: 10),
                 TextButton(
@@ -408,6 +548,18 @@ class _DataStep extends StatelessWidget {
                     context.trText('Skip - download later in Settings'),
                   ),
                 ),
+                if (vm.hasError) ...[
+                  const SizedBox(height: 10),
+                  NeoCard(
+                    tone: NeoTone.coral,
+                    shadow: 2,
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      context.trText(vm.error!),
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -441,23 +593,25 @@ class _StepIntro extends StatelessWidget {
     required this.sticker,
     required this.title,
     required this.subtitle,
+    this.showBack = false,
     this.onBack,
   });
 
   final String sticker;
   final String title;
   final String subtitle;
+  final bool showBack;
   final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (onBack != null) ...[
+          if (showBack) ...[
             NeoIconButton(
               icon: Icons.arrow_back_rounded,
               label: context.trText('Back'),
-              onTap: onBack!,
+              onTap: onBack,
             ),
             const SizedBox(width: 16),
           ],
@@ -492,6 +646,41 @@ class _StepIntro extends StatelessWidget {
       );
 }
 
+class _EqualHeightGrid extends StatelessWidget {
+  const _EqualHeightGrid({
+    required this.itemCount,
+    required this.itemExtent,
+    required this.itemBuilder,
+  });
+
+  final int itemCount;
+  final double itemExtent;
+  final Widget Function(int index) itemBuilder;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = constraints.maxWidth >= 760
+              ? 3
+              : constraints.maxWidth >= 520
+                  ? 2
+                  : 1;
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: itemCount,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisExtent: itemExtent,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+            ),
+            itemBuilder: (_, index) => itemBuilder(index),
+          );
+        },
+      );
+}
+
 class _ResponsiveWrap extends StatelessWidget {
   const _ResponsiveWrap({required this.itemCount, required this.itemBuilder});
 
@@ -519,23 +708,23 @@ class _ModeCard extends StatelessWidget {
   const _ModeCard({
     required this.mode,
     required this.selected,
+    required this.enabled,
     required this.onTap,
   });
 
   final AppMode mode;
   final bool selected;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: context.isWide ? 178 : 0,
-        ),
+  Widget build(BuildContext context) => Opacity(
+        opacity: enabled ? 1 : .5,
         child: NeoCard(
           tone: selected ? NeoTone.acid : NeoTone.paper,
           shadow: selected ? 6 : 4,
           padding: const EdgeInsets.all(17),
-          onTap: onTap,
+          onTap: enabled ? onTap : null,
           semanticLabel: mode.label,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -573,6 +762,8 @@ class _ModeCard extends StatelessWidget {
               const SizedBox(height: 5),
               Text(
                 mode.blurb,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: context.jc.body,
                   fontSize: 13,
@@ -590,51 +781,66 @@ class _PlacementCard extends StatelessWidget {
   const _PlacementCard({
     required this.title,
     required this.subtitle,
-    required this.index,
+    required this.badge,
+    required this.icon,
     required this.selected,
+    required this.enabled,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
-  final int index;
+  final String badge;
+  final IconData icon;
   final bool selected;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: context.isWide ? 156 : 0,
-        ),
+  Widget build(BuildContext context) => Opacity(
+        opacity: enabled ? 1 : .5,
         child: NeoCard(
           tone: selected ? NeoTone.acid : NeoTone.paper,
           shadow: selected ? 6 : 4,
-          onTap: onTap,
+          onTap: enabled ? onTap : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  NeoBadge('0$index',
-                      tone: selected ? NeoTone.ink : NeoTone.lavender),
+                  NeoBadge(
+                    badge,
+                    tone: selected ? NeoTone.ink : NeoTone.lavender,
+                  ),
                   const Spacer(),
-                  Icon(
-                    selected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_off_rounded,
-                    size: 24,
+                  Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(icon, size: 25),
+                      if (selected)
+                        const Positioned(
+                          right: -2,
+                          bottom: -3,
+                          child: Icon(Icons.check_circle_rounded, size: 14),
+                        ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(height: 15),
               Text(
                 title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style:
                     const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
               ),
               const SizedBox(height: 5),
               Text(
                 subtitle,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: context.jc.body,
                   fontSize: 13,
@@ -657,26 +863,29 @@ class _SelectionTag extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool selected;
   final IconData? icon;
 
   @override
-  Widget build(BuildContext context) => NeoCard(
-        tone: selected ? NeoTone.acid : NeoTone.paper,
-        shadow: selected ? 3 : 0,
-        radius: 8,
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-        onTap: onTap,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 17),
-              const SizedBox(width: 6),
+  Widget build(BuildContext context) => Opacity(
+        opacity: onTap == null ? .5 : 1,
+        child: NeoCard(
+          tone: selected ? NeoTone.acid : NeoTone.paper,
+          shadow: selected ? 3 : 0,
+          radius: 8,
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+          onTap: onTap,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 17),
+                const SizedBox(width: 6),
+              ],
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
             ],
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
-          ],
+          ),
         ),
       );
 }
@@ -687,59 +896,63 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.read<OnboardingViewModel>();
+    final vm = context.watch<OnboardingViewModel>();
     final size = offer.info == null
         ? null
         : StorageViewModel.humanSize(offer.info!.bytes);
-    return NeoCard(
-      tone: offer.selected ? NeoTone.lavender : NeoTone.paper,
-      shadow: offer.selected ? 6 : 4,
-      onTap: () => vm.toggleOffer(offer, !offer.selected),
-      semanticLabel: offer.title,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: offer.selected ? context.jc.acid : context.jc.canvas,
-                  border: Border.all(color: context.jc.ink, width: 2.5),
-                  borderRadius: BorderRadius.circular(9),
+    return Opacity(
+      opacity: vm.isLoading ? .5 : 1,
+      child: NeoCard(
+        tone: offer.selected ? NeoTone.lavender : NeoTone.paper,
+        shadow: offer.selected ? 6 : 4,
+        onTap:
+            vm.isLoading ? null : () => vm.toggleOffer(offer, !offer.selected),
+        semanticLabel: offer.title,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: offer.selected ? context.jc.acid : context.jc.canvas,
+                    border: Border.all(color: context.jc.ink, width: 2.5),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: const Icon(Icons.download_for_offline_outlined),
                 ),
-                child: const Icon(Icons.download_for_offline_outlined),
-              ),
-              const Spacer(),
-              Icon(
-                offer.selected
-                    ? Icons.check_box_rounded
-                    : Icons.check_box_outline_blank_rounded,
-                size: 27,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            offer.title,
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-          ),
-          if (size != null) ...[
-            const SizedBox(height: 5),
-            NeoBadge(size, tone: NeoTone.lime),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            offer.blurb,
-            style: TextStyle(
-              color: context.jc.body,
-              fontSize: 13,
-              height: 1.35,
-              fontWeight: FontWeight.w600,
+                const Spacer(),
+                Icon(
+                  offer.selected
+                      ? Icons.check_box_rounded
+                      : Icons.check_box_outline_blank_rounded,
+                  size: 27,
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Text(
+              offer.title,
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+            ),
+            if (size != null) ...[
+              const SizedBox(height: 5),
+              NeoBadge(size, tone: NeoTone.lime),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              offer.blurb,
+              style: TextStyle(
+                color: context.jc.body,
+                fontSize: 13,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

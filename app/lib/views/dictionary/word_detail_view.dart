@@ -31,7 +31,8 @@ class WordDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (ctx) => WordDetailViewModel(
-          ctx.read<DictionaryRepository>(), ctx.read<StudyRepository>(), wordId)
+          ctx.read<DictionaryRepository>(), ctx.read<StudyRepository>(), wordId,
+          loadStudyState: ctx.read<AppState>().isAuthenticated)
         ..load(),
       child: const _WordDetail(embedded: false),
     );
@@ -50,6 +51,7 @@ class WordDetailPane extends StatelessWidget {
           ctx.read<DictionaryRepository>(),
           ctx.read<StudyRepository>(),
           wordId,
+          loadStudyState: ctx.read<AppState>().isAuthenticated,
         )..load(),
         child: const _WordDetail(embedded: true),
       );

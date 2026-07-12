@@ -99,6 +99,7 @@ GoRouter buildRouter(AppState app) {
         path: '/decks/community',
         builder: (_, s) => CommunityDecksView(
           initialTab: s.uri.queryParameters['tab'] == 'mine' ? 1 : 0,
+          showBack: true,
         ),
       ),
       GoRoute(

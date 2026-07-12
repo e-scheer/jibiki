@@ -20,7 +20,6 @@ import '../widgets/neo_pop.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/origin_section.dart';
 import '../widgets/pressable.dart';
-import '../widgets/speech_button.dart';
 import '../widgets/study_mark.dart';
 import '../widgets/stroke_order_view.dart';
 import 'kana_cell.dart';
@@ -52,10 +51,12 @@ class KanaDetailPane extends StatelessWidget {
   const KanaDetailPane({
     super.key,
     required this.char,
+    this.showBoth = false,
     this.onSelectKana,
   });
 
   final String char;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -72,6 +73,7 @@ class KanaDetailPane extends StatelessWidget {
       child: _KanaDetail(
         char: char,
         embedded: true,
+        showBoth: showBoth,
         onSelectKana: onSelectKana,
       ),
     );
@@ -91,11 +93,13 @@ class _KanaDetail extends StatefulWidget {
   const _KanaDetail({
     required this.char,
     this.embedded = false,
+    this.showBoth = false,
     this.onSelectKana,
   });
 
   final String char;
   final bool embedded;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -192,6 +196,7 @@ class _KanaDetailState extends State<_KanaDetail> {
             data: data,
             added: mnemonic.added,
             onAdd: () => _addToStudy(context, mnemonic),
+            showBoth: widget.showBoth,
             onSelectKana: widget.onSelectKana,
           );
         },
@@ -257,12 +262,14 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
     required this.data,
     required this.added,
     required this.onAdd,
+    required this.showBoth,
     required this.onSelectKana,
   });
 
   final _KanaDetailData data;
   final bool added;
   final VoidCallback onAdd;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -276,6 +283,7 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
             children: [
               _TabletKanaHero(
                 data: data,
+                showBoth: showBoth,
                 onSelectKana: onSelectKana,
               ),
               const SizedBox(height: 14),
@@ -293,15 +301,14 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
             children: [
               Expanded(
                 child: NeoPrimaryButton(
-                  label:
-                      _copy(context, 'Practise writing', 'Pratiquer le tracé'),
+                  label: _copy(context, 'Free practice', 'Pratique libre'),
                   icon: Icons.gesture_rounded,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => _KanaWritingPracticePage(
                         kana: data.focused,
                         stroke: data.stroke,
-                        startWithGuide: false,
+                        mode: _KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -325,70 +332,106 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
 }
 
 class _TabletKanaHero extends StatelessWidget {
-  const _TabletKanaHero({required this.data, this.onSelectKana});
+  const _TabletKanaHero({
+    required this.data,
+    required this.showBoth,
+    this.onSelectKana,
+  });
 
   final _KanaDetailData data;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
   Widget build(BuildContext context) {
     final kana = data.focused;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      decoration: BoxDecoration(
-        color: context.jc.lime,
-        border: Border.all(color: context.jc.ink, width: 3),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: context.jc.ink,
-            blurRadius: 0,
-            offset: const Offset(6, 6),
-          ),
-        ],
-      ),
+    final pair = showBoth && data.counterpart != null
+        ? [kana, data.counterpart!]
+        : [kana];
+    return NeoCard(
+      tone: NeoTone.lime,
+      shadow: 2,
+      radius: 14,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Row(
         children: [
-          SizedBox(
-            width: 96,
-            child: Text(
-              kana.char,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'ZenKakuGothicNew',
-                fontSize: 78,
-                height: 1,
-                fontWeight: FontWeight.w900,
+          for (var index = 0; index < pair.length; index++) ...[
+            if (index > 0) const SizedBox(width: 7),
+            Pressable(
+              label: _copy(
+                context,
+                'Play ${pair[index].script} ${pair[index].romaji}',
+                'Écouter ${pair[index].script} ${pair[index].romaji}',
+              ),
+              onTap: () => Speech.instance.say(pair[index].char),
+              child: Container(
+                width: pair.length == 2 ? 68 : 82,
+                height: 86,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: context.jc.surface,
+                  border: Border.all(color: context.jc.ink, width: 2.5),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      pair[index].char,
+                      style: TextStyle(
+                        fontFamily: 'ZenKakuGothicNew',
+                        fontSize: pair.length == 2 ? 45 : 56,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      pair[index].isHiragana ? 'HIRA' : 'KATA',
+                      style: const TextStyle(
+                        fontSize: 8.5,
+                        letterSpacing: .7,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 18),
+          ],
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                NeoCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  radius: 10,
-                  shadow: 3,
-                  onTap: () => Speech.instance.say(kana.char),
-                  semanticLabel: _copy(
+                Pressable(
+                  label: _copy(
                     context,
                     'Play ${kana.romaji}',
                     'Écouter ${kana.romaji}',
                   ),
-                  child: SizedBox(
-                    height: 40,
+                  onTap: () => Speech.instance.say(kana.char),
+                  child: Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: context.jc.ink,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.volume_up_rounded, size: 18),
-                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.volume_up_rounded,
+                          size: 17,
+                          color: context.jc.surface,
+                        ),
+                        const SizedBox(width: 7),
                         Text(
                           kana.romaji,
-                          style: const TextStyle(
+                          style: TextStyle(
+                            color: context.jc.surface,
                             fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
@@ -413,7 +456,7 @@ class _TabletKanaHero extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (data.counterpart != null) ...[
+                if (!showBoth && data.counterpart != null) ...[
                   const SizedBox(height: 10),
                   _KanaScriptSwitcher(
                     data: data,
@@ -654,67 +697,83 @@ class _KanaHero extends StatelessWidget {
     final kana = data.focused;
     return NeoCard(
       tone: NeoTone.lime,
-      shadow: 6,
+      shadow: 2,
       radius: 14,
-      padding: const EdgeInsets.fromLTRB(14, 7, 14, 10),
-      child: Column(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            kana.char,
-            style: const TextStyle(
-              fontFamily: 'ZenKakuGothicNew',
-              fontSize: 84,
-              height: 1.02,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
           Container(
-            constraints: const BoxConstraints(minHeight: 40),
+            width: 78,
+            height: 86,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.jc.surface,
               border: Border.all(color: context.jc.ink, width: 2.5),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: context.jc.ink,
-                  blurRadius: 0,
-                  offset: const Offset(3, 3),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(11),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Text(
+              kana.char,
+              style: const TextStyle(
+                fontFamily: 'ZenKakuGothicNew',
+                fontSize: 58,
+                height: 1,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SpeechButton(text: kana.char, size: 18, color: context.jc.ink),
-                Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: Text(
-                    kana.romaji,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
+                Pressable(
+                  label: _copy(
+                    context,
+                    'Play ${kana.romaji}',
+                    'Écouter ${kana.romaji}',
+                  ),
+                  onTap: () => Speech.instance.say(kana.char),
+                  child: Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 11),
+                    decoration: BoxDecoration(
+                      color: context.jc.ink,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.volume_up_rounded,
+                          size: 18,
+                          color: context.jc.surface,
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          kana.romaji,
+                          style: TextStyle(
+                            color: context.jc.surface,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 9),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    _Tag(label: _kindLabel(context, kana.kind, kana.row)),
+                    if (data.counterpart != null)
+                      _TwinTag(kana: data.counterpart!),
+                  ],
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 11),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 7,
-            children: [
-              _Tag(label: _kindLabel(context, kana.kind, kana.row)),
-              _Tag(
-                label: _copy(
-                  context,
-                  '${kana.row.toUpperCase()} row',
-                  'Rangée ${kana.row.toUpperCase()}',
-                ),
-              ),
-              if (data.counterpart != null) _TwinTag(kana: data.counterpart!),
-            ],
           ),
         ],
       ),
@@ -807,7 +866,7 @@ class _WritingGuide extends StatelessWidget {
                         builder: (_) => _KanaWritingPracticePage(
                           kana: kana,
                           stroke: stroke,
-                          startWithGuide: true,
+                          mode: _KanaWritingMode.guided,
                         ),
                       ),
                     ),
@@ -817,7 +876,11 @@ class _WritingGuide extends StatelessWidget {
                         const Icon(Icons.gesture_rounded, size: 17),
                         const SizedBox(width: 6),
                         Text(
-                          _copy(context, 'Trace it', 'À tracer'),
+                          _copy(
+                            context,
+                            'Guided tracing',
+                            'Tracé guidé',
+                          ),
                           style: const TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ],
@@ -830,12 +893,16 @@ class _WritingGuide extends StatelessWidget {
                       tone: NeoTone.paper,
                       shadow: 2,
                       radius: 9,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => _KanaWritingPracticePage(
                             kana: kana,
                             stroke: stroke,
-                            startWithGuide: false,
+                            mode: _KanaWritingMode.free,
                           ),
                         ),
                       ),
@@ -845,7 +912,11 @@ class _WritingGuide extends StatelessWidget {
                           const Icon(Icons.edit_rounded, size: 16),
                           const SizedBox(width: 6),
                           Text(
-                            _copy(context, 'Practice writing', 'Pratiquer'),
+                            _copy(
+                              context,
+                              'Free practice',
+                              'Pratique libre',
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
@@ -859,8 +930,8 @@ class _WritingGuide extends StatelessWidget {
                   Text(
                     _copy(
                       context,
-                      'Keep the shape centred and use the guide as your frame.',
-                      'Gardez la forme centrée et utilisez le quadrillage comme repère.',
+                      'Guided tracing overlays the model and replays stroke order.',
+                      'Le tracé guidé superpose le modèle et rejoue l’ordre des traits.',
                     ),
                     style: const TextStyle(
                       fontSize: 12.5,
@@ -872,8 +943,8 @@ class _WritingGuide extends StatelessWidget {
                   Text(
                     _copy(
                       context,
-                      'Practise slowly first, then write from memory.',
-                      'Tracez lentement, puis recommencez de mémoire.',
+                      'Free practice starts blank; reveal the guide only when needed.',
+                      'La pratique libre commence à blanc ; affichez le guide si besoin.',
                     ),
                     style: const TextStyle(
                       fontSize: 12.5,
@@ -1228,7 +1299,6 @@ class _Tag extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 31),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: context.jc.surface,
         border: Border.all(color: context.jc.ink, width: 2.5),
@@ -1271,15 +1341,14 @@ class _DetailActions extends StatelessWidget {
             children: [
               Expanded(
                 child: NeoPrimaryButton(
-                  label:
-                      _copy(context, 'Practise writing', 'Pratiquer le tracé'),
+                  label: _copy(context, 'Free practice', 'Pratique libre'),
                   icon: Icons.gesture_rounded,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => _KanaWritingPracticePage(
                         kana: kana,
                         stroke: stroke,
-                        startWithGuide: false,
+                        mode: _KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -1302,16 +1371,18 @@ class _DetailActions extends StatelessWidget {
   }
 }
 
+enum _KanaWritingMode { guided, free }
+
 class _KanaWritingPracticePage extends StatefulWidget {
   const _KanaWritingPracticePage({
     required this.kana,
+    required this.mode,
     this.stroke,
-    this.startWithGuide = true,
   });
 
   final KanaEntry kana;
   final KanaStrokeData? stroke;
-  final bool startWithGuide;
+  final _KanaWritingMode mode;
 
   @override
   State<_KanaWritingPracticePage> createState() =>
@@ -1320,7 +1391,7 @@ class _KanaWritingPracticePage extends StatefulWidget {
 
 class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
   final DrawingController _controller = DrawingController();
-  late bool _showGuide = widget.startWithGuide;
+  late bool _showGuide = widget.mode == _KanaWritingMode.guided;
 
   @override
   void dispose() {
@@ -1331,6 +1402,7 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
   @override
   Widget build(BuildContext context) {
     final kana = widget.kana;
+    final guided = widget.mode == _KanaWritingMode.guided;
     return Scaffold(
       backgroundColor: context.jc.lavender,
       body: SafeArea(
@@ -1348,7 +1420,17 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _copy(context, 'Writing', 'Tracé'),
+                            guided
+                                ? _copy(
+                                    context,
+                                    'Guided tracing',
+                                    'Tracé guidé',
+                                  )
+                                : _copy(
+                                    context,
+                                    'Free practice',
+                                    'Pratique libre',
+                                  ),
                             style: const TextStyle(
                               fontSize: 28,
                               height: 1,
@@ -1357,11 +1439,17 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _copy(
-                              context,
-                              'Trace slowly, then hide the guide.',
-                              'Tracez lentement, puis masquez le guide.',
-                            ),
+                            guided
+                                ? _copy(
+                                    context,
+                                    'Follow the model and stroke order, then try once without it.',
+                                    'Suivez le modèle et l’ordre des traits, puis essayez sans aide.',
+                                  )
+                                : _copy(
+                                    context,
+                                    'Write from memory on a blank canvas. Reveal the guide if you get stuck.',
+                                    'Écrivez de mémoire sur une toile blanche. Affichez le guide en cas de doute.',
+                                  ),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -1379,8 +1467,8 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                 ),
                 const SizedBox(height: 16),
                 NeoCard(
-                  tone: NeoTone.acid,
-                  shadow: 4,
+                  tone: guided ? NeoTone.magenta : NeoTone.acid,
+                  shadow: 3,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -1421,7 +1509,8 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                if (widget.stroke != null &&
+                if (guided &&
+                    widget.stroke != null &&
                     widget.stroke!.paths.isNotEmpty) ...[
                   SizedBox(
                     height: 190,

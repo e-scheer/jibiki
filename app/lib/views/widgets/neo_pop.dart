@@ -450,6 +450,7 @@ class NeoSegmentedControl<T> extends StatelessWidget {
     required this.onChanged,
     this.enabled = true,
     this.height = 56,
+    this.selectionColor,
   });
 
   final List<NeoSegment<T>> segments;
@@ -457,6 +458,7 @@ class NeoSegmentedControl<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final bool enabled;
   final double height;
+  final Color? selectionColor;
 
   @override
   Widget build(BuildContext context) {
@@ -486,36 +488,30 @@ class NeoSegmentedControl<T> extends StatelessWidget {
                 (segment) => segment.value == selected,
               );
               final count = segments.length.clamp(1, 12);
+              final hasSelection = selectedIndex >= 0;
               final alignment = count == 1
                   ? 0.0
                   : -1.0 +
                       (selectedIndex.clamp(0, count - 1) * 2 / (count - 1));
               return Stack(
                 children: [
-                  AnimatedAlign(
-                    duration: Motion.timed(
-                      context,
-                      const Duration(milliseconds: 230),
-                    ),
-                    curve: Motion.outStrong,
-                    alignment: Alignment(alignment, 0),
-                    child: FractionallySizedBox(
-                      widthFactor: 1 / count,
-                      heightFactor: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 1),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: jc.acid,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: jc.ink, width: 2.5),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black,
-                                blurRadius: 0,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
+                  AnimatedOpacity(
+                    duration: Motion.timed(context, Motion.fast),
+                    opacity: hasSelection ? 1 : 0,
+                    child: AnimatedAlign(
+                      duration: Motion.timed(
+                        context,
+                        const Duration(milliseconds: 230),
+                      ),
+                      curve: Motion.outStrong,
+                      alignment: Alignment(alignment, 0),
+                      child: FractionallySizedBox(
+                        widthFactor: 1 / count,
+                        heightFactor: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1),
+                          child: _SlidingSelectionPill(
+                            color: selectionColor ?? jc.acid,
                           ),
                         ),
                       ),
@@ -543,6 +539,39 @@ class NeoSegmentedControl<T> extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SlidingSelectionPill extends StatelessWidget {
+  const _SlidingSelectionPill({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: Transform.translate(
+              offset: const Offset(2, 2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.jc.ink,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: context.jc.ink, width: 2.5),
+              ),
+            ),
+          ),
+        ],
+      );
 }
 
 class _NeoSegmentButton<T> extends StatelessWidget {

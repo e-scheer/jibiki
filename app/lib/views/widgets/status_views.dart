@@ -2,17 +2,37 @@ import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../core/api_exception.dart';
 import '../auth/auth_required_sheet.dart';
-import 'jibiki_brand.dart';
 import 'neo_pop.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override
-  Widget build(BuildContext context) => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: NeoChaseLoader(),
+  Widget build(BuildContext context) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: const Padding(
+            padding: EdgeInsets.all(22),
+            child: SkeletonPulse(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Skeleton(width: 154, height: 22, radius: 8),
+                  SizedBox(height: 15),
+                  Skeleton(height: 72, radius: 12),
+                  SizedBox(height: 10),
+                  Skeleton(height: 72, radius: 12),
+                  SizedBox(height: 10),
+                  FractionallySizedBox(
+                    widthFactor: .72,
+                    child: Skeleton(height: 18, radius: 8),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       );
 }
@@ -25,9 +45,19 @@ class ErrorRetry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final normalized = message.toLowerCase();
-    final authError = normalized.contains('authentication') ||
+    final authError = message == authRequiredErrorMessage ||
+        normalized.contains('authentication') ||
         normalized.contains('credentials') ||
         normalized.contains('sign in');
+    if (authError) {
+      return AuthRequiredPanel(
+        title: context.trText('Your session needs attention'),
+        description: context.trText(
+          'Sign in again without losing this screen or the work already on it.',
+        ),
+        icon: Icons.lock_reset_rounded,
+      );
+    }
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -53,20 +83,11 @@ class ErrorRetry extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  authError
-                      ? context.trText('Sign in to continue here.')
-                      : message,
+                  message,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                if (authError) ...[
-                  const SizedBox(height: 18),
-                  NeoPrimaryButton(
-                    label: context.trText('Sign in'),
-                    icon: Icons.arrow_forward_rounded,
-                    onTap: () => showAuthRequiredSheet(context),
-                  ),
-                ] else if (onRetry != null) ...[
+                if (onRetry != null) ...[
                   const SizedBox(height: 18),
                   NeoPrimaryButton(
                     label: context.trText('Retry'),
@@ -146,7 +167,7 @@ class EmptyHint extends StatelessWidget {
 }
 
 /// A single static placeholder block (a skeleton bone). Group several inside a
-/// [_Pulse] to make them breathe; on its own it's just a rounded neutral shape.
+/// [SkeletonPulse] to make them breathe; on its own it's a rounded neutral shape.
 class Skeleton extends StatelessWidget {
   const Skeleton(
       {super.key,
@@ -179,14 +200,15 @@ class Skeleton extends StatelessWidget {
 /// Breathes its child's opacity so a cluster of [Skeleton]s reads as "loading".
 /// One controller drives the whole group; the pulse holds still under
 /// reduce-motion (the placeholder simply sits at a steady tone).
-class _Pulse extends StatefulWidget {
-  const _Pulse({required this.child});
+class SkeletonPulse extends StatefulWidget {
+  const SkeletonPulse({super.key, required this.child});
   final Widget child;
   @override
-  State<_Pulse> createState() => _PulseState();
+  State<SkeletonPulse> createState() => _SkeletonPulseState();
 }
 
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+class _SkeletonPulseState extends State<SkeletonPulse>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 900))
     ..repeat(reverse: true);
@@ -236,7 +258,7 @@ class SkeletonTileList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _Pulse(
+    return SkeletonPulse(
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 4),
         itemCount: count,
@@ -308,7 +330,7 @@ class SkeletonCardGrid extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: childAspectRatio,
           );
-    return _Pulse(
+    return SkeletonPulse(
       child: GridView.builder(
         gridDelegate: delegate,
         padding: padding,

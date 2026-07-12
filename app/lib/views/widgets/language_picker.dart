@@ -12,23 +12,36 @@ Future<String?> showMnemonicLanguagePicker(
   BuildContext context,
   String current,
 ) {
+  if (context.isWide) {
+    return showDialog<String>(
+      context: context,
+      barrierColor: context.jc.ink.withValues(alpha: 0.52),
+      builder: (ctx) => Dialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640, maxHeight: 720),
+          child: _LanguageSheet(current: current, dialog: true),
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     showDragHandle: false,
     backgroundColor: Colors.transparent,
     barrierColor: context.jc.ink.withValues(alpha: 0.52),
-    constraints: BoxConstraints(
-      maxWidth: context.isExpanded ? 640 : double.infinity,
-    ),
     builder: (ctx) => _LanguageSheet(current: current),
   );
 }
 
 class _LanguageSheet extends StatefulWidget {
-  const _LanguageSheet({required this.current});
+  const _LanguageSheet({required this.current, this.dialog = false});
 
   final String current;
+  final bool dialog;
 
   @override
   State<_LanguageSheet> createState() => _LanguageSheetState();
@@ -36,6 +49,45 @@ class _LanguageSheet extends StatefulWidget {
 
 class _LanguageSheetState extends State<_LanguageSheet> {
   String _query = '';
+  final ScrollController _scrollController = ScrollController();
+  bool _fadeTop = false;
+  bool _fadeBottom = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_syncFades);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncFades());
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_syncFades)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _syncFades() {
+    if (!_scrollController.hasClients || !mounted) return;
+    final position = _scrollController.position;
+    final top = position.pixels > 2;
+    final bottom = position.pixels < position.maxScrollExtent - 2;
+    if (top != _fadeTop || bottom != _fadeBottom) {
+      setState(() {
+        _fadeTop = top;
+        _fadeBottom = bottom;
+      });
+    }
+  }
+
+  void _setQuery(String value) {
+    setState(() => _query = value);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) _scrollController.jumpTo(0);
+      _syncFades();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,37 +110,40 @@ class _LanguageSheetState extends State<_LanguageSheet> {
       curve: Motion.out,
       padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
       child: SafeArea(
-        top: false,
+        top: widget.dialog,
         child: SizedBox(
-          height: media.size.height * 0.88,
+          height: media.size.height * (widget.dialog ? 0.82 : 0.88),
           child: Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: jc.canvas,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: widget.dialog
+                  ? BorderRadius.circular(24)
+                  : const BorderRadius.vertical(top: Radius.circular(24)),
               border: Border.all(color: jc.ink, width: 3),
             ),
             child: Column(
               children: [
-                _SheetHeader(onQueryChanged: (value) {
-                  setState(() => _query = value);
-                }),
+                _SheetHeader(
+                  showHandle: !widget.dialog,
+                  onQueryChanged: _setQuery,
+                ),
                 Expanded(
                   child: ShaderMask(
                     blendMode: BlendMode.dstIn,
-                    shaderCallback: (rect) => const LinearGradient(
+                    shaderCallback: (rect) => LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
+                        _fadeTop ? Colors.transparent : Colors.black,
                         Colors.black,
                         Colors.black,
-                        Colors.transparent,
+                        _fadeBottom ? Colors.transparent : Colors.black,
                       ],
                       stops: [0, .035, .94, 1],
                     ).createShader(rect),
                     child: ListView(
+                      controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
                       children: [
                         if (filtered == null) ...[
@@ -138,9 +193,13 @@ class _LanguageSheetState extends State<_LanguageSheet> {
 }
 
 class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.onQueryChanged});
+  const _SheetHeader({
+    required this.onQueryChanged,
+    required this.showHandle,
+  });
 
   final ValueChanged<String> onQueryChanged;
+  final bool showHandle;
 
   @override
   Widget build(BuildContext context) {
@@ -155,17 +214,19 @@ class _SheetHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            child: Container(
-              width: 48,
-              height: 5,
-              decoration: BoxDecoration(
-                color: jc.ink,
-                borderRadius: BorderRadius.circular(3),
+          if (showHandle) ...[
+            Align(
+              child: Container(
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: jc.ink,
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
           Text(
             context.trText('Mnemonic language'),
             style: context.text.headlineSmall?.copyWith(

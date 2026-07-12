@@ -141,7 +141,7 @@ class _ReportSheetState extends State<_ReportSheet> {
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomInset),
       child: NeoCard(
-        shadow: 4,
+        shadow: 0,
         radius: 18,
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
         child: authed ? _form(context) : _signInPrompt(context),

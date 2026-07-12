@@ -9,6 +9,7 @@ import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
+import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
@@ -198,24 +199,28 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
           ),
           SizedBox(
             height: 38,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _chip('All', _jlpt == null, () => _setJlpt(null),
-                    enabled: !_busy),
-                for (final n in [5, 4, 3, 2, 1])
-                  _chip('N$n', _jlpt == n, () => _setJlpt(n), enabled: !_busy),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: _chip(
-                      '部 Radical',
-                      false,
-                      () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const RadicalPickerView())),
+            child: HorizontalOverflowCue(
+              edgeColor: context.jc.canvas,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _chip('All', _jlpt == null, () => _setJlpt(null),
                       enabled: !_busy),
-                ),
-              ],
+                  for (final n in [5, 4, 3, 2, 1])
+                    _chip('N$n', _jlpt == n, () => _setJlpt(n),
+                        enabled: !_busy),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: _chip(
+                        '部 Radical',
+                        false,
+                        () => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => const RadicalPickerView())),
+                        enabled: !_busy),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 8),
