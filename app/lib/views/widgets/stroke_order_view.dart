@@ -237,37 +237,12 @@ class _StrokePainter extends CustomPainter {
     }
     c.restore();
     if (showNumbers) {
-      final numberInk = _contrastingMonochrome(numberColor);
-      final fill = Paint()
-        ..color = numberColor
-        ..style = PaintingStyle.fill;
-      final outline = Paint()
-        ..color = ink
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeNumberBadgeBorderPx;
-      for (var i = 0; i < numberCenters.length; i++) {
-        final center = numberCenters[i];
-        if (center == null) continue;
-        c.drawCircle(center, strokeNumberBadgeRadiusPx, fill);
-        c.drawCircle(center, strokeNumberBadgeRadiusPx, outline);
-        final label = '${i + 1}';
-        final painter = TextPainter(
-          text: TextSpan(
-            text: label,
-            style: TextStyle(
-              color: numberInk,
-              fontSize: label.length > 1 ? 7.5 : 9,
-              height: 1,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        painter.paint(
-          c,
-          center - Offset(painter.width / 2, painter.height / 2),
-        );
-      }
+      paintStrokeNumberBadges(
+        c,
+        centers: numberCenters,
+        fillColor: numberColor,
+        outlineColor: ink,
+      );
     }
   }
 
@@ -297,10 +272,51 @@ const double strokeNumberBadgeRadiusPx = 8.5;
 @visibleForTesting
 const double strokeNumberBadgeBorderPx = 1.25;
 
+/// Paints the shared NeoPop stroke-order markers in logical screen pixels.
+/// Both the animated reference and the writing canvas use this function so
+/// their numbers keep the exact same size, contrast and outline.
+void paintStrokeNumberBadges(
+  Canvas canvas, {
+  required List<Offset?> centers,
+  required Color fillColor,
+  required Color outlineColor,
+}) {
+  final numberInk = _contrastingMonochrome(fillColor);
+  final fill = Paint()
+    ..color = fillColor
+    ..style = PaintingStyle.fill;
+  final outline = Paint()
+    ..color = outlineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeNumberBadgeBorderPx;
+  for (var i = 0; i < centers.length; i++) {
+    final center = centers[i];
+    if (center == null) continue;
+    canvas.drawCircle(center, strokeNumberBadgeRadiusPx, fill);
+    canvas.drawCircle(center, strokeNumberBadgeRadiusPx, outline);
+    final label = '${i + 1}';
+    final painter = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          color: numberInk,
+          fontSize: label.length > 1 ? 7.5 : 9,
+          height: 1,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(
+      canvas,
+      center - Offset(painter.width / 2, painter.height / 2),
+    );
+  }
+}
+
 /// Places each stroke number close to its stroke origin without covering any
 /// stroke or an already placed badge. Work happens once when geometry changes,
 /// never on an animation tick.
-@visibleForTesting
 List<Offset?> layoutStrokeNumberCenters({
   required List<List<PathMetric>> metrics,
   required double canvas,

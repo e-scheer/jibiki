@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/data/kana_strokes.dart';
+import 'package:jibiki/views/widgets/drawing_canvas.dart';
 import 'package:jibiki/views/widgets/stroke_order_view.dart';
 import 'package:path_drawing/path_drawing.dart';
 
@@ -98,5 +99,40 @@ void main() {
         );
       }
     }
+  });
+
+  testWidgets('writing canvas renders a numbered guide without blocking ink',
+      (tester) async {
+    final data = await KanaStrokeCatalog.load('あ');
+    expect(data, isNotNull);
+    final controller = DrawingController();
+    addTearDown(controller.dispose);
+    const badgeColor = Color(0xFFFF57A8);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 220,
+            child: DrawingCanvas(
+              controller: controller,
+              guidePaths: data!.paths,
+              guideViewBox: data.viewBox,
+              showGuide: true,
+              showStrokeNumbers: true,
+              strokeNumberColor: badgeColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DrawingCanvas), findsOneWidget);
+
+    await tester.drag(find.byType(DrawingCanvas), const Offset(24, 0));
+    await tester.pump();
+    expect(controller.isEmpty, isFalse);
+    expect(tester.takeException(), isNull);
   });
 }

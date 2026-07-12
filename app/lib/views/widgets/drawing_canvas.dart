@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 import '../../theme/app_theme.dart';
+import 'stroke_order_view.dart';
 
 /// Holds the drawn strokes so a parent can undo/clear and read emptiness.
 class DrawingController extends ChangeNotifier {
@@ -47,12 +48,16 @@ class DrawingCanvas extends StatelessWidget {
     this.guidePaths = const [],
     this.guideViewBox = '0 0 109 109',
     this.showGuide = true,
+    this.showStrokeNumbers = false,
+    this.strokeNumberColor,
   });
 
   final DrawingController controller;
   final List<String> guidePaths;
   final String guideViewBox;
   final bool showGuide;
+  final bool showStrokeNumbers;
+  final Color? strokeNumberColor;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +70,10 @@ class DrawingCanvas extends StatelessWidget {
         } catch (_) {}
       }
     }
+    final metrics = [
+      for (final path in parsed) path.computeMetrics().toList(),
+    ];
+    final canvasUnit = _unit(guideViewBox);
     return AspectRatio(
       aspectRatio: 1,
       child: Container(
@@ -77,19 +86,33 @@ class DrawingCanvas extends StatelessWidget {
         child: GestureDetector(
           onPanStart: (d) => controller.begin(d.localPosition),
           onPanUpdate: (d) => controller.extend(d.localPosition),
-          child: ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => CustomPaint(
-              painter: _PadPainter(
-                strokes: controller.strokes,
-                guide: parsed,
-                canvasUnit: _unit(guideViewBox),
-                grid: jc.hairline,
-                guideColor: jc.ink.withValues(alpha: 0.12),
-                ink: jc.ink,
-              ),
-              size: Size.infinite,
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final padSize = constraints.biggest.shortestSide;
+              final numberCenters = showGuide && showStrokeNumbers
+                  ? layoutStrokeNumberCenters(
+                      metrics: metrics,
+                      canvas: canvasUnit,
+                      size: padSize,
+                    )
+                  : const <Offset?>[];
+              return ListenableBuilder(
+                listenable: controller,
+                builder: (context, _) => CustomPaint(
+                  painter: _PadPainter(
+                    strokes: controller.strokes,
+                    guide: parsed,
+                    canvasUnit: canvasUnit,
+                    numberCenters: numberCenters,
+                    numberColor: strokeNumberColor ?? jc.brand,
+                    grid: jc.hairline,
+                    guideColor: jc.ink.withValues(alpha: 0.12),
+                    ink: jc.ink,
+                  ),
+                  size: Size.infinite,
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -107,6 +130,8 @@ class _PadPainter extends CustomPainter {
     required this.strokes,
     required this.guide,
     required this.canvasUnit,
+    required this.numberCenters,
+    required this.numberColor,
     required this.grid,
     required this.guideColor,
     required this.ink,
@@ -115,7 +140,8 @@ class _PadPainter extends CustomPainter {
   final List<List<Offset>> strokes;
   final List<Path> guide;
   final double canvasUnit;
-  final Color grid, guideColor, ink;
+  final List<Offset?> numberCenters;
+  final Color numberColor, grid, guideColor, ink;
 
   @override
   void paint(Canvas c, Size size) {
@@ -134,6 +160,15 @@ class _PadPainter extends CustomPainter {
         c.drawPath(path, gp);
       }
       c.restore();
+    }
+
+    if (numberCenters.isNotEmpty) {
+      paintStrokeNumberBadges(
+        c,
+        centers: numberCenters,
+        fillColor: numberColor,
+        outlineColor: ink,
+      );
     }
 
     final pen = Paint()

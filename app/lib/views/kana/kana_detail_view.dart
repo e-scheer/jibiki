@@ -1404,6 +1404,8 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
   Widget build(BuildContext context) {
     final kana = widget.kana;
     final guided = widget.mode == _KanaWritingMode.guided;
+    final hasStrokeOrder =
+        widget.stroke != null && widget.stroke!.paths.isNotEmpty;
     return Scaffold(
       backgroundColor: context.jc.lavender,
       body: SafeArea(
@@ -1448,8 +1450,8 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                                   )
                                 : _copy(
                                     context,
-                                    'Write from memory on a blank canvas. Reveal the guide if you get stuck.',
-                                    'Écrivez de mémoire sur une toile blanche. Affichez le guide en cas de doute.',
+                                    'Write from memory on a blank canvas. Reveal the stroke order if you get stuck.',
+                                    'Écrivez de mémoire sur une toile blanche. Affichez l’ordre des traits en cas de doute.',
                                   ),
                             style: const TextStyle(
                               fontSize: 13,
@@ -1542,9 +1544,21 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                           child: Stack(
                             children: [
                               Positioned.fill(
-                                child: DrawingCanvas(controller: _controller),
+                                child: DrawingCanvas(
+                                  controller: _controller,
+                                  guidePaths: hasStrokeOrder
+                                      ? widget.stroke!.paths
+                                      : const [],
+                                  guideViewBox: hasStrokeOrder
+                                      ? widget.stroke!.viewBox
+                                      : '0 0 109 109',
+                                  showGuide: _showGuide,
+                                  showStrokeNumbers:
+                                      _showGuide && hasStrokeOrder,
+                                  strokeNumberColor: context.jc.magenta,
+                                ),
                               ),
-                              if (_showGuide)
+                              if (_showGuide && !hasStrokeOrder)
                                 Positioned.fill(
                                   child: IgnorePointer(
                                     child: Center(
@@ -1574,6 +1588,7 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                 Row(
                   children: [
                     Expanded(
+                      flex: 4,
                       child: _PracticeTool(
                         icon: Icons.undo_rounded,
                         label: _copy(context, 'Undo', 'Annuler'),
@@ -1582,6 +1597,7 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
+                      flex: 4,
                       child: _PracticeTool(
                         icon: Icons.layers_clear_outlined,
                         label: _copy(context, 'Clear', 'Effacer'),
@@ -1590,11 +1606,20 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
+                      flex: 5,
                       child: _PracticeTool(
-                        icon: _showGuide
-                            ? Icons.visibility_rounded
-                            : Icons.visibility_off_outlined,
-                        label: _copy(context, 'Guide', 'Guide'),
+                        icon: hasStrokeOrder
+                            ? Icons.format_list_numbered_rounded
+                            : _showGuide
+                                ? Icons.visibility_rounded
+                                : Icons.visibility_off_outlined,
+                        label: hasStrokeOrder
+                            ? _copy(
+                                context,
+                                'Stroke order',
+                                'Ordre des traits',
+                              )
+                            : _copy(context, 'Guide', 'Guide'),
                         selected: _showGuide,
                         onTap: () => setState(() => _showGuide = !_showGuide),
                       ),
