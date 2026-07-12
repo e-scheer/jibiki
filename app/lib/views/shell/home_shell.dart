@@ -357,10 +357,12 @@ class _NeoNavigationRail extends StatelessWidget {
                 minWidth: constraints.maxWidth - horizontal * 2,
               ),
               child: SizedBox(
+                width: constraints.maxWidth - horizontal * 2,
                 height: contentHeight > constraints.maxHeight - 28
                     ? contentHeight
                     : constraints.maxHeight - 28,
                 child: Stack(
+                  fit: StackFit.expand,
                   clipBehavior: Clip.none,
                   children: [
                     Positioned.fill(
@@ -373,25 +375,27 @@ class _NeoNavigationRail extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const _RailBrand(),
-                        const SizedBox(height: brandGap),
-                        for (var i = 0; i < destinations.length; i++) ...[
-                          if (i > 0) const SizedBox(height: itemGap),
-                          SizedBox(
-                            height: itemHeight,
-                            child: _NeoNavButton(
-                              destination: destinations[i],
-                              selected: index == i,
-                              showSelection: false,
-                              due: i == _ShellState._reviewIndex ? due : 0,
-                              onTap: () => onSelect(i),
+                    Positioned.fill(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const _RailBrand(),
+                          const SizedBox(height: brandGap),
+                          for (var i = 0; i < destinations.length; i++) ...[
+                            if (i > 0) const SizedBox(height: itemGap),
+                            SizedBox(
+                              height: itemHeight,
+                              child: _NeoNavButton(
+                                destination: destinations[i],
+                                selected: index == i,
+                                showSelection: false,
+                                due: i == _ShellState._reviewIndex ? due : 0,
+                                onTap: () => onSelect(i),
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -471,6 +475,7 @@ class _NeoNavButtonState extends State<_NeoNavButton> {
                   ? 1.055
                   : 1,
           child: Container(
+            width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
             decoration: BoxDecoration(
               color: widget.selected && widget.showSelection
@@ -494,6 +499,7 @@ class _NeoNavButtonState extends State<_NeoNavButton> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 icon,
                 const SizedBox(height: 3),
