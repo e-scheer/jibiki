@@ -87,9 +87,11 @@ only seed personal study status; dictionary reference content remains available.
 
 Tablet is a distinct workspace, not a stretched phone. A fixed 76 px rail remains
 compact at every tablet width. At expanded widths the dictionary keeps a 340 px
-result list beside a persistent detail pane, and Kana keeps a 524 px matrix beside
-the selected glyph detail; the `Both` mode keeps hiragana and katakana visible
-together in that detail pane. The home dashboard becomes a dense three-column grid
+result list beside a persistent detail pane. Kana keeps a 524 px matrix beside the
+selected glyph detail, with an always-visible switcher for Basic, Dakuten,
+Handakuten and Yōon instead of hiding variants below a nested scroll; the `Both`
+mode keeps hiragana and katakana visible together in that detail pane. The home
+dashboard becomes a dense three-column grid
 for due reviews, word of the day, forecast, history and community. Landscape review
 removes the rail and uses a 55/45 card-and-grading split on a lavender field.
 

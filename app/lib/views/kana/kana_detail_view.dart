@@ -547,10 +547,18 @@ class _TabletKanaHero extends StatelessWidget {
                       pair[index].char,
                       style: TextStyle(
                         fontFamily: 'ZenKakuGothicNew',
-                        fontSize: pair.length == 2 ? 45 : 56,
+                        fontSize: pair[index].char.characters.length > 1
+                            ? pair.length == 2
+                                ? 29
+                                : 38
+                            : pair.length == 2
+                                ? 45
+                                : 56,
                         height: 1,
                         fontWeight: FontWeight.w900,
                       ),
+                      maxLines: 1,
+                      softWrap: false,
                     ),
                     Text(
                       pair[index].isHiragana ? 'HIRA' : 'KATA',

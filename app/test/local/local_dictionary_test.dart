@@ -89,7 +89,8 @@ void main() {
   });
 
   group('detail', () {
-    test('word detail carries forms, senses, glosses and kanji breakdown', () async {
+    test('word detail carries forms, senses, glosses and kanji breakdown',
+        () async {
       final id = (await dict.search('食べる')).words.first.id;
       final word = await dict.word(id);
       expect(word.headword, '食べる');
@@ -102,7 +103,8 @@ void main() {
       expect(word.examples, isEmpty);
     });
 
-    test('kanji detail: meanings, components, strokes and ranked words', () async {
+    test('kanji detail: meanings, components, strokes and ranked words',
+        () async {
       final kanji = await dict.kanji('水');
       expect(kanji.meaningsFor('en').join(' '), contains('water'));
       expect(kanji.strokeCount, 4);
@@ -117,12 +119,15 @@ void main() {
 
     test('kana chart and detail', () async {
       final chart = await dict.kana();
-      expect(chart.length, 142);
+      expect(chart.length, 208);
       final hira = await dict.kana(script: 'hiragana');
       expect(hira.every((k) => k.isHiragana), isTrue);
       final a = await dict.kanaDetail('あ');
       expect(a.romaji, 'a');
       expect(a.order, greaterThanOrEqualTo(0));
+      final kya = await dict.kanaDetail('きゃ');
+      expect(kya.romaji, 'kya');
+      expect(kya.kind, 'yoon');
     });
   });
 
@@ -133,7 +138,10 @@ void main() {
       expect(page1.length, 5);
       expect(page1.every((w) => w.isCommon), isTrue);
       expect(
-        page2.map((w) => w.id).toSet().intersection(page1.map((w) => w.id).toSet()),
+        page2
+            .map((w) => w.id)
+            .toSet()
+            .intersection(page1.map((w) => w.id).toSet()),
         isEmpty,
       );
     });
@@ -155,12 +163,14 @@ void main() {
     test('radicals list', () async {
       final radicals = await dict.radicals();
       expect(radicals, isNotEmpty);
-      expect(radicals.first.keys, containsAll(['literal', 'strokes', 'reading', 'meaning']));
+      expect(radicals.first.keys,
+          containsAll(['literal', 'strokes', 'reading', 'meaning']));
     });
   });
 
   test('sha256 of the asset matches its manifest (release-gate sanity)', () {
-    final manifest = jsonDecode(File('assets/packs/base_manifest.json').readAsStringSync());
+    final manifest =
+        jsonDecode(File('assets/packs/base_manifest.json').readAsStringSync());
     final gz = File('assets/packs/base.db.gz').readAsBytesSync();
     expect(sha256.convert(gz).toString(), manifest['sha256']);
   });

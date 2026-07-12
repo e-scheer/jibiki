@@ -36,10 +36,18 @@ def test_kana_origin_dakuten_points_at_base_kana():
     assert "handakuten" in note_p.lower()
 
 
-def test_kana_origin_unknown_sound_is_empty():
+def test_kana_origin_yoon_explains_its_two_kana_composition():
     from dictionary.seed_data import kana_origin
 
-    assert kana_origin("kya", "hiragana", "yoon") == ("", "")
+    origin, note = kana_origin("kya", "hiragana", "yoon")
+    assert origin == "き"
+    assert "small ゃ" in note and "きゃ" in note
+
+    origin_k, note_k = kana_origin("kya", "katakana", "yoon")
+    assert origin_k == "キ"
+    assert "small ャ" in note_k and "キャ" in note_k
+
+    assert kana_origin("nope", "hiragana", "yoon") == ("", "")
 
 
 # ── Kana grammatical role (particles) ──────────────────────────────────────────

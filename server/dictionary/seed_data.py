@@ -8,7 +8,9 @@ Nothing here is request-path; it is read once by `manage.py seed_demo`.
 from __future__ import annotations
 
 # ── Kana ──────────────────────────────────────────────────────────────────────
-# (romaji, hiragana, katakana, row, kind). kind: gojuon | dakuten | handakuten.
+# (romaji, hiragana, katakana, row, kind).
+# kind: gojuon | dakuten | handakuten | yoon. Yōon rows contain the complete
+# modern contracted-sound chart: an i-row kana followed by small ya/yu/yo.
 KANA: list[tuple[str, str, str, str, str]] = [
     # gojūon
     ("a", "あ", "ア", "a", "gojuon"),
@@ -84,6 +86,40 @@ KANA: list[tuple[str, str, str, str, str]] = [
     ("pu", "ぷ", "プ", "p", "handakuten"),
     ("pe", "ぺ", "ペ", "p", "handakuten"),
     ("po", "ぽ", "ポ", "p", "handakuten"),
+    # yōon (contracted sounds: i-row kana + small ゃ/ゅ/ょ or ャ/ュ/ョ)
+    ("kya", "きゃ", "キャ", "k", "yoon"),
+    ("kyu", "きゅ", "キュ", "k", "yoon"),
+    ("kyo", "きょ", "キョ", "k", "yoon"),
+    ("sha", "しゃ", "シャ", "s", "yoon"),
+    ("shu", "しゅ", "シュ", "s", "yoon"),
+    ("sho", "しょ", "ショ", "s", "yoon"),
+    ("cha", "ちゃ", "チャ", "t", "yoon"),
+    ("chu", "ちゅ", "チュ", "t", "yoon"),
+    ("cho", "ちょ", "チョ", "t", "yoon"),
+    ("nya", "にゃ", "ニャ", "n", "yoon"),
+    ("nyu", "にゅ", "ニュ", "n", "yoon"),
+    ("nyo", "にょ", "ニョ", "n", "yoon"),
+    ("hya", "ひゃ", "ヒャ", "h", "yoon"),
+    ("hyu", "ひゅ", "ヒュ", "h", "yoon"),
+    ("hyo", "ひょ", "ヒョ", "h", "yoon"),
+    ("mya", "みゃ", "ミャ", "m", "yoon"),
+    ("myu", "みゅ", "ミュ", "m", "yoon"),
+    ("myo", "みょ", "ミョ", "m", "yoon"),
+    ("rya", "りゃ", "リャ", "r", "yoon"),
+    ("ryu", "りゅ", "リュ", "r", "yoon"),
+    ("ryo", "りょ", "リョ", "r", "yoon"),
+    ("gya", "ぎゃ", "ギャ", "g", "yoon"),
+    ("gyu", "ぎゅ", "ギュ", "g", "yoon"),
+    ("gyo", "ぎょ", "ギョ", "g", "yoon"),
+    ("ja", "じゃ", "ジャ", "z", "yoon"),
+    ("ju", "じゅ", "ジュ", "z", "yoon"),
+    ("jo", "じょ", "ジョ", "z", "yoon"),
+    ("bya", "びゃ", "ビャ", "b", "yoon"),
+    ("byu", "びゅ", "ビュ", "b", "yoon"),
+    ("byo", "びょ", "ビョ", "b", "yoon"),
+    ("pya", "ぴゃ", "ピャ", "p", "yoon"),
+    ("pyu", "ぴゅ", "ピュ", "p", "yoon"),
+    ("pyo", "ぴょ", "ピョ", "p", "yoon"),
 ]
 
 # ── Kana writing origins (man'yōgana) ──────────────────────────────────────────
@@ -119,13 +155,41 @@ _KANA_CHARS: dict[str, tuple[str, str]] = {
     romaji: (hira, kata) for romaji, hira, kata, _row, _kind in KANA
 }
 
+# A yōon is a two-kana composition rather than a separately derived glyph. Map
+# each contracted reading to its i-row base and the full-size y-series reading;
+# `kana_origin` replaces the latter with the script's corresponding small kana.
+_YOON_COMPOSITIONS: dict[str, tuple[str, str]] = {
+    f"{stem}{ending}": (base, f"y{ending}")
+    for stem, base in (
+        ("ky", "ki"),
+        ("sh", "shi"),
+        ("ch", "chi"),
+        ("ny", "ni"),
+        ("hy", "hi"),
+        ("my", "mi"),
+        ("ry", "ri"),
+        ("gy", "gi"),
+        ("j", "ji"),
+        ("by", "bi"),
+        ("py", "pi"),
+    )
+    for ending in ("a", "u", "o")
+}
+
+_SMALL_Y_KANA: dict[str, tuple[str, str]] = {
+    "ya": ("ゃ", "ャ"),
+    "yu": ("ゅ", "ュ"),
+    "yo": ("ょ", "ョ"),
+}
+
 
 def kana_origin(romaji: str, script: str, kind: str) -> tuple[str, str]:
     """(origin_char, origin_note) for one kana.
 
     Gojūon kana point at their man'yōgana source kanji; dakuten/handakuten kana
-    point at the base gojūon kana they are built from, with a note about the mark.
-    Returns ("", "") when the sound isn't in the table (e.g. yōon).
+    point at the base gojūon kana they are built from, with a note about the
+    mark. Yōon point at their i-row base kana and name the small ya/yu/yo kana
+    that completes the contracted sound. Unknown sounds return ("", "").
     """
     is_hira = script == "hiragana"
 
@@ -139,6 +203,23 @@ def kana_origin(romaji: str, script: str, kind: str) -> tuple[str, str]:
         else:
             note = f"Taken from a fragment of the man'yōgana kanji {origin}, borrowed for its sound."
         return (origin, note)
+
+    if kind == "yoon":
+        composition = _YOON_COMPOSITIONS.get(romaji)
+        if not composition:
+            return ("", "")
+        base, small_y = composition
+        if base not in _KANA_CHARS or small_y not in _SMALL_Y_KANA:
+            return ("", "")
+        script_index = 0 if is_hira else 1
+        base_char = _KANA_CHARS[base][script_index]
+        small_char = _SMALL_Y_KANA[small_y][script_index]
+        contracted_char = _KANA_CHARS[romaji][script_index]
+        note = (
+            f"Contracted yōon sound {romaji}: the i-row kana {base_char} + "
+            f"small {small_char} ({small_y}) combine as {contracted_char}."
+        )
+        return (base_char, note)
 
     base = _DAKUTEN_BASE.get(romaji)
     if not base or base not in _KANA_CHARS:

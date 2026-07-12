@@ -37,7 +37,7 @@ void main() {
     );
     expect(counts.single['words'], greaterThan(20000));
     expect(counts.single['kanji'], greaterThan(2000));
-    expect(counts.single['kana'], 142);
+    expect(counts.single['kana'], 208);
     expect(counts.single['radicals'], greaterThan(0));
   });
 
@@ -68,6 +68,33 @@ void main() {
     );
     expect(rows.single['char'], 'あ');
     expect(rows.single['romaji'], 'a');
+  });
+
+  test('kana variants are complete and paired across both scripts', () async {
+    final counts = await db.select(
+      'SELECT script, kind, count(*) AS total FROM kana '
+      'GROUP BY script, kind ORDER BY script, kind',
+    );
+    final byKey = {
+      for (final row in counts) '${row['script']}:${row['kind']}': row['total'],
+    };
+    expect(byKey, {
+      'hiragana:dakuten': 20,
+      'hiragana:gojuon': 46,
+      'hiragana:handakuten': 5,
+      'hiragana:yoon': 33,
+      'katakana:dakuten': 20,
+      'katakana:gojuon': 46,
+      'katakana:handakuten': 5,
+      'katakana:yoon': 33,
+    });
+
+    final brokenPairs = await db.select(
+      'SELECT kind, "row", romaji FROM kana '
+      'GROUP BY kind, "row", romaji '
+      'HAVING count(*) != 2 OR count(DISTINCT script) != 2',
+    );
+    expect(brokenPairs, isEmpty);
   });
 
   test('errors surface as exceptions, connection survives', () async {

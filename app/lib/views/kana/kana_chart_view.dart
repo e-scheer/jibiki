@@ -314,7 +314,6 @@ class _KanaLayout extends StatelessWidget {
       return _KanaTabletWorkspace(
         vm: vm,
         selection: selection,
-        extras: extras,
         showBoth: vm.script == 'both',
         focusedChar: resolvedFocus,
         onFocused: onFocused,
@@ -430,11 +429,10 @@ class _KanaLayout extends StatelessWidget {
   }
 }
 
-class _KanaTabletWorkspace extends StatelessWidget {
+class _KanaTabletWorkspace extends StatefulWidget {
   const _KanaTabletWorkspace({
     required this.vm,
     required this.selection,
-    required this.extras,
     required this.showBoth,
     required this.focusedChar,
     required this.onFocused,
@@ -443,14 +441,50 @@ class _KanaTabletWorkspace extends StatelessWidget {
 
   final KanaViewModel vm;
   final _Selection selection;
-  final Map<String, String> extras;
   final bool showBoth;
   final String focusedChar;
   final ValueChanged<String> onFocused;
   final ValueChanged<String> onScriptChanged;
 
   @override
+  State<_KanaTabletWorkspace> createState() => _KanaTabletWorkspaceState();
+}
+
+class _KanaTabletWorkspaceState extends State<_KanaTabletWorkspace> {
+  static const _kinds = ['gojuon', 'dakuten', 'handakuten', 'yoon'];
+
+  late String _selectedKind;
+  var _slideDirection = 1.0;
+
+  KanaEntry? _entryForChar(String char) {
+    for (final entry in widget.vm.current) {
+      if (entry.char == char) return entry;
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final focusedKind = _entryForChar(widget.focusedChar)?.kind;
+    _selectedKind = _kinds.contains(focusedKind) ? focusedKind! : _kinds.first;
+  }
+
+  void _selectKind(String kind) {
+    if (kind == _selectedKind) return;
+    final previousIndex = _kinds.indexOf(_selectedKind);
+    final nextIndex = _kinds.indexOf(kind);
+    final items = widget.vm.byKind(kind);
+    setState(() {
+      _slideDirection = nextIndex >= previousIndex ? 1 : -1;
+      _selectedKind = kind;
+    });
+    if (items.isNotEmpty) widget.onFocused(items.first.char);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final items = widget.vm.byKind(_selectedKind);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -463,44 +497,75 @@ class _KanaTabletWorkspace extends StatelessWidget {
           child: Column(
             children: [
               _KanaHeader(
-                vm: vm,
-                selection: selection,
-                onScriptChanged: onScriptChanged,
+                vm: widget.vm,
+                selection: widget.selection,
+                onScriptChanged: widget.onScriptChanged,
                 inset: 0,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
+              NeoSegmentedControl<String>(
+                selected: _selectedKind,
+                onChanged: _selectKind,
+                height: 48,
+                segments: const [
+                  NeoSegment('gojuon', 'Basic'),
+                  NeoSegment('dakuten', 'Dakuten'),
+                  NeoSegment('handakuten', 'Handakuten'),
+                  NeoSegment('yoon', 'Yōon'),
+                ],
+              ),
+              const SizedBox(height: 14),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: ClipRect(
+                  child: AnimatedSwitcher(
+                    duration: Motion.timed(context, Motion.base),
+                    switchInCurve: Motion.outStrong,
+                    switchOutCurve: Motion.out,
+                    layoutBuilder: (currentChild, previousChildren) => Stack(
+                      alignment: Alignment.topCenter,
                       children: [
-                        _KanaMatrix(
-                          items: vm.byKind('gojuon'),
-                          selection: selection,
-                          focusedChar: focusedChar,
-                          onOpen: (entry) => onFocused(entry.char),
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    ),
+                    transitionBuilder: (child, animation) {
+                      final incoming = child.key == ValueKey(_selectedKind);
+                      final offset = incoming
+                          ? Offset(.055 * _slideDirection, 0)
+                          : Offset(-.055 * _slideDirection, 0);
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: offset,
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
                         ),
-                        for (final extra in extras.entries)
-                          if (vm.byKind(extra.key).isNotEmpty) ...[
-                            const SizedBox(height: 18),
-                            Text(
-                              extra.value,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w900,
+                      );
+                    },
+                    child: SizedBox.expand(
+                      key: ValueKey(_selectedKind),
+                      child: items.isEmpty
+                          ? Center(
+                              child: EmptyHint(
+                                icon: Icons.grid_off_rounded,
+                                title: _copy(
+                                  context,
+                                  'No kana in this category yet.',
+                                  'Aucun kana dans cette catégorie pour le moment.',
+                                ),
+                              ),
+                            )
+                          : SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
+                              child: _KanaMatrix(
+                                items: items,
+                                selection: widget.selection,
+                                focusedChar: widget.focusedChar,
+                                onOpen: (entry) => widget.onFocused(entry.char),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            _KanaMatrix(
-                              items: vm.byKind(extra.key),
-                              selection: selection,
-                              focusedChar: focusedChar,
-                              onOpen: (entry) => onFocused(entry.char),
-                            ),
-                          ],
-                      ],
                     ),
                   ),
                 ),
@@ -524,10 +589,10 @@ class _KanaTabletWorkspace extends StatelessWidget {
               ),
             ),
             child: KanaDetailPane(
-              key: ValueKey('$focusedChar-$showBoth'),
-              char: focusedChar,
-              showBoth: showBoth,
-              onSelectKana: onFocused,
+              key: ValueKey('${widget.focusedChar}-${widget.showBoth}'),
+              char: widget.focusedChar,
+              showBoth: widget.showBoth,
+              onSelectKana: widget.onFocused,
             ),
           ),
         ),
@@ -961,20 +1026,24 @@ class _KanaMatrix extends StatelessWidget {
 
   static const _vowels = ['a', 'i', 'u', 'e', 'o'];
 
-  String _vowelOf(String romaji) {
+  String _vowelOf(String romaji, List<String> vowels) {
     if (romaji.isEmpty) return '';
     final last = romaji[romaji.length - 1];
-    return _vowels.contains(last) ? last : '';
+    return vowels.contains(last) ? last : '';
   }
 
   @override
   Widget build(BuildContext context) {
+    final matrixVowels =
+        items.isNotEmpty && items.every((entry) => entry.kind == 'yoon')
+            ? const ['a', 'u', 'o']
+            : _vowels;
     final byKey = <String, List<KanaEntry>>{};
     final noVowel = <KanaEntry>[];
     final rowOrder = <String, int>{};
 
     for (final kana in items) {
-      final vowel = _vowelOf(kana.romaji);
+      final vowel = _vowelOf(kana.romaji, matrixVowels);
       if (vowel.isEmpty) {
         noVowel.add(kana);
         continue;
@@ -998,7 +1067,7 @@ class _KanaMatrix extends StatelessWidget {
       ..sort((a, b) => rowOrder[a]!.compareTo(rowOrder[b]!));
     final slots = <List<KanaEntry>?>[
       for (final row in rows)
-        for (final vowel in _vowels) byKey['$row$vowel'],
+        for (final vowel in matrixVowels) byKey['$row$vowel'],
       if (noVowel.isNotEmpty) noVowel,
     ];
 
@@ -1006,8 +1075,8 @@ class _KanaMatrix extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: slots.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: matrixVowels.length,
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
         mainAxisExtent: 56,
