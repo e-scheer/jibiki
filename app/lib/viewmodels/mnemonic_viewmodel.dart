@@ -32,10 +32,25 @@ class MnemonicViewModel extends BaseViewModel {
   /// feed below is the English backup - the UI invites them to draw the first.
   bool _englishFallback = false;
   bool get englishFallback => _englishFallback;
+  final Set<int> _busyItems = {};
+
+  bool isBusy(int id) => _busyItems.contains(id);
+
+  bool _beginItem(int id) {
+    if (!_busyItems.add(id)) return false;
+    notifyListeners();
+    return true;
+  }
+
+  void _endItem(int id) {
+    _busyItems.remove(id);
+    notifyListeners();
+  }
 
   Future<void> load() async {
     final r = await runGuarded(
-      () => _mnemonics.list(character: character, language: language, kind: kind),
+      () =>
+          _mnemonics.list(character: character, language: language, kind: kind),
     );
     if (r == null) return;
     _englishFallback = false;
@@ -63,38 +78,57 @@ class MnemonicViewModel extends BaseViewModel {
   /// Optimistic like: the heart fills + the count moves the instant you tap, then
   /// the server's authoritative numbers reconcile (or we revert on failure).
   Future<void> vote(Mnemonic m, int direction) async {
+    if (!_beginItem(m.id)) return;
     final target = m.myVote == direction ? 0 : direction;
     final prev = m;
-    _replace(m.copyWith(myVote: target, score: m.score + (target - m.myVote)));
-
-    final res = await runGuarded(() => _mnemonics.vote(m.id, target), silent: true);
-    if (res != null) {
-      final (score, myVote) = res;
-      _replace(prev.copyWith(score: score, myVote: myVote));
-    } else {
-      _replace(prev); // network/validation failed: undo the optimistic change
+    try {
+      _replace(
+          m.copyWith(myVote: target, score: m.score + (target - m.myVote)));
+      final res =
+          await runGuarded(() => _mnemonics.vote(m.id, target), silent: true);
+      if (res != null) {
+        final (score, myVote) = res;
+        _replace(prev.copyWith(score: score, myVote: myVote));
+      } else {
+        _replace(prev); // network/validation failed: undo the optimistic change
+      }
+    } finally {
+      _endItem(m.id);
     }
   }
 
   Future<void> report(Mnemonic m, String reason, {String detail = ''}) async {
-    await runGuarded(() => _mnemonics.report(m.id, reason, detail: detail), silent: true);
+    if (!_beginItem(m.id)) return;
+    try {
+      await runGuarded(
+        () => _mnemonics.report(m.id, reason, detail: detail),
+        silent: true,
+      );
+    } finally {
+      _endItem(m.id);
+    }
   }
 
   /// Optimistic bookmark: flips the instant you tap, reconciles / reverts after.
   Future<void> toggleSave(Mnemonic m) async {
+    if (!_beginItem(m.id)) return;
     final prev = m;
-    _replace(m.copyWith(saved: !m.saved));
-
-    final res = await runGuarded(() => _mnemonics.save(m.id), silent: true);
-    if (res != null) {
-      _replace(prev.copyWith(saved: res));
-    } else {
-      _replace(prev);
+    try {
+      _replace(m.copyWith(saved: !m.saved));
+      final res = await runGuarded(() => _mnemonics.save(m.id), silent: true);
+      if (res != null) {
+        _replace(prev.copyWith(saved: res));
+      } else {
+        _replace(prev);
+      }
+    } finally {
+      _endItem(m.id);
     }
   }
 
   /// Submit a new mnemonic. Returns the created one (VISIBLE or PENDING) or null.
-  Future<Mnemonic?> contribute(String story, {List<int>? imageBytes, String? imageFilename}) async {
+  Future<Mnemonic?> contribute(String story,
+      {List<int>? imageBytes, String? imageFilename}) async {
     final m = await runGuarded(
       () => _mnemonics.create(
         character: character,

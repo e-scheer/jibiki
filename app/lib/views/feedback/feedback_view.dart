@@ -45,7 +45,8 @@ class _Feedback extends StatelessWidget {
             leading: NeoIconButton(
               icon: Icons.arrow_back_rounded,
               label: context.trText('Back'),
-              onTap: () => Navigator.of(context).maybePop(),
+              onTap:
+                  vm.isLoading ? null : () => Navigator.of(context).maybePop(),
             ),
             trailing: const NeoBadge(
               'FEEDBACK',
@@ -121,6 +122,7 @@ class _Form extends StatelessWidget {
                 _KindChip(
                   label: context.trText('${kind.emoji}  ${kind.label}'),
                   selected: vm.kind == kind,
+                  enabled: !vm.isLoading,
                   onSelected: () => vm.selectKind(kind),
                 ),
             ],
@@ -132,6 +134,7 @@ class _Form extends StatelessWidget {
             shadow: 5,
             child: TextField(
               autofocus: true,
+              enabled: !vm.isLoading,
               minLines: 6,
               maxLines: 12,
               maxLength: 4000,
@@ -154,6 +157,7 @@ class _Form extends StatelessWidget {
               shadow: 3,
               child: TextField(
                 keyboardType: TextInputType.emailAddress,
+                enabled: !vm.isLoading,
                 decoration: InputDecoration(
                   hintText: context.trText(
                     'Email - only if you’d like a reply (optional)',
@@ -292,11 +296,13 @@ class _KindChip extends StatelessWidget {
   const _KindChip({
     required this.label,
     required this.selected,
+    this.enabled = true,
     required this.onSelected,
   });
 
   final String label;
   final bool selected;
+  final bool enabled;
   final VoidCallback onSelected;
 
   @override
@@ -327,7 +333,7 @@ class _KindChip extends StatelessWidget {
             color: context.jc.ink,
             fontWeight: FontWeight.w800,
           ),
-          onSelected: (_) => onSelected(),
+          onSelected: enabled ? (_) => onSelected() : null,
         ),
       );
 }

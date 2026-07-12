@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../models/mnemonic.dart';
 import '../../repositories/mnemonic_deck_repository.dart';
 import '../../repositories/mnemonic_repository.dart';
+import '../../repositories/dictionary_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
@@ -26,6 +27,7 @@ class DeckBuilderView extends StatelessWidget {
         ctx.read<MnemonicDeckRepository>(),
         ctx.read<MnemonicRepository>(),
         language: lang,
+        dictionary: ctx.read<DictionaryRepository>(),
       )..load(),
       child: const _Builder(),
     );
@@ -186,6 +188,23 @@ class _BuilderState extends State<_Builder> {
                           ],
                         ),
                       ],
+                      if (vm.kind == 'kanji') ...[
+                        const SizedBox(height: 10),
+                        NeoSegmentedControl<String>(
+                          height: 46,
+                          selected: vm.jlptFilter,
+                          enabled: !_saving && !vm.isJlptLoading,
+                          onChanged: vm.setJlptFilter,
+                          segments: const [
+                            NeoSegment('all', 'All'),
+                            NeoSegment('5', 'N5'),
+                            NeoSegment('4', 'N4'),
+                            NeoSegment('3', 'N3'),
+                            NeoSegment('2', 'N2'),
+                            NeoSegment('1', 'N1'),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       _PublishToggle(
                         value: _publish,
@@ -234,7 +253,8 @@ class _BuilderState extends State<_Builder> {
                           ],
                         ),
                       ),
-                      if (vm.isLoading && vm.available.isEmpty)
+                      if ((vm.isLoading || vm.isJlptLoading) &&
+                          vm.available.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(28),
                           child: LoadingView(),

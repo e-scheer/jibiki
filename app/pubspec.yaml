@@ -64,31 +64,23 @@ flutter_launcher_icons:
     background_color: "#F2E51C"
     theme_color: "#2B36E3"
 
-# Exploration 17 launch screen. Flutter takes over immediately with the
-# animated chase loader while the app finishes bootstrapping.
+# Exploration 17 runtime splash. The OS launch stays a solid brand field so
+# device-specific scaling never distorts the lockup; Flutter takes over with
+# the animated branded splash while bootstrapping.
 flutter_native_splash:
   color: "#2B36E3"
   color_dark: "#17131F"
-  image: assets/icon/splash_klein.png
-  image_dark: assets/icon/splash_dark.png
-  branding: assets/icon/branding_klein.png
-  branding_dark: assets/icon/branding_dark.png
-  branding_mode: bottom
-  branding_bottom_padding: 32
   android_12:
     color: "#2B36E3"
     color_dark: "#17131F"
-    image: assets/icon/splash_android12.png
-    image_dark: assets/icon/splash_android12.png
-    branding: assets/icon/branding_klein.png
-    branding_dark: assets/icon/branding_dark.png
   android: true
-  ios: true
+  ios: false
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
+    - assets/data/kana_strokes.json
     # Bundled offline dictionary (the "base" content pack, installed on first
     # run). Regenerated at release time: make build-base-pack.
     - assets/packs/base.db.gz

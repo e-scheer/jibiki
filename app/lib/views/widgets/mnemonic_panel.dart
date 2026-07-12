@@ -42,7 +42,7 @@ class MnemonicPanel extends StatelessWidget {
                 radius: 9,
                 padding: const EdgeInsets.symmetric(horizontal: 11),
                 semanticLabel: context.trText('Add'),
-                onTap: () => _contribute(context, vm),
+                onTap: vm.isLoading ? null : () => _contribute(context, vm),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -66,23 +66,29 @@ class MnemonicPanel extends StatelessWidget {
               tone: NeoTone.lavender,
               shadow: 0,
               padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-              child: Row(
-                children: [
-                  Icon(Icons.translate, size: 18, color: context.jc.muted),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      context.trText(
-                          'Nothing in ${mnemonicLanguageName(vm.language)} for '
-                          '${vm.character} yet - yours could be the first! '
-                          'English shown meanwhile.'),
-                      style: TextStyle(
-                          fontSize: 12.5,
-                          color: context.jc.muted,
-                          height: 1.35),
-                    ),
-                  ),
-                  SizedBox(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final narrow = constraints.maxWidth < 390;
+                  final copy = Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.translate, size: 18, color: context.jc.muted),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          context.trText(
+                              'Nothing in ${mnemonicLanguageName(vm.language)} for '
+                              '${vm.character} yet - yours could be the first! '
+                              'English shown meanwhile.'),
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              color: context.jc.muted,
+                              height: 1.35),
+                        ),
+                      ),
+                    ],
+                  );
+                  final draw = SizedBox(
                     height: 42,
                     child: NeoCard(
                       tone: NeoTone.acid,
@@ -90,14 +96,33 @@ class MnemonicPanel extends StatelessWidget {
                       radius: 8,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       semanticLabel: context.trText('Draw it'),
-                      onTap: () => _draw(context, vm),
+                      onTap: vm.isLoading ? null : () => _draw(context, vm),
                       child: Text(
                         context.trText('Draw it'),
                         style: const TextStyle(fontWeight: FontWeight.w900),
                       ),
                     ),
-                  ),
-                ],
+                  );
+                  return narrow
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            copy,
+                            const SizedBox(height: 9),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: draw,
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(child: copy),
+                            const SizedBox(width: 8),
+                            draw,
+                          ],
+                        );
+                },
               ),
             ),
           ),
@@ -468,20 +493,24 @@ class _MnemonicPost extends StatelessWidget {
                         icon: m.liked ? Icons.favorite : Icons.favorite_border,
                         color: m.liked ? jc.ratingAgain : jc.ink,
                         tooltip: context.trText('Like'),
-                        onTap: () {
-                          Haptics.light();
-                          vm.vote(m, 1);
-                        },
+                        onTap: vm.isBusy(m.id)
+                            ? null
+                            : () {
+                                Haptics.light();
+                                vm.vote(m, 1);
+                              },
                       ),
                       const Spacer(),
                       _IconAction(
                         icon: m.saved ? Icons.bookmark : Icons.bookmark_border,
                         color: jc.ink,
                         tooltip: context.trText('Save'),
-                        onTap: () {
-                          Haptics.tick();
-                          vm.toggleSave(m);
-                        },
+                        onTap: vm.isBusy(m.id)
+                            ? null
+                            : () {
+                                Haptics.tick();
+                                vm.toggleSave(m);
+                              },
                       ),
                     ],
                   ),
@@ -642,22 +671,32 @@ class _Header extends StatelessWidget {
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     )),
+                if (m.status != 'visible')
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: jc.acid,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: jc.ink, width: 1.8),
+                      ),
+                      child: Text(
+                        context.trText('In review'),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          if (m.status != 'visible')
-            Container(
-              margin: const EdgeInsets.only(right: 2),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: jc.acid,
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: jc.ink, width: 2),
-              ),
-              child: Text(context.trText('In review'),
-                  style: const TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.w900)),
-            ),
           const SizedBox(width: 6),
           NeoIconButton(
             icon: Icons.more_horiz,
@@ -713,20 +752,23 @@ class _IconAction extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String tooltip;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: 44,
-      child: NeoCard(
-        tone: NeoTone.paper,
-        radius: 9,
-        shadow: 3,
-        padding: EdgeInsets.zero,
-        semanticLabel: tooltip,
-        onTap: onTap,
-        child: Icon(icon, color: color, size: 24),
+    return Opacity(
+      opacity: onTap == null ? .45 : 1,
+      child: SizedBox.square(
+        dimension: 44,
+        child: NeoCard(
+          tone: NeoTone.paper,
+          radius: 9,
+          shadow: 3,
+          padding: EdgeInsets.zero,
+          semanticLabel: tooltip,
+          onTap: onTap,
+          child: Icon(icon, color: color, size: 24),
+        ),
       ),
     );
   }

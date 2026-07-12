@@ -328,6 +328,7 @@ class _NeoNavigationRail extends StatelessWidget {
                   BoxConstraints(minHeight: constraints.maxHeight - 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const _RailBrand(),
                   const SizedBox(height: 14),
@@ -402,33 +403,38 @@ class _NeoNavButton extends StatelessWidget {
       selected: selected,
       focusRadius: 10,
       onTap: onTap,
-      builder: (context, pressed) => AnimatedContainer(
+      builder: (context, pressed) => AnimatedScale(
         duration: Motion.timed(context, const Duration(milliseconds: 120)),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected && showSelection ? jc.acid : Colors.transparent,
-          border: selected && showSelection
-              ? Border.all(color: jc.ink, width: 2.5)
-              : null,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: selected && showSelection && !pressed
-              ? [
-                  BoxShadow(
-                    color: jc.ink,
-                    blurRadius: 0,
-                    offset: const Offset(3, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(height: 3),
-            FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
-          ],
+        scale: selected ? 1.04 : 1,
+        child: AnimatedContainer(
+          duration: Motion.timed(context, const Duration(milliseconds: 120)),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected && showSelection ? jc.acid : Colors.transparent,
+            border: selected && showSelection
+                ? Border.all(color: jc.ink, width: 2.5)
+                : null,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: selected && showSelection && !pressed
+                ? [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              icon,
+              const SizedBox(height: 3),
+              FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
+            ],
+          ),
         ),
       ),
     );

@@ -63,10 +63,12 @@ dictionary flow; drawing and pack creation belong inside the community flow.
 
 The core mark is the `字` character inside an acid square with an ink outline and
 hard offset shadow. The wordmark is `jibiki` followed by a small rotated acid
-square. Native and web launch screens use the full Klein or ink brand field, the
+square. The web and in-app runtime splash use the full Klein or ink brand field,
 centered mark and wordmark, the three-block chase loader, and the line
-"dictionnaire libre, mémoire durable". Space Grotesk is the Latin display family;
-Zen Kaku Gothic New is the Japanese display family.
+"dictionnaire libre, mémoire durable". Native OS launch screens intentionally use
+only the solid brand field, then hand off to that responsive branded runtime
+splash so no device stretches a bitmap lockup. Space Grotesk is the Latin display
+family; Zen Kaku Gothic New is the Japanese display family.
 
 The dictionary landing is also the daily return loop: search remains first, then
 the due-review callout, a tappable word of the day and a compact recent-history

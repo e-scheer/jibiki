@@ -7,7 +7,7 @@ import '../auth/auth_required_sheet.dart';
 import '../study/study_chrome.dart';
 import 'pressable.dart';
 
-class StudyStatusBar extends StatelessWidget {
+class StudyStatusBar extends StatefulWidget {
   const StudyStatusBar({
     super.key,
     required this.status,
@@ -18,10 +18,27 @@ class StudyStatusBar extends StatelessWidget {
   final Future<void> Function(String target) onSetStatus;
 
   @override
+  State<StudyStatusBar> createState() => _StudyStatusBarState();
+}
+
+class _StudyStatusBarState extends State<StudyStatusBar> {
+  bool _busy = false;
+
+  Future<void> _setStatus(BuildContext context, String target) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onSetStatus(target);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final accountReady = context.watch<AppState>().isAuthenticated;
-    final learning = status == 'learning';
-    final known = status == 'known';
+    final learning = widget.status == 'learning';
+    final known = widget.status == 'known';
     return Container(
       decoration: BoxDecoration(
         color: context.jc.canvas,
@@ -36,13 +53,14 @@ class StudyStatusBar extends StatelessWidget {
               Expanded(
                 child: _StatusChoice(
                   selected: learning,
+                  enabled: !_busy,
                   color: context.jc.acid,
                   icon: learning ? Icons.school : Icons.school_outlined,
                   label: learning ? 'Studying' : 'Study',
                   onTap: () {
                     Haptics.light();
                     if (accountReady) {
-                      onSetStatus(learning ? 'none' : 'learning');
+                      _setStatus(context, learning ? 'none' : 'learning');
                     } else {
                       showAuthRequiredSheet(context);
                     }
@@ -53,6 +71,7 @@ class StudyStatusBar extends StatelessWidget {
               Expanded(
                 child: _StatusChoice(
                   selected: known,
+                  enabled: !_busy,
                   color: context.jc.lime,
                   icon: known
                       ? Icons.check_circle_rounded
@@ -61,7 +80,7 @@ class StudyStatusBar extends StatelessWidget {
                   onTap: () {
                     Haptics.light();
                     if (accountReady) {
-                      onSetStatus(known ? 'none' : 'known');
+                      _setStatus(context, known ? 'none' : 'known');
                     } else {
                       showAuthRequiredSheet(context);
                     }
@@ -83,6 +102,7 @@ class _StatusChoice extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.enabled = true,
   });
 
   final bool selected;
@@ -90,6 +110,7 @@ class _StatusChoice extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -98,7 +119,7 @@ class _StatusChoice extends StatelessWidget {
           label: label,
           selected: selected,
           haptic: false,
-          onTap: onTap,
+          onTap: enabled ? onTap : null,
           child: StudyPanel(
             color: selected ? color : context.jc.surface,
             shadow: selected ? 3 : 0,

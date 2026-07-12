@@ -229,7 +229,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
               leading: NeoIconButton(
                 icon: Icons.arrow_back_rounded,
                 label: context.trText('Back'),
-                onTap: () => Navigator.of(context).maybePop(),
+                onTap: _busy ? null : () => Navigator.of(context).maybePop(),
               ),
               trailing: const NeoBadge('蟹', tone: NeoTone.acid),
             ),
@@ -258,7 +258,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
             leading: NeoIconButton(
               icon: Icons.arrow_back_rounded,
               label: context.trText('Back'),
-              onTap: () => Navigator.of(context).maybePop(),
+              onTap: _busy ? null : () => Navigator.of(context).maybePop(),
             ),
             trailing: const NeoBadge('蟹', tone: NeoTone.acid, rotate: 2),
           ),
@@ -372,6 +372,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
               child: TextField(
                 controller: _token,
                 obscureText: true,
+                enabled: !_busy,
                 decoration: InputDecoration(
                   labelText: context.trText('WaniKani API token'),
                   hintText: context.trText('Paste your read-only token'),
@@ -470,7 +471,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
                 NeoIconButton(
                   icon: Icons.close_rounded,
                   label: context.trText('Cancel import'),
-                  onTap: _busy ? () {} : _cancel,
+                  onTap: _busy ? null : _cancel,
                   tone: NeoTone.coral,
                 ),
               ],
@@ -505,6 +506,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
       );
 
   Widget _thresholdPicker(BuildContext context) => NeoSegmentedControl<String>(
+        enabled: !_busy,
         segments: const [
           NeoSegment('guru', 'Guru'),
           NeoSegment('master', 'Master'),

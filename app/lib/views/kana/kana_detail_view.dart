@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
 import '../../core/speech.dart';
+import '../../data/kana_strokes.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
 import '../../repositories/dictionary_repository.dart';
@@ -21,6 +22,7 @@ import '../widgets/origin_section.dart';
 import '../widgets/pressable.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/study_mark.dart';
+import '../widgets/stroke_order_view.dart';
 import 'kana_cell.dart';
 
 class KanaDetailView extends StatelessWidget {
@@ -79,6 +81,7 @@ class KanaDetailPane extends StatelessWidget {
 typedef _KanaDetailData = ({
   KanaEntry focused,
   KanaEntry? counterpart,
+  KanaStrokeData? stroke,
   List<KanaEntry> nearby,
   Map<String, int> states,
   Set<String> dueChars,
@@ -115,6 +118,7 @@ class _KanaDetailState extends State<_KanaDetail> {
     final allFuture = dictionary.kana();
     final focused = await focusedFuture;
     final all = await allFuture;
+    final stroke = await KanaStrokeCatalog.load(widget.char);
 
     final otherScript = focused.isHiragana ? 'katakana' : 'hiragana';
     KanaEntry? counterpart;
@@ -165,6 +169,7 @@ class _KanaDetailState extends State<_KanaDetail> {
     return (
       focused: focused,
       counterpart: counterpart,
+      stroke: stroke,
       nearby: candidates.take(3).toList(growable: false),
       states: states,
       dueChars: dueChars,
@@ -200,6 +205,7 @@ class _KanaDetailState extends State<_KanaDetail> {
           if (data == null) return const SizedBox.shrink();
           return _DetailActions(
             kana: data.focused,
+            stroke: data.stroke,
             added: mnemonic.added,
             onAdd: () => _addToStudy(context, mnemonic),
           );
@@ -273,7 +279,7 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                 onSelectKana: onSelectKana,
               ),
               const SizedBox(height: 14),
-              _WritingGuide(kana: data.focused),
+              _WritingGuide(kana: data.focused, stroke: data.stroke),
               const SizedBox(height: 16),
               const _FeaturedMnemonic(),
               const SizedBox(height: 16),
@@ -294,6 +300,7 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => _KanaWritingPracticePage(
                         kana: data.focused,
+                        stroke: data.stroke,
                         startWithGuide: false,
                       ),
                     ),
@@ -521,7 +528,7 @@ class _DetailContent extends StatelessWidget {
           children: [
             _KanaHero(data: data),
             const SizedBox(height: 20),
-            _WritingGuide(kana: data.focused),
+            _WritingGuide(kana: data.focused, stroke: data.stroke),
             const SizedBox(height: 18),
             _NearbyKana(data: data),
           ],
@@ -716,9 +723,10 @@ class _KanaHero extends StatelessWidget {
 }
 
 class _WritingGuide extends StatelessWidget {
-  const _WritingGuide({required this.kana});
+  const _WritingGuide({required this.kana, this.stroke});
 
   final KanaEntry kana;
+  final KanaStrokeData? stroke;
 
   @override
   Widget build(BuildContext context) {
@@ -748,40 +756,38 @@ class _WritingGuide extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _WritingGridPainter(color: context.jc.muted),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      kana.char,
-                      style: TextStyle(
-                        fontFamily: 'ZenKakuGothicNew',
-                        fontSize: 105,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                        color: context.jc.ink,
+              child: stroke == null || stroke!.paths.isEmpty
+                  ? Stack(
+                      children: [
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter:
+                                _WritingGridPainter(color: context.jc.muted),
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            kana.char,
+                            style: TextStyle(
+                              fontFamily: 'ZenKakuGothicNew',
+                              fontSize: 105,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                              color: context.jc.ink,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: StrokeOrderView(
+                        paths: stroke!.paths,
+                        viewBox: stroke!.viewBox,
+                        size: 158,
+                        showControls: false,
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: 10,
-                    top: 10,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: context.jc.magenta,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: context.jc.ink, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -800,6 +806,7 @@ class _WritingGuide extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => _KanaWritingPracticePage(
                           kana: kana,
+                          stroke: stroke,
                           startWithGuide: true,
                         ),
                       ),
@@ -814,6 +821,38 @@ class _WritingGuide extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 42,
+                    child: NeoCard(
+                      tone: NeoTone.paper,
+                      shadow: 2,
+                      radius: 9,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => _KanaWritingPracticePage(
+                            kana: kana,
+                            stroke: stroke,
+                            startWithGuide: false,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.edit_rounded, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            _copy(context, 'Practice writing', 'Pratiquer'),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -1207,11 +1246,13 @@ class _Tag extends StatelessWidget {
 class _DetailActions extends StatelessWidget {
   const _DetailActions({
     required this.kana,
+    this.stroke,
     required this.added,
     required this.onAdd,
   });
 
   final KanaEntry kana;
+  final KanaStrokeData? stroke;
   final bool added;
   final VoidCallback onAdd;
 
@@ -1237,6 +1278,7 @@ class _DetailActions extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => _KanaWritingPracticePage(
                         kana: kana,
+                        stroke: stroke,
                         startWithGuide: false,
                       ),
                     ),
@@ -1263,10 +1305,12 @@ class _DetailActions extends StatelessWidget {
 class _KanaWritingPracticePage extends StatefulWidget {
   const _KanaWritingPracticePage({
     required this.kana,
+    this.stroke,
     this.startWithGuide = true,
   });
 
   final KanaEntry kana;
+  final KanaStrokeData? stroke;
   final bool startWithGuide;
 
   @override
@@ -1377,6 +1421,23 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                   ),
                 ),
                 const SizedBox(height: 18),
+                if (widget.stroke != null &&
+                    widget.stroke!.paths.isNotEmpty) ...[
+                  SizedBox(
+                    height: 190,
+                    child: NeoCard(
+                      tone: NeoTone.paper,
+                      shadow: 4,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: StrokeOrderView(
+                        paths: widget.stroke!.paths,
+                        viewBox: widget.stroke!.viewBox,
+                        size: 140,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 Expanded(
                   child: Center(
                     child: ConstrainedBox(

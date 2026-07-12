@@ -9,12 +9,18 @@ import '../../theme/app_theme.dart';
 /// Animates a kanji's KanjiVG strokes in order: completed strokes stay inked, the
 /// current stroke traces in, upcoming strokes show as a faint guide. Tap to replay.
 class StrokeOrderView extends StatefulWidget {
-  const StrokeOrderView(
-      {super.key, required this.paths, required this.viewBox, this.size = 200});
+  const StrokeOrderView({
+    super.key,
+    required this.paths,
+    required this.viewBox,
+    this.size = 200,
+    this.showControls = true,
+  });
 
   final List<String> paths; // SVG `d` strings, in stroke order
   final String viewBox; // "0 0 109 109"
   final double size;
+  final bool showControls;
 
   @override
   State<StrokeOrderView> createState() => _StrokeOrderViewState();
@@ -134,28 +140,29 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
             ),
           ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton.icon(
-              onPressed: _replay,
-              icon: const Icon(Icons.replay, size: 18),
-              label: Text(context.trText('Replay strokes')),
-            ),
-            TextButton.icon(
-              onPressed: () => setState(() => _showNumbers = !_showNumbers),
-              icon: Icon(
-                _showNumbers ? Icons.looks_one_outlined : Icons.visibility,
-                size: 17,
+        if (widget.showControls)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton.icon(
+                onPressed: _replay,
+                icon: const Icon(Icons.replay, size: 18),
+                label: Text(context.trText('Replay strokes')),
               ),
-              label: Text(
-                _showNumbers
-                    ? context.trText('Hide numbers')
-                    : context.trText('Show numbers'),
+              TextButton.icon(
+                onPressed: () => setState(() => _showNumbers = !_showNumbers),
+                icon: Icon(
+                  _showNumbers ? Icons.looks_one_outlined : Icons.visibility,
+                  size: 17,
+                ),
+                label: Text(
+                  _showNumbers
+                      ? context.trText('Hide numbers')
+                      : context.trText('Show numbers'),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
       ],
     );
   }

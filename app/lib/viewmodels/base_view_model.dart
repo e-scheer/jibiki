@@ -19,7 +19,14 @@ abstract class BaseViewModel extends ChangeNotifier {
   }
 
   @protected
-  Future<T?> runGuarded<T>(Future<T> Function() action, {bool silent = false}) async {
+  void setError(String? message) {
+    _error = message;
+    _safeNotify();
+  }
+
+  @protected
+  Future<T?> runGuarded<T>(Future<T> Function() action,
+      {bool silent = false}) async {
     if (!silent) {
       _loading = true;
       _error = null;

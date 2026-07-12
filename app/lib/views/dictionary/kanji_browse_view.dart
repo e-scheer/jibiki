@@ -144,10 +144,12 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                 ? NeoIconButton(
                     icon: Icons.close_rounded,
                     label: context.trText('Cancel'),
-                    onTap: () => setState(() {
-                      _selecting = false;
-                      _selected.clear();
-                    }),
+                    onTap: _busy
+                        ? null
+                        : () => setState(() {
+                              _selecting = false;
+                              _selected.clear();
+                            }),
                   )
                 : canPop
                     ? NeoIconButton(
@@ -159,7 +161,7 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
             trailing: _selecting
                 ? _BrowseHeaderAction(
                     label: context.trText('Select all'),
-                    enabled: list.isNotEmpty,
+                    enabled: list.isNotEmpty && !_busy,
                     onTap: () => setState(
                       () => _selected.addAll(list.map((k) => k.literal)),
                     ),
@@ -170,7 +172,9 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
                       NeoIconButton(
                         icon: Icons.checklist_rounded,
                         label: context.trText('Select kanji'),
-                        onTap: () => setState(() => _selecting = true),
+                        onTap: _busy
+                            ? null
+                            : () => setState(() => _selecting = true),
                       ),
                       const SizedBox(width: 8),
                       NeoIconButton(
@@ -184,7 +188,8 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
             child: TextField(
-              onChanged: (v) => setState(() => _q = v),
+              onChanged: _busy ? null : (v) => setState(() => _q = v),
+              enabled: !_busy,
               decoration: InputDecoration(
                 hintText: context.trText('Filter by kanji or meaning…'),
                 prefixIcon: const Icon(Icons.search),
@@ -197,16 +202,18 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _chip('All', _jlpt == null, () => _setJlpt(null)),
+                _chip('All', _jlpt == null, () => _setJlpt(null),
+                    enabled: !_busy),
                 for (final n in [5, 4, 3, 2, 1])
-                  _chip('N$n', _jlpt == n, () => _setJlpt(n)),
+                  _chip('N$n', _jlpt == n, () => _setJlpt(n), enabled: !_busy),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: _chip(
                       '部 Radical',
                       false,
                       () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const RadicalPickerView()))),
+                          builder: (_) => const RadicalPickerView())),
+                      enabled: !_busy),
                 ),
               ],
             ),
@@ -258,34 +265,38 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
     _load();
   }
 
-  Widget _chip(String label, bool on, VoidCallback onTap) {
+  Widget _chip(String label, bool on, VoidCallback onTap,
+      {bool enabled = true}) {
     final jc = context.jc;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: Pressable(
-        label: label,
-        selected: on,
-        onTap: onTap,
-        child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: on ? jc.acid : jc.surface,
-            borderRadius: BorderRadius.circular(9),
-            border: Border.all(color: jc.ink, width: 2.5),
-            boxShadow: on
-                ? [
-                    BoxShadow(
-                      color: jc.ink,
-                      blurRadius: 0,
-                      offset: const Offset(3, 3),
-                    ),
-                  ]
-                : null,
+      child: Opacity(
+        opacity: enabled ? 1 : .45,
+        child: Pressable(
+          label: label,
+          selected: on,
+          onTap: enabled ? onTap : null,
+          child: Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: on ? jc.acid : jc.surface,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: jc.ink, width: 2.5),
+              boxShadow: on
+                  ? [
+                      BoxShadow(
+                        color: jc.ink,
+                        blurRadius: 0,
+                        offset: const Offset(3, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(label,
+                style: TextStyle(
+                    color: jc.ink, fontWeight: FontWeight.w700, fontSize: 13)),
           ),
-          child: Text(label,
-              style: TextStyle(
-                  color: jc.ink, fontWeight: FontWeight.w700, fontSize: 13)),
         ),
       ),
     );

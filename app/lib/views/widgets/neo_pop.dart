@@ -187,19 +187,22 @@ class NeoIconButton extends StatelessWidget {
   });
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final NeoTone tone;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-        dimension: 44,
-        child: NeoCard(
-          tone: tone,
-          padding: EdgeInsets.zero,
-          radius: 10,
-          onTap: onTap,
-          semanticLabel: label,
-          child: Icon(icon, size: 21),
+  Widget build(BuildContext context) => Opacity(
+        opacity: onTap == null ? .45 : 1,
+        child: SizedBox.square(
+          dimension: 44,
+          child: NeoCard(
+            tone: tone,
+            padding: EdgeInsets.zero,
+            radius: 10,
+            onTap: onTap,
+            semanticLabel: label,
+            child: Icon(icon, size: 21),
+          ),
         ),
       );
 }
@@ -460,78 +463,82 @@ class NeoSegmentedControl<T> extends StatelessWidget {
     final jc = context.jc;
     return Semantics(
       container: true,
-      child: Container(
-        height: height,
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: jc.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: jc.ink, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: jc.ink,
-              blurRadius: 0,
-              offset: const Offset(4, 4),
-            ),
-          ],
-        ),
-        child: LayoutBuilder(
-          builder: (context, _) {
-            final selectedIndex = segments.indexWhere(
-              (segment) => segment.value == selected,
-            );
-            final count = segments.length.clamp(1, 12);
-            final alignment = count == 1
-                ? 0.0
-                : -1.0 + (selectedIndex.clamp(0, count - 1) * 2 / (count - 1));
-            return Stack(
-              children: [
-                AnimatedAlign(
-                  duration: Motion.timed(
-                    context,
-                    const Duration(milliseconds: 230),
-                  ),
-                  curve: Motion.outStrong,
-                  alignment: Alignment(alignment, 0),
-                  child: FractionallySizedBox(
-                    widthFactor: 1 / count,
-                    heightFactor: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 1),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: jc.acid,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: jc.ink, width: 2.5),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black,
-                              blurRadius: 0,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
+      child: Opacity(
+        opacity: enabled ? 1 : .5,
+        child: Container(
+          height: height,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: jc.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: jc.ink, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: jc.ink,
+                blurRadius: 0,
+                offset: const Offset(4, 4),
+              ),
+            ],
+          ),
+          child: LayoutBuilder(
+            builder: (context, _) {
+              final selectedIndex = segments.indexWhere(
+                (segment) => segment.value == selected,
+              );
+              final count = segments.length.clamp(1, 12);
+              final alignment = count == 1
+                  ? 0.0
+                  : -1.0 +
+                      (selectedIndex.clamp(0, count - 1) * 2 / (count - 1));
+              return Stack(
+                children: [
+                  AnimatedAlign(
+                    duration: Motion.timed(
+                      context,
+                      const Duration(milliseconds: 230),
+                    ),
+                    curve: Motion.outStrong,
+                    alignment: Alignment(alignment, 0),
+                    child: FractionallySizedBox(
+                      widthFactor: 1 / count,
+                      heightFactor: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: jc.acid,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: jc.ink, width: 2.5),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                blurRadius: 0,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    for (final segment in segments)
-                      Expanded(
-                        child: _NeoSegmentButton<T>(
-                          segment: segment,
-                          selected: segment.value == selected,
-                          enabled: enabled,
-                          showSelection: false,
-                          onTap: () => onChanged(segment.value),
+                  Row(
+                    children: [
+                      for (final segment in segments)
+                        Expanded(
+                          child: _NeoSegmentButton<T>(
+                            segment: segment,
+                            selected: segment.value == selected,
+                            enabled: enabled,
+                            showSelection: false,
+                            onTap: () => onChanged(segment.value),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ],
-            );
-          },
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

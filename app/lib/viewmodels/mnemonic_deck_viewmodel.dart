@@ -1,5 +1,6 @@
 import '../models/mnemonic.dart';
 import '../models/mnemonic_deck.dart';
+import '../repositories/dictionary_repository.dart';
 import '../repositories/mnemonic_deck_repository.dart';
 import '../repositories/mnemonic_repository.dart';
 import 'base_view_model.dart';
@@ -87,17 +88,26 @@ class DeckDetailViewModel extends BaseViewModel {
 
 /// Assemble a pack from the user's own drawings, then create / publish it.
 class DeckBuilderViewModel extends BaseViewModel {
-  DeckBuilderViewModel(this._decks, this._mnemonics, {required this.language});
+  DeckBuilderViewModel(
+    this._decks,
+    this._mnemonics, {
+    required this.language,
+    DictionaryRepository? dictionary,
+  }) : _dictionary = dictionary;
   final MnemonicDeckRepository _decks;
   final MnemonicRepository _mnemonics;
+  final DictionaryRepository? _dictionary;
   final String language;
 
   String kind = 'kana';
   String kanaScriptFilter = 'both';
+  String jlptFilter = 'all';
   List<Mnemonic> _available = [];
   List<Mnemonic> _filtered =
       const []; // cached: own drawings of the current kind
   final List<int> _selected = []; // ordered selection
+  final Map<int, Set<String>> _jlptCharacters = {};
+  bool _jlptLoading = false;
 
   /// The user's own drawings matching the current kind (image-bearing first).
   List<Mnemonic> get available => _filtered;
@@ -105,6 +115,7 @@ class DeckBuilderViewModel extends BaseViewModel {
   List<int> get selected => _selected;
   int get selectedCount => _selected.length;
   bool isSelected(int id) => _selected.contains(id);
+  bool get isJlptLoading => _jlptLoading;
   bool get allVisibleSelected =>
       _filtered.isNotEmpty && _filtered.every((m) => _selected.contains(m.id));
 
@@ -119,9 +130,44 @@ class DeckBuilderViewModel extends BaseViewModel {
   void setKind(String k) {
     if (kind == k) return;
     kind = k;
+    jlptFilter = 'all';
     _selected.clear();
     _recomputeFiltered();
     notifyListeners();
+  }
+
+  /// Uses the dictionary's canonical JLPT metadata rather than a hand-written
+  /// character list. The first choice loads one compact set, then subsequent
+  /// changes are instant and work offline from the dictionary pack.
+  void setJlptFilter(String filter) {
+    if (kind != 'kanji' || jlptFilter == filter) return;
+    jlptFilter = filter;
+    _selected.clear();
+    if (filter == 'all' || _jlptCharacters.containsKey(int.tryParse(filter))) {
+      _recomputeFiltered();
+      notifyListeners();
+      return;
+    }
+    _jlptLoading = true;
+    _filtered = const [];
+    notifyListeners();
+    _loadJlpt(int.parse(filter));
+  }
+
+  Future<void> _loadJlpt(int level) async {
+    try {
+      final dictionary = _dictionary;
+      if (dictionary == null) return;
+      final entries = await dictionary.kanjiList(jlpt: level, limit: 1500);
+      _jlptCharacters[level] = entries.map((entry) => entry.literal).toSet();
+      _recomputeFiltered();
+    } catch (error) {
+      setError('Unable to load JLPT N$level right now.');
+      _filtered = const [];
+    } finally {
+      _jlptLoading = false;
+      notifyListeners();
+    }
   }
 
   void setKanaScriptFilter(String filter) {
@@ -140,6 +186,10 @@ class DeckBuilderViewModel extends BaseViewModel {
       if (rune == null) return false;
       final hiragana = rune >= 0x3040 && rune <= 0x309f;
       return kanaScriptFilter == 'hiragana' ? hiragana : !hiragana;
+    }).where((m) {
+      if (kind != 'kanji' || jlptFilter == 'all') return true;
+      return _jlptCharacters[int.parse(jlptFilter)]?.contains(m.character) ??
+          false;
     }).toList()
       ..sort((a, b) => (b.hasImage ? 1 : 0).compareTo(a.hasImage ? 1 : 0));
   }

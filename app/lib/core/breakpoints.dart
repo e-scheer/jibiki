@@ -22,7 +22,7 @@ class Breakpoints {
   static const double medium = 600;
 
   /// Tablet landscape and desktop workspaces start here. The navigation rail
-  /// remains the same compact 76 px at every wide size.
+  /// remains the same compact 84 px at every wide size.
   static const double expanded = 960;
 
   /// Reading/content column ceiling on wide screens, so prose and forms don't
