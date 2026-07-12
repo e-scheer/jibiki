@@ -16,6 +16,9 @@ Future<void> showAuthRequiredSheet(
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
+    elevation: 0,
+    shape: const RoundedRectangleBorder(),
+    clipBehavior: Clip.none,
     isScrollControlled: true,
     builder: (sheetContext) => SafeArea(
       child: Padding(
