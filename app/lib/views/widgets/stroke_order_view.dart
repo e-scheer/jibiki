@@ -1,7 +1,8 @@
-import 'package:jibiki/l10n/l10n.dart';
+import 'dart:math' as math;
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 import '../../theme/app_theme.dart';
@@ -15,12 +16,14 @@ class StrokeOrderView extends StatefulWidget {
     required this.viewBox,
     this.size = 200,
     this.showControls = true,
+    this.numberColor,
   });
 
   final List<String> paths; // SVG `d` strings, in stroke order
   final String viewBox; // "0 0 109 109"
   final double size;
   final bool showControls;
+  final Color? numberColor;
 
   @override
   State<StrokeOrderView> createState() => _StrokeOrderViewState();
@@ -33,6 +36,7 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
   // PathMetrics precomputed once per stroke, extracting them every frame in the
   // painter (during the trace animation) is needless work.
   late List<List<PathMetric>> _metrics;
+  late List<Offset?> _numberCenters;
   double _canvas = 109;
 
   bool _started = false;
@@ -82,16 +86,26 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
         // Skip an unparseable stroke rather than fail the whole diagram.
       }
     }
+    _numberCenters = layoutStrokeNumberCenters(
+      metrics: _metrics,
+      canvas: _canvas,
+      size: widget.size,
+    );
   }
 
   @override
   void didUpdateWidget(StrokeOrderView old) {
     super.didUpdateWidget(old);
-    if (old.paths != widget.paths) {
+    final geometryChanged = old.paths != widget.paths ||
+        old.viewBox != widget.viewBox ||
+        old.size != widget.size;
+    if (geometryChanged) {
       _parse();
-      _controller.duration =
-          Duration(milliseconds: 380 * widget.paths.length.clamp(1, 40));
-      _play();
+      if (old.paths != widget.paths) {
+        _controller.duration =
+            Duration(milliseconds: 380 * widget.paths.length.clamp(1, 40));
+      }
+      if (old.paths != widget.paths || old.viewBox != widget.viewBox) _play();
     }
   }
 
@@ -131,7 +145,8 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
                       progress: _controller.value,
                       ink: jc.ink,
                       guide: jc.ink.withValues(alpha: 0.12),
-                      numberColor: jc.magenta,
+                      numberColor: widget.numberColor ?? jc.brand,
+                      numberCenters: _numberCenters,
                       showNumbers: _showNumbers,
                     ),
                   ),
@@ -177,6 +192,7 @@ class _StrokePainter extends CustomPainter {
     required this.ink,
     required this.guide,
     required this.numberColor,
+    required this.numberCenters,
     required this.showNumbers,
   });
 
@@ -187,12 +203,14 @@ class _StrokePainter extends CustomPainter {
   final Color ink;
   final Color guide;
   final Color numberColor;
+  final List<Offset?> numberCenters;
   final bool showNumbers;
 
   @override
   void paint(Canvas c, Size size) {
     if (strokes.isEmpty) return;
     final scale = size.width / canvas;
+    c.save();
     c.scale(scale);
 
     final n = strokes.length;
@@ -217,23 +235,37 @@ class _StrokePainter extends CustomPainter {
         c.drawPath(stroke, pen(guide)); // upcoming: faint guide
       }
     }
+    c.restore();
     if (showNumbers) {
-      final numberStyle = TextStyle(
-        color: numberColor,
-        fontSize: 10 / scale,
-        fontWeight: FontWeight.w900,
-      );
-      for (var i = 0; i < metrics.length; i++) {
-        final first =
-            metrics[i].isEmpty ? null : metrics[i].first.getTangentForOffset(0);
-        if (first == null) continue;
+      final numberInk = _contrastingMonochrome(numberColor);
+      final fill = Paint()
+        ..color = numberColor
+        ..style = PaintingStyle.fill;
+      final outline = Paint()
+        ..color = ink
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeNumberBadgeBorderPx;
+      for (var i = 0; i < numberCenters.length; i++) {
+        final center = numberCenters[i];
+        if (center == null) continue;
+        c.drawCircle(center, strokeNumberBadgeRadiusPx, fill);
+        c.drawCircle(center, strokeNumberBadgeRadiusPx, outline);
+        final label = '${i + 1}';
         final painter = TextPainter(
-          text: TextSpan(text: '${i + 1}', style: numberStyle),
+          text: TextSpan(
+            text: label,
+            style: TextStyle(
+              color: numberInk,
+              fontSize: label.length > 1 ? 7.5 : 9,
+              height: 1,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           textDirection: TextDirection.ltr,
         )..layout();
         painter.paint(
           c,
-          first.position - Offset(painter.width / 2, painter.height / 2),
+          center - Offset(painter.width / 2, painter.height / 2),
         );
       }
     }
@@ -253,5 +285,173 @@ class _StrokePainter extends CustomPainter {
       old.strokes != strokes ||
       old.ink != ink ||
       old.numberColor != numberColor ||
+      old.numberCenters != numberCenters ||
       old.showNumbers != showNumbers;
+}
+
+/// Fixed logical-pixel footprint of a stroke number. Keeping the badge in
+/// screen coordinates makes it equally readable in compact and large guides.
+@visibleForTesting
+const double strokeNumberBadgeRadiusPx = 8.5;
+
+@visibleForTesting
+const double strokeNumberBadgeBorderPx = 1.25;
+
+/// Places each stroke number close to its stroke origin without covering any
+/// stroke or an already placed badge. Work happens once when geometry changes,
+/// never on an animation tick.
+@visibleForTesting
+List<Offset?> layoutStrokeNumberCenters({
+  required List<List<PathMetric>> metrics,
+  required double canvas,
+  required double size,
+}) {
+  if (metrics.isEmpty || canvas <= 0 || size <= 0) return const [];
+  final scale = size / canvas;
+  const sampleStepPx = 1.5;
+  final sampleStep = sampleStepPx / scale;
+  final segments = <_StrokeSegment>[];
+  final origins = <({Offset position, Offset direction})?>[];
+
+  for (final strokeMetrics in metrics) {
+    ({Offset position, Offset direction})? origin;
+    for (final metric in strokeMetrics) {
+      if (metric.length <= 0) continue;
+      final start = metric.getTangentForOffset(0);
+      if (origin == null && start != null) {
+        origin = (
+          position: start.position * scale,
+          direction: _unit(start.vector),
+        );
+      }
+      final first = start?.position;
+      if (first == null) continue;
+      var previous = first * scale;
+      for (var offset = sampleStep;
+          offset < metric.length;
+          offset += sampleStep) {
+        final point = metric.getTangentForOffset(offset)?.position;
+        if (point == null) continue;
+        final current = point * scale;
+        segments.add(_StrokeSegment(previous, current));
+        previous = current;
+      }
+      final end = metric.getTangentForOffset(metric.length)?.position;
+      if (end != null) {
+        final current = end * scale;
+        segments.add(_StrokeSegment(previous, current));
+      }
+    }
+    origins.add(origin);
+  }
+
+  final strokeRadiusPx = 4.5 * scale / 2;
+  const freeGapPx = 2.5;
+  final outerBadgeRadius =
+      strokeNumberBadgeRadiusPx + strokeNumberBadgeBorderPx / 2;
+  final strokeClearance =
+      outerBadgeRadius + strokeRadiusPx + freeGapPx + sampleStepPx / 2;
+  final labelClearance = outerBadgeRadius * 2 + 2.5;
+  final margin = outerBadgeRadius + 1.5;
+  final maxDistance = math.min(size * .7, 96.0);
+
+  final candidateSets = <List<Offset>>[];
+  for (final origin in origins) {
+    if (origin == null) {
+      candidateSets.add(const []);
+      continue;
+    }
+    final tangent =
+        origin.direction == Offset.zero ? const Offset(1, 0) : origin.direction;
+    final normal = Offset(-tangent.dy, tangent.dx);
+    final directions = <Offset>[
+      -tangent,
+      normal,
+      -normal,
+      _unit(-tangent + normal),
+      _unit(-tangent - normal),
+      tangent,
+      for (var step = 0; step < 32; step++)
+        Offset(
+          math.cos(step * math.pi / 16),
+          math.sin(step * math.pi / 16),
+        ),
+    ];
+    final candidates = <Offset>[];
+    for (var distance = strokeClearance;
+        distance <= maxDistance && candidates.length < 96;
+        distance += 4) {
+      for (final direction in directions) {
+        if (direction == Offset.zero) continue;
+        final candidate = origin.position + direction * distance;
+        if (candidate.dx < margin ||
+            candidate.dy < margin ||
+            candidate.dx > size - margin ||
+            candidate.dy > size - margin) {
+          continue;
+        }
+        var touchesStroke = false;
+        for (final segment in segments) {
+          if (segment.distanceSquaredTo(candidate) <
+              strokeClearance * strokeClearance) {
+            touchesStroke = true;
+            break;
+          }
+        }
+        if (!touchesStroke) candidates.add(candidate);
+      }
+    }
+    candidateSets.add(candidates);
+  }
+
+  final result = List<Offset?>.filled(metrics.length, null);
+  final placed = <Offset>[];
+  final order = List<int>.generate(metrics.length, (index) => index)
+    ..sort((a, b) {
+      final byFreedom =
+          candidateSets[a].length.compareTo(candidateSets[b].length);
+      return byFreedom != 0 ? byFreedom : a.compareTo(b);
+    });
+  for (final index in order) {
+    for (final candidate in candidateSets[index]) {
+      if (placed.every(
+        (other) => (candidate - other).distance >= labelClearance,
+      )) {
+        result[index] = candidate;
+        placed.add(candidate);
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+Offset _unit(Offset vector) {
+  final length = vector.distance;
+  return length <= 0.0001 ? Offset.zero : vector / length;
+}
+
+Color _contrastingMonochrome(Color background) {
+  final luminance = background.computeLuminance();
+  final whiteContrast = 1.05 / (luminance + 0.05);
+  final blackContrast = (luminance + 0.05) / 0.05;
+  return whiteContrast > blackContrast ? Colors.white : Colors.black;
+}
+
+class _StrokeSegment {
+  const _StrokeSegment(this.start, this.end);
+
+  final Offset start;
+  final Offset end;
+
+  double distanceSquaredTo(Offset point) {
+    final vector = end - start;
+    final lengthSquared = vector.distanceSquared;
+    if (lengthSquared <= 0.0001) return (point - start).distanceSquared;
+    final projection =
+        ((point - start).dx * vector.dx + (point - start).dy * vector.dy) /
+            lengthSquared;
+    final nearest = start + vector * projection.clamp(0.0, 1.0).toDouble();
+    return (point - nearest).distanceSquared;
+  }
 }

@@ -133,7 +133,10 @@ class _KanjiDetail extends StatelessWidget {
               Center(
                 child: k.hasStrokes
                     ? StrokeOrderView(
-                        paths: k.strokePaths, viewBox: k.strokeViewbox)
+                        paths: k.strokePaths,
+                        viewBox: k.strokeViewbox,
+                        numberColor: context.jc.lime,
+                      )
                     : Text(k.literal,
                         style: const TextStyle(
                             fontSize: 96,
