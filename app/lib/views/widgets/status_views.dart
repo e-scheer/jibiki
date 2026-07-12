@@ -2,6 +2,7 @@ import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import 'jibiki_brand.dart';
 import 'neo_pop.dart';
 
 class LoadingView extends StatelessWidget {
@@ -10,84 +11,9 @@ class LoadingView extends StatelessWidget {
   Widget build(BuildContext context) => const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
-          child: _NeoLoader(),
+          child: NeoChaseLoader(),
         ),
       );
-}
-
-class _NeoLoader extends StatefulWidget {
-  const _NeoLoader();
-
-  @override
-  State<_NeoLoader> createState() => _NeoLoaderState();
-}
-
-class _NeoLoaderState extends State<_NeoLoader>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 720),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final jc = context.jc;
-    final colors = [jc.acid, jc.magenta, jc.brand];
-    return Semantics(
-      label: context.trText('Loading'),
-      child: ExcludeSemantics(
-        child: RepaintBoundary(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              final phase = Motion.enabled(context) ? _controller.value : 0.2;
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var i = 0; i < colors.length; i++) ...[
-                    Transform.translate(
-                      offset: Offset(0, -5 * _pulse(phase, i / 3)),
-                      child: Transform.rotate(
-                        angle: (phase + i / 3) * 0.22,
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: colors[i],
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: jc.ink, width: 2.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: jc.ink,
-                                blurRadius: 0,
-                                offset: const Offset(3, 3),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (i != colors.length - 1) const SizedBox(width: 9),
-                  ],
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  double _pulse(double phase, double offset) {
-    final value = (phase - offset + 1) % 1;
-    return value < 0.5 ? value * 2 : (1 - value) * 2;
-  }
 }
 
 class ErrorRetry extends StatelessWidget {
@@ -225,9 +151,12 @@ class Skeleton extends StatelessWidget {
       width: width,
       height: circle ? (width ?? height) : height,
       decoration: BoxDecoration(
-        color: context.jc.surfaceAlt,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? context.jc.surfaceAlt
+            : const Color(0xFFD7D3E3),
         borderRadius: circle ? null : BorderRadius.circular(radius),
         shape: circle ? BoxShape.circle : BoxShape.rectangle,
+        border: Border.all(color: context.jc.ink, width: 2.5),
       ),
     );
   }
@@ -245,7 +174,7 @@ class _Pulse extends StatefulWidget {
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1100))
+      vsync: this, duration: const Duration(milliseconds: 900))
     ..repeat(reverse: true);
 
   @override
@@ -257,7 +186,7 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     if (!Motion.enabled(context)) {
-      return Opacity(opacity: 0.7, child: widget.child);
+      return widget.child;
     }
     return AnimatedBuilder(
       animation: _c,
@@ -354,19 +283,80 @@ class SkeletonCardGrid extends StatelessWidget {
         shrinkWrap: shrinkWrap,
         physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
         itemCount: count,
-        itemBuilder: (context, __) => Container(
-          decoration: BoxDecoration(
-            color: context.jc.surfaceAlt,
-            borderRadius: BorderRadius.circular(Radii.lg),
-            border: Border.all(color: context.jc.ink, width: 2.5),
-            boxShadow: [
-              BoxShadow(
-                color: context.jc.ink,
-                blurRadius: 0,
-                offset: const Offset(4, 4),
+        itemBuilder: (context, __) => LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontal = constraints.maxHeight < 150 &&
+                constraints.maxWidth > constraints.maxHeight * 1.8;
+            return Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: context.jc.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.jc.ink, width: 2.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(4, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
+              child: horizontal
+                  ? const Row(
+                      children: [
+                        Skeleton(width: 58, height: 58, radius: 9),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Skeleton(width: 150, height: 13),
+                              SizedBox(height: 8),
+                              FractionallySizedBox(
+                                widthFactor: 0.72,
+                                child: Skeleton(
+                                  width: double.infinity,
+                                  height: 10,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Skeleton(width: 76, height: 10),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Skeleton(width: double.infinity, radius: 10),
+                        ),
+                        SizedBox(height: 12),
+                        Skeleton(width: 88, height: 12),
+                        SizedBox(height: 9),
+                        FractionallySizedBox(
+                          widthFactor: 0.75,
+                          child: Skeleton(
+                            width: double.infinity,
+                            height: 10,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Skeleton(width: 38, height: 30, radius: 8),
+                            SizedBox(width: 7),
+                            Skeleton(width: 50, height: 30, radius: 8),
+                            SizedBox(width: 7),
+                            Skeleton(width: 34, height: 30, radius: 8),
+                          ],
+                        ),
+                      ],
+                    ),
+            );
+          },
         ),
       ),
     );

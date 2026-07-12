@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/breakpoints.dart';
 import '../../theme/app_theme.dart';
+import 'jibiki_brand.dart';
 import 'pressable.dart';
 
 enum NeoTone { paper, acid, blue, magenta, lime, lavender, coral, ink }
@@ -232,12 +233,9 @@ class NeoPrimaryButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (busy)
-                SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: tone.foreground(context),
-                  ),
+                NeoChaseLoader.small(
+                  alternateFirst: tone == NeoTone.blue || tone == NeoTone.ink,
+                  semanticLabel: '$label, loading',
                 )
               else if (icon != null)
                 Icon(icon, size: 20),

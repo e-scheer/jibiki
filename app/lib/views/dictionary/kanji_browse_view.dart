@@ -9,6 +9,7 @@ import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
 import '../widgets/status_views.dart';
@@ -121,45 +122,8 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
     final lang = context.read<AppState>().mnemonicLanguage;
     final list = _filtered(lang);
 
+    final canPop = Navigator.of(context).canPop();
     return Scaffold(
-      appBar: AppBar(
-        leading: _selecting
-            ? IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: context.trText('Cancel'),
-                onPressed: () => setState(() {
-                  _selecting = false;
-                  _selected.clear();
-                }),
-              )
-            : null,
-        title: Text(_selecting ? '${_selected.length} selected' : 'Kanji'),
-        actions: _selecting
-            ? [
-                TextButton(
-                  onPressed: list.isEmpty
-                      ? null
-                      : () {
-                          Haptics.tick();
-                          setState(() =>
-                              _selected.addAll(list.map((k) => k.literal)));
-                        },
-                  child: Text(context.trText('Select all')),
-                ),
-              ]
-            : [
-                IconButton(
-                  tooltip: context.trText('Select kanji'),
-                  icon: const Icon(Icons.checklist_rounded),
-                  onPressed: () => setState(() => _selecting = true),
-                ),
-                IconButton(
-                  tooltip: context.trText('Settings'),
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => context.push('/settings'),
-                ),
-              ],
-      ),
       bottomNavigationBar: _selecting
           ? SelectionActionBar(
               count: _selected.length,
@@ -170,8 +134,55 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
           : null,
       body: Column(
         children: [
+          NeoPageHeader(
+            title: _selecting ? '${_selected.length} selected' : 'Kanji',
+            subtitle: _selecting
+                ? context.trText('Choose the kanji to update together.')
+                : context.trText('Filter the matrix by meaning or level.'),
+            tone: _selecting ? NeoTone.acid : NeoTone.lavender,
+            leading: _selecting
+                ? NeoIconButton(
+                    icon: Icons.close_rounded,
+                    label: context.trText('Cancel'),
+                    onTap: () => setState(() {
+                      _selecting = false;
+                      _selected.clear();
+                    }),
+                  )
+                : canPop
+                    ? NeoIconButton(
+                        icon: Icons.arrow_back_rounded,
+                        label: context.trText('Back'),
+                        onTap: () => Navigator.pop(context),
+                      )
+                    : null,
+            trailing: _selecting
+                ? _BrowseHeaderAction(
+                    label: context.trText('Select all'),
+                    enabled: list.isNotEmpty,
+                    onTap: () => setState(
+                      () => _selected.addAll(list.map((k) => k.literal)),
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      NeoIconButton(
+                        icon: Icons.checklist_rounded,
+                        label: context.trText('Select kanji'),
+                        onTap: () => setState(() => _selecting = true),
+                      ),
+                      const SizedBox(width: 8),
+                      NeoIconButton(
+                        icon: Icons.settings_outlined,
+                        label: context.trText('Settings'),
+                        onTap: () => context.push('/settings'),
+                      ),
+                    ],
+                  ),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
             child: TextField(
               onChanged: (v) => setState(() => _q = v),
               decoration: InputDecoration(
@@ -279,6 +290,43 @@ class _KanjiBrowseViewState extends State<KanjiBrowseView> {
       ),
     );
   }
+}
+
+class _BrowseHeaderAction extends StatelessWidget {
+  const _BrowseHeaderAction({
+    required this.label,
+    required this.onTap,
+    this.enabled = true,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+        opacity: enabled ? 1 : 0.45,
+        child: SizedBox(
+          height: 44,
+          child: NeoCard(
+            tone: NeoTone.paper,
+            shadow: enabled ? 3 : 0,
+            radius: 10,
+            padding: const EdgeInsets.symmetric(horizontal: 13),
+            semanticLabel: label,
+            onTap: enabled ? onTap : null,
+            child: Center(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _KanjiTile extends StatelessWidget {

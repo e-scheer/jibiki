@@ -49,30 +49,39 @@ dev_dependencies:
   # Generate launcher icons (Android adaptive + monochrome, iOS, web).
   flutter_launcher_icons: ^0.14.1
 
-# The app icon: white 字 on the NeoPop Klein blue field.
+# Exploration 17 app icon: ink 字 on the full NeoPop acid field.
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
-  adaptive_icon_background: "#2B36E3"
+  adaptive_icon_background: "#F2E51C"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   adaptive_icon_monochrome: "assets/icon/icon_monochrome.png"
   remove_alpha_ios: true
   web:
     generate: true
     image_path: "assets/icon/icon.png"
-    background_color: "#2B36E3"
+    background_color: "#F2E51C"
     theme_color: "#2B36E3"
 
-# Launch screen: the Klein blue 字 on a crisp white surface.
+# Exploration 17 launch screen. Flutter takes over immediately with the
+# animated chase loader while the app finishes bootstrapping.
 flutter_native_splash:
-  color: "#FFFFFF"
-  color_dark: "#0C0A09"
-  image: assets/icon/splash.png
+  color: "#2B36E3"
+  color_dark: "#17131F"
+  image: assets/icon/splash_klein.png
+  image_dark: assets/icon/splash_dark.png
+  branding: assets/icon/branding_klein.png
+  branding_dark: assets/icon/branding_dark.png
+  branding_mode: bottom
+  branding_bottom_padding: 32
   android_12:
-    color: "#FFFFFF"
-    color_dark: "#0C0A09"
-    image: assets/icon/splash.png
+    color: "#2B36E3"
+    color_dark: "#17131F"
+    image: assets/icon/splash_android12.png
+    image_dark: assets/icon/splash_android12.png
+    branding: assets/icon/branding_klein.png
+    branding_dark: assets/icon/branding_dark.png
   android: true
   ios: true
 
@@ -85,9 +94,23 @@ flutter:
     - assets/packs/base.db.gz
     - assets/packs/base_manifest.json
   fonts:
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SpaceGrotesk-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/SpaceGrotesk-Bold.ttf
+          weight: 700
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter.ttf
+    - family: ZenKakuGothicNew
+      fonts:
+        - asset: assets/fonts/ZenKakuGothicNew-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/ZenKakuGothicNew-Black.ttf
+          weight: 900
     # Japanese faces for study cards: the same character in different hands
     # (gothic · mincho · brush) so the eye learns to read its variants. OFL.
     - family: NotoSansJP

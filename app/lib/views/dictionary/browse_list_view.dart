@@ -86,8 +86,23 @@ class _Browse extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(spec.title)),
-      body: body,
+      body: Column(
+        children: [
+          NeoPageHeader(
+            title: spec.title,
+            subtitle: spec.isKanji
+                ? context.trText('A dense, searchable kanji collection.')
+                : context.trText('Dictionary entries ready to explore.'),
+            tone: spec.isKanji ? NeoTone.lavender : NeoTone.blue,
+            leading: NeoIconButton(
+              icon: Icons.arrow_back_rounded,
+              label: context.trText('Back'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ),
+          Expanded(child: body),
+        ],
+      ),
     );
   }
 }
@@ -191,40 +206,61 @@ class _RadicalPickerViewState extends State<RadicalPickerView> {
   @override
   Widget build(BuildContext context) {
     final radicals = _radicals;
-    return Scaffold(
-      appBar: AppBar(title: Text(context.trText('By radical'))),
-      body: _error != null
-          ? ErrorRetry(message: _error!, onRetry: () => setState(() => _load()))
-          : radicals == null
-              ? const SkeletonCardGrid(
-                  count: 18, crossAxisCount: 6, childAspectRatio: 1)
-              : BoundedContent(
-                  maxWidth: 920,
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 60,
-                      mainAxisSpacing: 6,
-                      crossAxisSpacing: 6,
-                      childAspectRatio: 1,
-                    ),
-                    itemCount: radicals.length,
-                    itemBuilder: (_, i) {
-                      final lit = radicals[i]['literal']?.toString() ?? '';
-                      return _RadicalCell(
-                        literal: lit,
-                        onTap: () =>
-                            Navigator.of(context).push(MaterialPageRoute(
+    final content = _error != null
+        ? ErrorRetry(message: _error!, onRetry: () => setState(() => _load()))
+        : radicals == null
+            ? const SkeletonCardGrid(
+                count: 18,
+                crossAxisCount: 6,
+                childAspectRatio: 1,
+              )
+            : BoundedContent(
+                maxWidth: 920,
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 60,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount: radicals.length,
+                  itemBuilder: (_, i) {
+                    final lit = radicals[i]['literal']?.toString() ?? '';
+                    return _RadicalCell(
+                      literal: lit,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
                           builder: (_) => BrowseListView(
                             spec: BrowseSpec.kanji(
-                                title: 'Kanji with $lit', contains: lit),
+                              title: 'Kanji with $lit',
+                              contains: lit,
+                            ),
                           ),
-                        )),
-                      );
-                    },
-                  ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
+              );
+    return Scaffold(
+      body: Column(
+        children: [
+          NeoPageHeader(
+            title: context.trText('By radical'),
+            subtitle: context.trText(
+              'Choose a component to narrow the kanji matrix.',
+            ),
+            tone: NeoTone.lime,
+            leading: NeoIconButton(
+              icon: Icons.arrow_back_rounded,
+              label: context.trText('Back'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ),
+          Expanded(child: content),
+        ],
+      ),
     );
   }
 }

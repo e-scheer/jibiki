@@ -8,6 +8,7 @@ import '../../sync/sync_engine.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/storage_viewmodel.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/sync_conflict_gate.dart';
 
 class OfflineStorageView extends StatelessWidget {
@@ -276,9 +277,12 @@ class _UpdateButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (vm.checking)
-              const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
+              const NeoChaseLoader(
+                size: 16,
+                blockSize: 7,
+                borderWidth: 1.3,
+                radius: 2,
+                shadow: 1,
               )
             else
               const Icon(Icons.refresh_rounded, size: 17),
@@ -618,10 +622,7 @@ class _SyncPanel extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           if (sync.syncing)
-            const SizedBox.square(
-              dimension: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.5),
-            )
+            const NeoChaseLoader.small()
           else
             _SmallAction(
               icon: sync.conflict != null

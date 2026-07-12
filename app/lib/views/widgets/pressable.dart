@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/app_theme.dart';
 
@@ -22,9 +23,26 @@ class Pressable extends StatefulWidget {
     this.selected = false,
     this.pressedScale = 1,
     this.haptic = true,
-  });
+    this.focusRadius = 12,
+  }) : builder = null;
 
-  final Widget child;
+  const Pressable.builder({
+    super.key,
+    required this.builder,
+    required this.onTap,
+    this.label,
+    this.selected = false,
+    this.pressedScale = 1,
+    this.haptic = true,
+    this.focusRadius = 12,
+  }) : child = null;
+
+  final Widget? child;
+
+  /// Use this form when the painted child owns a hard shadow. The builder gets
+  /// the pressed state, so it can animate that shadow to zero while this widget
+  /// performs the contract's fixed 4 px translation.
+  final Widget Function(BuildContext context, bool pressed)? builder;
   final VoidCallback? onTap;
 
   /// Spoken label for screen readers. Omit when the [child] already exposes clear
@@ -33,6 +51,7 @@ class Pressable extends StatefulWidget {
   final bool selected;
   final double pressedScale;
   final bool haptic;
+  final double focusRadius;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -40,6 +59,7 @@ class Pressable extends StatefulWidget {
 
 class _PressableState extends State<Pressable> {
   bool _down = false;
+  bool _focused = false;
 
   bool get _active => widget.onTap != null;
 
@@ -48,34 +68,89 @@ class _PressableState extends State<Pressable> {
     if (_down != v) setState(() => _down = v);
   }
 
+  void _activate() {
+    if (!_active) return;
+    if (widget.haptic) Haptics.tick();
+    widget.onTap!();
+  }
+
+  void _activateFromKeyboard() {
+    if (!_active) return;
+    _set(true);
+    _activate();
+    Future<void>.delayed(Motion.fast, () {
+      if (mounted) _set(false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
+    final paintedChild = widget.builder?.call(context, _down) ?? widget.child!;
+    return FocusableActionDetector(
       enabled: _active,
-      selected: widget.selected,
-      label: widget.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => _set(true),
-        onTapCancel: () => _set(false),
-        onTapUp: (_) => _set(false),
-        onTap: _active
-            ? () {
-                if (widget.haptic) Haptics.tick();
-                widget.onTap!();
-              }
-            : null,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(end: _down ? 1 : 0),
-          duration: Motion.timed(context, Motion.fast),
-          curve: Motion.out,
-          child: widget.child,
-          builder: (context, value, child) => Transform.translate(
-            offset: Offset(4 * value, 4 * value),
-            child: Transform.scale(
-              scale: 1 - (1 - widget.pressedScale) * value,
-              child: child,
+      mouseCursor:
+          _active ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onShowFocusHighlight: (value) {
+        if (_focused != value) setState(() => _focused = value);
+      },
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+      },
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            _activateFromKeyboard();
+            return null;
+          },
+        ),
+      },
+      child: Semantics(
+        button: true,
+        enabled: _active,
+        selected: widget.selected,
+        label: widget.label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => _set(true),
+          onTapCancel: () => _set(false),
+          onTapUp: (_) => _set(false),
+          onTap: _active ? _activate : null,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: _down ? 1 : 0),
+            duration: Motion.timed(context, const Duration(milliseconds: 120)),
+            curve: Curves.easeOut,
+            child: paintedChild,
+            builder: (context, value, child) => Transform.translate(
+              offset: Offset(4 * value, 4 * value),
+              child: Transform.scale(
+                scale: 1 - (1 - widget.pressedScale) * value,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    child!,
+                    if (_focused)
+                      Positioned(
+                        top: -5,
+                        left: -5,
+                        right: -5,
+                        bottom: -5,
+                        child: IgnorePointer(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.circular(widget.focusRadius + 5),
+                              border: Border.all(
+                                color: context.jc.brand,
+                                width: 3,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

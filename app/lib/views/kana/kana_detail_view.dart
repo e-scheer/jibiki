@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../core/speech.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
 import '../../repositories/dictionary_repository.dart';
@@ -15,6 +16,7 @@ import '../feedback/report_item_sheet.dart';
 import '../widgets/drawing_canvas.dart';
 import '../widgets/mnemonic_panel.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/origin_section.dart';
 import '../widgets/pressable.dart';
 import '../widgets/speech_button.dart';
@@ -42,6 +44,38 @@ class KanaDetailView extends StatelessWidget {
   }
 }
 
+/// Detail surface used by the NeoPop 16 tablet matrix. It deliberately has no
+/// Scaffold or route chrome so the matrix remains visible while focus changes.
+class KanaDetailPane extends StatelessWidget {
+  const KanaDetailPane({
+    super.key,
+    required this.char,
+    this.onSelectKana,
+  });
+
+  final String char;
+  final ValueChanged<String>? onSelectKana;
+
+  @override
+  Widget build(BuildContext context) {
+    final language = context.read<AppState>().mnemonicLanguage;
+    return ChangeNotifierProvider(
+      create: (ctx) => MnemonicViewModel(
+        ctx.read<MnemonicRepository>(),
+        ctx.read<StudyRepository>(),
+        character: char,
+        kind: 'kana',
+        language: language,
+      )..load(),
+      child: _KanaDetail(
+        char: char,
+        embedded: true,
+        onSelectKana: onSelectKana,
+      ),
+    );
+  }
+}
+
 typedef _KanaDetailData = ({
   KanaEntry focused,
   KanaEntry? counterpart,
@@ -51,9 +85,15 @@ typedef _KanaDetailData = ({
 });
 
 class _KanaDetail extends StatefulWidget {
-  const _KanaDetail({required this.char});
+  const _KanaDetail({
+    required this.char,
+    this.embedded = false,
+    this.onSelectKana,
+  });
 
   final String char;
+  final bool embedded;
+  final ValueChanged<String>? onSelectKana;
 
   @override
   State<_KanaDetail> createState() => _KanaDetailState();
@@ -134,6 +174,24 @@ class _KanaDetailState extends State<_KanaDetail> {
   @override
   Widget build(BuildContext context) {
     final mnemonic = context.watch<MnemonicViewModel>();
+    if (widget.embedded) {
+      return FutureBuilder<_KanaDetailData>(
+        future: _data,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return const _EmbeddedDetailError();
+          final data = snapshot.data;
+          if (data == null) {
+            return _EmbeddedDetailSkeleton(char: widget.char);
+          }
+          return _EmbeddedKanaDetailContent(
+            data: data,
+            added: mnemonic.added,
+            onAdd: () => _addToStudy(context, mnemonic),
+            onSelectKana: widget.onSelectKana,
+          );
+        },
+      );
+    }
     return Scaffold(
       bottomNavigationBar: FutureBuilder<_KanaDetailData>(
         future: _data,
@@ -179,6 +237,254 @@ class _KanaDetailState extends State<_KanaDetail> {
               ? _copy(
                   context, 'Added to your study deck', 'Ajouté à vos révisions')
               : mnemonic.error ?? _copy(context, 'Failed', 'Échec'),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmbeddedKanaDetailContent extends StatelessWidget {
+  const _EmbeddedKanaDetailContent({
+    required this.data,
+    required this.added,
+    required this.onAdd,
+    required this.onSelectKana,
+  });
+
+  final _KanaDetailData data;
+  final bool added;
+  final VoidCallback onAdd;
+  final ValueChanged<String>? onSelectKana;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            key: PageStorageKey('kana-detail-${data.focused.char}'),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+            children: [
+              _TabletKanaHero(data: data),
+              const SizedBox(height: 14),
+              _WritingGuide(kana: data.focused),
+              const SizedBox(height: 16),
+              const _FeaturedMnemonic(),
+              const SizedBox(height: 16),
+              _NearbyKana(data: data, onSelectKana: onSelectKana),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: NeoPrimaryButton(
+                  label:
+                      _copy(context, 'Practise writing', 'Pratiquer le tracé'),
+                  icon: Icons.gesture_rounded,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => _KanaWritingPracticePage(
+                        kana: data.focused,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              NeoIconButton(
+                icon: added ? Icons.check_rounded : Icons.add_rounded,
+                label: added
+                    ? _copy(context, 'In your deck', 'Dans vos révisions')
+                    : _copy(context, 'Add to study', 'Ajouter aux révisions'),
+                tone: added ? NeoTone.lime : NeoTone.paper,
+                onTap: added ? () {} : onAdd,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TabletKanaHero extends StatelessWidget {
+  const _TabletKanaHero({required this.data});
+
+  final _KanaDetailData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final kana = data.focused;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      decoration: BoxDecoration(
+        color: context.jc.lime,
+        border: Border.all(color: context.jc.ink, width: 3),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: context.jc.ink,
+            blurRadius: 0,
+            offset: const Offset(6, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 116,
+            child: Text(
+              kana.char,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'ZenKakuGothicNew',
+                fontSize: 96,
+                height: 1,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                NeoCard(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  radius: 10,
+                  shadow: 3,
+                  onTap: () => Speech.instance.say(kana.char),
+                  semanticLabel: _copy(
+                    context,
+                    'Play ${kana.romaji}',
+                    'Écouter ${kana.romaji}',
+                  ),
+                  child: SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.volume_up_rounded, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          kana.romaji,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    _Tag(
+                      label: kana.isHiragana ? 'Hiragana' : 'Katakana',
+                    ),
+                    _Tag(label: _kindLabel(context, kana.kind, kana.row)),
+                    _Tag(
+                      label: _copy(
+                        context,
+                        '${kana.row.toUpperCase()} row',
+                        'Rangée ${kana.row.toUpperCase()}',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmbeddedDetailSkeleton extends StatelessWidget {
+  const _EmbeddedDetailSkeleton({required this.char});
+
+  final String char;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: 154,
+            decoration: BoxDecoration(
+              color: context.jc.lime,
+              border: Border.all(color: context.jc.ink, width: 3),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: context.jc.ink,
+                  blurRadius: 0,
+                  offset: const Offset(6, 6),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                char,
+                style: TextStyle(
+                  fontFamily: 'ZenKakuGothicNew',
+                  fontSize: 88,
+                  fontWeight: FontWeight.w900,
+                  color: context.jc.ink.withValues(alpha: .2),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 172,
+            decoration: BoxDecoration(
+              color: context.jc.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.jc.ink, width: 3),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            height: 112,
+            decoration: BoxDecoration(
+              color: context.jc.surfaceAlt,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.jc.ink, width: 3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmbeddedDetailError extends StatelessWidget {
+  const _EmbeddedDetailError();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          _copy(
+            context,
+            'This kana could not be loaded.',
+            'Ce kana n’a pas pu être chargé.',
+          ),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -295,7 +601,7 @@ class _KanaHero extends StatelessWidget {
           Text(
             kana.char,
             style: const TextStyle(
-              fontFamily: 'NotoSansJP',
+              fontFamily: 'ZenKakuGothicNew',
               fontSize: 104,
               height: 1.02,
               fontWeight: FontWeight.w900,
@@ -374,8 +680,8 @@ class _WritingGuide extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 168,
-              height: 168,
+              width: 172,
+              height: 172,
               decoration: BoxDecoration(
                 color: context.jc.surface,
                 border: Border.all(color: context.jc.ink, width: 3),
@@ -399,7 +705,7 @@ class _WritingGuide extends StatelessWidget {
                     child: Text(
                       kana.char,
                       style: TextStyle(
-                        fontFamily: 'NotoSansJP',
+                        fontFamily: 'ZenKakuGothicNew',
                         fontSize: 105,
                         height: 1,
                         fontWeight: FontWeight.w900,
@@ -538,9 +844,7 @@ class _FeaturedMnemonic extends StatelessWidget {
           child: vm.isLoading && mnemonic == null
               ? const SizedBox(
                   height: 68,
-                  child: Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
+                  child: Center(child: NeoChaseLoader()),
                 )
               : mnemonic == null
                   ? Column(
@@ -716,9 +1020,10 @@ class _AllMnemonicsButton extends StatelessWidget {
 }
 
 class _NearbyKana extends StatelessWidget {
-  const _NearbyKana({required this.data});
+  const _NearbyKana({required this.data, this.onSelectKana});
 
   final _KanaDetailData data;
+  final ValueChanged<String>? onSelectKana;
 
   @override
   Widget build(BuildContext context) {
@@ -742,7 +1047,9 @@ class _NearbyKana extends StatelessWidget {
                   selected: false,
                   mark: studyMarkFor(data.states[data.nearby[i].char]),
                   due: data.dueChars.contains(data.nearby[i].char),
-                  onTap: () => context.push('/kana/${data.nearby[i].char}'),
+                  onTap: onSelectKana == null
+                      ? () => context.push('/kana/${data.nearby[i].char}')
+                      : () => onSelectKana!(data.nearby[i].char),
                 ),
               ),
             ],
@@ -777,7 +1084,7 @@ class _TwinTag extends StatelessWidget {
             Text(
               kana.char,
               style: const TextStyle(
-                fontFamily: 'NotoSansJP',
+                fontFamily: 'ZenKakuGothicNew',
                 fontSize: 17,
                 fontWeight: FontWeight.w900,
               ),
@@ -976,7 +1283,7 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                       Text(
                         kana.char,
                         style: const TextStyle(
-                          fontFamily: 'NotoSansJP',
+                          fontFamily: 'ZenKakuGothicNew',
                           fontSize: 48,
                           height: 1,
                           fontWeight: FontWeight.w900,
@@ -1008,7 +1315,7 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                                       child: Text(
                                         kana.char,
                                         style: TextStyle(
-                                          fontFamily: 'NotoSansJP',
+                                          fontFamily: 'ZenKakuGothicNew',
                                           fontSize: 190,
                                           height: 1,
                                           fontWeight: FontWeight.w900,
@@ -1154,7 +1461,7 @@ class _DetailSkeleton extends StatelessWidget {
               child: Text(
                 char,
                 style: TextStyle(
-                  fontFamily: 'NotoSansJP',
+                  fontFamily: 'ZenKakuGothicNew',
                   fontSize: 104,
                   fontWeight: FontWeight.w900,
                   color: context.jc.ink.withValues(alpha: 0.28),

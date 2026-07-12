@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/breakpoints.dart';
 import '../../l10n/l10n.dart';
 import '../../theme/app_theme.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 
 /// Shared NeoPop stage for the two account entry points.
@@ -187,26 +188,10 @@ class _BrandPanel extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                     ],
-                    Text(
-                      context.trText('jibiki'),
-                      style: TextStyle(
-                        color: jc.surface,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.7,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Transform.rotate(
-                      angle: 0.2,
-                      child: Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: jc.acid,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+                    const JibikiWordmark(
+                      fontSize: 24,
+                      variant: JibikiBrandVariant.negative,
+                      dotOutline: JibikiBrandColors.ink,
                     ),
                   ],
                 ),

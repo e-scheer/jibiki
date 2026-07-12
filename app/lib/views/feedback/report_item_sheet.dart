@@ -8,6 +8,7 @@ import '../../services/feedback_service.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 
 enum ReportItemType {
   kanji('kanji', 'this kanji'),
@@ -382,13 +383,7 @@ class _SheetFilledButton extends StatelessWidget {
           ),
           onPressed: busy ? null : onPressed,
           child: busy
-              ? SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: context.jc.ink,
-                  ),
-                )
+              ? const NeoChaseLoader.small()
               : Text(label,
                   style: const TextStyle(fontWeight: FontWeight.w900)),
         ),

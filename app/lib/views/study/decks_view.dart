@@ -9,6 +9,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/decks_viewmodel.dart';
 import '../widgets/pressable.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/status_views.dart';
 import 'study_chrome.dart';
 
@@ -272,13 +273,7 @@ class _DeckRow extends StatelessWidget {
                 border: Border.all(color: context.jc.ink, width: 2.5),
               ),
               child: busy
-                  ? SizedBox.square(
-                      dimension: 21,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: context.jc.ink,
-                      ),
-                    )
+                  ? const NeoChaseLoader.small()
                   : Text(
                       done ? '✓' : '${deck.due}',
                       style: TextStyle(

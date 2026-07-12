@@ -22,6 +22,9 @@ class SearchViewModel extends BaseViewModel {
   List<NameItem> _names = [];
   List<NameItem> get names => _names;
 
+  int? _selectedWordId;
+  int? get selectedWordId => _selectedWordId;
+
   String _query = '';
   String get query => _query;
   bool get hasSearched => _query.trim().isNotEmpty;
@@ -87,6 +90,12 @@ class SearchViewModel extends BaseViewModel {
     unawaited(_history.remember(word.id, at: now));
   }
 
+  void selectWord(WordEntry word) {
+    if (_selectedWordId == word.id) return;
+    _selectedWordId = word.id;
+    rememberOpened(word);
+  }
+
   /// Debounced search-as-you-type. The view calls this on every keystroke.
   void onQueryChanged(String q) {
     _query = q;
@@ -113,6 +122,12 @@ class SearchViewModel extends BaseViewModel {
     if (r != null && q == _query) {
       _results = r.words;
       _names = r.names;
+      if (_results.isEmpty) {
+        _selectedWordId = null;
+      } else if (!_results.any((word) => word.id == _selectedWordId)) {
+        _selectedWordId = _results.first.id;
+      }
+      notifyListeners();
     }
   }
 

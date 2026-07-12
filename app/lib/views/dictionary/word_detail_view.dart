@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../core/speech.dart';
 import '../../models/enums.dart';
+import '../../models/kanji.dart';
 import '../../models/word.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
+import '../../viewmodels/search_viewmodel.dart';
 import '../../viewmodels/word_detail_viewmodel.dart';
 import '../feedback/report_item_sheet.dart';
 import '../widgets/study_status_bar.dart';
@@ -29,19 +32,48 @@ class WordDetailView extends StatelessWidget {
       create: (ctx) => WordDetailViewModel(
           ctx.read<DictionaryRepository>(), ctx.read<StudyRepository>(), wordId)
         ..load(),
-      child: const _WordDetail(),
+      child: const _WordDetail(embedded: false),
     );
   }
 }
 
+class WordDetailPane extends StatelessWidget {
+  const WordDetailPane({super.key, required this.wordId});
+
+  final int wordId;
+
+  @override
+  Widget build(BuildContext context) => ChangeNotifierProvider(
+        key: ValueKey(wordId),
+        create: (ctx) => WordDetailViewModel(
+          ctx.read<DictionaryRepository>(),
+          ctx.read<StudyRepository>(),
+          wordId,
+        )..load(),
+        child: const _WordDetail(embedded: true),
+      );
+}
+
 class _WordDetail extends StatelessWidget {
-  const _WordDetail();
+  const _WordDetail({required this.embedded});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<WordDetailViewModel>();
     final lang = context.watch<AppState>().mnemonicLanguage;
     final word = vm.word;
+    final content = vm.isLoading
+        ? const LoadingView()
+        : vm.hasError
+            ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+            : word == null
+                ? const SizedBox.shrink()
+                : _content(context, word, lang, vm);
+    if (embedded) {
+      return content;
+    }
     return Scaffold(
       bottomNavigationBar: word == null
           ? null
@@ -79,13 +111,7 @@ class _WordDetail extends StatelessWidget {
             ),
             Expanded(
               child: BoundedContent(
-                child: vm.isLoading
-                    ? const LoadingView()
-                    : vm.hasError
-                        ? ErrorRetry(message: vm.error!, onRetry: vm.load)
-                        : word == null
-                            ? const SizedBox.shrink()
-                            : _content(context, word, lang),
+                child: content,
               ),
             ),
           ],
@@ -122,8 +148,13 @@ class _WordDetail extends StatelessWidget {
     }
   }
 
-  Widget _content(BuildContext context, WordEntry word, String lang) {
-    final jc = context.jc;
+  Widget _content(
+    BuildContext context,
+    WordEntry word,
+    String lang,
+    WordDetailViewModel vm,
+  ) {
+    if (embedded) return _embeddedContent(context, word, lang, vm);
     final glossLanguage = word.glossLanguageFor(lang);
     final senses = word.sensesFor(lang);
     return ListView(
@@ -133,42 +164,31 @@ class _WordDetail extends StatelessWidget {
           tone: NeoTone.magenta,
           shadow: 6,
           padding: const EdgeInsets.all(18),
-          child: Column(
-            children: [
-              if (word.primaryReading.isNotEmpty &&
-                  word.primaryReading != word.headword)
-                TappableJapanese(word.primaryReading,
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: jc.ink,
-                        fontWeight: FontWeight.w800)),
-              TappableJapanese(word.headword,
-                  affordance: false,
-                  style: const TextStyle(
-                      fontSize: 76, fontWeight: FontWeight.w900, height: 1.08)),
-              const SizedBox(height: 4),
-              SpeechButton(
-                text: word.primaryReading.isNotEmpty
-                    ? word.primaryReading
-                    : word.headword,
-                size: 25,
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (word.isCommon)
-                    NeoBadge(context.trText('common'), tone: NeoTone.lime),
-                  if (word.jlpt != null)
-                    NeoBadge('JLPT N${word.jlpt}', tone: NeoTone.acid),
-                  if (_pitchOf(word).isNotEmpty)
-                    NeoBadge(context.trText('pitch ${_pitchOf(word)}')),
-                ],
-              ),
-            ],
-          ),
+          child: embedded
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _WordHeroGlyph(word: word),
+                    const SizedBox(width: 26),
+                    Flexible(
+                      child: _WordHeroInfo(
+                        word: word,
+                        pitch: _pitchOf(word),
+                        alignStart: true,
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _WordHeroGlyph(word: word),
+                    const SizedBox(height: 8),
+                    _WordHeroInfo(
+                      word: word,
+                      pitch: _pitchOf(word),
+                    ),
+                  ],
+                ),
         ),
         const SizedBox(height: 20),
         NeoSectionTitle(context.trText('Meanings')),
@@ -220,6 +240,148 @@ class _WordDetail extends StatelessWidget {
     );
   }
 
+  Widget _embeddedContent(
+    BuildContext context,
+    WordEntry word,
+    String lang,
+    WordDetailViewModel vm,
+  ) {
+    final senses = word.sensesFor(lang);
+    final primaryKanji =
+        word.kanjiBreakdown.isEmpty ? null : word.kanjiBreakdown.first;
+    final related = _relatedWords(
+      primaryKanji?.words ?? const [],
+      currentWordId: word.id,
+    );
+    return ListView(
+      key: PageStorageKey('tablet-word-${word.id}'),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      children: [
+        NeoCard(
+          tone: NeoTone.magenta,
+          shadow: 6,
+          radius: 14,
+          padding: const EdgeInsets.fromLTRB(22, 14, 16, 14),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: _WordHeroGlyph(word: word),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                flex: 5,
+                child: _TabletWordHeroInfo(word: word),
+              ),
+              const SizedBox(width: 12),
+              NeoIconButton(
+                icon: vm.status == 'learning'
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
+                label: _copy(
+                  context,
+                  vm.status == 'learning' ? 'Remove from deck' : 'Save word',
+                  vm.status == 'learning'
+                      ? 'Retirer du paquet'
+                      : 'Enregistrer le mot',
+                ),
+                onTap: () => vm.setStatus(
+                  vm.status == 'learning' ? 'none' : 'learning',
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        _TabletSenses(senses: senses, language: word.glossLanguageFor(lang)),
+        if (primaryKanji != null) ...[
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 154,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _CompositionCard(
+                    kanji: primaryKanji,
+                    language: lang,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MemoryCard(kanji: primaryKanji, language: lang),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (word.examples.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _TabletExample(
+            example: word.examples.first,
+            headword: word.headword,
+          ),
+        ],
+        if (related.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Text(
+            _copy(context, 'SEE ALSO', 'VOIR AUSSI'),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final relatedWord in related.take(4))
+                _RelatedWordButton(
+                  word: relatedWord,
+                  onTap: () =>
+                      context.read<SearchViewModel>().selectWord(relatedWord),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 16),
+        NeoPrimaryButton(
+          label: _copy(
+            context,
+            vm.status == 'none' ? 'Add to my deck' : 'Remove from my deck',
+            vm.status == 'none' ? 'Ajouter au paquet' : 'Retirer du paquet',
+          ),
+          icon: vm.status == 'none' ? Icons.add_rounded : Icons.remove_rounded,
+          onTap: () => vm.setStatus(
+            vm.status == 'none' ? 'learning' : 'none',
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<WordEntry> _relatedWords(
+    List<dynamic> raw, {
+    required int currentWordId,
+  }) {
+    final words = <WordEntry>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      try {
+        final word = WordEntry.fromJson(item.cast<String, dynamic>());
+        if (word.id != currentWordId && word.headword.isNotEmpty) {
+          words.add(word);
+        }
+      } catch (_) {
+        // Related rows are optional enrichment. A partial local pack must not
+        // prevent the main dictionary entry from rendering.
+      }
+    }
+    return words;
+  }
+
   /// The pitch pattern of the primary reading (or the first reading that has one).
   String _pitchOf(WordEntry word) {
     for (final r in word.readings) {
@@ -260,6 +422,524 @@ class _WordDetail extends StatelessWidget {
       ),
     );
   }
+}
+
+class _WordHeroGlyph extends StatelessWidget {
+  const _WordHeroGlyph({required this.word});
+
+  final WordEntry word;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (word.primaryReading.isNotEmpty &&
+              word.primaryReading != word.headword)
+            TappableJapanese(
+              word.primaryReading,
+              style: TextStyle(
+                fontSize: 16,
+                color: context.jc.ink,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 260),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: TappableJapanese(
+                word.headword,
+                affordance: false,
+                style: const TextStyle(
+                  fontSize: 86,
+                  fontWeight: FontWeight.w900,
+                  height: 1.04,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+}
+
+class _WordHeroInfo extends StatelessWidget {
+  const _WordHeroInfo({
+    required this.word,
+    required this.pitch,
+    this.alignStart = false,
+  });
+
+  final WordEntry word;
+  final String pitch;
+  final bool alignStart;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment:
+            alignStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          SpeechButton(
+            text: word.primaryReading.isNotEmpty
+                ? word.primaryReading
+                : word.headword,
+            size: 25,
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            alignment: alignStart ? WrapAlignment.start : WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (word.isCommon)
+                NeoBadge(context.trText('common'), tone: NeoTone.lime),
+              if (word.jlpt != null)
+                NeoBadge('JLPT N${word.jlpt}', tone: NeoTone.acid),
+              if (pitch.isNotEmpty) NeoBadge(context.trText('pitch $pitch')),
+            ],
+          ),
+        ],
+      );
+}
+
+class _TabletWordHeroInfo extends StatelessWidget {
+  const _TabletWordHeroInfo({required this.word});
+
+  final WordEntry word;
+
+  @override
+  Widget build(BuildContext context) {
+    final partsOfSpeech = word.senses
+        .expand((sense) => sense.pos)
+        .where((part) => part.trim().isNotEmpty)
+        .toSet()
+        .take(1);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 44,
+          child: NeoCard(
+            tone: NeoTone.acid,
+            shadow: 3,
+            radius: 10,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            semanticLabel: _copy(context, 'Play audio', 'Écouter'),
+            onTap: () {
+              Haptics.tick();
+              Speech.instance.say(
+                word.primaryReading.isEmpty
+                    ? word.headword
+                    : word.primaryReading,
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.volume_up_rounded, size: 19),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    word.primaryReading,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            for (final part in partsOfSpeech) _FlatWordTag(part),
+            if (word.jlpt != null) _FlatWordTag('JLPT N${word.jlpt}'),
+            if (word.isCommon)
+              _FlatWordTag(_copy(context, 'Frequent', 'Fréquent')),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _FlatWordTag extends StatelessWidget {
+  const _FlatWordTag(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: context.jc.surface.withValues(alpha: 0.78),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 11.5,
+            height: 1,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      );
+}
+
+class _TabletSenses extends StatelessWidget {
+  const _TabletSenses({required this.senses, required this.language});
+
+  final List<Sense> senses;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 13),
+        decoration: BoxDecoration(
+          color: context.jc.surface,
+          border: Border.all(color: context.jc.ink, width: 3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _TabletLabel(_copy(context, 'MEANINGS', 'SENS')),
+            const SizedBox(height: 7),
+            for (final entry in senses.take(4).toList().asMap().entries)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${entry.key + 1}.  ',
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      TextSpan(
+                        text: entry.value.glossesFor(language).join('; '),
+                      ),
+                    ],
+                  ),
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    height: 1.32,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+}
+
+class _CompositionCard extends StatelessWidget {
+  const _CompositionCard({required this.kanji, required this.language});
+
+  final KanjiEntry kanji;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    final detailed = kanji.componentDetails.take(3).toList();
+    final literals = detailed.isEmpty
+        ? kanji.components.take(3).toList()
+        : detailed.map((component) => component.literal).toList();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        color: context.jc.surface,
+        border: Border.all(color: context.jc.ink, width: 3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TabletLabel(
+            _copy(context, 'INSIDE THE KANJI', 'DANS LE KANJI'),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (literals.isEmpty)
+                _ComponentPart(
+                  glyph: kanji.literal,
+                  label: kanji.meaningsFor(language).take(1).join(),
+                  tone: NeoTone.lime,
+                )
+              else
+                for (var index = 0; index < literals.length; index++) ...[
+                  if (index > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 3),
+                      child: Text(
+                        '+',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  Flexible(
+                    child: _ComponentPart(
+                      glyph: literals[index],
+                      label: detailed.isEmpty ? '' : detailed[index].meaning,
+                      tone: [
+                        NeoTone.lime,
+                        NeoTone.acid,
+                        NeoTone.lavender,
+                      ][index % 3],
+                    ),
+                  ),
+                ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ComponentPart extends StatelessWidget {
+  const _ComponentPart({
+    required this.glyph,
+    required this.label,
+    required this.tone,
+  });
+
+  final String glyph;
+  final String label;
+  final NeoTone tone;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            constraints: const BoxConstraints(minWidth: 46, minHeight: 46),
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: tone.color(context),
+              border: Border.all(color: context.jc.ink, width: 2.5),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Center(
+              child: Text(
+                glyph,
+                style: const TextStyle(
+                  fontSize: 25,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+          if (label.isNotEmpty) ...[
+            const SizedBox(height: 5),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.jc.body,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ],
+      );
+}
+
+class _MemoryCard extends StatelessWidget {
+  const _MemoryCard({required this.kanji, required this.language});
+
+  final KanjiEntry kanji;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    final components = kanji.componentDetails
+        .map((component) => component.literal)
+        .where((literal) => literal.isNotEmpty)
+        .take(3)
+        .join(' + ');
+    final meaning = kanji.meaningsFor(language).take(2).join(', ');
+    final fallback = _copy(
+      context,
+      components.isEmpty
+          ? 'Anchor ${kanji.literal} to the image "$meaning".'
+          : 'Spot $components, then reconnect the pieces to "$meaning".',
+      components.isEmpty
+          ? 'Associe ${kanji.literal} à l’image « $meaning ».'
+          : 'Repère $components, puis relie les pièces à « $meaning ».',
+    );
+    return Container(
+      padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+      decoration: BoxDecoration(
+        color: context.jc.brand,
+        border: Border.all(color: context.jc.ink, width: 3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TabletLabel(
+            _copy(context, 'MEMORY HOOK', 'REPÈRE MÉMOIRE'),
+            light: true,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            kanji.origin.trim().isEmpty ? fallback : kanji.origin.trim(),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.jc.surface,
+              fontSize: 13,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _copy(context, 'From the dictionary', 'D’après le dictionnaire'),
+            style: TextStyle(
+              color: context.jc.surface.withValues(alpha: 0.82),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabletExample extends StatelessWidget {
+  const _TabletExample({required this.example, required this.headword});
+
+  final ExampleItem example;
+  final String headword;
+
+  @override
+  Widget build(BuildContext context) {
+    final characters = example.japanese.runes
+        .map(String.fromCharCode)
+        .where((character) => character.trim().isNotEmpty)
+        .take(20);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
+      decoration: BoxDecoration(
+        color: context.jc.surface,
+        border: Border.all(color: context.jc.ink, width: 3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TabletLabel(_copy(context, 'IN CONTEXT', 'EN CONTEXTE')),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              for (final character in characters)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: headword.contains(character)
+                        ? context.jc.acid
+                        : context.jc.canvas,
+                    border: Border.all(color: context.jc.ink, width: 2.5),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Text(
+                    character,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (example.translation.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              '« ${example.translation} »',
+              style: TextStyle(
+                color: context.jc.body,
+                fontSize: 12.5,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RelatedWordButton extends StatelessWidget {
+  const _RelatedWordButton({required this.word, required this.onTap});
+
+  final WordEntry word;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 40,
+        child: NeoCard(
+          shadow: 0,
+          radius: 9,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          semanticLabel: word.headword,
+          onTap: onTap,
+          child: Center(
+            child: Text(
+              word.headword,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class _TabletLabel extends StatelessWidget {
+  const _TabletLabel(this.label, {this.light = false});
+
+  final String label;
+  final bool light;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        label,
+        style: TextStyle(
+          color: light ? context.jc.surface : context.jc.ink,
+          fontSize: 10.5,
+          height: 1,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1,
+        ),
+      );
 }
 
 class _CaptureResult {
@@ -515,3 +1195,6 @@ class _ExampleRow extends StatelessWidget {
     );
   }
 }
+
+String _copy(BuildContext context, String english, String french) =>
+    Localizations.localeOf(context).languageCode == 'fr' ? french : english;

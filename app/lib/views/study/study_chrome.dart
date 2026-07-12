@@ -3,7 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/pressable.dart';
+
+/// The exploration 16 review workspace is a tablet landscape composition, not
+/// the phone layout rotated sideways. The height guard keeps short phone
+/// landscapes on the compact flow even when their pixel width is large.
+bool studyUsesLandscapeContract(BuildContext context) {
+  final size = MediaQuery.sizeOf(context);
+  return size.width >= 900 && size.height >= 500 && size.width > size.height;
+}
 
 /// Shared NeoPop primitives for the study flow. These intentionally keep most
 /// surfaces flat. Hard shadows are reserved for the main card, stickers and the
@@ -27,7 +36,9 @@ class StudyPanel extends StatelessWidget {
   final double shadow;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AnimatedContainer(
+        duration: Motion.timed(context, const Duration(milliseconds: 120)),
+        curve: Curves.easeOut,
         padding: padding,
         decoration: BoxDecoration(
           color: color ?? context.jc.surface,
@@ -128,24 +139,23 @@ class StudyActionButton extends StatelessWidget {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: Pressable(
+      child: Pressable.builder(
         label: label,
         onTap: busy ? null : onTap,
         haptic: false,
         pressedScale: 1,
-        child: StudyPanel(
+        focusRadius: 12,
+        builder: (context, pressed) => StudyPanel(
           color: color ?? context.jc.acid,
-          shadow: shadow,
+          shadow: pressed ? 0 : shadow,
+          borderWidth: 3,
           radius: 12,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (busy)
-                SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2.5, color: fg),
-                )
+                const NeoChaseLoader.small()
               else if (icon != null)
                 Icon(icon, size: 20, color: fg),
               if (busy || icon != null) const SizedBox(width: 9),
@@ -185,38 +195,40 @@ class StudySticker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sticker = Transform.rotate(
-      angle: angle * math.pi / 180,
-      child: StudyPanel(
-        color: color ?? context.jc.acid,
-        shadow: large ? 5 : 3,
-        radius: 9,
-        padding: EdgeInsets.symmetric(
-          horizontal: large ? 16 : 10,
-          vertical: large ? 9 : 6,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: context.jc.ink,
-            fontSize: large ? 18 : 12,
-            fontWeight: FontWeight.w900,
-            letterSpacing: large ? 0.7 : 0.2,
-            height: 1,
-          ),
+    final panel = StudyPanel(
+      color: color ?? context.jc.acid,
+      shadow: large ? 5 : 3,
+      borderWidth: 3,
+      radius: 9,
+      padding: EdgeInsets.symmetric(
+        horizontal: large ? 16 : 10,
+        vertical: large ? 9 : 6,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: context.jc.ink,
+          fontSize: large ? 19 : 12,
+          fontWeight: FontWeight.w900,
+          letterSpacing: large ? 0.7 : 0.2,
+          height: 1,
         ),
       ),
     );
-    if (!Motion.enabled(context)) return sticker;
+    final end = Transform.rotate(angle: angle * math.pi / 180, child: panel);
+    if (!Motion.enabled(context)) return end;
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.35, end: 1),
-      duration: Motion.timed(context, const Duration(milliseconds: 360)),
-      curve: Motion.outStrong,
-      builder: (_, scale, child) => Transform.scale(
-        scale: scale,
-        child: Opacity(opacity: scale.clamp(0, 1), child: child),
+      tween: Tween(begin: 0, end: 1),
+      duration: Motion.timed(context, const Duration(milliseconds: 380)),
+      curve: const Cubic(0.18, 1.4, 0.4, 1),
+      builder: (_, value, child) => Transform.rotate(
+        angle: (9 + (angle - 9) * value) * math.pi / 180,
+        child: Transform.scale(
+          scale: 0.2 + 0.8 * value,
+          child: Opacity(opacity: value.clamp(0, 1), child: child),
+        ),
       ),
-      child: sticker,
+      child: panel,
     );
   }
 }
@@ -244,6 +256,7 @@ class StudyConfetti extends StatelessWidget {
       Alignment(0.72, 0.72),
       Alignment(0.3, -0.76),
     ];
+    const delays = [120, 180, 240, 300, 360];
     Widget pieces(double t) => SizedBox.fromSize(
           size: size,
           child: Stack(
@@ -252,13 +265,16 @@ class StudyConfetti extends StatelessWidget {
                 Align(
                   alignment: placements[i],
                   child: Opacity(
-                    opacity: t,
+                    opacity: _pieceProgress(t, delays[i]),
                     child: Transform.translate(
-                      offset: Offset(0, -8 * (1 - t)),
+                      offset: Offset(
+                        0,
+                        -10 * (1 - _pieceProgress(t, delays[i])),
+                      ),
                       child: Transform.rotate(
                         angle: (i.isEven ? 0.34 : -0.22),
                         child: Transform.scale(
-                          scale: t,
+                          scale: _pieceProgress(t, delays[i]),
                           child: Container(
                             width: i.isEven ? 17 : 11,
                             height: i.isEven ? 10 : 18,
@@ -282,9 +298,15 @@ class StudyConfetti extends StatelessWidget {
     if (!Motion.enabled(context)) return pieces(1);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: Motion.timed(context, const Duration(milliseconds: 480)),
-      curve: Motion.out,
+      duration: Motion.timed(context, const Duration(milliseconds: 860)),
+      curve: Curves.linear,
       builder: (_, t, __) => pieces(t),
     );
+  }
+
+  double _pieceProgress(double timeline, int delayMs) {
+    final elapsedMs = timeline * 860 - delayMs;
+    final value = (elapsedMs / 500).clamp(0.0, 1.0);
+    return Curves.easeOut.transform(value);
   }
 }

@@ -47,7 +47,9 @@ Three words: **bold, clear, encouraging.** Emotional goal: visible momentum and
 confidence, not test anxiety or childish reward-chasing. Voice remains plain,
 specific and human. It celebrates real progress without hype.
 
-**Visual direction:** Neo-pop geometry inspired by `design-explorations/10-neopop.html`.
+**Visual direction:** Neo-pop geometry defined by `design-explorations/10-neopop.html`,
+with `16-neopop-tablette.html` as the tablet layout contract and
+`17-neopop-marque.html` as the identity, splash and loading contract.
 The default palette combines cold off-white, near-black ink, Klein blue, acid
 yellow, magenta, lime and lavender. Colour is token-based rather than hard-coded in
 components. Users can switch complete palettes like an editor theme, including the
@@ -59,6 +61,13 @@ status marks, loading states and pressed translations. The primary navigation is
 Dictionary, Kana, Review, Community and Profile. Kanji browsing belongs inside the
 dictionary flow; drawing and pack creation belong inside the community flow.
 
+The core mark is the `字` character inside an acid square with an ink outline and
+hard offset shadow. The wordmark is `jibiki` followed by a small rotated acid
+square. Native and web launch screens use the full Klein or ink brand field, the
+centered mark and wordmark, the three-block chase loader, and the line
+"dictionnaire libre, mémoire durable". Space Grotesk is the Latin display family;
+Zen Kaku Gothic New is the Japanese display family.
+
 The dictionary landing is also the daily return loop: search remains first, then
 the due-review callout, a tappable word of the day and a compact recent-history
 strip. History is local-first and useful without an account. Kana and kanji browse
@@ -68,6 +77,13 @@ shadows are reserved for hierarchy and actions rather than repeated on every cel
 Settings expose the complete display system. Light, dark and automatic appearance
 can be combined with a runtime palette, currently Neo-pop and Harmonie, while the
 same semantic colour roles preserve hierarchy and interaction states.
+
+Tablet is a distinct workspace, not a stretched phone. A fixed 76 px rail remains
+compact at every tablet width. At expanded widths the dictionary keeps a 340 px
+result list beside a persistent detail pane, and Kana keeps a 524 px matrix beside
+the selected glyph detail. The home dashboard becomes a dense three-column grid
+for due reviews, word of the day, forecast, history and community. Landscape review
+removes the rail and uses a 55/45 card-and-grading split on a lavender field.
 
 ## Anti-references
 
@@ -100,8 +116,9 @@ same semantic colour roles preserve hierarchy and interaction states.
    grading use short, GPU-friendly transitions and haptic feedback. Reduced-motion
    preferences always collapse non-essential movement.
 8. **One layout system, three densities.** Phones use compact bottom navigation;
-   tablets gain a premium rail and bounded editorial columns; expanded windows use
-   the same components without stretching reading content.
+   tablets use the fixed 76 px rail and persistent working panes; expanded windows
+   use the dashboard grid and master-detail layouts without stretching reading
+   content.
 9. **Palettes are data.** Components consume semantic colour tokens so a complete
    palette can change at runtime without altering hierarchy, contrast or meaning.
 

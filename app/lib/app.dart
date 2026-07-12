@@ -117,10 +117,12 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Resolve the session behind the held native splash, then reveal the app
-    // straight onto its real first screen (no second splash, no flash). Runs
-    // regardless of outcome - success, login, or the offline retry state.
-    final bootstrap = _app.bootstrap().whenComplete(FlutterNativeSplash.remove);
+    // The native screen covers only the engine warm-up. Flutter then continues
+    // with the matching animated exploration 17 splash while bootstrap runs.
+    final bootstrap = _app.bootstrap();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FlutterNativeSplash.remove();
+    });
     // Install/refresh the bundled dictionary pack in the background; local
     // reads wait on readiness, and the HTTP fallback covers any failure.
     _packs?.ensureReady();

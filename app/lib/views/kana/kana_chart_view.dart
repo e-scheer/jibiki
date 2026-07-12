@@ -18,6 +18,7 @@ import '../widgets/selection_action_bar.dart';
 import '../widgets/status_views.dart';
 import '../widgets/study_mark.dart';
 import 'kana_cell.dart';
+import 'kana_detail_view.dart';
 
 class KanaChartView extends StatelessWidget {
   const KanaChartView({super.key});
@@ -66,6 +67,7 @@ class _KanaChartState extends State<_KanaChart> {
 
   bool _selecting = false;
   bool _busy = false;
+  String? _focusedChar;
   final Set<String> _selected = {};
   Map<String, int> _states = const {};
   Set<String> _dueChars = const {};
@@ -78,8 +80,15 @@ class _KanaChartState extends State<_KanaChart> {
 
   void _changeScript(KanaViewModel vm, String script) {
     if (script == vm.script) return;
-    setState(() => _selected.clear());
+    setState(() {
+      _selected.clear();
+      _focusedChar = null;
+    });
     vm.setScript(script);
+  }
+
+  void _focusKana(String char) {
+    if (_focusedChar != char) setState(() => _focusedChar = char);
   }
 
   Future<void> _loadStates() async {
@@ -226,6 +235,8 @@ class _KanaChartState extends State<_KanaChart> {
                       onCancelSelection: _exitSelect,
                       onSelectAll: () => _selectAllVisible(vm),
                       onMnemonics: () => _openMnemonics(vm),
+                      focusedChar: _focusedChar,
+                      onFocused: _focusKana,
                     ),
                   ),
       ),
@@ -246,6 +257,8 @@ class _KanaLayout extends StatelessWidget {
     required this.onCancelSelection,
     required this.onSelectAll,
     required this.onMnemonics,
+    required this.focusedChar,
+    required this.onFocused,
   });
 
   final KanaViewModel vm;
@@ -258,9 +271,39 @@ class _KanaLayout extends StatelessWidget {
   final VoidCallback onCancelSelection;
   final VoidCallback onSelectAll;
   final VoidCallback onMnemonics;
+  final String? focusedChar;
+  final ValueChanged<String> onFocused;
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.sizeOf(context).width >= Breakpoints.expanded) {
+      if (vm.script == 'both') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          onScriptChanged('hiragana');
+        });
+      }
+      final basic = vm.byKind('gojuon');
+      if (basic.isEmpty) {
+        return EmptyHint(
+          icon: Icons.grid_off_rounded,
+          title: _copy(
+            context,
+            'No basic kana in this content pack.',
+            'Aucun kana de base dans ce pack de contenu.',
+          ),
+        );
+      }
+      final resolvedFocus = basic.any((entry) => entry.char == focusedChar)
+          ? focusedChar!
+          : basic.first.char;
+      return _KanaTabletWorkspace(
+        vm: vm,
+        selection: selection,
+        focusedChar: resolvedFocus,
+        onFocused: onFocused,
+        onScriptChanged: onScriptChanged,
+      );
+    }
     return BoundedContent(
       maxWidth: context.isExpanded ? 940 : 560,
       child: LayoutBuilder(
@@ -370,6 +413,85 @@ class _KanaLayout extends StatelessWidget {
   }
 }
 
+class _KanaTabletWorkspace extends StatelessWidget {
+  const _KanaTabletWorkspace({
+    required this.vm,
+    required this.selection,
+    required this.focusedChar,
+    required this.onFocused,
+    required this.onScriptChanged,
+  });
+
+  final KanaViewModel vm;
+  final _Selection selection;
+  final String focusedChar;
+  final ValueChanged<String> onFocused;
+  final ValueChanged<String> onScriptChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          width: 524,
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+          decoration: BoxDecoration(
+            border: Border(right: BorderSide(color: context.jc.ink, width: 3)),
+          ),
+          child: Column(
+            children: [
+              _KanaHeader(
+                vm: vm,
+                selection: selection,
+                onScriptChanged: onScriptChanged,
+                inset: 0,
+                tabletContract: true,
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
+                    child: _KanaMatrix(
+                      items: vm.byKind('gojuon'),
+                      selection: selection,
+                      focusedChar: focusedChar,
+                      onOpen: (entry) => onFocused(entry.char),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: Motion.timed(context, Motion.base),
+            switchInCurve: Motion.outStrong,
+            switchOutCurve: Motion.out,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(.025, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            ),
+            child: KanaDetailPane(
+              key: ValueKey(focusedChar),
+              char: focusedChar,
+              onSelectKana: onFocused,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _KanaPrimary extends StatelessWidget {
   const _KanaPrimary({
     required this.vm,
@@ -452,11 +574,15 @@ class _KanaHeader extends StatelessWidget {
     required this.vm,
     required this.selection,
     required this.onScriptChanged,
+    this.inset = 14,
+    this.tabletContract = false,
   });
 
   final KanaViewModel vm;
   final _Selection selection;
   final ValueChanged<String> onScriptChanged;
+  final double inset;
+  final bool tabletContract;
 
   @override
   Widget build(BuildContext context) {
@@ -465,7 +591,7 @@ class _KanaHeader extends StatelessWidget {
         .length;
     final total = vm.current.length;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: EdgeInsets.symmetric(horizontal: inset),
       child: Column(
         children: [
           Row(
@@ -478,7 +604,8 @@ class _KanaHeader extends StatelessWidget {
                   segments: [
                     const NeoSegment('hiragana', 'ひらがな'),
                     const NeoSegment('katakana', 'カタカナ'),
-                    NeoSegment('both', _copy(context, 'Both', 'Les deux')),
+                    if (!tabletContract)
+                      NeoSegment('both', _copy(context, 'Both', 'Les deux')),
                   ],
                 ),
               ),
@@ -759,10 +886,17 @@ class _ReviewKanaButton extends StatelessWidget {
 }
 
 class _KanaMatrix extends StatelessWidget {
-  const _KanaMatrix({required this.items, required this.selection});
+  const _KanaMatrix({
+    required this.items,
+    required this.selection,
+    this.focusedChar,
+    this.onOpen,
+  });
 
   final List<KanaEntry> items;
   final _Selection selection;
+  final String? focusedChar;
+  final ValueChanged<KanaEntry>? onOpen;
 
   static const _vowels = ['a', 'i', 'u', 'e', 'o'];
 
@@ -813,8 +947,8 @@ class _KanaMatrix extends StatelessWidget {
       itemCount: slots.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 5,
-        crossAxisSpacing: 3,
-        mainAxisSpacing: 3,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
         mainAxisExtent: 56,
       ),
       itemBuilder: (context, index) {
@@ -836,11 +970,14 @@ class _KanaMatrix extends StatelessWidget {
         return KanaCell(
           entries: entries,
           selected: selected,
+          focused: entries.any((entry) => entry.char == focusedChar),
           mark: studyMarkFor(furthestState),
           due: due,
           onTap: selection.active
               ? () => selection.onToggle(entries)
-              : () => context.push('/kana/${entries.first.char}'),
+              : onOpen == null
+                  ? () => context.push('/kana/${entries.first.char}')
+                  : () => onOpen!(entries.first),
         );
       },
     );
@@ -929,8 +1066,8 @@ class _KanaLoadingSkeleton extends StatelessWidget {
             itemCount: 46,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
-              crossAxisSpacing: 3,
-              mainAxisSpacing: 3,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
               mainAxisExtent: 56,
             ),
             itemBuilder: (_, index) => _SkeletonBox(

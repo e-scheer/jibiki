@@ -8,7 +8,11 @@ import 'theme_controller.dart';
 class AppTheme {
   AppTheme._();
 
-  static const String fontFamily = 'Inter';
+  static const String fontFamily = 'SpaceGrotesk';
+  static const List<String> fontFamilyFallback = [
+    'ZenKakuGothicNew',
+    'NotoSansJP',
+  ];
 
   // Default signature action colour: Klein blue.
   static const Color brand = Color(0xFF2B36E3);
@@ -45,7 +49,8 @@ class AppTheme {
         useMaterial3: true,
         colorScheme: scheme,
         brightness: b,
-        fontFamily: fontFamily);
+        fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback);
     return base.copyWith(
       scaffoldBackgroundColor: jc.canvas,
       extensions: [jc],
@@ -310,6 +315,7 @@ class AppTheme {
             {double h = 1.25, double ls = -0.2, Color? c}) =>
         TextStyle(
             fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
             fontSize: size,
             fontWeight: w,
             height: h,

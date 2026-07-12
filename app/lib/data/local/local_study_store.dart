@@ -54,7 +54,8 @@ class LocalStudyStore implements StudyStore {
     final rows =
         await _user.select('SELECT value FROM kv WHERE key = ?', ['profile']);
     if (rows.isEmpty) return const {};
-    return (jsonDecode(rows.single['value'] as String) as Map).cast<String, dynamic>();
+    return (jsonDecode(rows.single['value'] as String) as Map)
+        .cast<String, dynamic>();
   }
 
   Future<Fsrs> _scheduler() async {
@@ -90,7 +91,8 @@ class LocalStudyStore implements StudyStore {
         due: DateTime.fromMillisecondsSinceEpoch(r['due'] as int, isUtc: true),
         lastReview: r['last_review'] == null
             ? null
-            : DateTime.fromMillisecondsSinceEpoch(r['last_review'] as int, isUtc: true),
+            : DateTime.fromMillisecondsSinceEpoch(r['last_review'] as int,
+                isUtc: true),
         reps: r['reps'] as int,
         lapses: r['lapses'] as int,
         favorite: r['favorite'] == 1,
@@ -173,14 +175,16 @@ class LocalStudyStore implements StudyStore {
     return rows.isNotEmpty;
   }
 
-  List<(String, List<Object?>)> _upsertNew(String type, String ref, int nowMs) => [
+  List<(String, List<Object?>)> _upsertNew(
+          String type, String ref, int nowMs) =>
+      [
         (
           'INSERT INTO cards (item_type, item_ref, due, created_at, updated_at) '
-          'VALUES (?, ?, ?, ?, ?) '
-          'ON CONFLICT(item_type, item_ref) DO UPDATE SET '
-          // Re-adding a locally-deleted card resurrects it as new.
-          'deleted = 0, state = CASE WHEN cards.deleted = 1 THEN 0 ELSE cards.state END, '
-          'updated_at = excluded.updated_at',
+              'VALUES (?, ?, ?, ?, ?) '
+              'ON CONFLICT(item_type, item_ref) DO UPDATE SET '
+              // Re-adding a locally-deleted card resurrects it as new.
+              'deleted = 0, state = CASE WHEN cards.deleted = 1 THEN 0 ELSE cards.state END, '
+              'updated_at = excluded.updated_at',
           [type, ref, nowMs, nowMs, nowMs],
         ),
       ];
@@ -223,8 +227,14 @@ class LocalStudyStore implements StudyStore {
 
     if (spec != null) {
       final member = await _deckFilter(spec, [...due, ...newRows]);
-      due = [for (final r in due) if (member(r)) r];
-      newRows = [for (final r in newRows) if (member(r)) r];
+      due = [
+        for (final r in due)
+          if (member(r)) r
+      ];
+      newRows = [
+        for (final r in newRows)
+          if (member(r)) r
+      ];
     }
 
     // Prerequisite-first ordering: within the batch we're about to surface,
@@ -255,12 +265,14 @@ class LocalStudyStore implements StudyStore {
   /// or a prerequisite outside the window can never drop a card.
   Future<List<Map<String, Object?>>> _prerequisiteOrder(
       List<Map<String, Object?>> rows, int take) async {
-    final windowSize = rows.length < (take + 60) ? rows.length : (take + 60).clamp(0, 500);
+    final windowSize =
+        rows.length < (take + 60) ? rows.length : (take + 60).clamp(0, 500);
     if (windowSize < 2) return rows;
     final window = rows.sublist(0, windowSize);
     final tail = rows.sublist(windowSize);
 
-    String keyOf(Map<String, Object?> r) => '${r['item_type']}:${r['item_ref']}';
+    String keyOf(Map<String, Object?> r) =>
+        '${r['item_type']}:${r['item_ref']}';
     final inWindow = {for (final r in window) keyOf(r)};
     final kanjiLits = [
       for (final r in window)
@@ -270,7 +282,9 @@ class LocalStudyStore implements StudyStore {
       for (final r in window)
         if (r['item_type'] == 'word') int.parse(r['item_ref'] as String),
     ];
-    if (kanjiLits.isEmpty && wordIds.isEmpty) return rows; // kana only: nothing to order
+    if (kanjiLits.isEmpty && wordIds.isEmpty) {
+      return rows; // kana only: nothing to order
+    }
 
     final db = await _content;
     // prereqs[key] = keys that must come before it (only those also in-window).
@@ -292,12 +306,15 @@ class LocalStudyStore implements StudyStore {
     }
     if (wordIds.isNotEmpty) {
       final marks = List.filled(wordIds.length, '?').join(',');
-      final words = await db.select('SELECT id, headword FROM words WHERE id IN ($marks)', wordIds);
+      final words = await db.select(
+          'SELECT id, headword FROM words WHERE id IN ($marks)', wordIds);
       for (final w in words) {
         final self = 'word:${w['id']}';
         for (final lit in kanjiIn(w['headword'] as String? ?? '')) {
           final dep = 'kanji:$lit';
-          if (inWindow.contains(dep)) prereqs.putIfAbsent(self, () => {}).add(dep);
+          if (inWindow.contains(dep)) {
+            prereqs.putIfAbsent(self, () => {}).add(dep);
+          }
         }
       }
     }
@@ -336,7 +353,8 @@ class LocalStudyStore implements StudyStore {
   // ── reviews ─────────────────────────────────────────────────────────────────
 
   @override
-  Future<StudyCard> review(int cardId, Rating rating, {int durationMs = 0}) async {
+  Future<StudyCard> review(int cardId, Rating rating,
+      {int durationMs = 0}) async {
     final row = await _rowById(cardId);
     if (row == null) throw StateError('card $cardId not found');
     final card = _toCard(row);
@@ -346,8 +364,8 @@ class LocalStudyStore implements StudyStore {
     await _user.tx([
       (
         'UPDATE cards SET stability = ?, difficulty = ?, state = ?, step = ?, '
-        'due = ?, last_review = ?, reps = ?, lapses = ?, updated_at = ? '
-        'WHERE rowid = ?',
+            'due = ?, last_review = ?, reps = ?, lapses = ?, updated_at = ? '
+            'WHERE rowid = ?',
         [
           card.stability,
           card.difficulty,
@@ -363,7 +381,7 @@ class LocalStudyStore implements StudyStore {
       ),
       (
         'INSERT INTO review_log (client_review_id, item_type, item_ref, rating, '
-        'state_before, duration_ms, reviewed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            'state_before, duration_ms, reviewed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [
           _uuid.v4(),
           card.itemType,
@@ -384,7 +402,14 @@ class LocalStudyStore implements StudyStore {
   // ── add / status ────────────────────────────────────────────────────────────
 
   @override
-  Future<StudyCard> addCard(ItemType type, String ref) async {
+  Future<StudyCard> addCard(
+    ItemType type,
+    String ref, {
+    String sourceSentence = '',
+    String sourceUrl = '',
+    String sourceTitle = '',
+    String sourceMedia = '',
+  }) async {
     if (!await _resolves(type.wire, ref)) {
       throw StateError('unknown study item: ${type.wire}:$ref');
     }
@@ -393,6 +418,10 @@ class LocalStudyStore implements StudyStore {
       'items': [
         {'item_type': type.wire, 'ref': ref},
       ],
+      'source_sentence': sourceSentence,
+      'source_url': sourceUrl,
+      'source_title': sourceTitle,
+      'source_media': sourceMedia,
     });
     final row = await _rowByKey(type.wire, ref);
     return (await _assemble([row!])).single;
@@ -419,8 +448,8 @@ class LocalStudyStore implements StudyStore {
         [_ms(now), _ms(now), type.wire, ref],
       );
     }
-    await _enqueueOp('set_status',
-        {'item_type': type.wire, 'ref': ref, 'status': status});
+    await _enqueueOp(
+        'set_status', {'item_type': type.wire, 'ref': ref, 'status': status});
     return status;
   }
 
@@ -579,12 +608,13 @@ class LocalStudyStore implements StudyStore {
   Future<int> _streakDays(DateTime nowUtc) async {
     final windowStart = _ms(nowUtc.subtract(const Duration(days: 400)));
     final rows = await _user.select(
-        'SELECT reviewed_at FROM review_log WHERE reviewed_at >= ?', [windowStart]);
+        'SELECT reviewed_at FROM review_log WHERE reviewed_at >= ?',
+        [windowStart]);
     final days = <String>{};
     for (final r in rows) {
-      final local =
-          DateTime.fromMillisecondsSinceEpoch(r['reviewed_at'] as int, isUtc: true)
-              .toLocal();
+      final local = DateTime.fromMillisecondsSinceEpoch(r['reviewed_at'] as int,
+              isUtc: true)
+          .toLocal();
       days.add('${local.year}-${local.month}-${local.day}');
     }
     if (days.isEmpty) return 0;
@@ -605,15 +635,21 @@ class LocalStudyStore implements StudyStore {
   @override
   Future<List<Deck>> decks() async {
     final nowMs = _ms(_now());
-    final rows = await _user
-        .select('SELECT $_cardCols FROM cards WHERE deleted = 0');
+    final rows =
+        await _user.select('SELECT $_cardCols FROM cards WHERE deleted = 0');
     final content = await _content;
 
     final out = <Deck>[];
     for (final spec in deckCatalog) {
       final member = await _deckFilter(spec, rows);
-      final mine = [for (final r in rows) if (member(r)) r];
-      final studied = [for (final r in mine) if (r['state'] != 0) r];
+      final mine = [
+        for (final r in rows)
+          if (member(r)) r
+      ];
+      final studied = [
+        for (final r in mine)
+          if (r['state'] != 0) r
+      ];
       final due = [
         for (final r in studied)
           if ((r['due'] as int) <= nowMs) r,
@@ -649,7 +685,7 @@ class LocalStudyStore implements StudyStore {
             refs.sublist(i, i + 100 > refs.length ? refs.length : i + 100);
         statements.add((
           'INSERT OR IGNORE INTO cards (item_type, item_ref, due, created_at, updated_at) '
-          'VALUES ${List.filled(chunk.length, '(?, ?, ?, ?, ?)').join(', ')}',
+              'VALUES ${List.filled(chunk.length, '(?, ?, ?, ?, ?)').join(', ')}',
           [
             for (final ref in chunk) ...[type, ref, nowMs, nowMs, nowMs],
           ],

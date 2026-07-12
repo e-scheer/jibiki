@@ -12,6 +12,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/statistics_viewmodel.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/status_views.dart';
 import 'study_chrome.dart';
 
@@ -166,12 +167,9 @@ class _HeaderAction extends StatelessWidget {
             radius: 10,
             padding: EdgeInsets.zero,
             child: busy
-                ? Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: context.jc.ink,
-                    ),
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: NeoChaseLoader.small(),
                   )
                 : Icon(icon, size: 20),
           ),

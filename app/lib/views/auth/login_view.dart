@@ -7,8 +7,9 @@ import '../../core/dev_login.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/auth_viewmodel.dart';
-import 'auth_chrome.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
+import 'auth_chrome.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -99,15 +100,7 @@ class _LoginFormState extends State<_LoginForm> {
                     ),
                   ),
                 ),
-                Text(
-                  '字',
-                  style: TextStyle(
-                    color: context.jc.brand,
-                    fontSize: 48,
-                    height: 0.9,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+                const JibikiBrandMark(size: 52),
               ],
             ),
             const SizedBox(height: 8),

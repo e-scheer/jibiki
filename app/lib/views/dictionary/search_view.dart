@@ -11,22 +11,30 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/browse_viewmodel.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/status_views.dart';
 import '../widgets/word_tile.dart';
 import 'browse_list_view.dart';
+import 'word_detail_view.dart';
 
 class SearchView extends StatelessWidget {
-  const SearchView({super.key});
+  const SearchView({super.key, this.initialQuery = ''});
+
+  final String initialQuery;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => SearchViewModel(
-        ctx.read<DictionaryRepository>(),
-        glossLanguage: ctx.read<AppState>().mnemonicLanguage,
-      )..loadLanding(),
+      create: (ctx) {
+        final vm = SearchViewModel(
+          ctx.read<DictionaryRepository>(),
+          glossLanguage: ctx.read<AppState>().mnemonicLanguage,
+        )..loadLanding();
+        if (initialQuery.trim().isNotEmpty) vm.submit(initialQuery.trim());
+        return vm;
+      },
       child: const _SearchScreen(),
     );
   }
@@ -38,6 +46,9 @@ class _SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SearchViewModel>();
+    if (context.isExpanded && vm.hasSearched) {
+      return _TabletDictionary(vm: vm);
+    }
     return Scaffold(
       body: Column(
         children: [
@@ -107,6 +118,306 @@ class _SearchScreen extends StatelessWidget {
   }
 }
 
+class _TabletDictionary extends StatelessWidget {
+  const _TabletDictionary({required this.vm});
+
+  final SearchViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final listWidth = constraints.maxWidth >= 980 ? 340.0 : 310.0;
+          return Row(
+            children: [
+              SizedBox(
+                width: listWidth,
+                child: _TabletResultPane(vm: vm),
+              ),
+              VerticalDivider(
+                width: 3,
+                thickness: 3,
+                color: context.jc.ink,
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: Motion.timed(
+                    context,
+                    const Duration(milliseconds: 180),
+                  ),
+                  switchInCurve: Motion.out,
+                  switchOutCurve: Motion.out,
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.015),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Motion.out,
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  ),
+                  child: vm.selectedWordId == null
+                      ? EmptyHint(
+                          key: const ValueKey('no-word-selected'),
+                          icon: Icons.menu_book_outlined,
+                          title: context.trText('Choose a result'),
+                          subtitle: context.trText(
+                            'Its complete dictionary card will stay beside the list.',
+                          ),
+                        )
+                      : WordDetailPane(
+                          key: ValueKey(vm.selectedWordId),
+                          wordId: vm.selectedWordId!,
+                        ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _TabletResultPane extends StatelessWidget {
+  const _TabletResultPane({required this.vm});
+
+  final SearchViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget results;
+    if (vm.hasError) {
+      results = ErrorRetry(
+        message: vm.error!,
+        onRetry: () => vm.submit(vm.query),
+      );
+    } else if (vm.isLoading && vm.results.isEmpty) {
+      results = const SkeletonTileList();
+    } else if (vm.results.isEmpty) {
+      results = EmptyHint(
+        icon: Icons.search_off_rounded,
+        title: _copy(
+          context,
+          'No matches for "${vm.query}"',
+          'Aucun résultat pour « ${vm.query} »',
+        ),
+      );
+    } else {
+      results = ListView.separated(
+        padding: EdgeInsets.zero,
+        itemCount: vm.results.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 9),
+        itemBuilder: (context, index) {
+          final word = vm.results[index];
+          return _TabletResultCard(
+            word: word,
+            lang: vm.glossLanguage,
+            selected: word.id == vm.selectedWordId,
+            onTap: () => vm.selectWord(word),
+          );
+        },
+      );
+    }
+
+    return ColoredBox(
+      color: context.jc.canvas,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _TabletSearchField(vm: vm),
+            const SizedBox(height: 10),
+            Text(
+              _copy(
+                context,
+                '${vm.results.length} results for "${vm.query}".',
+                '${vm.results.length} résultats pour « ${vm.query} ».',
+              ),
+              style: TextStyle(
+                color: context.jc.body,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(child: results),
+            const SizedBox(height: 8),
+            Text(
+              _copy(
+                context,
+                'Sorted by relevance. Romaji is transliterated.',
+                'Tri : pertinence. Le rōmaji est translittéré.',
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.jc.body,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TabletSearchField extends StatefulWidget {
+  const _TabletSearchField({required this.vm});
+
+  final SearchViewModel vm;
+
+  @override
+  State<_TabletSearchField> createState() => _TabletSearchFieldState();
+}
+
+class _TabletSearchFieldState extends State<_TabletSearchField> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.vm.query);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: context.jc.surface,
+          border: Border.all(color: context.jc.ink, width: 3),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: context.jc.ink,
+              blurRadius: 0,
+              offset: const Offset(4, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search_rounded, size: 21),
+            const SizedBox(width: 9),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                textInputAction: TextInputAction.search,
+                onChanged: widget.vm.onQueryChanged,
+                onSubmitted: widget.vm.submit,
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            Pressable(
+              label: context.trText('Clear search'),
+              onTap: () {
+                _controller.clear();
+                widget.vm.onQueryChanged('');
+              },
+              child: const SizedBox.square(
+                dimension: 36,
+                child: Icon(Icons.close_rounded, size: 19),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class _TabletResultCard extends StatelessWidget {
+  const _TabletResultCard({
+    required this.word,
+    required this.lang,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final WordEntry word;
+  final String lang;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 66,
+        child: NeoCard(
+          tone: selected ? NeoTone.acid : NeoTone.paper,
+          shadow: selected ? 4 : 0,
+          radius: 11,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          onTap: onTap,
+          semanticLabel: '${word.headword}, ${word.summaryGloss(lang)}',
+          child: Row(
+            children: [
+              SizedBox(
+                width: 62,
+                child: Text(
+                  word.headword,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'ZenKakuGothicNew',
+                    fontSize: 23,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      word.primaryReading,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      word.summaryGloss(lang),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.jc.body,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (selected) const Icon(Icons.chevron_right_rounded, size: 19),
+            ],
+          ),
+        ),
+      );
+}
+
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({required this.vm});
 
@@ -143,27 +454,10 @@ class _HomeHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          context.trText('jibiki'),
-                          style: TextStyle(
-                            color: jc.surface,
-                            fontSize: 24,
-                            height: 1,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Transform.rotate(
-                          angle: 0.2,
-                          child: Container(
-                            width: 9,
-                            height: 9,
-                            decoration: BoxDecoration(
-                              color: jc.acid,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
+                        const JibikiWordmark(
+                          fontSize: 24,
+                          variant: JibikiBrandVariant.negative,
+                          dotOutline: JibikiBrandColors.ink,
                         ),
                         const Spacer(),
                         Text(
@@ -215,7 +509,8 @@ class _HomeHeader extends StatelessWidget {
                           Icon(Icons.search_rounded, color: jc.ink, size: 22),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: TextField(
+                            child: TextFormField(
+                              initialValue: vm.query,
                               textInputAction: TextInputAction.search,
                               style: TextStyle(
                                 color: jc.ink,
@@ -242,19 +537,16 @@ class _HomeHeader extends StatelessWidget {
                                 ),
                               ),
                               onChanged: vm.onQueryChanged,
-                              onSubmitted: vm.submit,
+                              onFieldSubmitted: vm.submit,
                             ),
                           ),
                           AnimatedSwitcher(
                             duration: Motion.timed(context, Motion.fast),
                             child: vm.isLoading
-                                ? SizedBox.square(
-                                    key: const ValueKey('search-loading'),
+                                ? const SizedBox.square(
+                                    key: ValueKey('search-loading'),
                                     dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: jc.ink,
-                                    ),
+                                    child: NeoChaseLoader.small(),
                                   )
                                 : const SizedBox.shrink(
                                     key: ValueKey('search-idle'),
@@ -547,7 +839,7 @@ class _WordOfTheDay extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontFamily: 'NotoSansJP',
+                                fontFamily: 'ZenKakuGothicNew',
                                 fontSize: 46,
                                 height: 1.05,
                                 fontWeight: FontWeight.w900,
@@ -789,7 +1081,7 @@ class _RecentWordButton extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontFamily: 'NotoSansJP',
+            fontFamily: 'ZenKakuGothicNew',
             fontSize: 15,
             fontWeight: FontWeight.w900,
           ),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
@@ -25,10 +27,12 @@ class SwipeStage extends StatefulWidget {
     super.key,
     required this.vm,
     required this.lang,
+    this.onOpenDetails,
     this.onRated,
   });
   final ReviewViewModel vm;
   final String lang;
+  final VoidCallback? onOpenDetails;
   final void Function(StudyCard card, Rating rating)? onRated;
 
   @override
@@ -50,7 +54,9 @@ class _SwipeStageState extends State<SwipeStage> {
   Widget build(BuildContext context) {
     final card = widget.vm.current!;
     final next = widget.vm.next;
+    final landscape = studyUsesLandscapeContract(context);
     final cardStack = Stack(
+      clipBehavior: Clip.none,
       children: [
         if (next != null)
           Positioned.fill(
@@ -68,33 +74,71 @@ class _SwipeStageState extends State<SwipeStage> {
             },
             onProgress: (p) => _peek.value = p,
             onRevealChanged: (v) => setState(() => _revealed = v),
-            front: _Face(card: card, lang: widget.lang, revealed: false),
-            back: _Face(card: card, lang: widget.lang, revealed: true),
+            front: _Face(
+              card: card,
+              lang: widget.lang,
+              revealed: false,
+              landscape: landscape,
+            ),
+            back: _Face(
+              card: card,
+              lang: widget.lang,
+              revealed: true,
+              landscape: landscape,
+            ),
           ),
         ),
+        if (landscape && _revealed)
+          Positioned(
+            top: -64,
+            right: -26,
+            child: IgnorePointer(
+              child: _CardCelebration(
+                label: _copy(context, 'REMEMBERED', 'RETENU'),
+              ),
+            ),
+          ),
       ],
     );
 
-    // Rotation-adaptive: landscape sets the card beside a vertical grade column so
-    // nothing fights for the short height; portrait keeps the card above the bar,
-    // bounded so a tablet centres a real card instead of a giant one.
-    if (context.isLandscape) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 16, 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: BoundedBoard(maxWidth: 480, child: cardStack)),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 164,
-              child: _ActionBar(
-                  revealed: _revealed,
-                  controller: _controller,
-                  axis: Axis.vertical),
+    if (landscape) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            flex: 55,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(30, 20, 30, 26),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final width = math.min(548.0, constraints.maxWidth);
+                  final height = math.min(540.0, constraints.maxHeight);
+                  return Center(
+                    child: SizedBox(
+                      width: width,
+                      height: height,
+                      child: cardStack,
+                    ),
+                  );
+                },
+              ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            flex: 45,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 20, 30, 26),
+              child: _ActionBar(
+                revealed: _revealed,
+                controller: _controller,
+                axis: Axis.vertical,
+                card: card,
+                lang: widget.lang,
+                onOpenDetails: widget.onOpenDetails,
+              ),
+            ),
+          ),
+        ],
       );
     }
     return BoundedBoard(
@@ -105,11 +149,41 @@ class _SwipeStageState extends State<SwipeStage> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
                 child: cardStack),
           ),
-          _ActionBar(revealed: _revealed, controller: _controller),
+          _ActionBar(
+            revealed: _revealed,
+            controller: _controller,
+            card: card,
+            lang: widget.lang,
+          ),
         ],
       ),
     );
   }
+}
+
+class _CardCelebration extends StatelessWidget {
+  const _CardCelebration({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 220,
+        height: 126,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Positioned.fill(
+              child: StudyConfetti(size: Size(210, 108)),
+            ),
+            Positioned(
+              top: 48,
+              right: 20,
+              child: StudySticker(label, large: true),
+            ),
+          ],
+        ),
+      );
 }
 
 /// The next card, peeking behind, rises + fades in as the top card is dragged.
@@ -158,13 +232,20 @@ class _PeekCard extends StatelessWidget {
 /// The premium bottom controls: "Show answer" before reveal, then the four
 /// colour-coded grade buttons that mirror the swipe directions.
 class _ActionBar extends StatelessWidget {
-  const _ActionBar(
-      {required this.revealed,
-      required this.controller,
-      this.axis = Axis.horizontal});
+  const _ActionBar({
+    required this.revealed,
+    required this.controller,
+    required this.card,
+    required this.lang,
+    this.axis = Axis.horizontal,
+    this.onOpenDetails,
+  });
   final bool revealed;
   final SwipeCardController controller;
+  final StudyCard card;
+  final String lang;
   final Axis axis;
+  final VoidCallback? onOpenDetails;
 
   static const _grades = [Rating.again, Rating.hard, Rating.good, Rating.easy];
 
@@ -186,16 +267,32 @@ class _ActionBar extends StatelessWidget {
     final Widget content = revealed
         ? (vertical
             ? Column(
-                key: const ValueKey('grades'),
+                key: const ValueKey('grades-landscape'),
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Text(
+                    _copy(context, 'Did you know it?', 'Tu l\'avais ?'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   for (var i = 0; i < _grades.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 8),
+                    if (i > 0) const SizedBox(height: 10),
                     _GradeButton(
-                        rating: _grades[i],
-                        onTap: () => controller.rate(_grades[i])),
+                      rating: _grades[i],
+                      vertical: true,
+                      onTap: () => controller.rate(_grades[i]),
+                    ),
                   ],
+                  const SizedBox(height: 18),
+                  _LandscapeContextPanel(
+                    card: card,
+                    lang: lang,
+                    onTap: onOpenDetails,
+                  ),
                 ],
               )
             : Column(
@@ -234,23 +331,36 @@ class _ActionBar extends StatelessWidget {
             child: vertical ? Center(child: revealBtn) : revealBtn,
           );
 
+    final switched = AnimatedSwitcher(
+      duration: Motion.timed(context, Motion.fast),
+      child: content,
+    );
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: vertical
-            ? const EdgeInsets.symmetric(vertical: 4)
-            : const EdgeInsets.fromLTRB(18, 4, 18, 14),
-        child: AnimatedSwitcher(
-            duration: Motion.timed(context, Motion.fast), child: content),
-      ),
+      child: vertical
+          ? Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(right: 4, bottom: 8),
+                child: switched,
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 14),
+              child: switched,
+            ),
     );
   }
 }
 
 class _GradeButton extends StatelessWidget {
-  const _GradeButton({required this.rating, required this.onTap});
+  const _GradeButton({
+    required this.rating,
+    required this.onTap,
+    this.vertical = false,
+  });
   final Rating rating;
   final VoidCallback onTap;
+  final bool vertical;
 
   @override
   Widget build(BuildContext context) {
@@ -262,65 +372,94 @@ class _GradeButton extends StatelessWidget {
     };
     final foreground =
         rating == Rating.easy ? context.jc.surface : context.jc.ink;
-    final interval = switch (rating) {
-      Rating.again => '2 min',
-      Rating.hard => '1 d',
-      Rating.good => '3 d',
-      Rating.easy => '7 d',
-    };
-    return Pressable(
+    final interval = _ratingInterval(context, rating);
+    return Pressable.builder(
       label: 'Grade: ${rating.label}',
       haptic: false, // the light impact below is the intended feedback
+      focusRadius: 12,
       onTap: () {
         Haptics.light();
         onTap();
       },
-      child: Container(
-        height: 60,
+      builder: (context, pressed) => AnimatedContainer(
+        duration: Motion.timed(context, const Duration(milliseconds: 120)),
+        curve: Curves.easeOut,
+        height: vertical ? 70 : 60,
         decoration: BoxDecoration(
           color: fill,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: context.jc.ink, width: 2.5),
-          boxShadow: [
-            BoxShadow(
-                color: context.jc.ink,
-                blurRadius: 0,
-                offset: const Offset(3, 3))
-          ],
+          borderRadius: BorderRadius.circular(vertical ? 12 : 10),
+          border: Border.all(
+            color: context.jc.ink,
+            width: vertical ? 3 : 2.5,
+          ),
+          boxShadow: pressed
+              ? null
+              : [
+                  BoxShadow(
+                    color: context.jc.ink,
+                    blurRadius: 0,
+                    offset: Offset(vertical ? 4 : 3, vertical ? 4 : 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [
-            const SizedBox(width: 10),
+            SizedBox(width: vertical ? 16 : 10),
             Icon(ratingIcon(rating), color: foreground, size: 22),
-            const SizedBox(width: 9),
+            SizedBox(width: vertical ? 14 : 9),
             Expanded(
-              child: Column(
+              child: Text(
+                context.trText(rating.label),
+                style: TextStyle(
+                  color: foreground,
+                  fontWeight: FontWeight.w700,
+                  fontSize: vertical ? 18 : 15,
+                ),
+              ),
+            ),
+            if (vertical)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: context.jc.surface,
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(color: context.jc.ink, width: 2),
+                ),
+                child: Text(
+                  interval,
+                  style: TextStyle(
+                    color: context.jc.ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            else ...[
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(rating.label,
-                      style: TextStyle(
-                          color: foreground,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15)),
-                  const SizedBox(height: 1),
-                  Text(interval,
-                      style: TextStyle(
-                          color: foreground,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11.5)),
+                  Text(
+                    interval,
+                    style: TextStyle(
+                      color: foreground,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                  Text(
+                    ratingArrow(rating),
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            Text(
-              ratingArrow(rating),
-              style: TextStyle(
-                color: foreground,
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(width: 8),
+            ],
+            SizedBox(width: vertical ? 16 : 8),
           ],
         ),
       ),
@@ -328,20 +467,156 @@ class _GradeButton extends StatelessWidget {
   }
 }
 
+class _LandscapeContextPanel extends StatelessWidget {
+  const _LandscapeContextPanel({
+    required this.card,
+    required this.lang,
+    this.onTap,
+  });
+
+  final StudyCard card;
+  final String lang;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final sentence = card.sourceSentence.trim();
+    final tokens = sentence.isEmpty
+        ? <String>[
+            card.front,
+            if (card.reading.isNotEmpty && card.reading != card.front)
+              card.reading,
+          ]
+        : sentence
+            .split(RegExp(r'\s+'))
+            .where((token) => token.isNotEmpty)
+            .toList(growable: false);
+    var hit = tokens.indexWhere((token) => token.contains(card.front));
+    if (hit < 0) hit = tokens.length - 1;
+
+    Widget panel(bool pressed) => StudyPanel(
+          borderWidth: 3,
+          shadow: pressed ? 0 : 4,
+          radius: 12,
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _copy(context, 'In context', 'En contexte'),
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (var i = 0; i < tokens.length; i++)
+                    _ContextChip(label: tokens[i], highlighted: i == hit),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                card.meaning(lang).isEmpty
+                    ? _copy(
+                        context,
+                        'No translation captured yet.',
+                        'Aucune traduction capturée pour le moment.',
+                      )
+                    : '« ${card.meaning(lang)} »',
+                style: TextStyle(
+                  color: context.jc.body,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                ),
+              ),
+              if (onTap != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      context.trText('Open full details'),
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right_rounded, size: 18),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+
+    if (onTap == null) return panel(false);
+    return Pressable.builder(
+      label: context.trText('Open full details'),
+      focusRadius: 12,
+      onTap: onTap,
+      builder: (context, pressed) => panel(pressed),
+    );
+  }
+}
+
+class _ContextChip extends StatelessWidget {
+  const _ContextChip({required this.label, required this.highlighted});
+
+  final String label;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        constraints: const BoxConstraints(minHeight: 40, maxWidth: 280),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: highlighted ? context.jc.acid : context.jc.surface,
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: context.jc.ink, width: 2.5),
+        ),
+        child: Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontFamily: 'ZenKakuGothicNew',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+}
+
 class _Face extends StatelessWidget {
-  const _Face({required this.card, required this.lang, required this.revealed});
+  const _Face({
+    required this.card,
+    required this.lang,
+    required this.revealed,
+    required this.landscape,
+  });
   final StudyCard card;
   final String lang;
   final bool revealed;
+  final bool landscape;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
+      padding: landscape
+          ? const EdgeInsets.fromLTRB(24, 62, 24, 44)
+          : const EdgeInsets.fromLTRB(22, 24, 22, 22),
       child: Column(
         children: [
-          Align(alignment: Alignment.centerLeft, child: _TypeBadge(card: card)),
+          if (!landscape)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _TypeBadge(card: card),
+            ),
           const Spacer(),
           Flexible(
             flex: 8,
@@ -351,8 +626,10 @@ class _Face extends StatelessWidget {
                 card.front,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: JpFonts.variant(card.id + card.reps),
-                  fontSize: 104,
+                  fontFamily: landscape
+                      ? 'ZenKakuGothicNew'
+                      : JpFonts.variant(card.id + card.reps),
+                  fontSize: landscape ? 148 : 104,
                   fontWeight: FontWeight.w900,
                   height: 1,
                   color: jc.ink,
@@ -364,9 +641,9 @@ class _Face extends StatelessWidget {
           if (!revealed)
             const _Hint(icon: Icons.touch_app_outlined, text: 'Tap to reveal')
           else
-            _AnswerBlock(card: card, lang: lang),
+            _AnswerBlock(card: card, lang: lang, landscape: landscape),
           const Spacer(),
-          if (revealed)
+          if (revealed && !landscape)
             const _Hint(
                 icon: Icons.swipe_outlined,
                 text: 'Swipe any way, or tap a button'),
@@ -379,9 +656,14 @@ class _Face extends StatelessWidget {
 /// The revealed answer: a hairline lead-in, the reading in vermilion, the meaning
 /// below, and a play button. A clear stack instead of loose stacked lines.
 class _AnswerBlock extends StatelessWidget {
-  const _AnswerBlock({required this.card, required this.lang});
+  const _AnswerBlock({
+    required this.card,
+    required this.lang,
+    required this.landscape,
+  });
   final StudyCard card;
   final String lang;
+  final bool landscape;
 
   @override
   Widget build(BuildContext context) {
@@ -403,8 +685,8 @@ class _AnswerBlock extends StatelessWidget {
               // Readings are kana; pin a JP face so they never fall back to a
               // Latin font (which renders them as tofu).
               style: TextStyle(
-                  fontFamily: 'NotoSansJP',
-                  fontSize: 27,
+                  fontFamily: 'ZenKakuGothicNew',
+                  fontSize: landscape ? 30 : 27,
                   color: jc.ink,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.3)),
@@ -413,11 +695,11 @@ class _AnswerBlock extends StatelessWidget {
         Text(card.meaning(lang),
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 17.5,
+                fontSize: landscape ? 18.5 : 17.5,
                 color: jc.ink,
                 height: 1.35,
-                fontWeight: FontWeight.w700)),
-        if (card.sourceSentence.isNotEmpty) ...[
+                fontWeight: FontWeight.w600)),
+        if (!landscape && card.sourceSentence.isNotEmpty) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -431,7 +713,8 @@ class _AnswerBlock extends StatelessWidget {
                 style: TextStyle(color: jc.body, fontSize: 13, height: 1.35)),
           ),
         ],
-        if (card.sourceTitle.isNotEmpty || card.sourceUrl.isNotEmpty)
+        if (!landscape &&
+            (card.sourceTitle.isNotEmpty || card.sourceUrl.isNotEmpty))
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
@@ -442,8 +725,10 @@ class _AnswerBlock extends StatelessWidget {
               style: TextStyle(color: jc.muted, fontSize: 11),
             ),
           ),
-        const SizedBox(height: 12),
-        SpeechButton(text: _cardSpeech(card), size: 26),
+        if (!landscape) ...[
+          const SizedBox(height: 12),
+          SpeechButton(text: _cardSpeech(card), size: 26),
+        ],
       ],
     );
   }
@@ -494,3 +779,16 @@ class _TypeBadge extends StatelessWidget {
     );
   }
 }
+
+String _ratingInterval(BuildContext context, Rating rating) {
+  final french = Localizations.localeOf(context).languageCode == 'fr';
+  return switch (rating) {
+    Rating.again => '2 min',
+    Rating.hard => french ? '1 j' : '1 d',
+    Rating.good => french ? '3 j' : '3 d',
+    Rating.easy => french ? '7 j' : '7 d',
+  };
+}
+
+String _copy(BuildContext context, String english, String french) =>
+    Localizations.localeOf(context).languageCode == 'fr' ? french : english;

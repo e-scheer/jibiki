@@ -26,35 +26,20 @@ class CommunityDecksView extends StatelessWidget {
       length: 2,
       initialIndex: initialTab,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: context.jc.magenta,
-          foregroundColor: context.jc.ink,
-          toolbarHeight: 82,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(context.trText('Community')),
-              const SizedBox(height: 3),
-              Text(
-                context.trText('Shared packs. Take, rate and improve.'),
-                style: TextStyle(
-                  color: context.jc.ink,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              tooltip: context.trText('Create a pack'),
-              icon: const Icon(Icons.add_box_outlined),
-              onPressed: () => context.push('/decks/new'),
-            ),
-          ],
-        ),
         body: Column(
           children: [
+            NeoPageHeader(
+              title: context.trText('Community'),
+              subtitle: context.trText(
+                'Shared packs. Take, rate and improve.',
+              ),
+              tone: NeoTone.magenta,
+              trailing: NeoIconButton(
+                icon: Icons.add_box_outlined,
+                label: context.trText('Create a pack'),
+                onTap: () => context.push('/decks/new'),
+              ),
+            ),
             Container(
               color: context.jc.canvas,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),

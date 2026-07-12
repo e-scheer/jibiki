@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/pressable.dart';
 import 'drawing_pad.dart';
 
@@ -346,10 +347,7 @@ class _StudioTop extends StatelessWidget {
                   ),
                   onTap: canSave ? onSave : null,
                   child: saving
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
+                      ? const NeoChaseLoader.small()
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

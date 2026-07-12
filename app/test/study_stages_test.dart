@@ -14,11 +14,13 @@ import 'package:jibiki/views/study/match_stage.dart';
 import 'package:jibiki/views/study/quiz_stage.dart';
 import 'package:jibiki/views/study/study_feedback.dart';
 import 'package:jibiki/views/study/swipe_stage.dart';
+import 'package:jibiki/views/widgets/pressable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A kanji card with one English meaning and a kun reading, so both the swipe
 /// answer block and the quiz distractors have real content to render.
-StudyCard _kanji(int id, String literal, String meaning, String kun) => StudyCard(
+StudyCard _kanji(int id, String literal, String meaning, String kun) =>
+    StudyCard(
       id: id,
       itemType: ItemType.kanji,
       itemRef: literal,
@@ -43,7 +45,8 @@ StudyCard _kanji(int id, String literal, String meaning, String kun) => StudyCar
     );
 
 class _FakeStudyRepo extends StudyRepository {
-  _FakeStudyRepo(StudyService service, {required this.pool}) : super(service, service);
+  _FakeStudyRepo(StudyService service, {required this.pool})
+      : super(service, service);
   final List<StudyCard> pool;
 
   @override
@@ -54,7 +57,8 @@ class _FakeStudyRepo extends StudyRepository {
       );
 
   @override
-  Future<StudyCard> review(int cardId, Rating rating, {int durationMs = 0}) async =>
+  Future<StudyCard> review(int cardId, Rating rating,
+          {int durationMs = 0}) async =>
       pool.firstWhere((c) => c.id == cardId);
 }
 
@@ -82,7 +86,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('QuizStage (multiple choice)', () {
-    testWidgets('renders the prompt, lettered option chips and every choice', (tester) async {
+    testWidgets('renders the prompt, lettered option chips and every choice',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
@@ -99,7 +104,8 @@ void main() {
       expect(find.byIcon(Icons.volume_up_outlined), findsNothing);
     });
 
-    testWidgets('recall direction flips prompt to the meaning and options to kanji',
+    testWidgets(
+        'recall direction flips prompt to the meaning and options to kanji',
         (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(
@@ -114,7 +120,8 @@ void main() {
       }
     });
 
-    testWidgets('locking a choice marks correct/wrong and reveals audio', (tester) async {
+    testWidgets('locking a choice marks correct/wrong and reveals audio',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
@@ -122,17 +129,22 @@ void main() {
       await tester.tap(find.text('fire')); // wrong (correct is 水/water)
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget); // the wrong pick
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget); // the correct answer surfaced
-      expect(find.byIcon(Icons.volume_up_outlined), findsOneWidget); // audio revealed
+      expect(
+          find.byIcon(Icons.close_rounded), findsOneWidget); // the wrong pick
+      expect(find.byIcon(Icons.check_rounded),
+          findsOneWidget); // the correct answer surfaced
+      expect(find.byIcon(Icons.volume_up_outlined),
+          findsOneWidget); // audio revealed
       // The correct card's reading surfaces as a teaching aid on a miss.
       expect(find.text('みず'), findsWidgets);
 
-      await tester.pump(const Duration(milliseconds: 1600)); // fire the advance timer (wrong = 1500ms)
+      await tester.pump(const Duration(
+          milliseconds: 1600)); // fire the advance timer (wrong = 1500ms)
       await tester.pumpAndSettle();
     });
 
-    testWidgets('a correct pick celebrates the win before advancing', (tester) async {
+    testWidgets('a correct pick celebrates the win before advancing',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
@@ -143,13 +155,16 @@ void main() {
       // The won round is signalled unmistakably while the next card is queued.
       expect(find.byType(SuccessBurst), findsOneWidget);
 
-      await tester.pump(const Duration(milliseconds: 900)); // drain the advance timer (correct = 850ms)
+      await tester.pump(const Duration(
+          milliseconds: 900)); // drain the advance timer (correct = 850ms)
       await tester.pumpAndSettle();
     });
   });
 
   group('SwipeStage (flashcard)', () {
-    testWidgets('shows the answer, the four graded buttons and their swipe arrows', (tester) async {
+    testWidgets(
+        'shows the answer, the four graded buttons and their swipe arrows',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(SwipeStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
@@ -169,10 +184,35 @@ void main() {
         expect(find.text(arrow), findsOneWidget);
       }
     });
+
+    testWidgets('uses the 55/45 tablet landscape review workspace',
+        (tester) async {
+      tester.view.physicalSize = const Size(1180, 820);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final vm = await _vm();
+      await tester.pumpWidget(_host(SwipeStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Did you know it?'), findsOneWidget);
+      expect(find.text('In context'), findsOneWidget);
+      final again = find.ancestor(
+        of: find.text('Again'),
+        matching: find.byType(Pressable),
+      );
+      expect(again, findsOneWidget);
+      expect(tester.getSize(again).height, 70);
+    });
   });
 
   group('MatchStage (memory)', () {
-    testWidgets('lays down face-down tiles and flips one on tap', (tester) async {
+    testWidgets('lays down face-down tiles and flips one on tap',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(MatchStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
@@ -190,13 +230,15 @@ void main() {
   });
 
   group('ListenStage (assemble the reading)', () {
-    testWidgets('fills cells from the tile bank and enables Check', (tester) async {
+    testWidgets('fills cells from the tile bank and enables Check',
+        (tester) async {
       final vm = await _vm();
       await tester.pumpWidget(_host(ListenStage(vm: vm, lang: 'en')));
       await tester.pumpAndSettle();
 
       expect(find.text('Type what you hear'), findsOneWidget);
-      FilledButton check() => tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Check'));
+      FilledButton check() => tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Check'));
       expect(check().onPressed, isNull); // nothing placed yet
 
       // 水's reading is みず: place both kana from the bank.
@@ -214,7 +256,8 @@ void main() {
       expect(find.byType(SuccessBurst), findsOneWidget);
       expect(find.text('water'), findsOneWidget);
 
-      await tester.pump(const Duration(milliseconds: 1700)); // drain the advance timer
+      await tester
+          .pump(const Duration(milliseconds: 1700)); // drain the advance timer
       await tester.pumpAndSettle();
     });
 
@@ -237,10 +280,12 @@ void main() {
       // and the correct reading + meaning are surfaced as a teaching moment.
       expect(find.byType(MissBurst), findsOneWidget);
       expect(find.byType(SuccessBurst), findsNothing);
-      expect(find.text('みず'), findsOneWidget); // corrected reading in the result block
+      expect(find.text('みず'),
+          findsOneWidget); // corrected reading in the result block
       expect(find.text('water'), findsOneWidget);
 
-      await tester.pump(const Duration(milliseconds: 1700)); // drain the advance timer
+      await tester
+          .pump(const Duration(milliseconds: 1700)); // drain the advance timer
       await tester.pumpAndSettle();
     });
   });

@@ -9,6 +9,7 @@ import '../../models/study.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
+import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/review_viewmodel.dart';
 import '../widgets/pressable.dart';
 import '../widgets/status_views.dart';
@@ -38,10 +39,18 @@ class SessionView extends StatelessWidget {
   final String? title;
 
   @override
-  Widget build(BuildContext context) => ChangeNotifierProvider(
-        create: (ctx) =>
-            ReviewViewModel(ctx.read<StudyRepository>(), deckId: deckId)
-              ..load(),
+  Widget build(BuildContext context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (ctx) =>
+                ReviewViewModel(ctx.read<StudyRepository>(), deckId: deckId)
+                  ..load(),
+          ),
+          ChangeNotifierProvider(
+            create: (ctx) =>
+                DashboardViewModel(ctx.read<StudyRepository>())..load(),
+          ),
+        ],
         child: _Session(initialMode: initialMode, title: title),
       );
 }
@@ -112,6 +121,7 @@ class _SessionState extends State<_Session> {
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
     final lang = context.read<AppState>().mnemonicLanguage;
+    final streak = context.watch<DashboardViewModel>().stats.streak;
 
     return Scaffold(
       backgroundColor: context.jc.lavender,
@@ -138,6 +148,7 @@ class _SessionState extends State<_Session> {
                           progress: vm.progress,
                           mode: _mode,
                           direction: _direction,
+                          streak: streak,
                           onClose: () => context.pop(),
                           onMode: _pick,
                           onDirection: _toggleDirection,
@@ -164,6 +175,7 @@ class _SessionState extends State<_Session> {
                                   key: ValueKey('s${vm.current!.id}'),
                                   vm: vm,
                                   lang: lang,
+                                  onOpenDetails: () => _openCurrentDetail(vm),
                                   onRated: _record,
                                 ),
                               StudyMode.quiz => QuizStage(
@@ -203,6 +215,7 @@ class _SessionHeader extends StatelessWidget {
     required this.progress,
     required this.mode,
     required this.direction,
+    required this.streak,
     required this.onClose,
     required this.onMode,
     required this.onDirection,
@@ -214,6 +227,7 @@ class _SessionHeader extends StatelessWidget {
   final double progress;
   final StudyMode mode;
   final StudyDirection direction;
+  final int streak;
   final VoidCallback onClose;
   final ValueChanged<StudyMode> onMode;
   final VoidCallback onDirection;
@@ -222,6 +236,16 @@ class _SessionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final left = (total - current).clamp(0, total);
+    if (studyUsesLandscapeContract(context)) {
+      return _LandscapeSessionHeader(
+        current: current,
+        total: total,
+        progress: progress,
+        left: left,
+        streak: streak,
+        onClose: onClose,
+      );
+    }
     return SafeArea(
       bottom: false,
       child: BoundedContent(
@@ -320,6 +344,138 @@ class _SessionHeader extends StatelessWidget {
   }
 }
 
+class _LandscapeSessionHeader extends StatelessWidget {
+  const _LandscapeSessionHeader({
+    required this.current,
+    required this.total,
+    required this.progress,
+    required this.left,
+    required this.streak,
+    required this.onClose,
+  });
+
+  final int current;
+  final int total;
+  final double progress;
+  final int left;
+  final int streak;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox.square(
+              dimension: 44,
+              child: Pressable.builder(
+                label: context.trText('Close'),
+                focusRadius: 10,
+                onTap: onClose,
+                builder: (context, pressed) => StudyPanel(
+                  borderWidth: 3,
+                  shadow: pressed ? 0 : 4,
+                  radius: 10,
+                  padding: EdgeInsets.zero,
+                  child: Icon(Icons.close_rounded, color: jc.ink, size: 22),
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: '$current'),
+                        TextSpan(
+                          text: ' / $total',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                    style: TextStyle(
+                      color: jc.ink,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -1,
+                      height: 0.95,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: StudyProgressRail(
+                      value: progress,
+                      height: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    left == 0
+                        ? _landscapeCopy(
+                            context,
+                            'Last card. Finish strong.',
+                            'Dernière carte. Finis en force.',
+                          )
+                        : _landscapeCopy(
+                            context,
+                            '$left left. Keep the rhythm.',
+                            'Encore $left. Tu tiens le rythme.',
+                          ),
+                    style: TextStyle(
+                      color: jc.ink,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 20),
+            Transform.rotate(
+              angle: -3 * 3.141592653589793 / 180,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: jc.acid,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: jc.ink, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(4, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  _landscapeCopy(
+                    context,
+                    'Streak: $streak days',
+                    'Série : $streak jours',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ModeSwitcher extends StatelessWidget {
   const _ModeSwitcher({required this.selected, required this.onSelected});
 
@@ -347,6 +503,13 @@ class _ModeSwitcher extends StatelessWidget {
         ),
       );
 }
+
+String _landscapeCopy(
+  BuildContext context,
+  String english,
+  String french,
+) =>
+    Localizations.localeOf(context).languageCode == 'fr' ? french : english;
 
 class _ModeItem extends StatelessWidget {
   const _ModeItem({

@@ -8,6 +8,7 @@ import '../../models/mnemonic.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/net_image.dart';
 import '../widgets/pressable.dart';
 import 'draw_mascot_view.dart';
@@ -180,7 +181,7 @@ class _StripState extends State<_Strip> {
                         Text(
                           widget.items[index].char,
                           style: const TextStyle(
-                            fontFamily: 'NotoSansJP',
+                            fontFamily: 'ZenKakuGothicNew',
                             fontSize: 17,
                             height: 1,
                             fontWeight: FontWeight.w900,
@@ -386,7 +387,7 @@ class _VisualSkeleton extends StatelessWidget {
             character,
             style: TextStyle(
               color: context.jc.surface.withValues(alpha: 0.52),
-              fontFamily: 'NotoSansJP',
+              fontFamily: 'ZenKakuGothicNew',
               fontSize: 190,
               fontWeight: FontWeight.w900,
             ),
@@ -398,10 +399,7 @@ class _VisualSkeleton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox.square(
-                  dimension: 17,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
-                ),
+                const NeoChaseLoader.small(),
                 const SizedBox(width: 8),
                 Text(
                   context.trText('Loading…'),
@@ -427,7 +425,7 @@ class _Glyph extends StatelessWidget {
           child: Text(
             character,
             style: TextStyle(
-              fontFamily: 'NotoSansJP',
+              fontFamily: 'ZenKakuGothicNew',
               fontSize: 210,
               fontWeight: FontWeight.w900,
               color: context.jc.ink,
@@ -465,7 +463,7 @@ class _LearnDetails extends StatelessWidget {
                 Text(
                   item.char,
                   style: const TextStyle(
-                    fontFamily: 'NotoSansJP',
+                    fontFamily: 'ZenKakuGothicNew',
                     fontSize: 44,
                     height: 0.9,
                     fontWeight: FontWeight.w900,

@@ -7,6 +7,7 @@ import '../../core/breakpoints.dart';
 import '../../core/languages.dart';
 import '../../l10n/l10n.dart';
 import '../widgets/language_picker.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import '../../models/enums.dart';
 import '../../repositories/study_repository.dart';
@@ -37,7 +38,7 @@ class _Settings extends StatelessWidget {
     final vm = context.read<SettingsViewModel>();
     final profile = app.profile;
     if (profile == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: NeoChaseLoader()));
     }
     final jc = context.jc;
 
@@ -343,33 +344,80 @@ class _Settings extends StatelessWidget {
         tsv.split('\n').where((l) => l.isNotEmpty && !l.startsWith('#')).length;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.exportCards(lines)),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: SelectableText(tsv,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: SizedBox(
+            height: (MediaQuery.sizeOf(ctx).height * 0.72).clamp(360, 620),
+            child: NeoCard(
+              shadow: 6,
+              radius: 14,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _SettingsModalHeader(
+                    title: context.l10n.exportCards(lines),
+                    onClose: () => Navigator.pop(ctx),
+                  ),
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: ctx.jc.canvas,
+                        border: Border.all(color: ctx.jc.ink, width: 2.5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          tsv,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SettingsModalButton(
+                          label: context.l10n.close,
+                          onTap: () => Navigator.pop(ctx),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _SettingsModalButton(
+                          label: context.l10n.copy,
+                          icon: Icons.copy_rounded,
+                          tone: NeoTone.acid,
+                          onTap: () async {
+                            await Clipboard.setData(ClipboardData(text: tsv));
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(context.l10n.ankiCopied),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(context.l10n.close)),
-          FilledButton.icon(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: tsv));
-              if (ctx.mounted) Navigator.pop(ctx);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.ankiCopied)),
-                );
-              }
-            },
-            icon: const Icon(Icons.copy, size: 18),
-            label: Text(context.l10n.copy),
-          ),
-        ],
       ),
     );
   }
@@ -382,44 +430,84 @@ class _Settings extends StatelessWidget {
     final ready = status['ready'] as bool? ?? false;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.personalisedScheduling),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LinearProgressIndicator(value: (reviews / minReviews).clamp(0, 1)),
-            const SizedBox(height: 12),
-            Text(context.l10n.reviewProgress(reviews, minReviews)),
-            const SizedBox(height: 6),
-            Text(
-              ready ? context.l10n.fsrsReady : context.l10n.fsrsKeepReviewing,
-              style: TextStyle(color: ctx.jc.muted, fontSize: 13),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: NeoCard(
+            shadow: 6,
+            radius: 14,
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SettingsModalHeader(
+                  title: context.l10n.personalisedScheduling,
+                  onClose: () => Navigator.pop(ctx),
+                ),
+                const SizedBox(height: 18),
+                NeoProgress(
+                  value: (reviews / minReviews).clamp(0, 1),
+                  tone: ready ? NeoTone.lime : NeoTone.blue,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.reviewProgress(reviews, minReviews),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  ready
+                      ? context.l10n.fsrsReady
+                      : context.l10n.fsrsKeepReviewing,
+                  style: TextStyle(
+                    color: ctx.jc.body,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SettingsModalButton(
+                        label: context.l10n.close,
+                        onTap: () => Navigator.pop(ctx),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _SettingsModalButton(
+                        label: context.l10n.optimiseNow,
+                        tone: NeoTone.acid,
+                        enabled: ready,
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          final res = await vm.runOptimize();
+                          if (context.mounted && res != null) {
+                            final improved = res['improved'] == true;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  improved
+                                      ? context.l10n.schedulerPersonalised
+                                      : context.l10n.schedulerDefaultsKept,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(context.l10n.close)),
-          FilledButton(
-            onPressed: ready
-                ? () async {
-                    Navigator.pop(ctx);
-                    final res = await vm.runOptimize();
-                    if (context.mounted && res != null) {
-                      final improved = res['improved'] == true;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(improved
-                            ? context.l10n.schedulerPersonalised
-                            : context.l10n.schedulerDefaultsKept),
-                      ));
-                    }
-                  }
-                : null,
-            child: Text(context.l10n.optimiseNow),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -445,6 +533,88 @@ class _Settings extends StatelessWidget {
         AppMode.middle => context.l10n.middleModeHelp,
         AppMode.learning => context.l10n.learningModeHelp,
       };
+}
+
+class _SettingsModalHeader extends StatelessWidget {
+  const _SettingsModalHeader({required this.title, required this.onClose});
+
+  final String title;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 21,
+                height: 1.1,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.45,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          NeoIconButton(
+            icon: Icons.close_rounded,
+            label: context.trText('Close'),
+            onTap: onClose,
+          ),
+        ],
+      );
+}
+
+class _SettingsModalButton extends StatelessWidget {
+  const _SettingsModalButton({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.tone = NeoTone.paper,
+    this.enabled = true,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final NeoTone tone;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+        opacity: enabled ? 1 : 0.42,
+        child: SizedBox(
+          height: 50,
+          child: NeoCard(
+            tone: tone,
+            shadow: enabled ? 3 : 0,
+            radius: 10,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            semanticLabel: label,
+            onTap: enabled ? onTap : null,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18),
+                  const SizedBox(width: 7),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }
 
 class _SettingsCard extends StatelessWidget {

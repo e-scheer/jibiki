@@ -6,8 +6,8 @@ import 'core/session_store.dart';
 
 Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
-  // Hold the OS launch screen until bootstrap resolves, so there's no flash to a
-  // second (Flutter) splash - the app is removed straight onto the real screen.
+  // Hold the static OS launch screen until Flutter paints its matching animated
+  // brand screen. JibikiApp removes it after the first Flutter frame.
   FlutterNativeSplash.preserve(widgetsBinding: binding);
   final session = await SessionStore.create();
   runApp(JibikiApp(session: session));

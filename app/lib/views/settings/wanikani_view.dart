@@ -7,6 +7,7 @@ import '../../models/integration.dart';
 import '../../services/integration_service.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 
 class WaniKaniView extends StatefulWidget {
   const WaniKaniView({super.key});
@@ -450,10 +451,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (_busy)
-                  const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  )
+                  const NeoChaseLoader.small()
                 else
                   const Icon(Icons.sync_rounded, size: 20),
                 const SizedBox(width: 8),
@@ -629,9 +627,12 @@ class _WaniSkeleton extends StatelessWidget {
                 const SizedBox(width: 14),
                 Expanded(child: Container(height: 16, color: context.jc.ink)),
                 const SizedBox(width: 14),
-                const SizedBox.square(
-                  dimension: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                const NeoChaseLoader(
+                  size: 22,
+                  blockSize: 9,
+                  borderWidth: 1.5,
+                  radius: 2,
+                  shadow: 1.5,
                 ),
               ],
             ),

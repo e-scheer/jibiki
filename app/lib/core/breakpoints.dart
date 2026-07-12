@@ -21,11 +21,9 @@ class Breakpoints {
   /// Phone-landscape / small tablet starts here.
   static const double medium = 600;
 
-  /// Tablet / desktop starts here (extended rail, two-pane games).
-  static const double expanded = 840;
-
-  /// Extended rail (icons + labels + brand mark) past this.
-  static const double railExtended = 900;
+  /// Tablet landscape and desktop workspaces start here. The navigation rail
+  /// remains the same compact 76 px at every wide size.
+  static const double expanded = 960;
 
   /// Reading/content column ceiling on wide screens, so prose and forms don't
   /// stretch into unreadable 1000px+ lines.
@@ -45,14 +43,16 @@ extension ResponsiveContext on BuildContext {
   WindowSize get win => Breakpoints.of(MediaQuery.sizeOf(this).width);
   bool get isWide => win.isWide;
   bool get isExpanded => win == WindowSize.expanded;
-  bool get isLandscape => MediaQuery.orientationOf(this) == Orientation.landscape;
+  bool get isLandscape =>
+      MediaQuery.orientationOf(this) == Orientation.landscape;
 }
 
 /// Caps content to a readable width and centres it on wide screens; a pass-through
 /// on phones. Wrap scrollable page bodies (lists, forms, detail) so a tablet shows
 /// a centred column, not a full-bleed stretch.
 class BoundedContent extends StatelessWidget {
-  const BoundedContent({super.key, required this.child, this.maxWidth = Breakpoints.maxContent});
+  const BoundedContent(
+      {super.key, required this.child, this.maxWidth = Breakpoints.maxContent});
   final Widget child;
   final double maxWidth;
 
@@ -60,7 +60,8 @@ class BoundedContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: ConstrainedBox(constraints: BoxConstraints(maxWidth: maxWidth), child: child),
+      child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth), child: child),
     );
   }
 }
@@ -70,7 +71,8 @@ class BoundedContent extends StatelessWidget {
 /// working. Use for the games' portrait layout so a tablet shows a tidy centred
 /// board instead of a stretched one.
 class BoundedBoard extends StatelessWidget {
-  const BoundedBoard({super.key, required this.child, this.maxWidth = Breakpoints.maxBoard});
+  const BoundedBoard(
+      {super.key, required this.child, this.maxWidth = Breakpoints.maxBoard});
   final Widget child;
   final double maxWidth;
 

@@ -16,6 +16,7 @@ class KanaCell extends StatelessWidget {
     required this.mark,
     required this.onTap,
     this.due = false,
+    this.focused = false,
   });
 
   final List<KanaEntry>
@@ -24,6 +25,7 @@ class KanaCell extends StatelessWidget {
   final StudyMark mark;
   final VoidCallback onTap;
   final bool due;
+  final bool focused;
 
   @override
   Widget build(BuildContext context) {
@@ -45,23 +47,39 @@ class KanaCell extends StatelessWidget {
                 ? '●'
                 : '';
 
-    return Pressable(
+    return Pressable.builder(
       label: '${entries.map((e) => e.char).join(' ')} $romaji',
-      selected: selected,
+      selected: selected || focused,
       onTap: onTap,
-      child: AnimatedContainer(
+      focusRadius: 10,
+      builder: (context, pressed) => AnimatedContainer(
         duration: Motion.timed(context, Motion.fast),
         curve: Motion.out,
         height: 56,
+        transform: Matrix4.translationValues(
+          focused ? -2 : 0,
+          focused ? -2 : 0,
+          0,
+        ),
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: jc.ink,
-            width: selected ? 3.5 : 2.5,
+            width: focused ? 3 : (selected ? 3.5 : 2.5),
           ),
+          boxShadow: focused && !pressed
+              ? [
+                  BoxShadow(
+                    color: jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(4, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Center(
               child: Column(
@@ -73,7 +91,7 @@ class KanaCell extends StatelessWidget {
                       children: [
                         Text(entries[0].char,
                             style: TextStyle(
-                                fontFamily: 'NotoSansJP',
+                                fontFamily: 'ZenKakuGothicNew',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
                                 height: 1,
@@ -81,7 +99,7 @@ class KanaCell extends StatelessWidget {
                         const SizedBox(width: 5),
                         Text(entries[1].char,
                             style: TextStyle(
-                                fontFamily: 'NotoSansJP',
+                                fontFamily: 'ZenKakuGothicNew',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
                                 height: 1,
@@ -91,7 +109,7 @@ class KanaCell extends StatelessWidget {
                   else
                     Text(entries.first.char,
                         style: TextStyle(
-                            fontFamily: 'NotoSansJP',
+                            fontFamily: 'ZenKakuGothicNew',
                             fontSize: 24,
                             fontWeight: FontWeight.w900,
                             height: 1,
@@ -124,11 +142,28 @@ class KanaCell extends StatelessWidget {
                   ),
                 ),
               ),
-            if (selected)
+            if (selected && !focused)
               Positioned(
                 left: 4,
                 bottom: 3,
                 child: Icon(Icons.check_box_rounded, size: 13, color: jc.ink),
+              ),
+            if (focused)
+              Positioned(
+                left: -7,
+                bottom: -7,
+                child: Transform.rotate(
+                  angle: .24,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: jc.brand,
+                      border: Border.all(color: jc.ink, width: 2.5),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
               ),
           ],
         ),

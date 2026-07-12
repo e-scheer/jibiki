@@ -72,6 +72,37 @@ SQLite fallback. Tests create a throwaway `test_jibiki` on the same server, so
 migrations, trigram search indexes and SQL behaviour are exercised exactly as in
 production. Start the DB (`make db`) before `make run` / `make test`.
 
+#### Windows setup
+
+`make` is not present on Windows by default, and Docker Desktop needs the WSL2
+platform. One-time setup:
+
+1. **Enable the WSL2 Windows components** (Docker Desktop's backend). In an
+   **administrator** PowerShell:
+   ```powershell
+   wsl --install --no-distribution
+   ```
+   then **reboot**. Virtualization must be enabled in the BIOS (VT-x / AMD-V).
+   Note the WSL app can already be installed while the optional OS component is
+   still off, which surfaces as Docker's misleading "Virtualization support not
+   detected".
+2. Launch **Docker Desktop** and wait for the engine to report running (from a
+   terminal you can start it with `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"`).
+
+Then run the same workflow without `make` (PowerShell, from the repo root):
+
+```powershell
+docker compose up -d db                              # Postgres on localhost:5432
+cd server
+uv run --project . python manage.py migrate          # apply migrations
+uv run --project . python manage.py seed_demo         # demo dictionary + kana mnemonics
+uv run --project . python manage.py runserver 8000    # dev server on http://localhost:8000
+```
+
+`uv run` auto-installs dependencies, so a separate sync step is not needed. Any
+other `make <target>` maps the same way: take the recipe body from the `Makefile`
+and run its `uv run --project . python manage.py ...` command from inside `server\`.
+
 Or the whole stack in containers (what runs on the server):
 
 ```bash
@@ -93,7 +124,9 @@ uv run --project server python server/manage.py import_kradfile kradfile
 
 ### App
 
-Requirements: Flutter SDK (3.6+).
+Requirements: Flutter SDK (3.6+). The repo pins Flutter 3.38.3 via fvm
+(`.fvmrc`); a stock Flutter on PATH also works. On Windows without fvm, call
+`flutter` directly (drop the `fvm` prefix).
 
 ```bash
 cd app
@@ -102,6 +135,15 @@ flutter analyze
 flutter test
 # point the app at your API (Android emulator uses 10.0.2.2 automatically):
 flutter run --dart-define=JIBIKI_API_BASE=http://localhost:8000
+```
+
+Run it as a **web app** (handy on Windows, no emulator needed):
+
+```powershell
+cd app
+flutter pub get
+flutter run -d web-server --web-port 3000 --dart-define=JIBIKI_API_BASE=http://localhost:8000
+# then open http://localhost:3000
 ```
 
 ---

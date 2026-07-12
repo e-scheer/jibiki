@@ -11,6 +11,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/onboarding_viewmodel.dart';
 import '../../viewmodels/storage_viewmodel.dart' show StorageViewModel;
+import '../widgets/jibiki_brand.dart';
 import '../widgets/language_picker.dart';
 import '../widgets/neo_pop.dart';
 
@@ -89,26 +90,10 @@ class _ProgressMasthead extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
             child: Row(
               children: [
-                Text(
-                  context.trText('jibiki'),
-                  style: TextStyle(
-                    color: jc.surface,
-                    fontSize: 23,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.7,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Transform.rotate(
-                  angle: 0.2,
-                  child: Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      color: jc.acid,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+                const JibikiWordmark(
+                  fontSize: 23,
+                  variant: JibikiBrandVariant.negative,
+                  dotOutline: JibikiBrandColors.ink,
                 ),
                 const Spacer(),
                 for (var index = 0; index < total; index++) ...[
@@ -296,7 +281,7 @@ class _PlacementStep extends StatelessWidget {
                     child: TextField(
                       onChanged: vm.setKnownCharacters,
                       style: const TextStyle(
-                        fontFamily: 'NotoSansJP',
+                        fontFamily: 'ZenKakuGothicNew',
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                       ),
@@ -769,9 +754,12 @@ class _OfferSkeletons extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  const NeoChaseLoader(
+                    size: 22,
+                    blockSize: 9,
+                    borderWidth: 1.5,
+                    radius: 2,
+                    shadow: 1.5,
                   ),
                 ],
               ),

@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/feedback_viewmodel.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/jibiki_brand.dart';
 
 class FeedbackView extends StatelessWidget {
   const FeedbackView({super.key});
@@ -365,13 +366,7 @@ class _FeedbackSubmitButton extends StatelessWidget {
           ),
           onPressed: busy ? null : onPressed,
           child: busy
-              ? SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: context.jc.ink,
-                  ),
-                )
+              ? const NeoChaseLoader.small()
               : Text(
                   context.trText('Send'),
                   style: const TextStyle(

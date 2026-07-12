@@ -201,7 +201,7 @@ class _ReferenceTile extends StatelessWidget {
               child: Text(
                 card.icon,
                 style: const TextStyle(
-                  fontFamily: 'NotoSansJP',
+                  fontFamily: 'ZenKakuGothicNew',
                   fontSize: 25,
                   fontWeight: FontWeight.w900,
                 ),
@@ -318,7 +318,7 @@ class ReferenceDetailView extends StatelessWidget {
               child: Text(
                 card.icon,
                 style: const TextStyle(
-                  fontFamily: 'NotoSansJP',
+                  fontFamily: 'ZenKakuGothicNew',
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
                 ),
@@ -425,7 +425,7 @@ class _ReferenceSectionView extends StatelessWidget {
                   section.examples[index].resolve(language),
                   style: TextStyle(
                     color: context.jc.ink,
-                    fontFamily: 'NotoSansJP',
+                    fontFamily: 'ZenKakuGothicNew',
                     height: 1.45,
                     fontWeight: FontWeight.w700,
                   ),

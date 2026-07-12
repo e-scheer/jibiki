@@ -319,9 +319,9 @@ class _CardShell extends StatelessWidget {
   }
 }
 
-/// A colour glow that grows from the edge you're dragging toward, so the card
-/// leans into the grade instead of tinting uniformly. Stronger, more directional
-/// than a flat overlay: it reads like the card is being pulled that way.
+/// A flat colour block that grows from the edge being dragged toward. The
+/// direction stays legible without introducing a gradient or blur into the
+/// NeoPop chrome.
 class _DirectionalWash extends StatelessWidget {
   const _DirectionalWash(
       {required this.dir, required this.color, required this.progress});
@@ -331,22 +331,23 @@ class _DirectionalWash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (begin, end) = switch (dir) {
-      Rating.again => (Alignment.centerLeft, Alignment.centerRight),
-      Rating.good => (Alignment.centerRight, Alignment.centerLeft),
-      Rating.easy => (Alignment.topCenter, Alignment.bottomCenter),
-      Rating.hard => (Alignment.bottomCenter, Alignment.topCenter),
+    final alignment = switch (dir) {
+      Rating.again => Alignment.centerLeft,
+      Rating.good => Alignment.centerRight,
+      Rating.easy => Alignment.topCenter,
+      Rating.hard => Alignment.bottomCenter,
     };
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: begin,
-          end: end,
-          colors: [
-            color.withValues(alpha: (progress * 0.3).clamp(0.0, 0.3)),
-            Colors.transparent
-          ],
-          stops: const [0.0, 0.72],
+    final horizontal = dir == Rating.again || dir == Rating.good;
+    final extent = (0.18 + progress * 0.52).clamp(0.18, 0.70);
+    return Align(
+      alignment: alignment,
+      child: FractionallySizedBox(
+        widthFactor: horizontal ? extent : 1,
+        heightFactor: horizontal ? 1 : extent,
+        child: ColoredBox(
+          color: color.withValues(
+            alpha: (0.08 + progress * 0.16).clamp(0.08, 0.24),
+          ),
         ),
       ),
     );

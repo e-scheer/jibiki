@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
-import '../../l10n/l10n.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../community/community_decks_view.dart';
+import '../dashboard/tablet_dashboard_view.dart';
 import '../dictionary/search_view.dart';
 import '../kana/kana_chart_view.dart';
 import '../study/decks_view.dart';
 import '../study/statistics_view.dart';
+import '../widgets/jibiki_brand.dart';
+import '../widgets/pressable.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
@@ -34,24 +36,31 @@ class _Shell extends StatefulWidget {
 
 class _ShellState extends State<_Shell> {
   static const _reviewIndex = 2;
-  static const _tabs = [
-    SearchView(),
-    KanaChartView(),
-    DecksView(),
-    CommunityDecksView(),
-    StatisticsView(),
-  ];
   static const _destinations = [
     _Destination(_NavGlyphKind.book, 'Dico', 'Dico'),
     _Destination(_NavGlyphKind.kana, 'Kana', 'Kana'),
     _Destination(_NavGlyphKind.review, 'Review', 'Réviser'),
-    _Destination(_NavGlyphKind.community, 'Community', 'Communauté'),
+    _Destination(_NavGlyphKind.community, 'Commu', 'Commu'),
     _Destination(_NavGlyphKind.profile, 'Profile', 'Profil'),
   ];
 
   int _index = 0;
   bool _initialised = false;
   PageController? _pager;
+  final _homeTabKey = GlobalKey<_ResponsiveHomeTabState>();
+  late final List<Widget> _tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = [
+      _ResponsiveHomeTab(key: _homeTabKey),
+      const KanaChartView(),
+      const DecksView(),
+      const CommunityDecksView(),
+      const StatisticsView(),
+    ];
+  }
 
   @override
   void didChangeDependencies() {
@@ -69,6 +78,7 @@ class _ShellState extends State<_Shell> {
   }
 
   void _go(int index) {
+    if (index == 0) _homeTabKey.currentState?.showDashboard();
     if (index == _index) return;
     final pager = _pager;
     if (context.win.isCompact && pager != null && pager.hasClients) {
@@ -124,7 +134,6 @@ class _ShellState extends State<_Shell> {
       );
     }
 
-    final extended = context.win == WindowSize.expanded;
     return Scaffold(
       body: SafeArea(
         child: Row(
@@ -132,7 +141,6 @@ class _ShellState extends State<_Shell> {
             _NeoNavigationRail(
               index: _index,
               due: showDue ? due : 0,
-              extended: extended,
               destinations: _destinations,
               onSelect: _go,
             ),
@@ -140,6 +148,66 @@ class _ShellState extends State<_Shell> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ResponsiveHomeTab extends StatefulWidget {
+  const _ResponsiveHomeTab({super.key});
+
+  @override
+  State<_ResponsiveHomeTab> createState() => _ResponsiveHomeTabState();
+}
+
+class _ResponsiveHomeTabState extends State<_ResponsiveHomeTab> {
+  bool _dictionaryOpen = false;
+  String _dictionaryQuery = '';
+  int _dashboardRevision = 0;
+  int _dictionaryRevision = 0;
+
+  void showDashboard() {
+    setState(() {
+      _dictionaryOpen = false;
+      _dashboardRevision++;
+    });
+  }
+
+  void _openDictionary([String query = '']) {
+    setState(() {
+      _dictionaryQuery = query.trim();
+      _dictionaryRevision++;
+      _dictionaryOpen = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.sizeOf(context).width < 768) {
+      return const SearchView();
+    }
+    return AnimatedSwitcher(
+      duration: Motion.timed(context, const Duration(milliseconds: 180)),
+      switchInCurve: Motion.out,
+      switchOutCurve: Motion.out,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.018, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
+      child: _dictionaryOpen
+          ? SearchView(
+              key: ValueKey('dictionary-$_dictionaryRevision'),
+              initialQuery: _dictionaryQuery,
+            )
+          : TabletDashboardView(
+              key: ValueKey('dashboard-$_dashboardRevision'),
+              onOpenDictionary: _openDictionary,
+            ),
     );
   }
 }
@@ -198,14 +266,12 @@ class _NeoNavigationRail extends StatelessWidget {
   const _NeoNavigationRail({
     required this.index,
     required this.due,
-    required this.extended,
     required this.destinations,
     required this.onSelect,
   });
 
   final int index;
   final int due;
-  final bool extended;
   final List<_Destination> destinations;
   final ValueChanged<int> onSelect;
 
@@ -214,36 +280,30 @@ class _NeoNavigationRail extends StatelessWidget {
     final jc = context.jc;
     return RepaintBoundary(
       child: Container(
-        width: extended ? 224 : 88,
+        width: 76,
         decoration: BoxDecoration(
           color: jc.surface,
           border: Border(right: BorderSide(color: jc.ink, width: 3)),
         ),
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              extended ? 16 : 10,
-              18,
-              extended ? 16 : 10,
-              18,
-            ),
+            padding: const EdgeInsets.fromLTRB(7, 14, 7, 14),
             child: ConstrainedBox(
               constraints:
-                  BoxConstraints(minHeight: constraints.maxHeight - 36),
+                  BoxConstraints(minHeight: constraints.maxHeight - 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _RailBrand(extended: extended),
-                  const SizedBox(height: 34),
+                  const _RailBrand(),
+                  const SizedBox(height: 12),
                   for (var i = 0; i < destinations.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 10),
+                    if (i > 0) const SizedBox(height: 6),
                     SizedBox(
-                      height: 58,
+                      height: 56,
                       child: _NeoNavButton(
                         destination: destinations[i],
                         selected: index == i,
                         due: i == _ShellState._reviewIndex ? due : 0,
-                        horizontal: extended,
                         onTap: () => onSelect(i),
                       ),
                     ),
@@ -259,88 +319,33 @@ class _NeoNavigationRail extends StatelessWidget {
 }
 
 class _RailBrand extends StatelessWidget {
-  const _RailBrand({required this.extended});
-
-  final bool extended;
+  const _RailBrand();
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment:
-          extended ? MainAxisAlignment.start : MainAxisAlignment.center,
-      children: [
-        if (!extended)
-          Text(
-            '字',
-            style: TextStyle(
-              color: context.jc.brand,
-              fontFamily: 'NotoSansJP',
-              fontSize: 28,
-              height: 1,
-              fontWeight: FontWeight.w900,
-            ),
-          )
-        else ...[
-          Text(
-            context.trText('jibiki'),
-            style: const TextStyle(
-              fontSize: 22,
-              height: 1,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Transform.rotate(
-            angle: 0.2,
-            child: Container(
-              width: 9,
-              height: 9,
-              decoration: BoxDecoration(
-                color: context.jc.acid,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
+  Widget build(BuildContext context) =>
+      const Center(child: JibikiBrandMark(size: 46));
 }
 
-class _NeoNavButton extends StatefulWidget {
+class _NeoNavButton extends StatelessWidget {
   const _NeoNavButton({
     required this.destination,
     required this.selected,
     required this.due,
     required this.onTap,
-    this.horizontal = false,
   });
 
   final _Destination destination;
   final bool selected;
   final int due;
   final VoidCallback onTap;
-  final bool horizontal;
-
-  @override
-  State<_NeoNavButton> createState() => _NeoNavButtonState();
-}
-
-class _NeoNavButtonState extends State<_NeoNavButton> {
-  bool _pressed = false;
-
-  void _setPressed(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
-  }
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    final label = widget.destination.label(context);
+    final label = destination.label(context);
     final icon = _NavIcon(
-      kind: widget.destination.kind,
-      due: widget.due,
+      kind: destination.kind,
+      due: due,
     );
     final labelWidget = Text(
       label,
@@ -349,68 +354,42 @@ class _NeoNavButtonState extends State<_NeoNavButton> {
       softWrap: false,
       style: TextStyle(
         color: jc.ink,
-        fontSize: widget.horizontal ? 13 : 10.5,
+        fontSize: 10.5,
         height: 1,
-        fontWeight: widget.selected ? FontWeight.w900 : FontWeight.w700,
+        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
       ),
     );
 
-    return Semantics(
-      button: true,
-      selected: widget.selected,
+    return Pressable.builder(
       label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => _setPressed(true),
-        onTapCancel: () => _setPressed(false),
-        onTapUp: (_) => _setPressed(false),
-        onTap: () {
-          Haptics.tick();
-          widget.onTap();
-        },
-        child: AnimatedContainer(
-          duration: Motion.timed(context, const Duration(milliseconds: 120)),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(
-            _pressed && widget.selected ? 4 : 0,
-            _pressed && widget.selected ? 4 : 0,
-            0,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: widget.horizontal ? 14 : 2,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: widget.selected ? jc.acid : Colors.transparent,
-            border:
-                widget.selected ? Border.all(color: jc.ink, width: 2.5) : null,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: widget.selected && !_pressed
-                ? [
-                    BoxShadow(
-                      color: jc.ink,
-                      blurRadius: 0,
-                      offset: const Offset(3, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          child: widget.horizontal
-              ? Row(
-                  children: [
-                    icon,
-                    const SizedBox(width: 12),
-                    Expanded(child: labelWidget),
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    icon,
-                    const SizedBox(height: 3),
-                    FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
-                  ],
-                ),
+      selected: selected,
+      focusRadius: 10,
+      onTap: onTap,
+      builder: (context, pressed) => AnimatedContainer(
+        duration: Motion.timed(context, const Duration(milliseconds: 120)),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? jc.acid : Colors.transparent,
+          border: selected ? Border.all(color: jc.ink, width: 2.5) : null,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: selected && !pressed
+              ? [
+                  BoxShadow(
+                    color: jc.ink,
+                    blurRadius: 0,
+                    offset: const Offset(3, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            const SizedBox(height: 3),
+            FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
+          ],
         ),
       ),
     );
@@ -430,7 +409,7 @@ class _NavIcon extends StatelessWidget {
             'あ',
             style: TextStyle(
               color: context.jc.ink,
-              fontFamily: 'NotoSansJP',
+              fontFamily: 'ZenKakuGothicNew',
               fontSize: 19,
               height: 1.05,
               fontWeight: FontWeight.w900,
