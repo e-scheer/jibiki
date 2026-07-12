@@ -80,7 +80,10 @@ GoRouter buildRouter(AppState app) {
       ),
       GoRoute(
         path: '/kana/:char',
-        builder: (_, s) => KanaDetailView(char: s.pathParameters['char']!),
+        builder: (_, s) => KanaDetailView(
+          char: s.pathParameters['char']!,
+          showBoth: s.uri.queryParameters['mode'] == 'both',
+        ),
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsView()),
       GoRoute(path: '/reference', builder: (_, __) => const ReferenceView()),

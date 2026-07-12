@@ -81,11 +81,30 @@ class _KanaChartState extends State<_KanaChart> {
 
   void _changeScript(KanaViewModel vm, String script) {
     if (script == vm.script) return;
+    KanaEntry? previous;
+    for (final kana in vm.current) {
+      if (kana.char == _focusedChar) {
+        previous = kana;
+        break;
+      }
+    }
+    vm.setScript(script);
+    String? nextFocus;
+    if (previous != null) {
+      for (final kana in vm.current) {
+        final samePair = kana.romaji == previous.romaji &&
+            kana.kind == previous.kind &&
+            kana.row == previous.row;
+        if (samePair && (script != 'both' || kana.isHiragana)) {
+          nextFocus = kana.char;
+          break;
+        }
+      }
+    }
     setState(() {
       _selected.clear();
-      _focusedChar = null;
+      _focusedChar = nextFocus;
     });
-    vm.setScript(script);
   }
 
   void _focusKana(String char) {
@@ -289,12 +308,13 @@ class _KanaLayout extends StatelessWidget {
           ),
         );
       }
-      final resolvedFocus = basic.any((entry) => entry.char == focusedChar)
+      final resolvedFocus = vm.current.any((entry) => entry.char == focusedChar)
           ? focusedChar!
           : basic.first.char;
       return _KanaTabletWorkspace(
         vm: vm,
         selection: selection,
+        extras: extras,
         showBoth: vm.script == 'both',
         focusedChar: resolvedFocus,
         onFocused: onFocused,
@@ -414,6 +434,7 @@ class _KanaTabletWorkspace extends StatelessWidget {
   const _KanaTabletWorkspace({
     required this.vm,
     required this.selection,
+    required this.extras,
     required this.showBoth,
     required this.focusedChar,
     required this.onFocused,
@@ -422,6 +443,7 @@ class _KanaTabletWorkspace extends StatelessWidget {
 
   final KanaViewModel vm;
   final _Selection selection;
+  final Map<String, String> extras;
   final bool showBoth;
   final String focusedChar;
   final ValueChanged<String> onFocused;
@@ -451,11 +473,34 @@ class _KanaTabletWorkspace extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
-                    child: _KanaMatrix(
-                      items: vm.byKind('gojuon'),
-                      selection: selection,
-                      focusedChar: focusedChar,
-                      onOpen: (entry) => onFocused(entry.char),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _KanaMatrix(
+                          items: vm.byKind('gojuon'),
+                          selection: selection,
+                          focusedChar: focusedChar,
+                          onOpen: (entry) => onFocused(entry.char),
+                        ),
+                        for (final extra in extras.entries)
+                          if (vm.byKind(extra.key).isNotEmpty) ...[
+                            const SizedBox(height: 18),
+                            Text(
+                              extra.value,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _KanaMatrix(
+                              items: vm.byKind(extra.key),
+                              selection: selection,
+                              focusedChar: focusedChar,
+                              onOpen: (entry) => onFocused(entry.char),
+                            ),
+                          ],
+                      ],
                     ),
                   ),
                 ),
@@ -973,26 +1018,32 @@ class _KanaMatrix extends StatelessWidget {
 
         final selected = selection.active &&
             entries.map((entry) => entry.char).every(selection.contains);
-        int? furthestState;
-        var due = false;
+        int? cellState;
+        var allHaveState = true;
+        var allDue = true;
         for (final entry in entries) {
           final state = selection.states[entry.char];
-          if (state != null &&
-              (furthestState == null || state > furthestState)) {
-            furthestState = state;
+          if (state == null) {
+            allHaveState = false;
+          } else if (cellState == null || state < cellState) {
+            // A Both cell is only as advanced as its least advanced form.
+            cellState = state;
           }
-          due = due || selection.isDue(entry.char);
+          allDue = allDue && selection.isDue(entry.char);
         }
+        if (!allHaveState) cellState = null;
         return KanaCell(
           entries: entries,
           selected: selected,
           focused: entries.any((entry) => entry.char == focusedChar),
-          mark: studyMarkFor(furthestState),
-          due: due,
+          mark: studyMarkFor(cellState),
+          due: allDue,
           onTap: selection.active
               ? () => selection.onToggle(entries)
               : onOpen == null
-                  ? () => context.push('/kana/${entries.first.char}')
+                  ? () => context.push(
+                        '/kana/${entries.first.char}${entries.length == 2 ? '?mode=both' : ''}',
+                      )
                   : () => onOpen!(entries.first),
         );
       },

@@ -25,9 +25,14 @@ import '../widgets/stroke_order_view.dart';
 import 'kana_cell.dart';
 
 class KanaDetailView extends StatelessWidget {
-  const KanaDetailView({super.key, required this.char});
+  const KanaDetailView({
+    super.key,
+    required this.char,
+    this.showBoth = false,
+  });
 
   final String char;
+  final bool showBoth;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,7 @@ class KanaDetailView extends StatelessWidget {
         kind: 'kana',
         language: language,
       )..load(),
-      child: _KanaDetail(char: char),
+      child: _KanaDetail(char: char, showBoth: showBoth),
     );
   }
 }
@@ -84,10 +89,42 @@ typedef _KanaDetailData = ({
   KanaEntry focused,
   KanaEntry? counterpart,
   KanaStrokeData? stroke,
+  KanaStrokeData? counterpartStroke,
   List<KanaEntry> nearby,
   Map<String, int> states,
   Set<String> dueChars,
 });
+
+/// A character and the stroke data that belongs to that exact script form.
+/// Keeping them atomic prevents a Hiragana glyph from ever receiving the
+/// Katakana trace (or the reverse) as Both-mode UI is composed.
+@immutable
+class KanaWritingTarget {
+  const KanaWritingTarget({required this.kana, required this.stroke});
+
+  final KanaEntry kana;
+  final KanaStrokeData? stroke;
+}
+
+List<KanaWritingTarget> _writingTargets(
+  _KanaDetailData data, {
+  required bool includeBoth,
+}) {
+  final targets = <KanaWritingTarget>[
+    KanaWritingTarget(kana: data.focused, stroke: data.stroke),
+    if (includeBoth && data.counterpart != null)
+      KanaWritingTarget(
+        kana: data.counterpart!,
+        stroke: data.counterpartStroke,
+      ),
+  ];
+  targets.sort(
+    (a, b) => (a.kana.isHiragana ? 0 : 1).compareTo(
+      b.kana.isHiragana ? 0 : 1,
+    ),
+  );
+  return targets;
+}
 
 class _KanaDetail extends StatefulWidget {
   const _KanaDetail({
@@ -129,11 +166,15 @@ class _KanaDetailState extends State<_KanaDetail> {
     for (final kana in all) {
       if (kana.script == otherScript &&
           kana.romaji == focused.romaji &&
-          kana.kind == focused.kind) {
+          kana.kind == focused.kind &&
+          kana.row == focused.row) {
         counterpart = kana;
         break;
       }
     }
+    final counterpartStroke = counterpart == null
+        ? null
+        : await KanaStrokeCatalog.load(counterpart.char);
 
     final candidates = all
         .where(
@@ -174,6 +215,7 @@ class _KanaDetailState extends State<_KanaDetail> {
       focused: focused,
       counterpart: counterpart,
       stroke: stroke,
+      counterpartStroke: counterpartStroke,
       nearby: candidates.take(3).toList(growable: false),
       states: states,
       dueChars: dueChars,
@@ -195,7 +237,12 @@ class _KanaDetailState extends State<_KanaDetail> {
           return _EmbeddedKanaDetailContent(
             data: data,
             added: mnemonic.added,
-            onAdd: () => _addToStudy(context, mnemonic),
+            onAdd: () => _addToStudy(
+              context,
+              mnemonic,
+              data: data,
+              addBoth: widget.showBoth,
+            ),
             showBoth: widget.showBoth,
             onSelectKana: widget.onSelectKana,
           );
@@ -209,10 +256,17 @@ class _KanaDetailState extends State<_KanaDetail> {
           final data = snapshot.data;
           if (data == null) return const SizedBox.shrink();
           return _DetailActions(
-            kana: data.focused,
-            stroke: data.stroke,
+            targets: _writingTargets(
+              data,
+              includeBoth: widget.showBoth,
+            ),
             added: mnemonic.added,
-            onAdd: () => _addToStudy(context, mnemonic),
+            onAdd: () => _addToStudy(
+              context,
+              mnemonic,
+              data: data,
+              addBoth: widget.showBoth,
+            ),
           );
         },
       ),
@@ -229,6 +283,7 @@ class _KanaDetailState extends State<_KanaDetail> {
               if (data == null) return _DetailSkeleton(char: widget.char);
               return _DetailContent(
                 data: data,
+                showBoth: widget.showBoth,
                 onSelectKana: widget.onSelectKana,
               );
             },
@@ -240,16 +295,38 @@ class _KanaDetailState extends State<_KanaDetail> {
 
   Future<void> _addToStudy(
     BuildContext context,
-    MnemonicViewModel mnemonic,
-  ) async {
-    final added = await mnemonic.addToStudy();
+    MnemonicViewModel mnemonic, {
+    required _KanaDetailData data,
+    required bool addBoth,
+  }) async {
+    final study = context.read<StudyRepository>();
+    var added = await mnemonic.addToStudy();
+    if (added && addBoth && data.counterpart != null) {
+      try {
+        await study.addCard(
+          ItemType.kana,
+          data.counterpart!.char,
+        );
+      } catch (_) {
+        added = false;
+      }
+    }
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           added
-              ? _copy(
-                  context, 'Added to your study deck', 'Ajouté à vos révisions')
+              ? addBoth && data.counterpart != null
+                  ? _copy(
+                      context,
+                      'Both forms added to your study deck',
+                      'Les deux formes ont été ajoutées à vos révisions',
+                    )
+                  : _copy(
+                      context,
+                      'Added to your study deck',
+                      'Ajouté à vos révisions',
+                    )
               : mnemonic.error ?? _copy(context, 'Failed', 'Échec'),
         ),
       ),
@@ -274,6 +351,8 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final targets = _writingTargets(data, includeBoth: showBoth);
+    final hasPair = targets.length == 2;
     return Column(
       children: [
         Expanded(
@@ -287,11 +366,17 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                 onSelectKana: onSelectKana,
               ),
               const SizedBox(height: 14),
-              _WritingGuide(kana: data.focused, stroke: data.stroke),
+              KanaWritingReference(targets: targets),
               const SizedBox(height: 16),
-              const _FeaturedMnemonic(),
+              _FeaturedMnemonic(
+                scriptContext: hasPair ? data.focused : null,
+              ),
               const SizedBox(height: 16),
-              _NearbyKana(data: data, onSelectKana: onSelectKana),
+              _NearbyKana(
+                data: data,
+                showBoth: showBoth,
+                onSelectKana: onSelectKana,
+              ),
             ],
           ),
         ),
@@ -301,14 +386,19 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
             children: [
               Expanded(
                 child: NeoPrimaryButton(
-                  label: _copy(context, 'Free practice', 'Pratique libre'),
+                  label: hasPair
+                      ? _copy(
+                          context,
+                          'Practice both forms',
+                          'Pratiquer les deux formes',
+                        )
+                      : _copy(context, 'Free practice', 'Pratique libre'),
                   icon: Icons.gesture_rounded,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => _KanaWritingPracticePage(
-                        kana: data.focused,
-                        stroke: data.stroke,
-                        mode: _KanaWritingMode.free,
+                      builder: (_) => KanaWritingPracticePage(
+                        targets: targets,
+                        mode: KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -318,8 +408,24 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
               NeoIconButton(
                 icon: added ? Icons.check_rounded : Icons.add_rounded,
                 label: added
-                    ? _copy(context, 'In your deck', 'Dans vos révisions')
-                    : _copy(context, 'Add to study', 'Ajouter aux révisions'),
+                    ? hasPair
+                        ? _copy(
+                            context,
+                            'Both forms in your deck',
+                            'Les deux formes dans vos révisions',
+                          )
+                        : _copy(context, 'In your deck', 'Dans vos révisions')
+                    : hasPair
+                        ? _copy(
+                            context,
+                            'Add both forms',
+                            'Ajouter les deux formes',
+                          )
+                        : _copy(
+                            context,
+                            'Add to study',
+                            'Ajouter aux révisions',
+                          ),
                 tone: added ? NeoTone.lime : NeoTone.paper,
                 onTap: added ? () {} : onAdd,
               ),
@@ -345,9 +451,15 @@ class _TabletKanaHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kana = data.focused;
-    final pair = showBoth && data.counterpart != null
-        ? [kana, data.counterpart!]
-        : [kana];
+    final pair = <KanaEntry>[
+      kana,
+      if (showBoth && data.counterpart != null) data.counterpart!,
+    ]..sort(
+        (a, b) => (a.isHiragana ? 0 : 1).compareTo(
+          b.isHiragana ? 0 : 1,
+        ),
+      );
+    final hasPair = pair.length == 2;
     return NeoCard(
       tone: NeoTone.lime,
       shadow: 2,
@@ -444,8 +556,24 @@ class _TabletKanaHero extends StatelessWidget {
                   runSpacing: 7,
                   children: [
                     _Tag(
-                      label: kana.isHiragana ? 'Hiragana' : 'Katakana',
+                      label: hasPair
+                          ? _copy(
+                              context,
+                              'Hiragana + Katakana',
+                              'Hiragana + Katakana',
+                            )
+                          : kana.isHiragana
+                              ? 'Hiragana'
+                              : 'Katakana',
                     ),
+                    if (hasPair)
+                      _Tag(
+                        label: _copy(
+                          context,
+                          '2 forms · same sound',
+                          '2 formes · même son',
+                        ),
+                      ),
                     _Tag(label: _kindLabel(context, kana.kind, kana.row)),
                     _Tag(
                       label: _copy(
@@ -557,9 +685,14 @@ class _EmbeddedDetailError extends StatelessWidget {
 }
 
 class _DetailContent extends StatelessWidget {
-  const _DetailContent({required this.data, this.onSelectKana});
+  const _DetailContent({
+    required this.data,
+    required this.showBoth,
+    this.onSelectKana,
+  });
 
   final _KanaDetailData data;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -567,13 +700,18 @@ class _DetailContent extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final tablet = constraints.maxWidth >= 760;
+        final targets = _writingTargets(data, includeBoth: showBoth);
+        final hasPair = targets.length == 2;
         final main = Column(
           children: [
-            _KanaHero(data: data),
+            if (hasPair)
+              _TabletKanaHero(data: data, showBoth: true)
+            else
+              _KanaHero(data: data),
             const SizedBox(height: 20),
-            _WritingGuide(kana: data.focused, stroke: data.stroke),
+            KanaWritingReference(targets: targets),
             const SizedBox(height: 18),
-            _NearbyKana(data: data),
+            _NearbyKana(data: data, showBoth: showBoth),
           ],
         );
         final supporting = Column(
@@ -587,7 +725,9 @@ class _DetailContent extends StatelessWidget {
               KanaOriginSection(kana: data.focused),
               const SizedBox(height: 18),
             ],
-            const _FeaturedMnemonic(),
+            _FeaturedMnemonic(
+              scriptContext: hasPair ? data.focused : null,
+            ),
           ],
         );
 
@@ -599,7 +739,11 @@ class _DetailContent extends StatelessWidget {
             28,
           ),
           children: [
-            _DetailTopBar(data: data, onSelectKana: onSelectKana),
+            _DetailTopBar(
+              data: data,
+              showBoth: showBoth,
+              onSelectKana: onSelectKana,
+            ),
             const SizedBox(height: 12),
             if (tablet)
               Row(
@@ -623,9 +767,14 @@ class _DetailContent extends StatelessWidget {
 }
 
 class _DetailTopBar extends StatelessWidget {
-  const _DetailTopBar({required this.data, this.onSelectKana});
+  const _DetailTopBar({
+    required this.data,
+    required this.showBoth,
+    this.onSelectKana,
+  });
 
   final _KanaDetailData data;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -638,7 +787,9 @@ class _DetailTopBar extends StatelessWidget {
           onTap: () => context.pop(),
         ),
         const Spacer(),
-        if (data.counterpart != null)
+        if (showBoth)
+          const NeoBadge('BOTH', tone: NeoTone.acid)
+        else if (data.counterpart != null)
           _KanaScriptSwitcher(
             data: data,
             onSelectKana: onSelectKana,
@@ -782,18 +933,20 @@ class _KanaHero extends StatelessWidget {
 }
 
 class _WritingGuide extends StatelessWidget {
-  const _WritingGuide({required this.kana, this.stroke});
+  const _WritingGuide({super.key, required this.target, this.title});
 
-  final KanaEntry kana;
-  final KanaStrokeData? stroke;
+  final KanaWritingTarget target;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
+    final kana = target.kana;
+    final stroke = target.stroke;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _copy(context, 'Writing gesture', 'Geste d’écriture'),
+          title ?? _copy(context, 'Writing gesture', 'Geste d’écriture'),
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 7),
@@ -815,7 +968,7 @@ class _WritingGuide extends StatelessWidget {
                   ),
                 ],
               ),
-              child: stroke == null || stroke!.paths.isEmpty
+              child: stroke == null || stroke.paths.isEmpty
                   ? Stack(
                       children: [
                         Positioned.fill(
@@ -841,11 +994,13 @@ class _WritingGuide extends StatelessWidget {
                   : Padding(
                       padding: const EdgeInsets.all(5),
                       child: StrokeOrderView(
-                        paths: stroke!.paths,
-                        viewBox: stroke!.viewBox,
-                        size: 158,
+                        paths: stroke.paths,
+                        viewBox: stroke.viewBox,
+                        size: 154,
                         showControls: false,
-                        numberColor: context.jc.magenta,
+                        numberColor: kana.isHiragana
+                            ? context.jc.magenta
+                            : context.jc.brand,
                       ),
                     ),
             ),
@@ -864,25 +1019,27 @@ class _WritingGuide extends StatelessWidget {
                     ),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => _KanaWritingPracticePage(
-                          kana: kana,
-                          stroke: stroke,
-                          mode: _KanaWritingMode.guided,
+                        builder: (_) => KanaWritingPracticePage(
+                          targets: [target],
+                          mode: KanaWritingMode.guided,
                         ),
                       ),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.gesture_rounded, size: 17),
                         const SizedBox(width: 6),
-                        Text(
-                          _copy(
-                            context,
-                            'Guided tracing',
-                            'Tracé guidé',
+                        Flexible(
+                          child: Text(
+                            _copy(
+                              context,
+                              'Guided tracing',
+                              'Tracé guidé',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w900),
                           ),
-                          style: const TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ],
                     ),
@@ -900,10 +1057,9 @@ class _WritingGuide extends StatelessWidget {
                       ),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => _KanaWritingPracticePage(
-                            kana: kana,
-                            stroke: stroke,
-                            mode: _KanaWritingMode.free,
+                          builder: (_) => KanaWritingPracticePage(
+                            targets: [target],
+                            mode: KanaWritingMode.free,
                           ),
                         ),
                       ),
@@ -912,15 +1068,19 @@ class _WritingGuide extends StatelessWidget {
                         children: [
                           const Icon(Icons.edit_rounded, size: 16),
                           const SizedBox(width: 6),
-                          Text(
-                            _copy(
-                              context,
-                              'Free practice',
-                              'Pratique libre',
-                            ),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
+                          Flexible(
+                            child: Text(
+                              _copy(
+                                context,
+                                'Free practice',
+                                'Pratique libre',
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                         ],
@@ -959,6 +1119,67 @@ class _WritingGuide extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class KanaWritingReference extends StatelessWidget {
+  const KanaWritingReference({super.key, required this.targets})
+      : assert(targets.length > 0);
+
+  final List<KanaWritingTarget> targets;
+
+  @override
+  Widget build(BuildContext context) => targets.length == 1
+      ? _WritingGuide(target: targets.first)
+      : _BothWritingGuide(targets: targets);
+}
+
+class _BothWritingGuide extends StatelessWidget {
+  const _BothWritingGuide({required this.targets});
+
+  final List<KanaWritingTarget> targets;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget guide(KanaWritingTarget target) => _WritingGuide(
+          key: ValueKey('kana-writing-${target.kana.script}'),
+          target: target,
+          title: target.kana.isHiragana
+              ? _copy(
+                  context,
+                  'Hiragana gesture · ${target.kana.char}',
+                  'Tracé hiragana · ${target.kana.char}',
+                )
+              : _copy(
+                  context,
+                  'Katakana gesture · ${target.kana.char}',
+                  'Tracé katakana · ${target.kana.char}',
+                ),
+        );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 900) {
+          return Column(
+            children: [
+              for (var index = 0; index < targets.length; index++) ...[
+                if (index > 0) const SizedBox(height: 20),
+                guide(targets[index]),
+              ],
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var index = 0; index < targets.length; index++) ...[
+              if (index > 0) const SizedBox(width: 18),
+              Expanded(child: guide(targets[index])),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -1011,7 +1232,9 @@ class _WritingGridPainter extends CustomPainter {
 }
 
 class _FeaturedMnemonic extends StatelessWidget {
-  const _FeaturedMnemonic();
+  const _FeaturedMnemonic({this.scriptContext});
+
+  final KanaEntry? scriptContext;
 
   @override
   Widget build(BuildContext context) {
@@ -1021,7 +1244,19 @@ class _FeaturedMnemonic extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _copy(context, 'Community mnemonic', 'Mnémo de la communauté'),
+          scriptContext == null
+              ? _copy(context, 'Community mnemonic', 'Mnémo de la communauté')
+              : scriptContext!.isHiragana
+                  ? _copy(
+                      context,
+                      'Hiragana mnemonic · ${scriptContext!.char}',
+                      'Mnémo hiragana · ${scriptContext!.char}',
+                    )
+                  : _copy(
+                      context,
+                      'Katakana mnemonic · ${scriptContext!.char}',
+                      'Mnémo katakana · ${scriptContext!.char}',
+                    ),
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 7),
@@ -1209,9 +1444,14 @@ class _AllMnemonicsButton extends StatelessWidget {
 }
 
 class _NearbyKana extends StatelessWidget {
-  const _NearbyKana({required this.data, this.onSelectKana});
+  const _NearbyKana({
+    required this.data,
+    this.showBoth = false,
+    this.onSelectKana,
+  });
 
   final _KanaDetailData data;
+  final bool showBoth;
   final ValueChanged<String>? onSelectKana;
 
   @override
@@ -1221,7 +1461,19 @@ class _NearbyKana extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _copy(context, 'Nearby kana', 'Kana proches'),
+          showBoth
+              ? data.focused.isHiragana
+                  ? _copy(
+                      context,
+                      'Nearby pairs · Hiragana anchors',
+                      'Paires proches · repères hiragana',
+                    )
+                  : _copy(
+                      context,
+                      'Nearby pairs · Katakana anchors',
+                      'Paires proches · repères katakana',
+                    )
+              : _copy(context, 'Nearby kana', 'Kana proches'),
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 7),
@@ -1237,7 +1489,9 @@ class _NearbyKana extends StatelessWidget {
                   mark: studyMarkFor(data.states[data.nearby[i].char]),
                   due: data.dueChars.contains(data.nearby[i].char),
                   onTap: onSelectKana == null
-                      ? () => context.push('/kana/${data.nearby[i].char}')
+                      ? () => context.push(
+                            '/kana/${data.nearby[i].char}${showBoth ? '?mode=both' : ''}',
+                          )
                       : () => onSelectKana!(data.nearby[i].char),
                 ),
               ),
@@ -1316,19 +1570,18 @@ class _Tag extends StatelessWidget {
 
 class _DetailActions extends StatelessWidget {
   const _DetailActions({
-    required this.kana,
-    this.stroke,
+    required this.targets,
     required this.added,
     required this.onAdd,
   });
 
-  final KanaEntry kana;
-  final KanaStrokeData? stroke;
+  final List<KanaWritingTarget> targets;
   final bool added;
   final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
+    final hasPair = targets.length == 2;
     return Container(
       decoration: BoxDecoration(
         color: context.jc.surface,
@@ -1342,14 +1595,19 @@ class _DetailActions extends StatelessWidget {
             children: [
               Expanded(
                 child: NeoPrimaryButton(
-                  label: _copy(context, 'Free practice', 'Pratique libre'),
+                  label: hasPair
+                      ? _copy(
+                          context,
+                          'Practice both forms',
+                          'Pratiquer les deux formes',
+                        )
+                      : _copy(context, 'Free practice', 'Pratique libre'),
                   icon: Icons.gesture_rounded,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => _KanaWritingPracticePage(
-                        kana: kana,
-                        stroke: stroke,
-                        mode: _KanaWritingMode.free,
+                      builder: (_) => KanaWritingPracticePage(
+                        targets: targets,
+                        mode: KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -1359,8 +1617,24 @@ class _DetailActions extends StatelessWidget {
               NeoIconButton(
                 icon: added ? Icons.check_rounded : Icons.add_rounded,
                 label: added
-                    ? _copy(context, 'In your deck', 'Dans vos révisions')
-                    : _copy(context, 'Add to study', 'Ajouter aux révisions'),
+                    ? hasPair
+                        ? _copy(
+                            context,
+                            'Both forms in your deck',
+                            'Les deux formes dans vos révisions',
+                          )
+                        : _copy(context, 'In your deck', 'Dans vos révisions')
+                    : hasPair
+                        ? _copy(
+                            context,
+                            'Add both forms',
+                            'Ajouter les deux formes',
+                          )
+                        : _copy(
+                            context,
+                            'Add to study',
+                            'Ajouter aux révisions',
+                          ),
                 onTap: added ? () {} : onAdd,
                 tone: added ? NeoTone.lime : NeoTone.paper,
               ),
@@ -1372,40 +1646,78 @@ class _DetailActions extends StatelessWidget {
   }
 }
 
-enum _KanaWritingMode { guided, free }
+enum KanaWritingMode { guided, free }
 
-class _KanaWritingPracticePage extends StatefulWidget {
-  const _KanaWritingPracticePage({
-    required this.kana,
+class KanaWritingPracticePage extends StatefulWidget {
+  const KanaWritingPracticePage({
+    super.key,
+    required this.targets,
     required this.mode,
-    this.stroke,
-  });
+  }) : assert(targets.length > 0);
 
-  final KanaEntry kana;
-  final KanaStrokeData? stroke;
-  final _KanaWritingMode mode;
+  final List<KanaWritingTarget> targets;
+  final KanaWritingMode mode;
 
   @override
-  State<_KanaWritingPracticePage> createState() =>
+  State<KanaWritingPracticePage> createState() =>
       _KanaWritingPracticePageState();
 }
 
-class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
-  final DrawingController _controller = DrawingController();
-  late bool _showGuide = widget.mode == _KanaWritingMode.guided;
+class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
+  late final List<DrawingController> _controllers = [
+    for (final _ in widget.targets) DrawingController(),
+  ];
+  late final List<bool> _showGuides = [
+    for (final _ in widget.targets) widget.mode == KanaWritingMode.guided,
+  ];
+  int _step = 0;
+
+  KanaWritingTarget get _target => widget.targets[_step];
+  DrawingController get _controller => _controllers[_step];
+  bool get _showGuide => _showGuides[_step];
+
+  void _setStep(int step) {
+    if (step == _step || step < 0 || step >= widget.targets.length) return;
+    Haptics.tick();
+    setState(() => _step = step);
+  }
+
+  void _toggleGuide() {
+    Haptics.tick();
+    setState(() => _showGuides[_step] = !_showGuides[_step]);
+  }
+
+  void _advanceOrFinish() {
+    if (_step < widget.targets.length - 1) {
+      _setStep(_step + 1);
+    } else {
+      Navigator.pop(context);
+    }
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final kana = widget.kana;
-    final guided = widget.mode == _KanaWritingMode.guided;
-    final hasStrokeOrder =
-        widget.stroke != null && widget.stroke!.paths.isNotEmpty;
+    final target = _target;
+    final kana = target.kana;
+    final stroke = target.stroke;
+    final guided = widget.mode == KanaWritingMode.guided;
+    final hasStrokeOrder = stroke != null && stroke.paths.isNotEmpty;
+    final hasPair = widget.targets.length == 2;
+    final next = _step < widget.targets.length - 1
+        ? widget.targets[_step + 1].kana
+        : null;
+    final numberColor = kana.isHiragana ? context.jc.magenta : context.jc.brand;
+    final showReferencePanel = guided &&
+        hasStrokeOrder &&
+        (!hasPair || MediaQuery.sizeOf(context).height >= 700);
     return Scaffold(
       backgroundColor: context.jc.lavender,
       body: SafeArea(
@@ -1423,17 +1735,29 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            guided
-                                ? _copy(
-                                    context,
-                                    'Guided tracing',
-                                    'Tracé guidé',
-                                  )
-                                : _copy(
-                                    context,
-                                    'Free practice',
-                                    'Pratique libre',
-                                  ),
+                            hasPair
+                                ? guided
+                                    ? _copy(
+                                        context,
+                                        'Trace both forms',
+                                        'Tracer les deux formes',
+                                      )
+                                    : _copy(
+                                        context,
+                                        'Practice both forms',
+                                        'Pratiquer les deux formes',
+                                      )
+                                : guided
+                                    ? _copy(
+                                        context,
+                                        'Guided tracing',
+                                        'Tracé guidé',
+                                      )
+                                    : _copy(
+                                        context,
+                                        'Free practice',
+                                        'Pratique libre',
+                                      ),
                             style: const TextStyle(
                               fontSize: 28,
                               height: 1,
@@ -1442,17 +1766,23 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            guided
+                            hasPair
                                 ? _copy(
                                     context,
-                                    'Follow the model and stroke order, then try once without it.',
-                                    'Suivez le modèle et l’ordre des traits, puis essayez sans aide.',
+                                    'Complete both scripts. Each form keeps its own canvas.',
+                                    'Complétez les deux écritures. Chaque forme garde son propre canvas.',
                                   )
-                                : _copy(
-                                    context,
-                                    'Write from memory on a blank canvas. Reveal the stroke order if you get stuck.',
-                                    'Écrivez de mémoire sur une toile blanche. Affichez l’ordre des traits en cas de doute.',
-                                  ),
+                                : guided
+                                    ? _copy(
+                                        context,
+                                        'Follow the model and stroke order, then try once without it.',
+                                        'Suivez le modèle et l’ordre des traits, puis essayez sans aide.',
+                                      )
+                                    : _copy(
+                                        context,
+                                        'Write from memory on a blank canvas. Reveal the stroke order if you get stuck.',
+                                        'Écrivez de mémoire sur une toile blanche. Affichez l’ordre des traits en cas de doute.',
+                                      ),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -1469,63 +1799,98 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                NeoCard(
-                  tone: guided ? NeoTone.magenta : NeoTone.acid,
-                  shadow: 3,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                if (hasPair) ...[
+                  SizedBox(
+                    height: 44,
+                    child: NeoSegmentedControl<int>(
+                      selected: _step,
+                      height: 44,
+                      segments: [
+                        for (var index = 0;
+                            index < widget.targets.length;
+                            index++)
+                          NeoSegment(
+                            index,
+                            '${index + 1} · ${widget.targets[index].kana.isHiragana ? 'Hiragana' : 'Katakana'} ${widget.targets[index].kana.char}',
+                          ),
+                      ],
+                      onChanged: _setStep,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              kana.isHiragana ? 'Hiragana' : 'Katakana',
-                              style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w800,
+                  const SizedBox(height: 12),
+                ],
+                AnimatedSwitcher(
+                  duration: Motion.timed(context, Motion.fast),
+                  switchInCurve: Motion.outStrong,
+                  switchOutCurve: Motion.out,
+                  child: NeoCard(
+                    key: ValueKey('practice-target-${kana.char}'),
+                    tone: guided
+                        ? NeoTone.magenta
+                        : kana.isHiragana
+                            ? NeoTone.acid
+                            : NeoTone.lime,
+                    shadow: 3,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                kana.isHiragana ? 'Hiragana' : 'Katakana',
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
-                            ),
-                            Text(
-                              kana.romaji,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
+                              Text(
+                                kana.romaji,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        kana.char,
-                        style: const TextStyle(
-                          fontFamily: 'ZenKakuGothicNew',
-                          fontSize: 48,
-                          height: 1,
-                          fontWeight: FontWeight.w900,
+                        if (hasPair)
+                          NeoBadge(
+                            '${_step + 1} / ${widget.targets.length}',
+                            tone: NeoTone.paper,
+                          ),
+                        if (hasPair) const SizedBox(width: 12),
+                        Text(
+                          kana.char,
+                          style: const TextStyle(
+                            fontFamily: 'ZenKakuGothicNew',
+                            fontSize: 48,
+                            height: 1,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 18),
-                if (guided &&
-                    widget.stroke != null &&
-                    widget.stroke!.paths.isNotEmpty) ...[
+                if (showReferencePanel) ...[
                   SizedBox(
-                    height: 190,
+                    height: hasPair ? 168 : 190,
                     child: NeoCard(
                       tone: NeoTone.paper,
                       shadow: 4,
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: StrokeOrderView(
-                        paths: widget.stroke!.paths,
-                        viewBox: widget.stroke!.viewBox,
-                        size: 140,
-                        numberColor: context.jc.magenta,
+                        paths: stroke.paths,
+                        viewBox: stroke.viewBox,
+                        size: hasPair ? 124 : 140,
+                        numberColor: numberColor,
+                        showControls: false,
                       ),
                     ),
                   ),
@@ -1546,16 +1911,15 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                               Positioned.fill(
                                 child: DrawingCanvas(
                                   controller: _controller,
-                                  guidePaths: hasStrokeOrder
-                                      ? widget.stroke!.paths
-                                      : const [],
+                                  guidePaths:
+                                      hasStrokeOrder ? stroke.paths : const [],
                                   guideViewBox: hasStrokeOrder
-                                      ? widget.stroke!.viewBox
+                                      ? stroke.viewBox
                                       : '0 0 109 109',
                                   showGuide: _showGuide,
                                   showStrokeNumbers:
                                       _showGuide && hasStrokeOrder,
-                                  strokeNumberColor: context.jc.magenta,
+                                  strokeNumberColor: numberColor,
                                 ),
                               ),
                               if (_showGuide && !hasStrokeOrder)
@@ -1621,17 +1985,25 @@ class _KanaWritingPracticePageState extends State<_KanaWritingPracticePage> {
                               )
                             : _copy(context, 'Guide', 'Guide'),
                         selected: _showGuide,
-                        onTap: () => setState(() => _showGuide = !_showGuide),
+                        onTap: _toggleGuide,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 NeoPrimaryButton(
-                  label: _copy(context, 'Done', 'Terminé'),
-                  icon: Icons.check_rounded,
+                  label: next == null
+                      ? _copy(context, 'Done', 'Terminé')
+                      : _copy(
+                          context,
+                          'Next: ${next.isHiragana ? 'Hiragana' : 'Katakana'} ${next.char}',
+                          'Suivant : ${next.isHiragana ? 'Hiragana' : 'Katakana'} ${next.char}',
+                        ),
+                  icon: next == null
+                      ? Icons.check_rounded
+                      : Icons.arrow_forward_rounded,
                   tone: NeoTone.ink,
-                  onTap: () => Navigator.pop(context),
+                  onTap: _advanceOrFinish,
                 ),
               ],
             ),
