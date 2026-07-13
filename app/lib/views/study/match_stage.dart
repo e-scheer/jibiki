@@ -9,6 +9,7 @@ import '../../models/study.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/review_viewmodel.dart';
 import '../widgets/pressable.dart';
+import '../widgets/vertical_overflow_cue.dart';
 import 'study_feedback.dart';
 import 'study_prompts.dart';
 
@@ -105,61 +106,80 @@ class _MatchStageState extends State<MatchStage> {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final total = _tiles.length ~/ 2;
-    return WinOverlay(
-      show: _done,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text(context.trText('Find the pairs'),
-                    style: context.text.titleMedium),
-                const Spacer(),
-                _PairPips(done: _pairsDone, total: total),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-                context.trText(
-                    'Flip two tiles to match a character with its meaning.'),
-                style: TextStyle(color: jc.muted, fontSize: 13),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 14),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, c) {
-                  // More columns as the board widens (landscape / tablet) so tiles
-                  // stay readable and fewer rows fit a short landscape screen.
-                  final base = c.maxWidth >= Breakpoints.expanded
-                      ? 4
-                      : (c.maxWidth >= Breakpoints.medium ? 3 : 2);
-                  final cols = base.clamp(2, _tiles.length);
-                  const gap = 12.0;
-                  final rows = (_tiles.length / cols).ceil();
-                  final tileW = (c.maxWidth - gap * (cols - 1)) / cols;
-                  final tileH = (c.maxHeight - gap * (rows - 1)) / rows;
-                  return GridView.count(
-                    crossAxisCount: cols,
-                    mainAxisSpacing: gap,
-                    crossAxisSpacing: gap,
-                    childAspectRatio: tileW / tileH,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      for (var i = 0; i < _tiles.length; i++)
-                        _MatchTile(
-                          tile: _tiles[i],
-                          faceUp: _up.contains(i) || _matched.contains(i),
-                          matched: _matched.contains(i),
-                          onTap: () => _tap(i),
-                        ),
-                    ],
-                  );
-                },
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.only(bottom: 8),
+      child: WinOverlay(
+        show: _done,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Text(context.trText('Find the pairs'),
+                      style: context.text.titleMedium),
+                  const Spacer(),
+                  _PairPips(done: _pairsDone, total: total),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                  context.trText(
+                      'Flip two tiles to match a character with its meaning.'),
+                  style: TextStyle(color: jc.muted, fontSize: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 14),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    // More columns as the board widens (landscape / tablet) so tiles
+                    // stay readable and fewer rows fit a short landscape screen.
+                    final base = c.maxWidth >= Breakpoints.expanded
+                        ? 4
+                        : (c.maxWidth >= Breakpoints.medium ? 3 : 2);
+                    final cols = base.clamp(2, _tiles.length);
+                    const gap = 12.0;
+                    final rows = (_tiles.length / cols).ceil();
+                    final tileW = (c.maxWidth - gap * (cols - 1)) / cols;
+                    final fittedTileH = (c.maxHeight - gap * (rows - 1)) / rows;
+                    // On unusually short windows preserve a useful tap target and
+                    // let the last row scroll into view. Normal phones still show
+                    // the whole board at once.
+                    final scrolls = fittedTileH < 72;
+                    final tileH = scrolls ? 78.0 : fittedTileH;
+                    return VerticalOverflowCue(
+                      edgeColor: jc.lavender,
+                      fadeExtent: 22,
+                      child: GridView.count(
+                        primary: false,
+                        padding: EdgeInsets.zero,
+                        crossAxisCount: cols,
+                        mainAxisSpacing: gap,
+                        crossAxisSpacing: gap,
+                        childAspectRatio: tileW / tileH,
+                        physics: scrolls
+                            ? const BouncingScrollPhysics(
+                                parent: AlwaysScrollableScrollPhysics(),
+                              )
+                            : const NeverScrollableScrollPhysics(),
+                        children: [
+                          for (var i = 0; i < _tiles.length; i++)
+                            _MatchTile(
+                              tile: _tiles[i],
+                              faceUp: _up.contains(i) || _matched.contains(i),
+                              matched: _matched.contains(i),
+                              onTap: () => _tap(i),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

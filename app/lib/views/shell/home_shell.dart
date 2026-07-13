@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +14,7 @@ import '../study/decks_view.dart';
 import '../study/statistics_view.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/pressable.dart';
+import '../widgets/vertical_overflow_cue.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
@@ -86,17 +86,16 @@ class _ShellState extends State<_Shell> {
       _navigationTarget = index;
       _index = index;
     });
-    if (context.isWide) {
-      _navigationTarget = null;
-      if (index == _reviewIndex) context.read<DashboardViewModel>().load();
-      return;
-    }
     final pager = _pager;
     if (pager != null && pager.hasClients) {
       if (Motion.enabled(context)) {
+        final distance = (index - (pager.page?.round() ?? _index)).abs();
         pager.animateToPage(
           index,
-          duration: Motion.timed(context, Motion.base),
+          duration: Motion.timed(
+            context,
+            Duration(milliseconds: 220 + 28 * distance.clamp(1, 4)),
+          ),
           curve: Motion.outStrong,
         );
       } else {
@@ -133,17 +132,23 @@ class _ShellState extends State<_Shell> {
     final due = context.watch<DashboardViewModel>().stats.dueNow;
     final showDue = mode.showsDueBadge && due > 0;
 
-    if (context.win.isCompact) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _syncPager();
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncPager();
+    });
+    final compact = context.win.isCompact;
+    final pageDeck = PageView(
+      key: ValueKey(compact ? 'compact-page-deck' : 'wide-page-deck'),
+      controller: _pager,
+      onPageChanged: _onPageSettled,
+      physics: compact
+          ? const _SnappyPageScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
+      children: [for (final tab in _tabs) _KeepAlive(child: tab)],
+    );
+
+    if (compact) {
       return Scaffold(
-        body: PageView(
-          controller: _pager,
-          onPageChanged: _onPageSettled,
-          physics: const _SnappyPageScrollPhysics(),
-          children: [for (final tab in _tabs) _KeepAlive(child: tab)],
-        ),
+        body: pageDeck,
         bottomNavigationBar: _NeoBottomNavigation(
           index: _index,
           due: showDue ? due : 0,
@@ -164,10 +169,7 @@ class _ShellState extends State<_Shell> {
               onSelect: _go,
             ),
             Expanded(
-              child: IndexedStack(
-                index: _index,
-                children: [for (final tab in _tabs) _KeepAlive(child: tab)],
-              ),
+              child: ClipRect(child: pageDeck),
             ),
           ],
         ),
@@ -349,55 +351,60 @@ class _NeoNavigationRail extends StatelessWidget {
               destinations.length * itemHeight +
               (destinations.length - 1) * itemGap +
               14;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(horizontal, top, horizontal, 14),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - 28,
-                minWidth: constraints.maxWidth - horizontal * 2,
-              ),
-              child: SizedBox(
-                width: constraints.maxWidth - horizontal * 2,
-                height: contentHeight > constraints.maxHeight - 28
-                    ? contentHeight
-                    : constraints.maxHeight - 28,
-                child: Stack(
-                  fit: StackFit.expand,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: _RailSlidingSelection(
-                          index: index,
-                          top: itemTop,
-                          itemHeight: itemHeight,
-                          slotHeight: itemHeight + itemGap,
+          return VerticalOverflowCue(
+            edgeColor: jc.surface,
+            fadeExtent: 18,
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.fromLTRB(horizontal, top, horizontal, 14),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 28,
+                  minWidth: constraints.maxWidth - horizontal * 2,
+                ),
+                child: SizedBox(
+                  width: constraints.maxWidth - horizontal * 2,
+                  height: contentHeight > constraints.maxHeight - 28
+                      ? contentHeight
+                      : constraints.maxHeight - 28,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: _RailSlidingSelection(
+                            index: index,
+                            top: itemTop,
+                            itemHeight: itemHeight,
+                            slotHeight: itemHeight + itemGap,
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned.fill(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const _RailBrand(),
-                          const SizedBox(height: brandGap),
-                          for (var i = 0; i < destinations.length; i++) ...[
-                            if (i > 0) const SizedBox(height: itemGap),
-                            SizedBox(
-                              height: itemHeight,
-                              child: _NeoNavButton(
-                                destination: destinations[i],
-                                selected: index == i,
-                                showSelection: false,
-                                due: i == _ShellState._reviewIndex ? due : 0,
-                                onTap: () => onSelect(i),
+                      Positioned.fill(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const _RailBrand(),
+                            const SizedBox(height: brandGap),
+                            for (var i = 0; i < destinations.length; i++) ...[
+                              if (i > 0) const SizedBox(height: itemGap),
+                              SizedBox(
+                                height: itemHeight,
+                                child: _NeoNavButton(
+                                  destination: destinations[i],
+                                  selected: index == i,
+                                  showSelection: false,
+                                  due: i == _ShellState._reviewIndex ? due : 0,
+                                  onTap: () => onSelect(i),
+                                ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -568,11 +575,6 @@ class _RailSlidingSelectionState extends State<_RailSlidingSelection>
     super.didUpdateWidget(oldWidget);
     if (widget.index == oldWidget.index) return;
     final from = _position.value;
-    if (kIsWeb) {
-      _controller.stop();
-      _position = AlwaysStoppedAnimation(widget.index.toDouble());
-      return;
-    }
     if (!Motion.enabled(context)) {
       _controller.stop();
       _position = AlwaysStoppedAnimation(widget.index.toDouble());
@@ -593,6 +595,7 @@ class _RailSlidingSelectionState extends State<_RailSlidingSelection>
 
   @override
   Widget build(BuildContext context) => CustomPaint(
+        key: const ValueKey('tablet-navigation-selection'),
         painter: _RailSelectionPainter(
           position: _position,
           top: widget.top,

@@ -35,9 +35,14 @@ void main() {
   testWidgets('kinds swap the prompt and gate the send button', (tester) async {
     await tester.pumpWidget(await _app());
 
-    expect(find.text('💡  Idea'), findsOneWidget);
-    expect(find.text('🐛  Bug'), findsOneWidget);
-    expect(find.textContaining('a human reads every single one'), findsOneWidget);
+    expect(find.text('Idea'), findsOneWidget);
+    expect(find.text('Bug'), findsOneWidget);
+    expect(find.byIcon(Icons.lightbulb_outline_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.bug_report_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsOneWidget);
+    expect(
+        find.textContaining('a human reads every single one'), findsOneWidget);
     // Transparency line about the attached context.
     expect(find.textContaining('Sent along for context'), findsOneWidget);
 
@@ -46,7 +51,7 @@ void main() {
     expect(tester.widget<FilledButton>(send).onPressed, isNull);
 
     // Switching kind swaps the placeholder prompt.
-    await tester.tap(find.text('🐛  Bug'));
+    await tester.tap(find.text('Bug'));
     await tester.pump();
     expect(find.textContaining('What happened'), findsOneWidget);
 

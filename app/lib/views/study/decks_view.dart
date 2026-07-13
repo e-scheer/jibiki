@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/decks_viewmodel.dart';
 import '../widgets/pressable.dart';
 import '../widgets/jibiki_brand.dart';
+import '../widgets/neo_pop.dart';
 import '../widgets/status_views.dart';
 import 'study_chrome.dart';
 
@@ -47,8 +48,8 @@ class _Decks extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          color: context.jc.brand,
+        child: NeoRefreshIndicator(
+          semanticLabel: context.trText('Refresh review packs'),
           onRefresh: vm.load,
           child: vm.hasError
               ? ListView(
@@ -164,6 +165,21 @@ class _Header extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
+          SizedBox.square(
+            key: const Key('review-reference-action'),
+            dimension: 46,
+            child: Pressable(
+              label: context.trText('Japanese reference'),
+              onTap: () => context.push('/reference'),
+              child: StudyPanel(
+                shadow: 4,
+                radius: 10,
+                padding: EdgeInsets.zero,
+                child: Icon(Icons.menu_book_outlined, color: context.jc.ink),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           SizedBox.square(
             dimension: 46,
             child: Pressable(

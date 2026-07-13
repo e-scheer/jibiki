@@ -11,6 +11,7 @@ import '../../viewmodels/app_state.dart';
 import '../../viewmodels/feedback_viewmodel.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/jibiki_brand.dart';
+import '../widgets/pressable.dart';
 
 class FeedbackView extends StatelessWidget {
   const FeedbackView({super.key});
@@ -120,7 +121,8 @@ class _Form extends StatelessWidget {
             children: [
               for (final kind in FeedbackKind.values)
                 _KindChip(
-                  label: context.trText('${kind.emoji}  ${kind.label}'),
+                  label: context.trText(kind.label),
+                  icon: _kindIcon(kind),
                   selected: vm.kind == kind,
                   enabled: !vm.isLoading,
                   onSelected: () => vm.selectKind(kind),
@@ -295,48 +297,69 @@ class _ThankYou extends StatelessWidget {
 class _KindChip extends StatelessWidget {
   const _KindChip({
     required this.label,
+    required this.icon,
     required this.selected,
     this.enabled = true,
     required this.onSelected,
   });
 
   final String label;
+  final IconData icon;
   final bool selected;
   final bool enabled;
   final VoidCallback onSelected;
 
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(9),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: context.jc.ink,
-                    blurRadius: 0,
-                    offset: const Offset(3, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: ChoiceChip(
-          label: Text(label),
-          selected: selected,
-          showCheckmark: false,
-          selectedColor: context.jc.acid,
-          backgroundColor: context.jc.surface,
-          side: BorderSide(color: context.jc.ink, width: 2.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9),
+  Widget build(BuildContext context) => Pressable.builder(
+        label: label,
+        selected: selected,
+        haptic: false,
+        focusRadius: 10,
+        pressedScale: 0.98,
+        onTap: enabled ? onSelected : null,
+        builder: (context, pressed) => AnimatedContainer(
+          duration: Motion.timed(context, Motion.fast),
+          curve: Motion.out,
+          constraints: const BoxConstraints(minHeight: 46),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? context.jc.magenta : context.jc.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: context.jc.ink, width: 2.5),
+            boxShadow: pressed
+                ? null
+                : [
+                    BoxShadow(
+                      color: context.jc.ink,
+                      blurRadius: 0,
+                      offset: Offset(0, selected ? 3 : 2),
+                    ),
+                  ],
           ),
-          labelStyle: TextStyle(
-            color: context.jc.ink,
-            fontWeight: FontWeight.w800,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 19, color: context.jc.ink),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: context.jc.ink,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
           ),
-          onSelected: enabled ? (_) => onSelected() : null,
         ),
       );
 }
+
+IconData _kindIcon(FeedbackKind kind) => switch (kind) {
+      FeedbackKind.idea => Icons.lightbulb_outline_rounded,
+      FeedbackKind.bug => Icons.bug_report_outlined,
+      FeedbackKind.love => Icons.favorite_border_rounded,
+      FeedbackKind.other => Icons.chat_bubble_outline_rounded,
+    };
 
 class _FeedbackSubmitButton extends StatelessWidget {
   const _FeedbackSubmitButton({required this.onPressed, required this.busy});

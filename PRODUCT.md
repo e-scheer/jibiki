@@ -76,6 +76,12 @@ strip. History is local-first and useful without an account. Kana and kanji brow
 screens use dense, shadow-free matrices so progress colours stay readable; hard
 shadows are reserved for hierarchy and actions rather than repeated on every cell.
 
+Japanese reference cards are reachable from both Settings and Review. Japanese
+text inside them stays actionable: a kana or kanji opens its detail directly, and
+longer words or sentences open a character breakdown. Scrollable surfaces expose
+subtle edge fades when content continues, while pull-to-refresh uses the branded
+three-block chase instead of a platform-default spinner.
+
 Settings expose the complete display system. Light, dark and automatic appearance
 can be combined with a runtime palette, currently Neo-pop and Harmonie, while the
 same semantic colour roles preserve hierarchy and interaction states.

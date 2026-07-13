@@ -311,30 +311,12 @@ class _SessionHeader extends StatelessWidget {
               const SizedBox(height: 14),
               StudyProgressRail(value: progress),
               const SizedBox(height: 11),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ModeSwitcher(
-                      selected: mode,
-                      onSelected: onMode,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (mode == StudyMode.quiz) ...[
-                    _MiniAction(
-                      label: context.trText(direction.label),
-                      icon: Icons.swap_horiz_rounded,
-                      selected: direction.isRecall,
-                      onTap: onDirection,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  _MiniAction(
-                    label: context.trText('Open full details'),
-                    icon: Icons.menu_book_outlined,
-                    onTap: onDetails,
-                  ),
-                ],
+              _ReviewToolbar(
+                mode: mode,
+                direction: direction,
+                onMode: onMode,
+                onDirection: onDirection,
+                onDetails: onDetails,
               ),
             ],
           ),
@@ -476,6 +458,80 @@ class _LandscapeSessionHeader extends StatelessWidget {
   }
 }
 
+class _ReviewToolbar extends StatelessWidget {
+  const _ReviewToolbar({
+    required this.mode,
+    required this.direction,
+    required this.onMode,
+    required this.onDirection,
+    required this.onDetails,
+  });
+
+  final StudyMode mode;
+  final StudyDirection direction;
+  final ValueChanged<StudyMode> onMode;
+  final VoidCallback onDirection;
+  final VoidCallback onDetails;
+
+  @override
+  Widget build(BuildContext context) => StudyPanel(
+        radius: 12,
+        padding: const EdgeInsets.all(3),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final showLabels = constraints.maxWidth >= 520;
+            return Row(
+              children: [
+                Expanded(
+                  child: _ModeSwitcher(
+                    selected: mode,
+                    onSelected: onMode,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.jc.surfaceAlt,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: context.jc.ink, width: 2),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (mode == StudyMode.quiz) ...[
+                        _ToolbarAction(
+                          label: context.trText(direction.label),
+                          compactLabel: context.trText('Swap'),
+                          semanticsLabel: context.trText(
+                            'Swap question and answer. Current mode: ${direction.label}',
+                          ),
+                          icon: Icons.swap_horiz_rounded,
+                          selected: direction.isRecall,
+                          showLabel: showLabels,
+                          onTap: onDirection,
+                        ),
+                        _ToolbarDivider(color: context.jc.ink),
+                      ],
+                      _ToolbarAction(
+                        label: context.trText('Reference'),
+                        compactLabel: context.trText('Ref'),
+                        semanticsLabel: context.trText('Open full details'),
+                        icon: Icons.menu_book_outlined,
+                        showLabel: showLabels,
+                        onTap: onDetails,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+}
+
 class _ModeSwitcher extends StatelessWidget {
   const _ModeSwitcher({required this.selected, required this.onSelected});
 
@@ -483,24 +539,20 @@ class _ModeSwitcher extends StatelessWidget {
   final ValueChanged<StudyMode> onSelected;
 
   @override
-  Widget build(BuildContext context) => StudyPanel(
-        radius: 12,
-        padding: const EdgeInsets.all(3),
-        child: Row(
-          children: [
-            for (final mode in StudyMode.values)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1),
-                  child: _ModeItem(
-                    mode: mode,
-                    selected: mode == selected,
-                    onTap: () => onSelected(mode),
-                  ),
+  Widget build(BuildContext context) => Row(
+        children: [
+          for (final mode in StudyMode.values)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1),
+                child: _ModeItem(
+                  mode: mode,
+                  selected: mode == selected,
+                  onTap: () => onSelected(mode),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       );
 }
 
@@ -552,32 +604,82 @@ class _ModeItem extends StatelessWidget {
       );
 }
 
-class _MiniAction extends StatelessWidget {
-  const _MiniAction({
+class _ToolbarAction extends StatelessWidget {
+  const _ToolbarAction({
     required this.label,
+    required this.compactLabel,
+    required this.semanticsLabel,
     required this.icon,
     required this.onTap,
+    required this.showLabel,
     this.selected = false,
   });
 
   final String label;
+  final String compactLabel;
+  final String semanticsLabel;
   final IconData icon;
   final VoidCallback onTap;
+  final bool showLabel;
   final bool selected;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-        dimension: 48,
-        child: Pressable(
-          label: label,
-          selected: selected,
-          onTap: onTap,
-          child: StudyPanel(
-            color: selected ? context.jc.acid : context.jc.surface,
-            radius: 10,
-            padding: EdgeInsets.zero,
-            child: Icon(icon, size: 20, color: context.jc.ink),
+  Widget build(BuildContext context) => Tooltip(
+        message: semanticsLabel,
+        child: SizedBox(
+          width: showLabel ? 108 : 60,
+          height: 36,
+          child: Pressable(
+            label: semanticsLabel,
+            selected: selected,
+            haptic: false,
+            focusRadius: 8,
+            onTap: onTap,
+            child: SizedBox.expand(
+              child: AnimatedContainer(
+                duration: Motion.timed(context, Motion.fast),
+                padding: EdgeInsets.symmetric(horizontal: showLabel ? 8 : 0),
+                decoration: BoxDecoration(
+                  color: selected ? context.jc.acid : context.jc.surface,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon,
+                        size: showLabel ? 19 : 17, color: context.jc.ink),
+                    SizedBox(width: showLabel ? 6 : 3),
+                    Flexible(
+                      child: Text(
+                        showLabel ? label : compactLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: showLabel ? 12 : 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
+        ),
+      );
+}
+
+class _ToolbarDivider extends StatelessWidget {
+  const _ToolbarDivider({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 2,
+        height: 36,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(2),
         ),
       );
 }

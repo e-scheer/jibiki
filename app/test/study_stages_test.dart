@@ -15,6 +15,7 @@ import 'package:jibiki/views/study/quiz_stage.dart';
 import 'package:jibiki/views/study/study_feedback.dart';
 import 'package:jibiki/views/study/swipe_stage.dart';
 import 'package:jibiki/views/widgets/pressable.dart';
+import 'package:jibiki/views/widgets/vertical_overflow_cue.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A kanji card with one English meaning and a kun reading, so both the swipe
@@ -62,7 +63,7 @@ class _FakeStudyRepo extends StudyRepository {
       pool.firstWhere((c) => c.id == cardId);
 }
 
-Future<ReviewViewModel> _vm() async {
+Future<ReviewViewModel> _vm({bool includeFifth = false}) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   final service = StudyService(ApiClient(SessionStore(prefs)));
@@ -71,6 +72,7 @@ Future<ReviewViewModel> _vm() async {
     _kanji(2, '火', 'fire', 'ひ'),
     _kanji(3, '木', 'tree', 'き'),
     _kanji(4, '金', 'gold', 'かね'),
+    if (includeFifth) _kanji(5, '土', 'earth', 'つち'),
   ]);
   final vm = ReviewViewModel(repo);
   await vm.load();
@@ -159,6 +161,29 @@ void main() {
           milliseconds: 900)); // drain the advance timer (correct = 850ms)
       await tester.pumpAndSettle();
     });
+
+    testWidgets('uses compact two-column answer cards on a phone',
+        (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final vm = await _vm();
+      await tester.pumpWidget(_host(QuizStage(vm: vm, lang: 'en')));
+      await tester.pumpAndSettle();
+
+      for (final meaning in ['water', 'fire', 'tree', 'gold']) {
+        final button = find.ancestor(
+          of: find.text(meaning),
+          matching: find.byType(Pressable),
+        );
+        expect(button, findsOneWidget);
+        final size = tester.getSize(button);
+        expect(size.width, lessThan(190));
+        expect(size.height, greaterThanOrEqualTo(72));
+      }
+    });
   });
 
   group('SwipeStage (flashcard)', () {
@@ -226,6 +251,38 @@ void main() {
       await tester.pumpAndSettle();
       // One tile flipped up → seven remain hidden.
       expect(find.bySemanticsLabel('Hidden tile'), findsNWidgets(7));
+    });
+
+    testWidgets('keeps every tile above the phone safe area', (tester) async {
+      tester.view.physicalSize = const Size(390, 540);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final vm = await _vm(includeFifth: true);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(390, 540),
+              padding: EdgeInsets.only(bottom: 24),
+              viewPadding: EdgeInsets.only(bottom: 24),
+            ),
+            child: Scaffold(body: MatchStage(vm: vm, lang: 'en')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final hidden = find.bySemanticsLabel('Hidden tile');
+      expect(hidden, findsNWidgets(10));
+      expect(find.byType(VerticalOverflowCue), findsOneWidget);
+      for (final element in hidden.evaluate()) {
+        final tile =
+            find.byElementPredicate((candidate) => candidate == element);
+        expect(tester.getBottomRight(tile).dy, lessThanOrEqualTo(516));
+      }
     });
   });
 

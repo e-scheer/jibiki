@@ -17,18 +17,22 @@ import '../widgets/status_views.dart';
 import 'study_chrome.dart';
 
 class StatisticsView extends StatelessWidget {
-  const StatisticsView({super.key});
+  const StatisticsView({super.key, this.showBack = false});
+
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
         create: (ctx) =>
             StatisticsViewModel(ctx.read<StudyRepository>())..load(),
-        child: const _Statistics(),
+        child: _Statistics(showBack: showBack),
       );
 }
 
 class _Statistics extends StatelessWidget {
-  const _Statistics();
+  const _Statistics({required this.showBack});
+
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +46,8 @@ class _Statistics extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          color: context.jc.brand,
+        child: NeoRefreshIndicator(
+          semanticLabel: context.trText('Refresh profile'),
           onRefresh: vm.load,
           child: BoundedContent(
             maxWidth: context.isExpanded ? 1040 : Breakpoints.maxContent,
@@ -56,7 +60,11 @@ class _Statistics extends StatelessWidget {
                 32,
               ),
               children: [
-                _Header(refreshing: vm.isLoading, onRefresh: vm.load),
+                _Header(
+                  refreshing: vm.isLoading,
+                  onRefresh: vm.load,
+                  showBack: showBack,
+                ),
                 const SizedBox(height: 18),
                 if (context.isExpanded)
                   Row(
@@ -96,21 +104,41 @@ class _Statistics extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.refreshing, required this.onRefresh});
+  const _Header({
+    required this.refreshing,
+    required this.onRefresh,
+    required this.showBack,
+  });
 
   final bool refreshing;
   final VoidCallback onRefresh;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (showBack) ...[
+            _HeaderAction(
+              label: context.trText('Back'),
+              icon: Icons.arrow_back_rounded,
+              onTap: () {
+                final navigator = Navigator.of(context);
+                if (navigator.canPop()) {
+                  navigator.pop();
+                } else {
+                  context.go('/');
+                }
+              },
+            ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.trText('Profile'),
+                  context.trText(showBack ? 'Statistics' : 'Profile'),
                   style: context.text.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.8,

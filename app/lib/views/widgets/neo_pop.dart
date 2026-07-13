@@ -4,6 +4,7 @@ import '../../core/breakpoints.dart';
 import '../../theme/app_theme.dart';
 import 'jibiki_brand.dart';
 import 'pressable.dart';
+import 'vertical_overflow_cue.dart';
 
 enum NeoTone { paper, acid, blue, magenta, lime, lavender, coral, ink }
 
@@ -254,6 +255,123 @@ class NeoPrimaryButton extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// A branded pull-to-refresh surface with no platform spinner. Flutter still
+/// owns the drag/arming physics, while the visible feedback is the lightweight
+/// three-block jibiki chase used by the rest of the app.
+class NeoRefreshIndicator extends StatefulWidget {
+  const NeoRefreshIndicator({
+    super.key,
+    required this.onRefresh,
+    required this.child,
+    this.edgeOffset = 0,
+    this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.semanticLabel = 'Refresh',
+    this.showOverflowCue = true,
+    this.edgeColor,
+  });
+
+  static const loaderKey = ValueKey('neo-refresh-loader');
+
+  final RefreshCallback onRefresh;
+  final Widget child;
+  final double edgeOffset;
+  final RefreshIndicatorTriggerMode triggerMode;
+  final ScrollNotificationPredicate notificationPredicate;
+  final String semanticLabel;
+  final bool showOverflowCue;
+  final Color? edgeColor;
+
+  @override
+  State<NeoRefreshIndicator> createState() => _NeoRefreshIndicatorState();
+}
+
+class _NeoRefreshIndicatorState extends State<NeoRefreshIndicator> {
+  RefreshIndicatorStatus? _status;
+
+  void _onStatusChanged(RefreshIndicatorStatus? status) {
+    if (_status == status) return;
+    setState(() => _status = status);
+  }
+
+  bool get _visible => switch (_status) {
+        null ||
+        RefreshIndicatorStatus.done ||
+        RefreshIndicatorStatus.canceled =>
+          false,
+        _ => true,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    return Stack(
+      children: [
+        RefreshIndicator.noSpinner(
+          onRefresh: widget.onRefresh,
+          onStatusChange: _onStatusChanged,
+          triggerMode: widget.triggerMode,
+          notificationPredicate: widget.notificationPredicate,
+          semanticsLabel: widget.semanticLabel,
+          child: widget.showOverflowCue
+              ? VerticalOverflowCue(
+                  edgeColor: widget.edgeColor ?? jc.canvas,
+                  child: widget.child,
+                )
+              : widget.child,
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: widget.edgeOffset + 8,
+          child: IgnorePointer(
+            child: Center(
+              child: AnimatedSlide(
+                duration: Motion.timed(context, Motion.fast),
+                curve: Motion.outStrong,
+                offset: _visible ? Offset.zero : const Offset(0, -.55),
+                child: AnimatedOpacity(
+                  duration: Motion.timed(context, Motion.fast),
+                  curve: Motion.out,
+                  opacity: _visible ? 1 : 0,
+                  child: Semantics(
+                    liveRegion: true,
+                    label: widget.semanticLabel,
+                    child: Container(
+                      key: NeoRefreshIndicator.loaderKey,
+                      width: 48,
+                      height: 42,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: jc.surface,
+                        borderRadius: BorderRadius.circular(13),
+                        border: Border.all(color: jc.ink, width: 2.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: jc.ink,
+                            blurRadius: 0,
+                            offset: const Offset(3, 3),
+                          ),
+                        ],
+                      ),
+                      child: TickerMode(
+                        enabled: _visible,
+                        child: NeoChaseLoader.small(
+                          semanticLabel: widget.semanticLabel,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class NeoPageHeader extends StatelessWidget {

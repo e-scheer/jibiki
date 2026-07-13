@@ -32,6 +32,8 @@ class _KanaDictionarySource implements DictionaryDataSource {
     'kind': 'gojuon',
     'row': 'a',
     'order': 1,
+    'usage_label': 'Sentence helper',
+    'usage': 'Shows how this kana behaves in a sentence.',
   });
   static final katakana = KanaEntry.fromJson(const {
     'char': 'ア',
@@ -251,6 +253,22 @@ void main() {
         .platformDispatcher
         .clearAllTestValues();
   });
+
+  testWidgets(
+    'embedded tablet detail keeps the kana grammar usage section',
+    (tester) async {
+      final dependencies = await _dependencies(authenticated: true);
+      await _pumpBothPane(tester, dependencies);
+
+      expect(find.text('In a sentence'), findsOneWidget);
+      expect(find.text('Sentence helper'), findsOneWidget);
+      expect(
+        find.text('Shows how this kana behaves in a sentence.'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'unauthenticated Both tablet add opens the auth sheet without calling study',

@@ -79,9 +79,8 @@ class _MySubmissions extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              color: jc.brand,
-              backgroundColor: jc.acid,
+            child: NeoRefreshIndicator(
+              semanticLabel: context.trText('Refresh submissions'),
               onRefresh: vm.load,
               child: vm.hasError
                   ? ListView(

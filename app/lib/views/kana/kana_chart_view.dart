@@ -18,6 +18,7 @@ import '../widgets/pressable.dart';
 import '../widgets/selection_action_bar.dart';
 import '../widgets/status_views.dart';
 import '../widgets/study_mark.dart';
+import '../widgets/vertical_overflow_cue.dart';
 import 'kana_cell.dart';
 import 'kana_detail_view.dart';
 
@@ -326,102 +327,108 @@ class _KanaLayout extends StatelessWidget {
         builder: (context, constraints) {
           final tablet = constraints.maxWidth >= 760;
           if (!tablet) {
-            return ListView(
-              padding: const EdgeInsets.only(top: 12, bottom: 28),
-              children: [
-                _KanaPrimary(
-                  vm: vm,
-                  selection: selection,
-                  selecting: selecting,
-                  selectedCount: selectedCount,
-                  onScriptChanged: onScriptChanged,
-                  onCancelSelection: onCancelSelection,
-                  onSelectAll: onSelectAll,
-                ),
-                _KanaTools(
-                  selecting: selecting,
-                  onSelect: onSelect,
-                  onCancelSelection: onCancelSelection,
-                  onMnemonics: onMnemonics,
-                ),
-                _KanaExtras(
-                  vm: vm,
-                  selection: selection,
-                  extras: extras,
-                ),
-              ],
-            );
-          }
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(18, 20, 18, 32),
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            return VerticalOverflowCue(
+              edgeColor: context.jc.canvas,
+              child: ListView(
+                padding: const EdgeInsets.only(top: 12, bottom: 28),
                 children: [
-                  SizedBox(
-                    width: 410,
-                    child: _KanaPrimary(
-                      vm: vm,
-                      selection: selection,
-                      selecting: selecting,
-                      selectedCount: selectedCount,
-                      onScriptChanged: onScriptChanged,
-                      onCancelSelection: onCancelSelection,
-                      onSelectAll: onSelectAll,
-                    ),
+                  _KanaPrimary(
+                    vm: vm,
+                    selection: selection,
+                    selecting: selecting,
+                    selectedCount: selectedCount,
+                    onScriptChanged: onScriptChanged,
+                    onCancelSelection: onCancelSelection,
+                    onSelectAll: onSelectAll,
                   ),
-                  const SizedBox(width: 28),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        NeoCard(
-                          tone: NeoTone.lavender,
-                          shadow: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _copy(context, 'Kana studio', 'Studio kana'),
-                                style: const TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _copy(
-                                  context,
-                                  'Open a glyph for its sound, origin and community mnemonics.',
-                                  'Ouvrez un glyphe pour son son, son origine et les mnémos de la communauté.',
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  height: 1.35,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _KanaTools(
-                          selecting: selecting,
-                          onSelect: onSelect,
-                          onCancelSelection: onCancelSelection,
-                          onMnemonics: onMnemonics,
-                        ),
-                        _KanaExtras(
-                          vm: vm,
-                          selection: selection,
-                          extras: extras,
-                          inset: 0,
-                        ),
-                      ],
-                    ),
+                  _KanaTools(
+                    selecting: selecting,
+                    onSelect: onSelect,
+                    onCancelSelection: onCancelSelection,
+                    onMnemonics: onMnemonics,
+                  ),
+                  _KanaExtras(
+                    vm: vm,
+                    selection: selection,
+                    extras: extras,
                   ),
                 ],
               ),
-            ],
+            );
+          }
+
+          return VerticalOverflowCue(
+            edgeColor: context.jc.canvas,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 20, 18, 32),
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 410,
+                      child: _KanaPrimary(
+                        vm: vm,
+                        selection: selection,
+                        selecting: selecting,
+                        selectedCount: selectedCount,
+                        onScriptChanged: onScriptChanged,
+                        onCancelSelection: onCancelSelection,
+                        onSelectAll: onSelectAll,
+                      ),
+                    ),
+                    const SizedBox(width: 28),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          NeoCard(
+                            tone: NeoTone.lavender,
+                            shadow: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _copy(context, 'Kana studio', 'Studio kana'),
+                                  style: const TextStyle(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _copy(
+                                    context,
+                                    'Open a glyph for its sound, origin and community mnemonics.',
+                                    'Ouvrez un glyphe pour son son, son origine et les mnémos de la communauté.',
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    height: 1.35,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _KanaTools(
+                            selecting: selecting,
+                            onSelect: onSelect,
+                            onCancelSelection: onCancelSelection,
+                            onMnemonics: onMnemonics,
+                          ),
+                          _KanaExtras(
+                            vm: vm,
+                            selection: selection,
+                            extras: extras,
+                            inset: 0,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -516,56 +523,60 @@ class _KanaTabletWorkspaceState extends State<_KanaTabletWorkspace> {
               ),
               const SizedBox(height: 14),
               Expanded(
-                child: ClipRect(
-                  child: AnimatedSwitcher(
-                    duration: Motion.timed(context, Motion.base),
-                    switchInCurve: Motion.outStrong,
-                    switchOutCurve: Motion.out,
-                    layoutBuilder: (currentChild, previousChildren) => Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        ...previousChildren,
-                        if (currentChild != null) currentChild,
-                      ],
-                    ),
-                    transitionBuilder: (child, animation) {
-                      final incoming = child.key == ValueKey(_selectedKind);
-                      final offset = incoming
-                          ? Offset(.055 * _slideDirection, 0)
-                          : Offset(-.055 * _slideDirection, 0);
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: offset,
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: SizedBox.expand(
-                      key: ValueKey(_selectedKind),
-                      child: items.isEmpty
-                          ? Center(
-                              child: EmptyHint(
-                                icon: Icons.grid_off_rounded,
-                                title: _copy(
-                                  context,
-                                  'No kana in this category yet.',
-                                  'Aucun kana dans cette catégorie pour le moment.',
+                child: VerticalOverflowCue(
+                  edgeColor: context.jc.canvas,
+                  child: ClipRect(
+                    child: AnimatedSwitcher(
+                      duration: Motion.timed(context, Motion.base),
+                      switchInCurve: Motion.outStrong,
+                      switchOutCurve: Motion.out,
+                      layoutBuilder: (currentChild, previousChildren) => Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      ),
+                      transitionBuilder: (child, animation) {
+                        final incoming = child.key == ValueKey(_selectedKind);
+                        final offset = incoming
+                            ? Offset(.055 * _slideDirection, 0)
+                            : Offset(-.055 * _slideDirection, 0);
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: offset,
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: SizedBox.expand(
+                        key: ValueKey(_selectedKind),
+                        child: items.isEmpty
+                            ? Center(
+                                child: EmptyHint(
+                                  icon: Icons.grid_off_rounded,
+                                  title: _copy(
+                                    context,
+                                    'No kana in this category yet.',
+                                    'Aucun kana dans cette catégorie pour le moment.',
+                                  ),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
+                                child: _KanaMatrix(
+                                  items: items,
+                                  selection: widget.selection,
+                                  focusedChar: widget.focusedChar,
+                                  onOpen: (entry) =>
+                                      widget.onFocused(entry.char),
                                 ),
                               ),
-                            )
-                          : SingleChildScrollView(
-                              padding: const EdgeInsets.fromLTRB(2, 2, 4, 6),
-                              child: _KanaMatrix(
-                                items: items,
-                                selection: widget.selection,
-                                focusedChar: widget.focusedChar,
-                                onOpen: (entry) => widget.onFocused(entry.char),
-                              ),
-                            ),
+                      ),
                     ),
                   ),
                 ),

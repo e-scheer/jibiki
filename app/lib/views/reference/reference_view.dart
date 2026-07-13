@@ -4,6 +4,7 @@ import 'package:jibiki/l10n/l10n.dart';
 import '../../core/breakpoints.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_pop.dart';
+import '../widgets/tappable_japanese.dart';
 import 'reference_data.dart';
 
 class ReferenceView extends StatefulWidget {
@@ -198,8 +199,9 @@ class _ReferenceTile extends StatelessWidget {
                 border: Border.all(color: context.jc.ink, width: 2.5),
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Text(
+              child: TappableJapanese(
                 card.icon,
+                affordance: false,
                 style: const TextStyle(
                   fontFamily: 'ZenKakuGothicNew',
                   fontSize: 25,
@@ -315,8 +317,9 @@ class ReferenceDetailView extends StatelessWidget {
               shadow: 4,
               radius: 11,
               padding: const EdgeInsets.all(10),
-              child: Text(
+              child: TappableJapanese(
                 card.icon,
+                affordance: false,
                 style: const TextStyle(
                   fontFamily: 'ZenKakuGothicNew',
                   fontSize: 24,
@@ -381,7 +384,7 @@ class _ReferenceSectionView extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
+                  child: TappableJapanese(
                     section.title.resolve(language),
                     style: context.text.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
@@ -391,7 +394,7 @@ class _ReferenceSectionView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            Text(
+            TappableJapanese(
               section.body.resolve(language),
               style: TextStyle(
                 color: context.jc.body,
@@ -421,7 +424,7 @@ class _ReferenceSectionView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: context.jc.ink, width: 2.5),
                 ),
-                child: Text(
+                child: TappableJapanese(
                   section.examples[index].resolve(language),
                   style: TextStyle(
                     color: context.jc.ink,

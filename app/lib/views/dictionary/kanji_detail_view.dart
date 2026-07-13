@@ -246,7 +246,6 @@ class _KanjiDetail extends StatelessWidget {
                 word: w,
                 lang: lang,
                 onTap: () => context.push('/word/${w.id}')),
-            if (w != words.last) Divider(height: 1, color: context.jc.hairline),
           ],
         ],
       ],

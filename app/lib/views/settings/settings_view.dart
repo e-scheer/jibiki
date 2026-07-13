@@ -49,29 +49,32 @@ class _Settings extends StatelessWidget {
             BoundedContent(
               maxWidth: 640,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-                child: Row(
-                  children: [
-                    NeoIconButton(
-                      icon: Icons.arrow_back_rounded,
-                      label: context.trText('Back to profile'),
-                      onTap: () {
-                        if (Navigator.of(context).canPop()) {
-                          Navigator.of(context).pop();
-                        } else {
-                          context.go('/');
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      context.l10n.settings,
-                      style: context.text.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Row(
+                    children: [
+                      NeoIconButton(
+                        icon: Icons.arrow_back_rounded,
+                        label: context.trText('Back to profile'),
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Text(
+                        context.l10n.settings,
+                        style: context.text.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

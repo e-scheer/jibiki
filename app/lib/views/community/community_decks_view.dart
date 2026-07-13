@@ -168,7 +168,6 @@ class _DecksGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<CommunityDecksViewModel>();
-    final jc = context.jc;
 
     if (vm.hasError) {
       return ListView(
@@ -191,8 +190,8 @@ class _DecksGrid extends StatelessWidget {
             : 'Be the first to publish a pack of mascots.',
       );
     }
-    return RefreshIndicator(
-      color: jc.brand,
+    return NeoRefreshIndicator(
+      semanticLabel: context.trText('Refresh community packs'),
       onRefresh: vm.load,
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),

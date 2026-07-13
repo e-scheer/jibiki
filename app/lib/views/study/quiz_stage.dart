@@ -98,7 +98,7 @@ class _QuizStageState extends State<QuizStage>
         answered: _locked,
         direction: widget.direction,
         lang: widget.lang);
-    final options = _optionsColumn();
+    final options = _optionsGrid();
     // Rotation-adaptive: landscape splits prompt | options into two panes so both
     // fit on a short wide screen; portrait stacks them, bounded so a tablet shows a
     // centred column rather than a stretched one.
@@ -129,36 +129,65 @@ class _QuizStageState extends State<QuizStage>
     return WinOverlay(show: _locked && _picked == _correct, child: content);
   }
 
-  Widget _optionsColumn() {
-    return Column(
-      children: [
-        for (var i = 0; i < _options.length; i++)
-          Expanded(
-            child: Padding(
-              padding:
-                  EdgeInsets.only(bottom: i == _options.length - 1 ? 0 : 10),
-              child: AnimatedBuilder(
-                animation: _intro,
-                builder: (_, child) {
-                  final t = _introT(i);
-                  return Opacity(
-                    opacity: t,
-                    child: Transform.translate(
-                        offset: Offset(0, 14 * (1 - t)), child: child),
-                  );
-                },
-                child: _OptionTile(
-                  letter: String.fromCharCode(65 + i),
-                  label: _options[i],
-                  state: _tileState(_options[i]),
-                  onTap: _locked ? null : () => _pick(_options[i]),
+  Widget _optionsGrid() => LayoutBuilder(
+        builder: (context, constraints) {
+          // Two substantial answer cards per row make the scan path shorter on
+          // phones and avoid the old four ultra-wide, paper-thin rows. Very
+          // narrow windows keep a single column so translated copy still fits.
+          final columns = constraints.maxWidth >= 300 ? 2 : 1;
+          final rows = (_options.length / columns).ceil();
+          const gap = 12.0;
+          const shadowRoom = 4.0;
+          final usableWidth = constraints.maxWidth - shadowRoom;
+          final usableHeight = constraints.maxHeight - shadowRoom;
+          final tileWidth = (usableWidth - gap * (columns - 1)) / columns;
+          final maxTileHeight = (usableHeight - gap * (rows - 1)) / rows;
+          final preferredHeight = columns == 2 ? 92.0 : 66.0;
+          final tileHeight =
+              maxTileHeight < preferredHeight ? maxTileHeight : preferredHeight;
+          final gridHeight = tileHeight * rows + gap * (rows - 1) + shadowRoom;
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: gridHeight,
+              child: GridView.builder(
+                primary: false,
+                padding: const EdgeInsets.only(
+                    right: shadowRoom, bottom: shadowRoom),
+                physics: const NeverScrollableScrollPhysics(),
+                clipBehavior: Clip.none,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  mainAxisSpacing: gap,
+                  crossAxisSpacing: gap,
+                  childAspectRatio: tileWidth / tileHeight,
+                ),
+                itemCount: _options.length,
+                itemBuilder: (_, i) => AnimatedBuilder(
+                  animation: _intro,
+                  builder: (_, child) {
+                    final t = _introT(i);
+                    return Opacity(
+                      opacity: t,
+                      child: Transform.translate(
+                        offset: Offset(0, 14 * (1 - t)),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _OptionTile(
+                    letter: String.fromCharCode(65 + i),
+                    label: _options[i],
+                    state: _tileState(_options[i]),
+                    onTap: _locked ? null : () => _pick(_options[i]),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
-    );
-  }
+          );
+        },
+      );
 
   _OptState _tileState(String opt) {
     if (!_locked) return _OptState.idle;
@@ -282,9 +311,9 @@ class _OptionTile extends StatelessWidget {
     final jc = context.jc;
     // (tile bg, label colour, border, chip bg, chip fg)
     final (bg, fg, border, chipBg, chipFg) = switch (state) {
-      _OptState.idle => (jc.surface, jc.ink, jc.ink, jc.surfaceAlt, jc.body),
-      _OptState.correct => (jc.lime, jc.ink, jc.ink, jc.lime, jc.ink),
-      _OptState.wrong => (jc.coral, jc.ink, jc.ink, jc.coral, jc.ink),
+      _OptState.idle => (jc.surface, jc.ink, jc.ink, jc.ink, jc.surface),
+      _OptState.correct => (jc.lime, jc.ink, jc.ink, jc.ink, jc.lime),
+      _OptState.wrong => (jc.coral, jc.ink, jc.ink, jc.ink, jc.coral),
       _OptState.dimmed => (
           jc.surface,
           jc.muted,
@@ -298,45 +327,52 @@ class _OptionTile extends StatelessWidget {
       _OptState.wrong => Icons.close_rounded,
       _ => null,
     };
-    return Pressable(
-      label: label,
-      haptic: false, // the result haptic in _pick is the intended feedback
-      pressedScale: 0.98,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.timed(context, Motion.base),
-        curve: Motion.out,
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(color: border, width: 2.5),
-          boxShadow: state == _OptState.idle
-              ? null
-              : [
-                  BoxShadow(
-                    color: jc.ink,
-                    blurRadius: 0,
-                    offset: const Offset(3, 3),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            _OptionChip(bg: chipBg, fg: chipFg, letter: letter, icon: icon),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(label,
+    return SizedBox.expand(
+      child: Pressable.builder(
+        label: label,
+        haptic: false, // the result haptic in _pick is the intended feedback
+        pressedScale: 0.99,
+        focusRadius: Radii.md,
+        onTap: onTap,
+        builder: (context, pressed) => AnimatedContainer(
+          duration: Motion.timed(context, Motion.base),
+          curve: Motion.out,
+          width: double.infinity,
+          height: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(Radii.md),
+            border: Border.all(color: border, width: 2.5),
+            boxShadow: pressed || state == _OptState.dimmed
+                ? null
+                : [
+                    BoxShadow(
+                      color: jc.ink,
+                      blurRadius: 0,
+                      offset: const Offset(3, 3),
+                    ),
+                  ],
+          ),
+          child: Row(
+            children: [
+              _OptionChip(bg: chipBg, fg: chipFg, letter: letter, icon: icon),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Text(
+                  label,
                   style: TextStyle(
-                      color: fg,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ],
+                    color: fg,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -361,11 +397,14 @@ class _OptionChip extends StatelessWidget {
     // check/cross always lands on a solid backing; the tile fill behind it is what
     // eases in.
     return Container(
-      width: 30,
-      height: 30,
+      width: 32,
+      height: 32,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-          color: bg, borderRadius: BorderRadius.circular(Radii.sm)),
+        color: bg,
+        borderRadius: BorderRadius.circular(Radii.sm),
+        border: Border.all(color: fg.withValues(alpha: 0.45), width: 1.5),
+      ),
       child: icon != null
           ? Icon(icon, color: fg, size: 19)
           : Text(letter,

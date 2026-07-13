@@ -87,7 +87,10 @@ GoRouter buildRouter(AppState app) {
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsView()),
       GoRoute(path: '/reference', builder: (_, __) => const ReferenceView()),
-      GoRoute(path: '/stats', builder: (_, __) => const StatisticsView()),
+      GoRoute(
+        path: '/stats',
+        builder: (_, __) => const StatisticsView(showBack: true),
+      ),
       GoRoute(
           path: '/settings/storage',
           builder: (_, __) => const OfflineStorageView()),

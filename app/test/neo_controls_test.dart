@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/theme/app_theme.dart';
@@ -10,6 +12,42 @@ Widget _host(Widget child) => MaterialApp(
     );
 
 void main() {
+  testWidgets('NeoRefreshIndicator uses the branded loader without a spinner',
+      (tester) async {
+    final refresh = Completer<void>();
+    addTearDown(() {
+      if (!refresh.isCompleted) refresh.complete();
+    });
+    await tester.pumpWidget(
+      _host(
+        SizedBox(
+          height: 360,
+          child: NeoRefreshIndicator(
+            onRefresh: () => refresh.future,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [SizedBox(height: 500)],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+    expect(find.byKey(NeoRefreshIndicator.loaderKey), findsOneWidget);
+    final opacityFinder = find.ancestor(
+      of: find.byKey(NeoRefreshIndicator.loaderKey),
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(tester.widget<AnimatedOpacity>(opacityFinder).opacity, 0);
+
+    await tester.drag(find.byType(ListView), const Offset(0, 160));
+    await tester.pump();
+
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+    expect(tester.widget<AnimatedOpacity>(opacityFinder).opacity, 1);
+  });
+
   testWidgets('NeoSegmentedControl slides its shared selection pill',
       (tester) async {
     var selected = 'first';

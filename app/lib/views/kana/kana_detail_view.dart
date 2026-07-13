@@ -129,6 +129,17 @@ List<KanaWritingTarget> _writingTargets(
   return targets;
 }
 
+KanaEntry? _grammarKana(
+  _KanaDetailData data, {
+  required bool includeCounterpart,
+}) {
+  if (data.focused.hasUsage) return data.focused;
+  if (includeCounterpart && (data.counterpart?.hasUsage ?? false)) {
+    return data.counterpart;
+  }
+  return null;
+}
+
 class _KanaDetail extends StatefulWidget {
   const _KanaDetail({
     required this.char,
@@ -408,6 +419,10 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final targets = _writingTargets(data, includeBoth: showBoth);
     final hasPair = targets.length == 2;
+    final grammarKana = _grammarKana(
+      data,
+      includeCounterpart: showBoth,
+    );
     return Column(
       children: [
         Expanded(
@@ -420,6 +435,10 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                 showBoth: showBoth,
                 onSelectKana: onSelectKana,
               ),
+              if (grammarKana != null) ...[
+                const SizedBox(height: 16),
+                KanaGrammarSection(kana: grammarKana),
+              ],
               const SizedBox(height: 14),
               KanaWritingReference(targets: targets),
               const SizedBox(height: 16),
@@ -765,6 +784,10 @@ class _DetailContent extends StatelessWidget {
         final tablet = constraints.maxWidth >= 760;
         final targets = _writingTargets(data, includeBoth: showBoth);
         final hasPair = targets.length == 2;
+        final grammarKana = _grammarKana(
+          data,
+          includeCounterpart: showBoth,
+        );
         final main = Column(
           children: [
             if (hasPair)
@@ -780,8 +803,8 @@ class _DetailContent extends StatelessWidget {
         final supporting = Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (data.focused.hasUsage) ...[
-              KanaGrammarSection(kana: data.focused),
+            if (grammarKana != null) ...[
+              KanaGrammarSection(kana: grammarKana),
               const SizedBox(height: 18),
             ],
             if (data.focused.hasOrigin) ...[
