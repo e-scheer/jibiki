@@ -169,31 +169,43 @@ class _DecksGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<CommunityDecksViewModel>();
 
-    if (vm.hasError) {
-      return ListView(
-          children: [ErrorRetry(message: vm.error!, onRetry: vm.load)]);
-    }
+    final Widget content;
     if (vm.isLoading && vm.decks.isEmpty) {
-      return const SkeletonCardGrid(
+      content = const SkeletonCardGrid(
         count: 6,
         maxCrossAxisExtent: 540,
         childAspectRatio: 3.45,
       );
-    }
-    if (vm.decks.isEmpty) {
-      return EmptyHint(
-        icon:
-            mine ? Icons.collections_bookmark_outlined : Icons.explore_outlined,
-        title: mine ? 'No packs yet' : 'No community packs yet',
-        subtitle: mine
-            ? 'Bundle your drawings into a pack and share it.'
-            : 'Be the first to publish a pack of mascots.',
+    } else if (vm.hasError) {
+      content = CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: ErrorRetry(message: vm.error!, onRetry: vm.load),
+          ),
+        ],
       );
-    }
-    return NeoRefreshIndicator(
-      semanticLabel: context.trText('Refresh community packs'),
-      onRefresh: vm.load,
-      child: GridView.builder(
+    } else if (vm.decks.isEmpty) {
+      content = CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyHint(
+              icon: mine
+                  ? Icons.collections_bookmark_outlined
+                  : Icons.explore_outlined,
+              title: mine ? 'No packs yet' : 'No community packs yet',
+              subtitle: mine
+                  ? 'Bundle your drawings into a pack and share it.'
+                  : 'Be the first to publish a pack of mascots.',
+            ),
+          ),
+        ],
+      );
+    } else {
+      content = GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -212,7 +224,13 @@ class _DecksGrid extends StatelessWidget {
             onLike: deck.isPublic ? () => vm.like(deck) : null,
           );
         },
-      ),
+      );
+    }
+
+    return NeoRefreshIndicator(
+      semanticLabel: context.trText('Refresh community packs'),
+      onRefresh: vm.load,
+      child: content,
     );
   }
 }

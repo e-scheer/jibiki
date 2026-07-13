@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 
 import '../../core/breakpoints.dart';
 import '../../theme/app_theme.dart';
@@ -257,9 +260,10 @@ class NeoPrimaryButton extends StatelessWidget {
       );
 }
 
-/// A branded pull-to-refresh surface with no platform spinner. Flutter still
-/// owns the drag/arming physics, while the visible feedback is the lightweight
-/// three-block jibiki chase used by the rest of the app.
+/// A branded pull-to-refresh surface that behaves like part of the page.
+///
+/// The content follows the resisted drag and uncovers a full-width status band
+/// above it. Nothing floats over the page and no platform spinner is used.
 class NeoRefreshIndicator extends StatefulWidget {
   const NeoRefreshIndicator({
     super.key,
@@ -274,6 +278,9 @@ class NeoRefreshIndicator extends StatefulWidget {
   });
 
   static const loaderKey = ValueKey('neo-refresh-loader');
+  static const headerKey = ValueKey('neo-refresh-header');
+  static const contentKey = ValueKey('neo-refresh-content');
+  static const double triggerExtent = 72;
 
   final RefreshCallback onRefresh;
   final Widget child;
@@ -288,78 +295,289 @@ class NeoRefreshIndicator extends StatefulWidget {
   State<NeoRefreshIndicator> createState() => _NeoRefreshIndicatorState();
 }
 
-class _NeoRefreshIndicatorState extends State<NeoRefreshIndicator> {
-  RefreshIndicatorStatus? _status;
+class _NeoRefreshIndicatorState extends State<NeoRefreshIndicator>
+    with SingleTickerProviderStateMixin {
+  static const _maxExtent = 112.0;
+  static const _refreshExtent = 64.0;
 
-  void _onStatusChanged(RefreshIndicatorStatus? status) {
-    if (_status == status) return;
-    setState(() => _status = status);
+  late final AnimationController _extent = AnimationController.unbounded(
+    vsync: this,
+    value: 0,
+  );
+  _NeoRefreshPhase _phase = _NeoRefreshPhase.idle;
+  bool _trackingDrag = false;
+  bool _thresholdHapticSent = false;
+
+  bool get _refreshing => _phase == _NeoRefreshPhase.refreshing;
+
+  @override
+  void dispose() {
+    _extent.dispose();
+    super.dispose();
   }
 
-  bool get _visible => switch (_status) {
-        null ||
-        RefreshIndicatorStatus.done ||
-        RefreshIndicatorStatus.canceled =>
-          false,
-        _ => true,
-      };
+  void _setPhase(_NeoRefreshPhase phase) {
+    if (_phase == phase || !mounted) return;
+    setState(() => _phase = phase);
+  }
+
+  bool _atLeadingEdge(ScrollMetrics metrics) =>
+      metrics.extentBefore <= .5 || metrics.pixels <= metrics.minScrollExtent;
+
+  bool _handleScroll(ScrollNotification notification) {
+    if (!widget.notificationPredicate(notification) ||
+        notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null &&
+        !_refreshing) {
+      _trackingDrag = widget.triggerMode == RefreshIndicatorTriggerMode.anywhere
+          ? true
+          : _atLeadingEdge(notification.metrics);
+      _thresholdHapticSent = false;
+    } else if (notification is OverscrollNotification &&
+        notification.dragDetails != null &&
+        notification.overscroll < 0 &&
+        _trackingDrag &&
+        !_refreshing) {
+      _addPull(-notification.overscroll);
+    } else if (notification is ScrollUpdateNotification &&
+        notification.dragDetails != null &&
+        _trackingDrag &&
+        !_refreshing) {
+      final fingerDelta = notification.dragDetails!.delta.dy;
+      if (notification.metrics.pixels <
+          notification.metrics.minScrollExtent - .5) {
+        // Bouncing physics consumes the overscroll instead of dispatching an
+        // OverscrollNotification. Mirror that distance for the integrated band.
+        final overscroll =
+            notification.metrics.minScrollExtent - notification.metrics.pixels;
+        _setPull((overscroll * .58).clamp(0, _maxExtent));
+      } else if (fingerDelta < 0 && _extent.value > 0) {
+        // Let a learner reverse the gesture before releasing it.
+        _setPull((_extent.value + fingerDelta).clamp(0, _maxExtent));
+      }
+    }
+
+    if ((notification is ScrollEndNotification ||
+            notification is UserScrollNotification &&
+                notification.direction == ScrollDirection.idle) &&
+        _trackingDrag) {
+      _finishDrag();
+    }
+    return false;
+  }
+
+  void _addPull(double rawDelta) {
+    final progress = (_extent.value / _maxExtent).clamp(0.0, 1.0);
+    final resistance = .58 - progress * .24;
+    _setPull(
+      (_extent.value + rawDelta * resistance).clamp(0, _maxExtent),
+    );
+  }
+
+  void _setPull(double value) {
+    _extent.value = value;
+    final armed = value >= NeoRefreshIndicator.triggerExtent;
+    if (armed && !_thresholdHapticSent) {
+      _thresholdHapticSent = true;
+      Haptics.medium();
+    }
+    _setPhase(
+      value <= .5
+          ? _NeoRefreshPhase.idle
+          : armed
+              ? _NeoRefreshPhase.armed
+              : _NeoRefreshPhase.pulling,
+    );
+  }
+
+  void _finishDrag() {
+    _trackingDrag = false;
+    if (_phase == _NeoRefreshPhase.armed) {
+      unawaited(_beginRefresh());
+    } else if (!_refreshing) {
+      unawaited(_settle());
+    }
+  }
+
+  Future<void> _animateExtent(double value) => _extent.animateTo(
+        value,
+        duration: Motion.timed(context, Motion.fast),
+        curve: Motion.outStrong,
+      );
+
+  Future<void> _settle() async {
+    _setPhase(_NeoRefreshPhase.settling);
+    await _animateExtent(0);
+    if (mounted && !_trackingDrag && !_refreshing) {
+      _setPhase(_NeoRefreshPhase.idle);
+    }
+  }
+
+  Future<void> _beginRefresh() async {
+    if (_refreshing) return;
+    _setPhase(_NeoRefreshPhase.refreshing);
+    // Start I/O at release; the short visual snap must never delay the request.
+    final refresh = _invokeRefresh();
+    await _animateExtent(_refreshExtent);
+    await refresh;
+    if (!mounted) return;
+    await _animateExtent(0);
+    if (mounted) _setPhase(_NeoRefreshPhase.idle);
+  }
+
+  Future<void> _invokeRefresh() async {
+    try {
+      await widget.onRefresh();
+    } catch (error, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'jibiki widgets',
+          context: ErrorDescription('while refreshing a NeoPop surface'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
-    return Stack(
-      children: [
-        RefreshIndicator.noSpinner(
-          onRefresh: widget.onRefresh,
-          onStatusChange: _onStatusChanged,
-          triggerMode: widget.triggerMode,
-          notificationPredicate: widget.notificationPredicate,
-          semanticsLabel: widget.semanticLabel,
-          child: widget.showOverflowCue
-              ? VerticalOverflowCue(
-                  edgeColor: widget.edgeColor ?? jc.canvas,
-                  child: widget.child,
-                )
-              : widget.child,
+    final content = widget.showOverflowCue
+        ? VerticalOverflowCue(
+            edgeColor: widget.edgeColor ?? jc.canvas,
+            child: widget.child,
+          )
+        : widget.child;
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScroll,
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: _extent,
+          child: content,
+          builder: (context, child) {
+            final extent = _extent.value.clamp(0.0, _maxExtent);
+            return Stack(
+              fit: StackFit.passthrough,
+              children: [
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: widget.edgeOffset,
+                  height: extent,
+                  child: _NeoRefreshBand(
+                    key: NeoRefreshIndicator.headerKey,
+                    extent: extent,
+                    phase: _phase,
+                    semanticLabel: widget.semanticLabel,
+                  ),
+                ),
+                Transform.translate(
+                  key: NeoRefreshIndicator.contentKey,
+                  offset: Offset(0, extent),
+                  transformHitTests: true,
+                  child: child,
+                ),
+              ],
+            );
+          },
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          top: widget.edgeOffset + 8,
-          child: IgnorePointer(
-            child: Center(
-              child: AnimatedSlide(
-                duration: Motion.timed(context, Motion.fast),
-                curve: Motion.outStrong,
-                offset: _visible ? Offset.zero : const Offset(0, -.55),
-                child: AnimatedOpacity(
-                  duration: Motion.timed(context, Motion.fast),
-                  curve: Motion.out,
-                  opacity: _visible ? 1 : 0,
-                  child: Semantics(
-                    liveRegion: true,
-                    label: widget.semanticLabel,
-                    child: Container(
-                      key: NeoRefreshIndicator.loaderKey,
-                      width: 48,
-                      height: 42,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: jc.surface,
-                        borderRadius: BorderRadius.circular(13),
-                        border: Border.all(color: jc.ink, width: 2.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: jc.ink,
-                            blurRadius: 0,
-                            offset: const Offset(3, 3),
-                          ),
-                        ],
-                      ),
-                      child: TickerMode(
-                        enabled: _visible,
-                        child: NeoChaseLoader.small(
-                          semanticLabel: widget.semanticLabel,
+      ),
+    );
+  }
+}
+
+enum _NeoRefreshPhase { idle, pulling, armed, refreshing, settling }
+
+class _NeoRefreshBand extends StatelessWidget {
+  const _NeoRefreshBand({
+    super.key,
+    required this.extent,
+    required this.phase,
+    required this.semanticLabel,
+  });
+
+  final double extent;
+  final _NeoRefreshPhase phase;
+  final String semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final jc = context.jc;
+    final french = Localizations.localeOf(context).languageCode == 'fr';
+    final armed = phase == _NeoRefreshPhase.armed;
+    final refreshing = phase == _NeoRefreshPhase.refreshing;
+    final label = refreshing
+        ? french
+            ? 'Actualisation…'
+            : 'Refreshing…'
+        : armed
+            ? french
+                ? 'Relâcher pour actualiser'
+                : 'Release to refresh'
+            : french
+                ? 'Tirer pour actualiser'
+                : 'Pull to refresh';
+    final reveal = (extent / 32).clamp(0.0, 1.0);
+    final visual = ExcludeSemantics(
+      child: ColoredBox(
+        color: armed ? jc.acid : jc.lavender,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: jc.ink.withValues(alpha: reveal),
+                width: 2.5,
+              ),
+            ),
+          ),
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.bottomCenter,
+              minHeight: _NeoRefreshIndicatorState._refreshExtent,
+              maxHeight: _NeoRefreshIndicatorState._refreshExtent,
+              child: SizedBox(
+                height: _NeoRefreshIndicatorState._refreshExtent,
+                child: Opacity(
+                  opacity: reveal,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+                      child: AnimatedSize(
+                        duration: Motion.timed(context, Motion.fast),
+                        curve: Motion.outStrong,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (refreshing)
+                              TickerMode(
+                                enabled: Motion.enabled(context),
+                                child: NeoChaseLoader.small(
+                                  key: NeoRefreshIndicator.loaderKey,
+                                  semanticLabel: semanticLabel,
+                                ),
+                              )
+                            else
+                              Icon(
+                                armed
+                                    ? Icons.keyboard_double_arrow_down_rounded
+                                    : Icons.south_rounded,
+                                size: 20,
+                              ),
+                            const SizedBox(width: 9),
+                            Text(
+                              label,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -369,7 +587,15 @@ class _NeoRefreshIndicatorState extends State<NeoRefreshIndicator> {
             ),
           ),
         ),
-      ],
+      ),
+    );
+    if (phase == _NeoRefreshPhase.idle || extent <= .5) {
+      return ExcludeSemantics(child: visual);
+    }
+    return Semantics(
+      liveRegion: armed || refreshing,
+      label: '$semanticLabel, $label',
+      child: visual,
     );
   }
 }

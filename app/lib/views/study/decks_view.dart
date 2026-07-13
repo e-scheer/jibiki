@@ -53,6 +53,7 @@ class _Decks extends StatelessWidget {
           onRefresh: vm.load,
           child: vm.hasError
               ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [ErrorRetry(message: vm.error!, onRetry: vm.load)],
                 )
               : BoundedContent(

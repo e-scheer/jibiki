@@ -37,11 +37,26 @@ class _Statistics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<StatisticsViewModel>();
-    if (vm.isLoading && vm.stats.totalCards == 0) {
-      return const Scaffold(body: LoadingView());
-    }
-    if (vm.hasError) {
-      return Scaffold(body: ErrorRetry(message: vm.error!, onRetry: vm.load));
+    if (vm.isLoading && vm.stats.totalCards == 0 || vm.hasError) {
+      return Scaffold(
+        body: SafeArea(
+          child: NeoRefreshIndicator(
+            semanticLabel: context.trText('Refresh profile'),
+            onRefresh: vm.load,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: vm.hasError
+                      ? ErrorRetry(message: vm.error!, onRetry: vm.load)
+                      : const LoadingView(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
