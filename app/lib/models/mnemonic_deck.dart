@@ -43,9 +43,7 @@ class MnemonicDeck {
 
   /// Absolute cover URL (relative /media/… paths get the API base prefixed).
   String get coverUrl {
-    if (coverSrc.isEmpty) return '';
-    if (coverSrc.startsWith('http')) return coverSrc;
-    return '${ApiConfig.baseUrl}$coverSrc';
+    return ApiConfig.absoluteUrl(coverSrc);
   }
 
   factory MnemonicDeck.fromJson(Map<String, dynamic> j) => MnemonicDeck(
@@ -66,7 +64,8 @@ class MnemonicDeck {
             .toList(),
       );
 
-  MnemonicDeck copyWith({int? score, int? myVote, String? status}) => MnemonicDeck(
+  MnemonicDeck copyWith({int? score, int? myVote, String? status}) =>
+      MnemonicDeck(
         id: id,
         title: title,
         description: description,

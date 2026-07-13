@@ -163,6 +163,14 @@ class _LoginFormState extends State<_LoginForm> {
                   : null,
               onFieldSubmitted: (_) => _submit(),
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed:
+                    vm.isLoading ? null : () => context.push('/reset-password'),
+                child: Text(context.l10n.forgotPassword),
+              ),
+            ),
             if (vm.hasError) ...[
               const SizedBox(height: 16),
               AuthInlineError(vm.error!),

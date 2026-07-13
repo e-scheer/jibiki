@@ -18,6 +18,9 @@ dependencies = [
     "django-cors-headers>=4.6",  # the Flutter web build talks to the API cross-origin in dev
     "cryptography>=43.0",
     "pycountry>=26.2.16",
+    # Optional at runtime: no SDK is initialized and no data leaves the process
+    # unless SENTRY_DSN is explicitly configured.
+    "sentry-sdk[django]>=2.35,<3.0",
 ]
 
 [dependency-groups]

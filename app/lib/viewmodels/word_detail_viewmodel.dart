@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/telemetry.dart';
 import '../models/enums.dart';
 import '../models/word.dart';
 import '../repositories/dictionary_repository.dart';
@@ -14,11 +15,14 @@ class WordDetailViewModel extends BaseViewModel {
     this.wordId, {
     required bool loadStudyState,
     RecentDictionaryHistory? history,
+    TelemetrySink? telemetry,
   })  : _loadStudyState = loadStudyState,
-        _history = history ?? RecentDictionaryHistory();
+        _history = history ?? RecentDictionaryHistory(),
+        _telemetry = telemetry ?? Telemetry.instance;
   final DictionaryRepository _dict;
   final StudyRepository _study;
   final RecentDictionaryHistory _history;
+  final TelemetrySink _telemetry;
   final bool _loadStudyState;
   final int wordId;
 
@@ -59,6 +63,24 @@ class WordDetailViewModel extends BaseViewModel {
       silent: true,
     );
     _status = res ?? prev;
+    if (res != null && prev == 'none' && res != 'none') {
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.studyCardAdded,
+        parameters: {
+          'item_type': ItemType.word.wire,
+          'card_state': res,
+          'source': 'detail_status',
+        },
+      ));
+    } else if (res == 'none' && prev != 'none') {
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.studyCardRemoved,
+        parameters: const {
+          'item_type': 'word',
+          'source': 'detail_status',
+        },
+      ));
+    }
     notifyListeners();
   }
 }

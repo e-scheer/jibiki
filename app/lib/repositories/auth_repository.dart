@@ -35,7 +35,8 @@ class AuthRepository {
     final raw = _session.localProfile;
     if (raw == null) return null;
     try {
-      return UserProfile.fromJson((jsonDecode(raw) as Map).cast<String, dynamic>());
+      return UserProfile.fromJson(
+          (jsonDecode(raw) as Map).cast<String, dynamic>());
     } catch (_) {
       return null;
     }
@@ -57,6 +58,20 @@ class AuthRepository {
     await _session.setLocalOnly(false);
     return _cache(await _auth.me());
   }
+
+  Future<void> inspectEmailVerificationKey(String key) =>
+      _auth.inspectEmailVerificationKey(key);
+
+  Future<void> verifyEmail(String key) => _auth.verifyEmail(key);
+
+  Future<void> requestPasswordReset(String email) =>
+      _auth.requestPasswordReset(email);
+
+  Future<void> inspectPasswordResetKey(String key) =>
+      _auth.inspectPasswordResetKey(key);
+
+  Future<void> resetPassword(String key, String password) =>
+      _auth.resetPassword(key, password);
 
   Future<AppUser> me() async => _cache(await _auth.me());
 

@@ -13,13 +13,35 @@ from pathlib import Path
 
 import dj_database_url
 
+from .observability.sentry import initialize_sentry
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-key")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
+SENTRY_ENVIRONMENT = os.environ.get(
+    "SENTRY_ENVIRONMENT", "development" if DEBUG else "production"
+).strip()
+SENTRY_RELEASE = os.environ.get("SENTRY_RELEASE", "").strip()
+
+try:
+    SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0"))
+except ValueError as error:
+    raise RuntimeError("SENTRY_TRACES_SAMPLE_RATE must be a number between 0 and 1") from error
+if not 0 <= SENTRY_TRACES_SAMPLE_RATE <= 1:
+    raise RuntimeError("SENTRY_TRACES_SAMPLE_RATE must be between 0 and 1")
+
+initialize_sentry(
+    dsn=SENTRY_DSN,
+    environment=SENTRY_ENVIRONMENT,
+    release=SENTRY_RELEASE or None,
+    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+)
+
 # Fail fast rather than serve prod with the dev key (12-factor).
-if not DEBUG and SECRET_KEY == "dev-only-insecure-key":
+if not DEBUG and (not SECRET_KEY or SECRET_KEY == "dev-only-insecure-key"):
     raise RuntimeError("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG=0")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,*").split(",")
@@ -66,6 +88,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # First so every response, including security redirects and failures, gets
+    # the same correlation id and duration log.
+    "jibiki_server.observability.middleware.RequestObservabilityMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",  # before CommonMiddleware, so preflight is answered
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -98,13 +123,27 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {
-    "default": dj_database_url.config(
-        env="DATABASE_URL",
-        default="postgres://jibiki:jibiki@localhost:5432/jibiki",
-        conn_max_age=60,
-    )
-}
+if "POSTGRES_PASSWORD" in os.environ:
+    # Discrete settings preserve strong passwords containing URI delimiters.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "jibiki"),
+            "USER": os.environ.get("POSTGRES_USER", "jibiki"),
+            "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+            "CONN_MAX_AGE": 60,
+        }
+    }
+else:
+    DATABASES = {
+        "default": dj_database_url.config(
+            env="DATABASE_URL",
+            default="postgres://jibiki:jibiki@localhost:5432/jibiki",
+            conn_max_age=60,
+        )
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
@@ -146,7 +185,14 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG and not CORS_ALLOWED_ORIGINS
 # Let the headless app-client token header through cross-origin (dev web build).
 from corsheaders.defaults import default_headers  # noqa: E402
 
-CORS_ALLOW_HEADERS = (*default_headers, "x-session-token")
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "x-session-token",
+    "x-request-id",
+    "x-email-verification-key",
+    "x-password-reset-key",
+)
+CORS_EXPOSE_HEADERS = ("x-request-id",)
 
 # ── allauth (headless) ─────────────────────────────────────────────────────────
 # Email-only accounts (no username - the product never shows one), same as the
@@ -166,7 +212,7 @@ HEADLESS_FRONTEND_URLS = {
     "account_confirm_email": f"{_APP_URL}/verify-email/{{key}}",
     "account_reset_password": f"{_APP_URL}/reset-password",
     "account_reset_password_from_key": f"{_APP_URL}/reset-password/{{key}}",
-    "account_signup": f"{_APP_URL}/signup",
+    "account_signup": f"{_APP_URL}/register",
     "socialaccount_login_error": f"{_APP_URL}/social-error",
 }
 
@@ -243,14 +289,14 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", str(BASE_DIR / "staticfiles"))
 
 # Community mnemonic images. Dev → local /media volume (served by Caddy in the
 # container stack, by Django's static() in DEBUG). Prod → set MEDIA_S3_* to push
 # to Cloudflare R2 (zero egress - the DEEP_SEARCH recommendation) or any
 # S3-compatible store. Same swappable pattern as tusorsou's Hetzner offload.
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 RUNTIME_DIR = Path(os.environ.get("JIBIKI_RUNTIME_DIR", BASE_DIR.parent / "var"))
 MEDIA_ROOT = os.environ.get("MEDIA_STORE", str(RUNTIME_DIR / "media"))
 
@@ -305,6 +351,37 @@ MNEMONIC_AUTO_HIDE_REPORTS = int(os.environ.get("MNEMONIC_AUTO_HIDE_REPORTS", "3
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO")},
+    "filters": {
+        "request_context": {
+            "()": "jibiki_server.observability.logging.RequestContextFilter",
+        }
+    },
+    "formatters": {
+        "json": {
+            "()": "jibiki_server.observability.logging.JsonFormatter",
+            "service": "jibiki-api",
+            "environment": SENTRY_ENVIRONMENT,
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["request_context"],
+            "formatter": "json",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO").upper(),
+    },
+    # Avoid Django's development formatter and duplicate propagation while
+    # retaining the same JSON schema for runserver messages.
+    "loggers": {
+        "django.server": {
+            "handlers": ["console"],
+            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO").upper(),
+            "propagate": False,
+        },
+    },
 }

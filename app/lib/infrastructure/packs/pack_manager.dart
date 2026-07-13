@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/api_config.dart';
 import '../../core/db/dict_db.dart';
+import '../../core/telemetry.dart';
 import 'pack_manifest.dart';
 
 const basePackId = 'dict-base';
@@ -83,13 +85,16 @@ class PackManager extends ChangeNotifier {
     required PackRoot root,
     required Dio dio,
     required AssetLoader loadAsset,
+    TelemetrySink? telemetry,
   })  : _rootProvider = root,
         _dio = dio,
-        _loadAsset = loadAsset;
+        _loadAsset = loadAsset,
+        _telemetry = telemetry ?? Telemetry.instance;
 
   final PackRoot _rootProvider;
   final Dio _dio;
   final AssetLoader _loadAsset;
+  final TelemetrySink _telemetry;
   final Map<String, CancelToken> _cancellations = {};
 
   DictDb? _database;
@@ -269,14 +274,42 @@ class PackManager extends ChangeNotifier {
           notifyListeners();
         },
       );
-      await _install(info, response.data!);
+      final payload = response.data!;
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.packDownloadCompleted,
+        parameters: {
+          'kind': _packKind(info.id),
+          'count': payload.length,
+          'source': current == null ? 'install' : 'update',
+        },
+      ));
+      await _install(info, payload);
       await _openTopology();
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.packInstallCompleted,
+        parameters: {
+          'kind': _packKind(info.id),
+          'count': info.installedBytes,
+          'source': current == null ? 'install' : 'update',
+        },
+      ));
     } finally {
       resolving.remove(id);
       _cancellations.remove(id);
       progress.remove(id);
       notifyListeners();
     }
+  }
+
+  static String _packKind(String id) {
+    if (id.startsWith('dict-locale-')) return 'dictionary_locale';
+    if (id.startsWith('examples-')) return 'examples';
+    if (id.startsWith('mnemonics-')) return 'mnemonics';
+    return switch (id) {
+      'names' => 'names',
+      basePackId || corePackId => 'dictionary_core',
+      _ => 'other',
+    };
   }
 
   void cancelDownload(String id) => _cancellations[id]?.cancel();

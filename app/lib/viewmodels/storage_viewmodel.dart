@@ -28,7 +28,9 @@ class PackRow {
   bool get isInstalled => installed != null;
   bool get isBusy => progress != null;
   bool get updateAvailable =>
-      installed != null && available != null && available!.version != installed!.version;
+      installed != null &&
+      available != null &&
+      available!.version != installed!.version;
   bool get canDownload => !isInstalled && available != null && !isBusy;
   bool get canDelete => isInstalled && id != basePackId;
 }
@@ -69,7 +71,9 @@ class StorageViewModel extends ChangeNotifier {
       for (final p in _packs.installed)
         if (p.id != basePackId && available.every((a) => a.id != p.id)) p.id,
     ];
-    return [for (final id in {...ids}) _row(id)];
+    return [
+      for (final id in {...ids}) _row(id)
+    ];
   }
 
   PackRow _row(String id) {
@@ -152,7 +156,7 @@ class StorageViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> syncNow() async => _sync?.syncNow();
+  Future<void> syncNow() async => _sync?.syncNow(source: 'manual');
 
   @override
   void dispose() {

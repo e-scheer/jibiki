@@ -237,8 +237,8 @@ class StatsView(APIView):
         ]
         cards_by_type = {
             item_type: Card.objects.filter(user=user, item_type=item_type).count()
-            for item_type, _ in Card.objects.filter(user=user)
-            .values_list("item_type")
+            for item_type in Card.objects.filter(user=user)
+            .values_list("item_type", flat=True)
             .distinct()
         }
         duration = logs.aggregate(value=Sum("duration_ms"))["value"] or 0

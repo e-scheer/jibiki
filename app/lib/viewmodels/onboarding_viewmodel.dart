@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import '../core/languages.dart';
 import '../core/api_exception.dart';
+import '../core/telemetry.dart';
 import '../infrastructure/packs/pack_manager.dart';
 import '../infrastructure/packs/pack_manifest.dart';
 import '../models/enums.dart';
@@ -12,7 +15,6 @@ enum OnboardingPlacement {
   fresh,
   hiragana,
   katakana,
-  allKana,
   specific,
   jlpt5,
   jlpt4,
@@ -63,7 +65,7 @@ class OnboardingViewModel extends BaseViewModel {
   late AppMode _mode;
   late String _language;
   int _step = 0;
-  OnboardingPlacement _placement = OnboardingPlacement.fresh;
+  final Set<OnboardingPlacement> _placements = {};
   String _knownCharacters = '';
   List<PackOffer> _offers = [];
   bool _offersLoaded = false;
@@ -76,12 +78,19 @@ class OnboardingViewModel extends BaseViewModel {
 
   /// The data step only exists where packs do (mobile).
   bool get hasDataStep => _packs != null;
-  OnboardingPlacement get placement => _placement;
+  Set<OnboardingPlacement> get placements => _placements;
+
+  /// `fresh` is the neutral state, represented by an empty set, so its card
+  /// reads as selected whenever nothing else is.
+  bool isSelected(OnboardingPlacement value) =>
+      value == OnboardingPlacement.fresh
+          ? _placements.isEmpty
+          : _placements.contains(value);
   String get knownCharacters => _knownCharacters;
   int get specificCharacterCount => _specificItems().length;
   bool get canContinuePlacement =>
       !isLoading &&
-      (_placement != OnboardingPlacement.specific ||
+      (!_placements.contains(OnboardingPlacement.specific) ||
           specificCharacterCount > 0);
 
   void selectMode(AppMode m) {
@@ -96,9 +105,25 @@ class OnboardingViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void selectPlacement(OnboardingPlacement value) {
+  /// Placements are independent toggles so a learner can combine, say, both
+  /// kana scripts with a JLPT level and their own characters. Two constraints
+  /// keep the set coherent:
+  ///   - `fresh` is the neutral "I know nothing extra" state (an empty set), so
+  ///     picking it clears everything, and re-tapping any card can empty back
+  ///     to it.
+  ///   - JLPT levels are cumulative, so at most one is ever active.
+  void togglePlacement(OnboardingPlacement value) {
     if (isLoading) return;
-    _placement = value;
+    if (value == OnboardingPlacement.fresh) {
+      _placements.clear();
+    } else if (_placements.contains(value)) {
+      _placements.remove(value);
+    } else {
+      if (value.jlptLevel != null) {
+        _placements.removeWhere((p) => p.jlptLevel != null);
+      }
+      _placements.add(value);
+    }
     if (hasError) clearError();
     notifyListeners();
   }
@@ -106,6 +131,36 @@ class OnboardingViewModel extends BaseViewModel {
   void setKnownCharacters(String value) {
     if (isLoading) return;
     _knownCharacters = value;
+    if (hasError) clearError();
+    notifyListeners();
+  }
+
+  /// The distinct, valid kana/kanji currently marked as known, in entry order.
+  /// This is the canonical source for the character chips.
+  List<String> get knownCharacterList =>
+      _specificItems().map((item) => item.ref).toList();
+
+  /// Fold any kana/kanji found in [input] into the known set (deduplicated,
+  /// entry order preserved). Any other character is ignored.
+  void addKnownCharacters(String input) {
+    if (isLoading) return;
+    final merged = <String>{...knownCharacterList};
+    for (final char in input.runes.map(String.fromCharCode)) {
+      final code = char.runes.single;
+      final isKana = code >= 0x3040 && code <= 0x30ff;
+      final isKanji = code >= 0x3400 && code <= 0x9fff;
+      if (isKana || isKanji) merged.add(char);
+    }
+    _knownCharacters = merged.join();
+    if (hasError) clearError();
+    notifyListeners();
+  }
+
+  /// Drop a single character chip from the known set.
+  void removeKnownCharacter(String char) {
+    if (isLoading) return;
+    _knownCharacters =
+        knownCharacterList.where((c) => c != char).join();
     if (hasError) clearError();
     notifyListeners();
   }
@@ -214,7 +269,7 @@ class OnboardingViewModel extends BaseViewModel {
     if (isLoading || !canContinuePlacement) return false;
     final completed = await runGuarded(() async {
       final items = await _placementItems();
-      if (_placement != OnboardingPlacement.fresh && items.isEmpty) {
+      if (_placements.isNotEmpty && items.isEmpty) {
         throw ApiException(
           'We could not load this level. Check your connection and try again.',
         );
@@ -229,6 +284,18 @@ class OnboardingViewModel extends BaseViewModel {
       return true;
     });
     if (completed != true) return false;
+    unawaited(Telemetry.instance.logEvent('tutorial_complete'));
+    unawaited(Telemetry.instance.logEvent(
+      'onboarding_complete',
+      parameters: {
+        'app_mode': _mode.wire,
+        'placement': _placements.isEmpty
+            ? 'fresh'
+            : (_placements.map((p) => p.name).toList()..sort()).join('+'),
+        'mnemonic_language': _language,
+        'download_selected': download,
+      },
+    ));
     final packs = _packs;
     if (download && packs != null) {
       for (final offer in _offers) {
@@ -243,41 +310,49 @@ class OnboardingViewModel extends BaseViewModel {
   }
 
   Future<List<({ItemType type, String ref})>> _placementItems() async {
-    if (_placement == OnboardingPlacement.fresh) return const [];
-    if (_placement == OnboardingPlacement.specific) return _specificItems();
+    if (_placements.isEmpty) return const [];
 
-    final jlpt = _placement.jlptLevel;
-    if (jlpt != null) {
-      // A learner placed at N3 also knows the earlier N5 and N4 sets. The
-      // dictionary pack is the canonical source imported by import_jlpt.py.
-      final batches = await Future.wait([
-        for (var level = 5; level >= jlpt; level--)
-          _dictionary.kanjiList(jlpt: level, limit: 1500),
-      ]);
-      final literals = <String>{
-        for (final batch in batches)
-          for (final entry in batch)
-            if (entry.literal.isNotEmpty) entry.literal,
-      };
-      return [
-        for (final literal in literals) (type: ItemType.kanji, ref: literal),
-      ];
+    // A Set dedupes across the independent axes, so a character reached through
+    // both "specific" and a kana script is only seeded once.
+    final items = <({ItemType type, String ref})>{};
+
+    if (_placements.contains(OnboardingPlacement.specific)) {
+      items.addAll(_specificItems());
     }
 
-    final kana = await _dictionary.kana();
-    final refs = <String>{
-      for (final entry in kana)
-        if (entry.char.isNotEmpty &&
-            (_placement == OnboardingPlacement.allKana ||
-                (_placement == OnboardingPlacement.hiragana &&
-                    entry.script == 'hiragana') ||
-                (_placement == OnboardingPlacement.katakana &&
-                    entry.script == 'katakana')))
-          entry.char,
-    };
-    return [
-      for (final ref in refs) (type: ItemType.kana, ref: ref),
-    ];
+    final wantHiragana = _placements.contains(OnboardingPlacement.hiragana);
+    final wantKatakana = _placements.contains(OnboardingPlacement.katakana);
+    if (wantHiragana || wantKatakana) {
+      final kana = await _dictionary.kana();
+      for (final entry in kana) {
+        if (entry.char.isEmpty) continue;
+        final matches = (wantHiragana && entry.script == 'hiragana') ||
+            (wantKatakana && entry.script == 'katakana');
+        if (matches) items.add((type: ItemType.kana, ref: entry.char));
+      }
+    }
+
+    // JLPT is cumulative and single, so the deepest selected level (N1 is the
+    // deepest) pulls in every earlier level too. The dictionary pack is the
+    // canonical source imported by import_jlpt.py.
+    final levels =
+        _placements.map((p) => p.jlptLevel).whereType<int>().toList();
+    if (levels.isNotEmpty) {
+      final deepest = levels.reduce((a, b) => a < b ? a : b);
+      final batches = await Future.wait([
+        for (var level = 5; level >= deepest; level--)
+          _dictionary.kanjiList(jlpt: level, limit: 1500),
+      ]);
+      for (final batch in batches) {
+        for (final entry in batch) {
+          if (entry.literal.isNotEmpty) {
+            items.add((type: ItemType.kanji, ref: entry.literal));
+          }
+        }
+      }
+    }
+
+    return items.toList();
   }
 
   List<({ItemType type, String ref})> _specificItems() {

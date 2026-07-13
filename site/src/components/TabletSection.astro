@@ -1,0 +1,459 @@
+---
+import type { Messages } from '../i18n/messages';
+import Brand from './Brand.astro';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section tablet-section" id="tablet">
+  <div class="container tablet-heading">
+    <span class="kicker">{t.tablet.kicker}</span>
+    <h2>{t.tablet.title}</h2>
+    <p class="section-copy">{t.tablet.body}</p>
+  </div>
+  <div class="tablet-stage-wrap">
+    <div class="tablet-stage" role="img" aria-label={t.tablet.detailLabel}>
+      <nav class="tablet-rail" aria-label={t.common.navigation}>
+        <Brand compact label={t.common.brandLabel} />
+        {t.tablet.navItems.map((item, index) => (
+          <span class:list={{ active: index === 0 }}><i aria-hidden="true">{['字', 'あ', '↺', '○', '人'][index]}</i><b>{item}</b></span>
+        ))}
+      </nav>
+      <aside class="tablet-list" aria-label={t.tablet.listLabel}>
+        <div class="tablet-search"><span aria-hidden="true">⌕</span><b>{t.tablet.search}</b></div>
+        <small>{t.tablet.results}</small>
+        <div class="result-list">
+          {t.tablet.resultItems.map((item, index) => (
+            <article class:list={{ selected: index === 0 }}>
+              <strong lang="ja">{item.glyph}</strong>
+              <span><b lang="ja">{item.reading}</b><small>{item.gloss}</small></span>
+              <i aria-hidden="true">›</i>
+            </article>
+          ))}
+        </div>
+      </aside>
+      <article class="tablet-detail" aria-label={t.tablet.detailLabel}>
+        <div class="tablet-hero">
+          <div><small lang="ja">さくら</small><strong lang="ja">桜</strong></div>
+          <span>♪ {t.dictionary.samples[0].romaji}</span>
+          <div class="tablet-tags"><b>N5</b><b>JLPT</b><b>3</b></div>
+        </div>
+        <section class="tablet-senses">
+          <h3>{t.tablet.senses}</h3>
+          <p><b>1.</b> {t.dictionary.samples[0].meanings[0]}</p>
+          <p><b>2.</b> {t.dictionary.samples[0].meanings[1]}</p>
+        </section>
+        <div class="tablet-details-grid">
+          <section class="tablet-parts">
+            <h3>{t.dictionary.composition}</h3>
+            <div>
+              {t.dictionary.samples[0].parts.map((part, index) => (
+                <><span><b lang="ja">{part.glyph}</b><small>{part.label}</small></span>{index < 2 && <i>+</i>}</>
+              ))}
+            </div>
+          </section>
+          <blockquote>
+            « {t.mnemonic.cards[0].quote} »
+            <small>{t.mnemonic.cards[0].author}</small>
+          </blockquote>
+        </div>
+        <section class="tablet-example">
+          <span lang="ja">{t.tablet.example}</span>
+          <small>{t.tablet.translation}</small>
+        </section>
+      </article>
+    </div>
+    <span class="stage-shadow" aria-hidden="true"></span>
+  </div>
+</section>
+
+<style>
+  .tablet-section {
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--acid);
+  }
+
+  .tablet-heading {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: end;
+    gap: 1.5rem 4rem;
+  }
+
+  .tablet-heading .kicker {
+    grid-column: 1 / -1;
+    width: max-content;
+    margin-bottom: -0.2rem;
+    background: #fff;
+  }
+
+  .tablet-heading h2 {
+    max-width: 12ch;
+    margin-bottom: 0;
+  }
+
+  .tablet-heading p {
+    margin-bottom: 0.5rem;
+  }
+
+  .tablet-stage-wrap {
+    position: relative;
+    width: min(calc(100% - 2rem), 1180px);
+    margin: clamp(3rem, 6vw, 5rem) auto 0;
+  }
+
+  .tablet-stage {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    min-height: 42rem;
+    grid-template-columns: 76px 340px 1fr;
+    overflow: hidden;
+    border: 4px solid var(--ink);
+    border-radius: 24px;
+    background: var(--canvas);
+    transform: rotate(-0.3deg);
+  }
+
+  .stage-shadow {
+    position: absolute;
+    z-index: 1;
+    inset: 12px -12px -12px 12px;
+    border-radius: 24px;
+    background: var(--ink);
+  }
+
+  .tablet-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 0.45rem;
+    border-right: var(--line);
+    background: #fff;
+  }
+
+  .tablet-rail :global(.brand-lockup) {
+    margin-bottom: 0.5rem;
+    transform: scale(0.85);
+  }
+
+  .tablet-rail > span {
+    display: flex;
+    width: 100%;
+    min-height: 3.6rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    border: 2px solid transparent;
+    border-radius: 9px;
+  }
+
+  .tablet-rail > span.active {
+    border-color: var(--ink);
+    background: var(--acid);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .tablet-rail i {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .tablet-rail b {
+    font-size: 0.55rem;
+  }
+
+  .tablet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-right: var(--line);
+  }
+
+  .tablet-search {
+    display: flex;
+    min-height: 3.2rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.8rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size: 0.8rem;
+  }
+
+  .tablet-list > small {
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .result-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .result-list article {
+    display: grid;
+    grid-template-columns: 4.2rem 1fr auto;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 4.45rem;
+    padding: 0.55rem 0.7rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .result-list article.selected {
+    background: var(--acid);
+    box-shadow: 4px 4px 0 var(--ink);
+    transform: translate(-2px, -2px);
+  }
+
+  .result-list article > strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+  }
+
+  .result-list article > span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .result-list article b,
+  .result-list article small {
+    overflow: hidden;
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .result-list article i {
+    font-size: 1.3rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .tablet-detail {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.1rem;
+  }
+
+  .tablet-hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.75rem 1.4rem;
+    padding: 1rem 1.2rem;
+    border: var(--line);
+    border-radius: 13px;
+    background: var(--magenta);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .tablet-hero > div:first-child {
+    display: flex;
+    grid-row: 1 / 3;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tablet-hero small {
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .tablet-hero strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 5.5rem;
+    font-weight: 900;
+    line-height: 0.9;
+  }
+
+  .tablet-hero > span {
+    justify-self: start;
+    padding: 0.4rem 0.65rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .tablet-tags {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .tablet-tags b {
+    padding: 0.3rem 0.5rem;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: #fff;
+    font-size: 0.62rem;
+  }
+
+  .tablet-senses,
+  .tablet-parts,
+  .tablet-example,
+  blockquote {
+    padding: 0.85rem 1rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .tablet-detail h3 {
+    margin-bottom: 0.45rem;
+    font-size: 0.68rem;
+    letter-spacing: 0;
+  }
+
+  .tablet-senses p {
+    margin: 0.2rem 0;
+    font-size: 0.76rem;
+  }
+
+  .tablet-senses p b {
+    color: var(--klein);
+  }
+
+  .tablet-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .tablet-parts > div {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .tablet-parts span {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.4rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--lime);
+  }
+
+  .tablet-parts span:nth-of-type(2) { background: var(--acid); }
+  .tablet-parts span:nth-of-type(3) { background: var(--lavender); }
+
+  .tablet-parts span b {
+    font-size: 1.45rem;
+  }
+
+  .tablet-parts span small {
+    font-size: 0.54rem;
+    font-weight: 700;
+  }
+
+  .tablet-parts i {
+    font-size: 0.8rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0;
+    background: var(--klein);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  blockquote small {
+    margin-top: 0.7rem;
+    color: #fff;
+    font-size: 0.56rem;
+  }
+
+  .tablet-example {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .tablet-example span {
+    font-weight: 900;
+  }
+
+  .tablet-example small {
+    color: var(--ink-2);
+    font-size: 0.64rem;
+  }
+
+  @media (max-width: 959px) {
+    .tablet-heading {
+      grid-template-columns: 1fr;
+    }
+
+    .tablet-stage-wrap {
+      width: calc(100% - 1.25rem);
+    }
+
+    .tablet-stage {
+      min-height: 39rem;
+      grid-template-columns: 68px 290px 1fr;
+    }
+
+    .tablet-details-grid {
+      grid-template-columns: 1fr;
+    }
+
+    blockquote {
+      display: none;
+    }
+  }
+
+  @media (max-width: 699px) {
+    .tablet-stage {
+      min-height: 36rem;
+      grid-template-columns: 62px 1fr;
+    }
+
+    .tablet-list {
+      border-right: 0;
+    }
+
+    .tablet-detail {
+      display: none;
+    }
+
+    .tablet-rail b {
+      display: none;
+    }
+
+    .stage-shadow {
+      inset: 8px -8px -8px 8px;
+    }
+  }
+</style>

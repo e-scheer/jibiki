@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import '../core/telemetry.dart';
 import '../models/enums.dart';
 import '../models/kanji.dart';
 import '../models/word.dart';
@@ -11,10 +14,13 @@ class KanjiDetailViewModel extends BaseViewModel {
     this._study,
     this.literal, {
     required bool loadStudyState,
-  }) : _loadStudyState = loadStudyState;
+    TelemetrySink? telemetry,
+  })  : _loadStudyState = loadStudyState,
+        _telemetry = telemetry ?? Telemetry.instance;
   final DictionaryRepository _dict;
   final StudyRepository _study;
   final bool _loadStudyState;
+  final TelemetrySink _telemetry;
   final String literal;
 
   KanjiEntry? _kanji;
@@ -64,6 +70,24 @@ class KanjiDetailViewModel extends BaseViewModel {
         () => _study.setStatus(ItemType.kanji, literal, target),
         silent: true);
     _status = res ?? prev;
+    if (res != null && prev == 'none' && res != 'none') {
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.studyCardAdded,
+        parameters: {
+          'item_type': ItemType.kanji.wire,
+          'card_state': res,
+          'source': 'detail_status',
+        },
+      ));
+    } else if (res == 'none' && prev != 'none') {
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.studyCardRemoved,
+        parameters: const {
+          'item_type': 'kanji',
+          'source': 'detail_status',
+        },
+      ));
+    }
     notifyListeners();
   }
 }

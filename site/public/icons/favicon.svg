@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140">
+  <rect width="140" height="140" rx="28" fill="#F2E51C"/>
+  <rect x="19" y="28" width="104" height="104" rx="26" fill="#17131F"/>
+  <rect x="11" y="20" width="104" height="104" rx="26" fill="#F2E51C" stroke="#17131F" stroke-width="7"/>
+  <text x="63" y="74" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="900" font-size="70" fill="#17131F">字</text>
+</svg>

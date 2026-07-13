@@ -1,0 +1,10 @@
+---
+import LegalPage from '../../components/LegalPage.astro';
+import { publicConfig } from '../../config';
+import { getMessages } from '../../i18n/messages';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { makeLegalSchema } from '../../seo';
+const t = getMessages('en');
+const schema = makeLegalSchema({ siteUrl: publicConfig.siteUrl, locale: 'en', homePath: t.routes.home, currentPath: t.routes.privacy, currentName: t.legal.privacy.title });
+---
+<BaseLayout locale="en" t={t} title={t.meta.privacyTitle} description={t.meta.privacyDescription} path={t.routes.privacy} alternatePath="/fr/confidentialite/" alternateLocale="fr" schema={schema}><LegalPage t={t} kind="privacy" /></BaseLayout>

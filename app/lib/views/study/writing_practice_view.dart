@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jibiki/l10n/l10n.dart';
 
 import '../../core/breakpoints.dart';
+import '../../core/telemetry.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/drawing_canvas.dart';
 import '../widgets/pressable.dart';
@@ -16,6 +19,7 @@ class WritingPracticeView extends StatefulWidget {
     required this.reading,
     required this.strokePaths,
     required this.strokeViewBox,
+    this.telemetry,
   });
 
   final String character;
@@ -23,6 +27,7 @@ class WritingPracticeView extends StatefulWidget {
   final String reading;
   final List<String> strokePaths;
   final String strokeViewBox;
+  final TelemetrySink? telemetry;
 
   @override
   State<WritingPracticeView> createState() => _WritingPracticeViewState();
@@ -31,6 +36,22 @@ class WritingPracticeView extends StatefulWidget {
 class _WritingPracticeViewState extends State<WritingPracticeView> {
   final _controller = DrawingController();
   bool _showGuide = true;
+  bool _completedLogged = false;
+
+  TelemetrySink get _telemetry => widget.telemetry ?? Telemetry.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_telemetry.logEvent(
+      TelemetryEvent.writingPracticeStarted,
+      parameters: const {
+        'item_type': 'kanji',
+        'kind': 'free',
+        'source': 'kanji_detail',
+      },
+    ));
+  }
 
   @override
   void dispose() {
@@ -40,6 +61,17 @@ class _WritingPracticeViewState extends State<WritingPracticeView> {
 
   void _reveal() {
     Haptics.light();
+    if (!_completedLogged) {
+      _completedLogged = true;
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.writingPracticeCompleted,
+        parameters: const {
+          'item_type': 'kanji',
+          'kind': 'free',
+          'source': 'kanji_detail',
+        },
+      ));
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

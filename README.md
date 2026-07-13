@@ -17,6 +17,7 @@ jibiki/
 ├── docs/          Product, data architecture and research notes
 ├── var/           Generated packs and local media (ignored)
 ├── compose.yaml   Postgres + api [+ caddy]           (prod topology)
+├── compose.production.yaml   prod-only secret validation
 ├── compose.override.yaml   dev-only (exposes the DB port)
 ├── caddy/Caddyfile
 ├── Makefile       one-liners for every workflow
@@ -124,7 +125,7 @@ uv run --project server python server/manage.py import_kradfile kradfile
 
 ### App
 
-Requirements: Flutter SDK (3.6+). The repo pins Flutter 3.38.3 via fvm
+Requirements: Flutter SDK (3.6+). The repo pins Flutter 3.44.5 via fvm
 (`.fvmrc`); a stock Flutter on PATH also works. On Windows without fvm, call
 `flutter` directly (drop the `fvm` prefix).
 

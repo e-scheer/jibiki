@@ -15,6 +15,48 @@ class AuthService {
   Future<String> login(String email, String password) =>
       _tokenFrom(ApiConfig.authLogin, {'email': email, 'password': password});
 
+  Future<void> inspectEmailVerificationKey(String key) async {
+    await _api.get(
+      ApiConfig.authVerifyEmail,
+      headers: {'X-Email-Verification-Key': key},
+    );
+  }
+
+  Future<void> verifyEmail(String key) async {
+    // A successful confirmation returns AuthenticationResponse. When allauth
+    // does not automatically sign the learner in, that response is 401 even
+    // though the email mutation succeeded.
+    await _api.postRaw(
+      ApiConfig.authVerifyEmail,
+      data: {'key': key},
+      acceptedStatusCodes: const {401},
+    );
+  }
+
+  Future<void> requestPasswordReset(String email) async {
+    await _api.post(
+      ApiConfig.authRequestPasswordReset,
+      data: {'email': email},
+    );
+  }
+
+  Future<void> inspectPasswordResetKey(String key) async {
+    await _api.get(
+      ApiConfig.authResetPassword,
+      headers: {'X-Password-Reset-Key': key},
+    );
+  }
+
+  Future<void> resetPassword(String key, String password) async {
+    // Password reset has the same unauthenticated success response as email
+    // verification when ACCOUNT_LOGIN_ON_PASSWORD_RESET is disabled.
+    await _api.postRaw(
+      ApiConfig.authResetPassword,
+      data: {'key': key, 'password': password},
+      acceptedStatusCodes: const {401},
+    );
+  }
+
   Future<AppUser> me() async {
     final data = await _api.get(ApiConfig.me);
     return AppUser.fromJson((data as Map).cast<String, dynamic>());
@@ -40,9 +82,11 @@ class AuthService {
     final meta = (data is Map ? data['meta'] : null) as Map?;
     final fromBody = meta?['session_token'] as String?;
     final fromHeader = resp.headers.value('x-session-token');
-    final token = (fromBody != null && fromBody.isNotEmpty) ? fromBody : fromHeader;
+    final token =
+        (fromBody != null && fromBody.isNotEmpty) ? fromBody : fromHeader;
     if (token == null || token.isEmpty) {
-      throw StateError('No session token returned, email verification may be required.');
+      throw StateError(
+          'No session token returned, email verification may be required.');
     }
     return token;
   }

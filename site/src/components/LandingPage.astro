@@ -1,0 +1,28 @@
+---
+import { publicConfig } from '../config';
+import type { Locale, Messages } from '../i18n/messages';
+import DictionaryDemo from './DictionaryDemo.astro';
+import FinalCta from './FinalCta.astro';
+import Hero from './Hero.astro';
+import MemoryFlow from './MemoryFlow.astro';
+import MnemonicSection from './MnemonicSection.astro';
+import ReviewSection from './ReviewSection.astro';
+import TabletSection from './TabletSection.astro';
+import TrustSection from './TrustSection.astro';
+
+interface Props {
+  locale: Locale;
+  t: Messages;
+}
+
+const { locale, t } = Astro.props;
+---
+
+<Hero t={t} appUrl={publicConfig.appUrl} />
+<DictionaryDemo locale={locale} t={t} appUrl={publicConfig.appUrl} apiUrl={publicConfig.apiUrl} />
+<MemoryFlow t={t} />
+<MnemonicSection t={t} />
+<ReviewSection t={t} />
+<TabletSection t={t} />
+<TrustSection t={t} />
+<FinalCta t={t} appUrl={publicConfig.appUrl} />

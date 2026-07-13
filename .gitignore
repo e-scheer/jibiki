@@ -25,7 +25,7 @@ app/android/.gradle/
 app/**/GeneratedPluginRegistrant.*
 *.iml
 
-# EDRDG source dumps (downloaded, not committed) — scoped so it never swallows
+# EDRDG source dumps are scoped so they never swallow
 # generated platform manifests (e.g. Android's AndroidManifest.xml).
 JMdict*
 kanjidic2*
@@ -35,5 +35,8 @@ radkfile*
 # OS
 .DS_Store
 
-# fvm — commit .fvmrc (pins the version), ignore the cache symlink dir
+# fvm: commit .fvmrc (pins the version), ignore the cache symlink dir
 app/.fvm/
+
+# Generated Web release assembly
+web-runtime/

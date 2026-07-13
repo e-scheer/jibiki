@@ -1,0 +1,38 @@
+---
+import LandingPage from '../../components/LandingPage.astro';
+import { publicConfig } from '../../config';
+import { getMessages } from '../../i18n/messages';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const t = getMessages('en');
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'jibiki',
+    url: publicConfig.siteUrl,
+    logo: `${publicConfig.siteUrl}/brand/jibiki-mark.svg`,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'jibiki',
+    url: `${publicConfig.siteUrl}${t.routes.home}`,
+    description: t.meta.homeDescription,
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'jibiki',
+    applicationCategory: 'EducationalApplication',
+    url: publicConfig.appUrl,
+    description: t.meta.homeDescription,
+    inLanguage: ['fr', 'en'],
+  },
+];
+---
+
+<BaseLayout locale="en" t={t} title={t.meta.homeTitle} description={t.meta.homeDescription} path={t.routes.home} alternatePath="/fr/" alternateLocale="fr" schema={schema}>
+  <LandingPage locale="en" t={t} />
+</BaseLayout>

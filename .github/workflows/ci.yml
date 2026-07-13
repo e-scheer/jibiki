@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: jibiki
+          POSTGRES_USER: jibiki
+          POSTGRES_PASSWORD: jibiki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jibiki -d jibiki"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://jibiki:jibiki@localhost:5432/jibiki
+      DJANGO_DEBUG: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.5"
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: flutter test
+      - run: >-
+          flutter build web --release --source-maps
+          --dart-define=JIBIKI_API_BASE=https://api.jibiki.app
+          --dart-define=JIBIKI_ENVIRONMENT=ci
+          --dart-define=JIBIKI_RELEASE=${{ github.sha }}
+
+  marketing:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.1
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/assemble_web_release.mjs
+      - run: >-
+          docker run --rm
+          -v "$PWD:/repo"
+          --workdir /repo
+          rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9
+          -color
+          .github/workflows/ci.yml
+          .github/workflows/release-web.yml
+      - run: docker buildx build --check -f caddy/Dockerfile.runtime .
+      - run: >-
+          docker run --rm
+          -e ROOT_DOMAIN=jibiki.app
+          -e APP_DOMAIN=my.jibiki.app
+          -e API_DOMAIN=api.jibiki.app
+          -v "$PWD/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"
+          caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+          caddy validate --config /etc/caddy/Caddyfile
+      - run: docker compose -f compose.yaml config --quiet
+      - name: Validate the immutable production overlay
+        env:
+          POSTGRES_PASSWORD: validation-only
+          DJANGO_SECRET_KEY: validation-only-secret-key-123456789
+          WEB_IMAGE: ghcr.io/example/jibiki@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        run: |
+          docker compose -f compose.yaml -f compose.production.yaml --profile web config --quiet
+          docker compose -f compose.yaml -f compose.production.yaml --profile web config --images \
+            | grep -Eq '^ghcr\.io/[^/]+/[^/]+@sha256:[0-9a-f]{64}$'

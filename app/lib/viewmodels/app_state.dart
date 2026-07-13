@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../core/api_exception.dart';
 import '../core/entitlements.dart';
 import '../core/languages.dart';
+import '../core/telemetry.dart';
 import '../models/enums.dart';
 import '../models/user.dart';
 import '../repositories/auth_repository.dart';
@@ -121,6 +124,7 @@ class AppState extends ChangeNotifier {
     _localOnly = true;
     _localProfile = _auth.localProfile;
     notifyListeners();
+    unawaited(Telemetry.instance.logEvent('guest_continue'));
   }
 
   Future<void> signup(String email, String password) async {

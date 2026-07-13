@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../core/japanese_text.dart';
+import '../core/telemetry.dart';
 import '../models/word.dart';
 import '../repositories/dictionary_repository.dart';
 import '../services/recent_dictionary_history.dart';
@@ -116,7 +118,16 @@ class SearchViewModel extends BaseViewModel {
   }
 
   Future<void> _run(String q) async {
-    if (q.trim().isEmpty) return;
+    final trimmed = q.trim();
+    if (trimmed.isEmpty) return;
+    unawaited(Telemetry.instance.logEvent(
+      'search_submitted',
+      parameters: {
+        'input_kind': _inputKind(trimmed),
+        'length_bucket': _lengthBucket(trimmed.runes.length),
+        'gloss_language': glossLanguage,
+      },
+    ));
     final r = await runGuarded(() => _repo.search(q, lang: glossLanguage));
     // Ignore a stale response whose query is no longer the current one.
     if (r != null && q == _query) {
@@ -129,7 +140,28 @@ class SearchViewModel extends BaseViewModel {
       }
       notifyListeners();
     }
+    unawaited(Telemetry.instance.logEvent(
+      'search_results',
+      parameters: {
+        'result': r == null ? 'failure' : 'success',
+        'word_count': r?.words.length ?? 0,
+        'name_count': r?.names.length ?? 0,
+      },
+    ));
   }
+
+  static String _inputKind(String query) {
+    if (isJapanese(query)) return 'japanese';
+    if (romajiToHiragana(query) != null) return 'romaji';
+    return 'gloss';
+  }
+
+  static String _lengthBucket(int length) => switch (length) {
+        <= 1 => '1',
+        <= 4 => '2_4',
+        <= 8 => '5_8',
+        _ => '9_plus',
+      };
 
   @override
   void dispose() {

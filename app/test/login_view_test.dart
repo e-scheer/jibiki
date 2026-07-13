@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jibiki/core/api_client.dart';
 import 'package:jibiki/core/session_store.dart';
+import 'package:jibiki/l10n/app_localizations.dart';
 import 'package:jibiki/repositories/auth_repository.dart';
 import 'package:jibiki/services/auth_service.dart';
 import 'package:jibiki/theme/app_theme.dart';
@@ -44,6 +45,8 @@ Widget _routerApp(AppState app, GoRouter router) =>
       child: MaterialApp.router(
         routerConfig: router,
         theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
 
@@ -188,7 +191,12 @@ void main() {
       find.text('Could not continue without an account. Please try again.'),
       findsOneWidget,
     );
-    final retry = tester.widget<TextButton>(find.byType(TextButton));
+    final retry = tester.widget<TextButton>(
+      find.ancestor(
+        of: find.text('Continue without an account'),
+        matching: find.byType(TextButton),
+      ),
+    );
     expect(retry.onPressed, isNotNull);
     expect(app.localOnly, isFalse);
   });

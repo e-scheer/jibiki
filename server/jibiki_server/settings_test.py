@@ -17,6 +17,11 @@ import tempfile
 # file storage caches the temp location on its very first access - otherwise seed
 # art / upload tests leak WebP files into the repo's var/media tree.
 os.environ.setdefault("MEDIA_STORE", tempfile.mkdtemp(prefix="jibiki-test-media-"))
+# A developer may have a production DSN in their shell. Tests must never send
+# errors or traces outside the process, regardless of that ambient environment.
+os.environ["SENTRY_DSN"] = ""
+os.environ["SENTRY_ENVIRONMENT"] = "test"
+os.environ["SENTRY_TRACES_SAMPLE_RATE"] = "0"
 
 from .settings import *  # noqa: F403
 

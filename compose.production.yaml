@@ -1,0 +1,17 @@
+# Production-only secret and artifact validation. This file has no defaults.
+# Use it with compose.yaml so deployment fails before dev values can start.
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for production}
+
+  api:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for production}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY for production}
+
+  caddy:
+    # Use the digest printed by the Release Web workflow. Tags alone are not
+    # accepted here because a tag can move after source maps were uploaded.
+    image: ${WEB_IMAGE:?Set WEB_IMAGE to the published GHCR image by digest}
+    pull_policy: always

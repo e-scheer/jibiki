@@ -1,0 +1,10 @@
+---
+import LegalPage from '../../components/LegalPage.astro';
+import { publicConfig } from '../../config';
+import { getMessages } from '../../i18n/messages';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { makeLegalSchema } from '../../seo';
+const t = getMessages('en');
+const schema = makeLegalSchema({ siteUrl: publicConfig.siteUrl, locale: 'en', homePath: t.routes.home, currentPath: t.routes.sources, currentName: t.legal.sources.title });
+---
+<BaseLayout locale="en" t={t} title={t.meta.sourcesTitle} description={t.meta.sourcesDescription} path={t.routes.sources} alternatePath="/fr/sources/" alternateLocale="fr" schema={schema}><LegalPage t={t} kind="sources" /></BaseLayout>

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import '../core/telemetry.dart';
 import '../infrastructure/packs/pack_manager.dart';
 import '../services/feedback_service.dart';
 import 'app_state.dart';
@@ -21,11 +24,17 @@ enum FeedbackKind {
 }
 
 class FeedbackViewModel extends BaseViewModel {
-  FeedbackViewModel(this._service, this._app, this._packs);
+  FeedbackViewModel(
+    this._service,
+    this._app,
+    this._packs, {
+    TelemetrySink? telemetry,
+  }) : _telemetry = telemetry ?? Telemetry.instance;
 
   final FeedbackService _service;
   final AppState _app;
   final PackManager? _packs;
+  final TelemetrySink _telemetry;
 
   FeedbackKind _kind = FeedbackKind.idea;
   String _message = '';
@@ -75,6 +84,13 @@ class FeedbackViewModel extends BaseViewModel {
         ));
     if (!hasError) {
       _sent = true;
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.feedbackSent,
+        parameters: {
+          'kind': _kind.wire,
+          'source': _app.isAuthenticated ? 'account' : 'guest',
+        },
+      ));
       notifyListeners();
     }
   }

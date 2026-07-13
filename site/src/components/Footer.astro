@@ -1,0 +1,187 @@
+---
+import type { Locale, Messages } from '../i18n/messages';
+import Brand from './Brand.astro';
+
+interface Props {
+  locale: Locale;
+  t: Messages;
+  alternatePath: string;
+  alternateLocale: Locale;
+  appUrl: string;
+}
+
+const { t, alternatePath, alternateLocale, appUrl } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="footer-shell container">
+    <div class="footer-brand">
+      <a href={t.routes.home} aria-label={t.common.brandLabel}><Brand variant="negative" label={t.common.brandLabel} /></a>
+      <p>{t.footer.tagline}</p>
+    </div>
+    <nav aria-label={t.common.navigation}>
+      <strong>{t.footer.product}</strong>
+      <a href={`${t.routes.home}#dictionary`}>{t.header.dictionary}</a>
+      <a href={`${t.routes.home}#method`}>{t.header.method}</a>
+      <a href={`${t.routes.home}#tablet`}>{t.header.tablet}</a>
+      <a href={appUrl} data-analytics-event="open_app_clicked">{t.common.openApp}</a>
+    </nav>
+    <nav aria-label={t.common.legalNavigation}>
+      <strong>{t.footer.information}</strong>
+      <a href={t.routes.privacy}>{t.footer.privacy}</a>
+      <a href={t.routes.terms}>{t.footer.terms}</a>
+      <a href={t.routes.sources}>{t.footer.sources}</a>
+      <button type="button" data-consent-settings>{t.footer.consentSettings}</button>
+    </nav>
+    <div class="footer-language">
+      <strong>{t.common.language}</strong>
+      <a href={alternatePath} lang={alternateLocale} hreflang={alternateLocale}>{alternateLocale.toUpperCase()}</a>
+    </div>
+  </div>
+  <div class="footer-bottom container">
+    <span>{t.footer.copyright}</span>
+    <span class="footer-confetti" aria-hidden="true"><i></i><i></i><i></i></span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding: 4.5rem 0 2rem;
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .footer-shell {
+    display: grid;
+    grid-template-columns: minmax(16rem, 1.6fr) repeat(3, minmax(9rem, 0.65fr));
+    gap: 2.5rem;
+  }
+
+  .footer-brand a {
+    display: inline-flex;
+    text-decoration: none;
+  }
+
+  .footer-brand p {
+    margin: 1rem 0 0;
+    color: var(--lavender);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  nav,
+  .footer-language {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  strong {
+    margin-bottom: 0.2rem;
+    color: var(--acid);
+  }
+
+  nav a,
+  .footer-language a,
+  button {
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  nav a:hover,
+  .footer-language a:hover,
+  button:hover {
+    color: var(--magenta);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .footer-language a {
+    display: grid;
+    min-width: 3rem;
+    min-height: 2.75rem;
+    place-items: center;
+    border: 2px solid #fff;
+    border-radius: 9px;
+  }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgb(255 255 255 / 24%);
+    color: var(--lavender);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .footer-confetti {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .footer-confetti i {
+    width: 0.72rem;
+    height: 0.72rem;
+    border: 2px solid #fff;
+    border-radius: 3px;
+    background: var(--lime);
+    transform: rotate(8deg);
+  }
+
+  .footer-confetti i:nth-child(2) {
+    background: var(--magenta);
+    transform: rotate(-9deg);
+  }
+
+  .footer-confetti i:nth-child(3) {
+    background: var(--acid);
+    transform: rotate(13deg);
+  }
+
+  @media (max-width: 959px) {
+    .footer-shell {
+      grid-template-columns: 1.4fr 1fr 1fr;
+    }
+
+    .footer-language {
+      grid-column: 2;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .site-footer {
+      padding-top: 3.5rem;
+    }
+
+    .footer-shell {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.25rem 1.25rem;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+
+    .footer-language {
+      grid-column: 1 / -1;
+    }
+
+    .footer-bottom {
+      align-items: flex-start;
+      margin-top: 3rem;
+    }
+  }
+</style>

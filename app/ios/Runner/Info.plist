@@ -22,6 +22,14 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<!-- Consent-first defaults. Dart enables each Firebase product only
+		     after the learner opts in. -->
+		<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+		<false/>
+		<key>FirebaseCrashlyticsCollectionEnabled</key>
+		<false/>
+		<key>firebase_performance_collection_enabled</key>
+		<false/>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>

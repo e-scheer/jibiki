@@ -1,13 +1,20 @@
-# Production topology. Local dev uses compose.override.yaml (auto-loaded, exposes
-# the DB port). On the server the override is absent and this file IS what runs.
+# Production topology. Local dev uses compose.override.yaml, which binds the DB
+# to localhost. Production commands must pass `-f compose.yaml` explicitly so a
+# copied development override can never alter the public topology.
 #
 #   db      Postgres - the store for dictionary + SRS + community mnemonics
 #   api     Django + gunicorn (DRF + allauth headless)
-#   caddy   reverse proxy + TLS, serves /media + /static   (profile "web")
+#   caddy   TLS edge serving the Astro site, Flutter Web and Django assets
 #
 # Mnemonic images can be offloaded to Cloudflare R2 (zero egress) by setting the
 # MEDIA_S3_* vars in .env; otherwise they land on the local media volume, which
 # Caddy serves from /media.
+
+x-json-logging: &json-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
 
 services:
   db:
@@ -24,32 +31,53 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    logging: *json-logging
 
   api:
     build: ./server
     environment:
-      DATABASE_URL: postgres://jibiki:${POSTGRES_PASSWORD:-jibiki}@db:5432/jibiki
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      POSTGRES_DB: jibiki
+      POSTGRES_USER: jibiki
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jibiki}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-insecure-key}
       DJANGO_DEBUG: "0"
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-api.jibiki.app}
-      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-https://api.jibiki.app}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-https://api.jibiki.app,https://my.jibiki.app}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://jibiki.app,https://my.jibiki.app}
       DJANGO_STATIC_ROOT: /app/staticfiles
       MEDIA_STORE: /data/media
-      HEADLESS_FRONTEND_BASE: ${HEADLESS_FRONTEND_BASE:-jibiki://auth}
+      HEADLESS_FRONTEND_BASE: ${HEADLESS_FRONTEND_BASE:-https://my.jibiki.app/#}
+      DJANGO_LOG_LEVEL: ${DJANGO_LOG_LEVEL:-INFO}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
       # Community image storage → Cloudflare R2 when set (see .env.example).
       MEDIA_S3_BUCKET: ${MEDIA_S3_BUCKET:-}
       MEDIA_S3_ENDPOINT_URL: ${MEDIA_S3_ENDPOINT_URL:-}
+      MEDIA_S3_REGION: ${MEDIA_S3_REGION:-auto}
       MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:-}
       MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-}
       MEDIA_S3_CUSTOM_DOMAIN: ${MEDIA_S3_CUSTOM_DOMAIN:-}
       # Auth / email (allauth). Empty in dev → verification "optional", console mail.
       ACCOUNT_EMAIL_VERIFICATION: ${ACCOUNT_EMAIL_VERIFICATION:-mandatory}
       EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-1}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-0}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-jibiki <noreply@jibiki.app>}
       SOCIALACCOUNT_GOOGLE_CLIENT_ID: ${SOCIALACCOUNT_GOOGLE_CLIENT_ID:-}
       SOCIALACCOUNT_GOOGLE_CLIENT_SECRET: ${SOCIALACCOUNT_GOOGLE_CLIENT_SECRET:-}
+      SOCIALACCOUNT_APPLE_CLIENT_ID: ${SOCIALACCOUNT_APPLE_CLIENT_ID:-}
+      SOCIALACCOUNT_APPLE_SECRET: ${SOCIALACCOUNT_APPLE_SECRET:-}
+      SOCIALACCOUNT_APPLE_KEY_ID: ${SOCIALACCOUNT_APPLE_KEY_ID:-}
+      SOCIALACCOUNT_APPLE_PRIVATE_KEY: ${SOCIALACCOUNT_APPLE_PRIVATE_KEY:-}
+      MNEMONIC_TRUST_THRESHOLD: ${MNEMONIC_TRUST_THRESHOLD:-10}
+      MNEMONIC_AUTO_HIDE_REPORTS: ${MNEMONIC_AUTO_HIDE_REPORTS:-3}
       CONTENT_PACK_DIR: /data/packs
       TZ: UTC
     volumes:
@@ -62,17 +90,39 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    logging: *json-logging
 
   caddy:
     profiles: [web]
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: caddy/Dockerfile
+      args:
+        PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-https://jibiki.app}
+        PUBLIC_APP_URL: ${PUBLIC_APP_URL:-https://my.jibiki.app}
+        PUBLIC_API_URL: ${PUBLIC_API_URL:-https://api.jibiki.app}
+        PUBLIC_GA_MEASUREMENT_ID: ${MARKETING_GA_MEASUREMENT_ID:-}
+        PUBLIC_GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
+        JIBIKI_API_BASE: ${JIBIKI_API_BASE:-https://api.jibiki.app}
+        JIBIKI_ENVIRONMENT: ${JIBIKI_ENVIRONMENT:-production}
+        JIBIKI_RELEASE: ${JIBIKI_RELEASE:-local}
+        FIREBASE_API_KEY: ${FIREBASE_API_KEY:-}
+        FIREBASE_APP_ID: ${FIREBASE_WEB_APP_ID:-}
+        FIREBASE_MESSAGING_SENDER_ID: ${FIREBASE_MESSAGING_SENDER_ID:-}
+        FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+        FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN:-}
+        FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET:-}
+        FIREBASE_MEASUREMENT_ID: ${FIREBASE_WEB_MEASUREMENT_ID:-}
+        SENTRY_DSN: ${FLUTTER_SENTRY_DSN:-}
+    image: jibiki-web:${JIBIKI_RELEASE:-local}
     ports:
       - "80:80"
       - "443:443"
     environment:
-      SITE_DOMAIN: ${SITE_DOMAIN:-api.jibiki.app}
+      ROOT_DOMAIN: ${ROOT_DOMAIN:-jibiki.app}
+      APP_DOMAIN: ${APP_DOMAIN:-my.jibiki.app}
+      API_DOMAIN: ${API_DOMAIN:-api.jibiki.app}
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - mediadata:/srv/media:ro
       - staticfiles:/srv/static:ro
       - packdata:/srv/packs:ro
@@ -81,6 +131,7 @@ services:
     depends_on:
       - api
     restart: unless-stopped
+    logging: *json-logging
 
 volumes:
   pgdata:

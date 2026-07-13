@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../core/breakpoints.dart';
 import '../../core/api_exception.dart';
 import '../../core/speech.dart';
+import '../../core/telemetry.dart';
 import '../../data/kana_strokes.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
@@ -1984,10 +1987,12 @@ class KanaWritingPracticePage extends StatefulWidget {
     super.key,
     required this.targets,
     required this.mode,
+    this.telemetry,
   }) : assert(targets.length > 0);
 
   final List<KanaWritingTarget> targets;
   final KanaWritingMode mode;
+  final TelemetrySink? telemetry;
 
   @override
   State<KanaWritingPracticePage> createState() =>
@@ -2008,6 +2013,23 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
     for (final _ in widget.targets) 0,
   ];
   int _step = 0;
+  bool _completedLogged = false;
+
+  TelemetrySink get _telemetry => widget.telemetry ?? Telemetry.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_telemetry.logEvent(
+      TelemetryEvent.writingPracticeStarted,
+      parameters: {
+        'item_type': ItemType.kana.wire,
+        'kind': widget.mode.name,
+        'count': widget.targets.length,
+        'source': 'kana_detail',
+      },
+    ));
+  }
 
   KanaWritingTarget get _target => widget.targets[_step];
   DrawingController get _controller => _controllers[_step];
@@ -2047,6 +2069,18 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
     if (_step < widget.targets.length - 1) {
       _setStep(_step + 1);
     } else {
+      if (!_completedLogged) {
+        _completedLogged = true;
+        unawaited(_telemetry.logEvent(
+          TelemetryEvent.writingPracticeCompleted,
+          parameters: {
+            'item_type': ItemType.kana.wire,
+            'kind': widget.mode.name,
+            'count': widget.targets.length,
+            'source': 'kana_detail',
+          },
+        ));
+      }
       Navigator.pop(context);
     }
   }

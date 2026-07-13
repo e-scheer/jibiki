@@ -56,9 +56,7 @@ class Mnemonic {
   /// Absolute image URL (the API returns a relative /media/… path for locally
   /// stored uploads; R2/CDN URLs come back absolute).
   String get imageUrl {
-    if (imageSrc.isEmpty) return '';
-    if (imageSrc.startsWith('http')) return imageSrc;
-    return '${ApiConfig.baseUrl}$imageSrc';
+    return ApiConfig.absoluteUrl(imageSrc);
   }
 
   factory Mnemonic.fromJson(Map<String, dynamic> j) => Mnemonic(

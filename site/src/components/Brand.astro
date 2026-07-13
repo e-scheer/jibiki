@@ -1,0 +1,88 @@
+---
+interface Props {
+  variant?: 'color' | 'negative';
+  compact?: boolean;
+  label: string;
+}
+
+const { variant = 'color', compact = false, label } = Astro.props;
+const negative = variant === 'negative';
+---
+
+<span class:list={['brand-lockup', { 'brand-lockup--negative': negative, 'brand-lockup--compact': compact }]} role={label ? 'img' : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : 'true'}>
+  <svg class="brand-mark" viewBox="0 0 140 140" aria-hidden="true">
+    <rect class="mark-shadow" x="14" y="28" width="104" height="104" rx="26"></rect>
+    <rect class="mark-face" x="6" y="20" width="104" height="104" rx="26"></rect>
+    <text x="58" y="74" text-anchor="middle" dominant-baseline="central" lang="ja">字</text>
+  </svg>
+  {!compact && (
+    <span class="wordmark" aria-hidden="true">
+      jibiki<span class="wordmark-dot"></span>
+    </span>
+  )}
+</span>
+
+<style>
+  .brand-lockup {
+    --brand-ink: var(--ink);
+    --brand-face: var(--acid);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex: 0 0 auto;
+  }
+
+  .brand-lockup--negative {
+    --brand-ink: #fff;
+    --brand-face: var(--ink);
+  }
+
+  .brand-mark {
+    width: 3.2rem;
+    height: 3.2rem;
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .brand-lockup--compact .brand-mark {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .mark-shadow {
+    fill: var(--brand-ink);
+  }
+
+  .mark-face {
+    fill: var(--brand-face);
+    stroke: var(--brand-ink);
+    stroke-width: 7;
+  }
+
+  text {
+    fill: var(--brand-ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 70px;
+    font-weight: 900;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: flex-end;
+    color: var(--brand-ink);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+
+  .wordmark-dot {
+    width: 0.46rem;
+    height: 0.46rem;
+    margin: 0 0 0.08rem 0.24rem;
+    border: 2px solid var(--brand-ink);
+    border-radius: 2px;
+    background: var(--acid);
+    transform: rotate(12deg);
+  }
+</style>

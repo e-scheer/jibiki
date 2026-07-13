@@ -1,0 +1,274 @@
+---
+import type { Messages } from '../i18n/messages';
+import Brand from './Brand.astro';
+
+interface Props {
+  t: Messages;
+  kind: 'privacy' | 'terms' | 'sources';
+}
+
+const { t, kind } = Astro.props;
+const page = t.legal[kind];
+const isSources = kind === 'sources';
+---
+
+<article class="legal-page">
+  <header class="legal-hero">
+    <div class="container legal-hero-grid">
+      <div>
+        <span class="legal-mark" aria-hidden="true"><Brand compact label="" /></span>
+        <h1>{page.title}</h1>
+        <p>{page.intro}</p>
+      </div>
+      <div class="legal-date"><span>{t.legal.updatedLabel}</span><b>{t.legal.updatedDate}</b></div>
+    </div>
+  </header>
+
+  <div class="container legal-content">
+    {isSources ? (
+      <div class="source-list">
+        {t.legal.sources.entries.map((entry, index) => (
+          <section class={`source-card source-card--${(index % 3) + 1}`}>
+            <div class="source-number" aria-hidden="true">{index + 1}</div>
+            <div>
+              <h2>{entry.name}</h2>
+              <span>{entry.license}</span>
+              <p>{entry.body}</p>
+              <a href={entry.href} rel="external noreferrer" target="_blank">
+                {entry.name}<span class="sr-only">, {t.common.externalLink}</span>
+              </a>
+            </div>
+          </section>
+        ))}
+        <p class="source-notice">{t.legal.sources.notice}</p>
+      </div>
+    ) : (
+      <div class="legal-sections">
+        {(kind === 'privacy' ? t.legal.privacy.sections : t.legal.terms.sections).map((section, index) => (
+          <section>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <div>
+              <h2>{section.title}</h2>
+              {section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          </section>
+        ))}
+      </div>
+    )}
+    <a class="button button--paper legal-back" href={t.routes.home}>← {t.common.backHome}</a>
+  </div>
+</article>
+
+<style>
+  .legal-page {
+    background: var(--canvas);
+  }
+
+  .legal-hero {
+    margin-top: -5.8rem;
+    padding: 10.5rem 0 5rem;
+    border-bottom: var(--line);
+    background: var(--acid);
+  }
+
+  .legal-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+  }
+
+  .legal-mark {
+    display: grid;
+    width: 4.6rem;
+    height: 4.6rem;
+    place-items: center;
+    margin-bottom: 1.3rem;
+    border: var(--line);
+    border-radius: 14px;
+    background: var(--magenta);
+    box-shadow: var(--shadow);
+    transform: rotate(-3deg);
+  }
+
+  .legal-mark :global(.brand-lockup) {
+    transform: scale(1.05);
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin-bottom: 1.25rem;
+  }
+
+  .legal-hero p {
+    max-width: 66ch;
+    margin: 0;
+    color: var(--ink-2);
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  }
+
+  .legal-date {
+    display: flex;
+    min-width: 13rem;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.9rem 1rem;
+    border: var(--line);
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    transform: rotate(1.5deg);
+  }
+
+  .legal-date span {
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .legal-date b {
+    font-size: 0.92rem;
+  }
+
+  .legal-content {
+    padding-block: clamp(4rem, 8vw, 7rem);
+  }
+
+  .legal-sections {
+    display: grid;
+    width: min(100%, 850px);
+    gap: 1.2rem;
+    margin-inline: auto;
+  }
+
+  .legal-sections section {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    gap: 1rem;
+    padding: clamp(1.2rem, 3vw, 2rem);
+    border: var(--line);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .legal-sections section:nth-child(2n) {
+    background: var(--lavender);
+  }
+
+  .legal-sections section > span {
+    font-size: 1.55rem;
+    font-weight: 700;
+  }
+
+  .legal-sections h2,
+  .source-card h2 {
+    margin-bottom: 0.8rem;
+    font-size: clamp(1.45rem, 3vw, 2.1rem);
+  }
+
+  .legal-sections p,
+  .source-card p {
+    color: var(--ink-2);
+  }
+
+  .legal-sections p:last-child,
+  .source-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .source-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .source-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1.35rem;
+    border: var(--line);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .source-card--2 { background: var(--lavender); }
+  .source-card--3 { background: var(--lime); }
+
+  .source-number {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: var(--acid);
+    font-weight: 700;
+  }
+
+  .source-card > div:last-child > span {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    padding: 0.3rem 0.55rem;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .source-card a {
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .source-notice {
+    grid-column: 1 / -1;
+    padding: 1.2rem;
+    border: var(--line);
+    border-radius: 12px;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .legal-back {
+    width: max-content;
+    margin: 2.5rem auto 0;
+  }
+
+  @media (max-width: 699px) {
+    .legal-hero-grid,
+    .source-list {
+      grid-template-columns: 1fr;
+    }
+
+    .legal-date {
+      width: max-content;
+    }
+
+    .legal-sections section {
+      grid-template-columns: 1fr;
+    }
+
+    .source-notice {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .legal-hero {
+      margin-top: -4.7rem;
+      padding: 8.5rem 0 4rem;
+    }
+
+    .source-card {
+      grid-template-columns: 1fr;
+    }
+
+    .legal-back {
+      width: 100%;
+    }
+  }
+</style>

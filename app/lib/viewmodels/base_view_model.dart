@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/api_exception.dart';
+import '../core/telemetry.dart';
 
 /// Shared ViewModel plumbing: a loading flag, a last-error message, and a guarded
-/// runner that flips loading, catches [ApiException], and notifies listeners.
+/// runner that handles expected API failures and reports unexpected failures.
 abstract class BaseViewModel extends ChangeNotifier {
   bool _loading = false;
   String? _error;
@@ -38,8 +42,17 @@ abstract class BaseViewModel extends ChangeNotifier {
     } on ApiException catch (e) {
       _error = e.isUnauthorized ? authRequiredErrorMessage : e.message;
       return null;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      if (error is DioException && error.type == DioExceptionType.cancel) {
+        return null;
+      }
       _error = 'Something went wrong. Please try again.';
+      unawaited(Telemetry.instance.recordError(
+        error,
+        stackTrace,
+        mechanism: 'view_model',
+        context: {'view_model': runtimeType.toString()},
+      ));
       return null;
     } finally {
       _loading = false;

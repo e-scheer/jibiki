@@ -2,7 +2,7 @@ import 'dart:async' show StreamSubscription, unawaited;
 import 'dart:io' show Directory;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -14,9 +14,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'core/api_client.dart';
 import 'core/api_config.dart';
+import 'core/breakpoints.dart';
 import 'core/db/user_db.dart';
 import 'core/session_store.dart';
 import 'core/speech.dart';
+import 'core/telemetry.dart';
 import 'infrastructure/local/local_dictionary_data_source.dart';
 import 'infrastructure/local/local_study_store.dart';
 import 'infrastructure/packs/pack_manager.dart';
@@ -192,11 +194,27 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         Provider(create: (_) => FeedbackService(_api)),
         ChangeNotifierProvider.value(value: _app),
         ChangeNotifierProvider.value(value: _theme),
+        ChangeNotifierProvider.value(value: Telemetry.instance),
       ],
       child: Builder(builder: (context) {
-        final interfaceLanguage = context.watch<AppState>().interfaceLanguage;
-        final palette = context.watch<ThemeController>().palette;
+        final appState = context.watch<AppState>();
+        final themeController = context.watch<ThemeController>();
+        final interfaceLanguage = appState.interfaceLanguage;
+        final palette = themeController.palette;
         _api.setInterfaceLanguage(interfaceLanguage);
+        unawaited(Telemetry.instance.setContext({
+          'interface_language': interfaceLanguage,
+          'mnemonic_language': appState.profile?.mnemonicLanguage ?? 'unknown',
+          'app_mode': appState.mode.wire,
+          'account_state': appState.isAuthenticated
+              ? 'authenticated'
+              : appState.localOnly
+                  ? 'local_only'
+                  : 'signed_out',
+          'palette': palette.name,
+          'platform': kIsWeb ? 'web' : defaultTargetPlatform.name,
+          'form_factor': Breakpoints.of(MediaQuery.sizeOf(context).width).name,
+        }));
         return MaterialApp.router(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
           locale: Locale(context.watch<AppState>().interfaceLanguage),
@@ -205,7 +223,7 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(palette),
           darkTheme: AppTheme.dark(palette),
-          themeMode: switch (context.watch<ThemeController>().mode) {
+          themeMode: switch (themeController.mode) {
             ThemeModeSetting.light => ThemeMode.light,
             ThemeModeSetting.dark => ThemeMode.dark,
             ThemeModeSetting.system => ThemeMode.system,

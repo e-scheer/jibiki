@@ -1,0 +1,619 @@
+---
+import type { Locale, Messages } from '../i18n/messages';
+import ChaseLoader from './ChaseLoader.astro';
+
+interface Props {
+  locale: Locale;
+  t: Messages;
+  appUrl: string;
+  apiUrl: string;
+}
+
+const { locale, t, appUrl, apiUrl } = Astro.props;
+const sample = t.dictionary.samples[0];
+---
+
+<section class="section dictionary-section" id="dictionary" data-dictionary-demo data-locale={locale} data-api-url={apiUrl} data-app-url={appUrl} data-samples={JSON.stringify(t.dictionary.samples)} data-loading={t.dictionary.loading} data-empty={t.dictionary.noResults} data-unavailable={t.dictionary.unavailable} data-error={t.dictionary.error} data-count-label={t.dictionary.resultCount}>
+  <div class="container dictionary-grid">
+    <div class="dictionary-copy">
+      <span class="kicker">{t.dictionary.kicker}</span>
+      <h2>{t.dictionary.title}</h2>
+      <p class="section-copy">{t.dictionary.body}</p>
+      <form class="search-form" data-search-form>
+        <label class="sr-only" for={`dictionary-search-${locale}`}>{t.dictionary.searchLabel}</label>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.5"></circle><path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path></svg>
+        <input id={`dictionary-search-${locale}`} name="q" type="search" autocomplete="off" placeholder={t.dictionary.placeholder} />
+        <span class="search-loader" aria-hidden="true"><ChaseLoader label={t.dictionary.loading} small /></span>
+        <button type="submit">{t.dictionary.submit}</button>
+      </form>
+      <div class="quick-examples">
+        <span>{t.dictionary.examplesLabel}</span>
+        <div>
+          {t.dictionary.samples.map((item, index) => (
+            <button class:list={{ active: index === 0 }} type="button" data-sample-key={item.key} aria-pressed={index === 0 ? 'true' : 'false'} lang="ja">{item.query}</button>
+          ))}
+        </div>
+      </div>
+      <p class="search-status" data-search-status aria-live="polite"></p>
+    </div>
+
+    <article class="entry-card" data-entry-card aria-label={t.dictionary.selectedResult}>
+      <div class="entry-hero">
+        <div class="entry-title">
+          <span data-reading lang="ja">{sample.reading}</span>
+          <strong data-glyph lang="ja">{sample.glyph}</strong>
+        </div>
+        <div class="entry-audio" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10H4Zm12-1.5c1.4 1.5 1.4 5.5 0 7m2-10c3.2 3.5 3.2 9.5 0 13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span data-romaji>{sample.romaji}</span>
+        </div>
+        <div class="entry-tags" data-tags>
+          {sample.tags.map((tag) => <span>{tag}</span>)}
+        </div>
+      </div>
+      <div class="entry-body">
+        <section>
+          <h3>{t.dictionary.meaning}</h3>
+          <ol data-meanings>
+            {sample.meanings.map((meaning, index) => <li><b>{index + 1}.</b><span>{meaning}</span></li>)}
+          </ol>
+        </section>
+        <section class="composition" data-composition>
+          <h3>{t.dictionary.composition}</h3>
+          <div data-parts>
+            {sample.parts.map((part, index) => (
+              <>
+                {index > 0 && <i aria-hidden="true">+</i>}
+                <span><b lang="ja">{part.glyph}</b><small>{part.label}</small></span>
+              </>
+            ))}
+          </div>
+        </section>
+        <div class="entry-actions">
+          <a class="button button--paper" data-entry-link href={appUrl} data-analytics-event="dictionary_result_opened">{t.dictionary.openEntry}</a>
+          <a class="button" data-study-link href={appUrl} data-analytics-event="add_to_study_clicked">{t.dictionary.addToStudy}</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<script>
+  type SamplePart = { glyph: string; label: string };
+  type DemoEntry = {
+    key?: string;
+    id?: number;
+    query?: string;
+    glyph: string;
+    reading: string;
+    romaji: string;
+    tags: string[];
+    meanings: string[];
+    parts: SamplePart[];
+  };
+
+  const demos = document.querySelectorAll<HTMLElement>('[data-dictionary-demo]');
+
+  demos.forEach((demo) => {
+    const form = demo.querySelector<HTMLFormElement>('[data-search-form]');
+    const input = form?.querySelector<HTMLInputElement>('input[name="q"]');
+    const status = demo.querySelector<HTMLElement>('[data-search-status]');
+    const sampleButtons = demo.querySelectorAll<HTMLButtonElement>('[data-sample-key]');
+    const apiUrl = demo.dataset.apiUrl || '';
+    const appUrl = demo.dataset.appUrl || '';
+    const locale = demo.dataset.locale || 'fr';
+    const samples = JSON.parse(demo.dataset.samples || '[]') as DemoEntry[];
+
+    const setStatus = (message: string) => {
+      if (status) status.textContent = message;
+    };
+
+    const renderList = (container: Element | null, values: string[], itemBuilder: (value: string, index: number) => HTMLElement) => {
+      if (!container) return;
+      container.replaceChildren(...values.map(itemBuilder));
+    };
+
+    const render = (entry: DemoEntry) => {
+      const glyph = demo.querySelector<HTMLElement>('[data-glyph]');
+      const reading = demo.querySelector<HTMLElement>('[data-reading]');
+      const romaji = demo.querySelector<HTMLElement>('[data-romaji]');
+      if (glyph) glyph.textContent = entry.glyph;
+      if (reading) reading.textContent = entry.reading;
+      if (romaji) romaji.textContent = entry.romaji;
+
+      renderList(demo.querySelector('[data-tags]'), entry.tags, (value) => {
+        const tag = document.createElement('span');
+        tag.textContent = value;
+        return tag;
+      });
+
+      const meanings = demo.querySelector('[data-meanings]');
+      if (meanings) {
+        meanings.replaceChildren(...entry.meanings.map((meaning, index) => {
+          const item = document.createElement('li');
+          const number = document.createElement('b');
+          const text = document.createElement('span');
+          number.textContent = `${index + 1}.`;
+          text.textContent = meaning;
+          item.append(number, text);
+          return item;
+        }));
+      }
+
+      const composition = demo.querySelector<HTMLElement>('[data-composition]');
+      const parts = demo.querySelector('[data-parts]');
+      if (composition) composition.hidden = entry.parts.length === 0;
+      if (parts) {
+        const nodes: HTMLElement[] = [];
+        entry.parts.forEach((part, index) => {
+          if (index > 0) {
+            const plus = document.createElement('i');
+            plus.ariaHidden = 'true';
+            plus.textContent = '+';
+            nodes.push(plus);
+          }
+          const box = document.createElement('span');
+          const character = document.createElement('b');
+          const label = document.createElement('small');
+          character.lang = 'ja';
+          character.textContent = part.glyph;
+          label.textContent = part.label;
+          box.append(character, label);
+          nodes.push(box);
+        });
+        parts.replaceChildren(...nodes);
+      }
+
+      const route = entry.id ? `${appUrl}/#/word/${entry.id}` : appUrl;
+      demo.querySelectorAll<HTMLAnchorElement>('[data-entry-link], [data-study-link]').forEach((link) => {
+        link.href = route;
+      });
+    };
+
+    sampleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const sample = samples.find((item) => item.key === button.dataset.sampleKey);
+        if (!sample) return;
+        sampleButtons.forEach((candidate) => {
+          const active = candidate === button;
+          candidate.classList.toggle('active', active);
+          candidate.setAttribute('aria-pressed', String(active));
+        });
+        if (input) input.value = sample.query || sample.glyph;
+        render(sample);
+        setStatus('');
+        window.jibikiAnalytics?.track('dictionary_sample_selected', {
+          sample: sample.key || 'sample',
+          surface: 'marketing_site',
+        });
+      });
+    });
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const query = input?.value.trim() || '';
+      if (!query) {
+        input?.focus();
+        return;
+      }
+      window.jibikiAnalytics?.track('dictionary_search_started', {
+        surface: 'marketing_site',
+        api_configured: Boolean(apiUrl),
+      });
+      if (!apiUrl) {
+        const sample = samples.find((item) => item.query === query || item.glyph === query);
+        if (sample) render(sample);
+        setStatus(demo.dataset.unavailable || '');
+        return;
+      }
+
+      form.classList.add('loading');
+      setStatus(demo.dataset.loading || '');
+      try {
+        const endpoint = `${apiUrl}/api/v1/dict/search?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(locale)}&limit=3`;
+        const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`Search failed with ${response.status}`);
+        const payload = await response.json() as { results?: Array<Record<string, unknown>> };
+        const results = Array.isArray(payload.results) ? payload.results : [];
+        if (results.length === 0) {
+          setStatus(demo.dataset.empty || '');
+          return;
+        }
+        const first = results[0];
+        const senses = Array.isArray(first.senses) ? first.senses as Array<{ glosses?: Array<{ language?: string; text?: string }> }> : [];
+        const allGlosses = senses.flatMap((sense) => Array.isArray(sense.glosses) ? sense.glosses : []);
+        const exact = allGlosses.filter((gloss) => gloss.language?.toLowerCase().startsWith(locale));
+        const fallback = allGlosses.filter((gloss) => gloss.language?.toLowerCase().startsWith('en'));
+        const selectedGlosses = exact.length > 0 ? exact : fallback.length > 0 ? fallback : allGlosses;
+        const entry: DemoEntry = {
+          id: typeof first.id === 'number' ? first.id : undefined,
+          glyph: String(first.headword || query),
+          reading: String(first.primary_reading || ''),
+          romaji: String(first.primary_reading || ''),
+          tags: [first.jlpt ? `JLPT ${String(first.jlpt).toUpperCase()}` : ''].filter(Boolean),
+          meanings: selectedGlosses.slice(0, 3).map((gloss) => String(gloss.text || '')).filter(Boolean),
+          parts: [],
+        };
+        render(entry);
+        setStatus(`${results.length} ${demo.dataset.countLabel || ''}`);
+        window.jibikiAnalytics?.track('dictionary_search_completed', {
+          surface: 'marketing_site',
+          result_count: results.length,
+        });
+      } catch {
+        setStatus(demo.dataset.error || '');
+      } finally {
+        form.classList.remove('loading');
+      }
+    });
+  });
+</script>
+
+<style>
+  .dictionary-section {
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--canvas);
+  }
+
+  .dictionary-section::before {
+    position: absolute;
+    top: 10%;
+    left: -5rem;
+    width: 12rem;
+    height: 4rem;
+    border: var(--line);
+    border-radius: 10px;
+    background: var(--klein);
+    content: '';
+    transform: rotate(-15deg);
+  }
+
+  .dictionary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(30rem, 1.18fr);
+    align-items: center;
+    gap: clamp(3rem, 7vw, 7rem);
+  }
+
+  .dictionary-copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  h2 {
+    max-width: 10ch;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-form {
+    display: flex;
+    min-height: 4.1rem;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 2rem;
+    padding: 0.35rem;
+    border: var(--line);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .search-form > svg {
+    width: 1.4rem;
+    flex: 0 0 auto;
+    margin-left: 0.65rem;
+  }
+
+  .search-form input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .search-form input::placeholder {
+    color: #5d5866;
+    opacity: 1;
+  }
+
+  .search-form button {
+    min-height: 3.15rem;
+    padding: 0 1rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: var(--acid);
+    font-weight: 700;
+  }
+
+  .search-loader {
+    display: none;
+  }
+
+  .search-form.loading .search-loader {
+    display: inline-flex;
+  }
+
+  .quick-examples {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 1.25rem;
+  }
+
+  .quick-examples > span {
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .quick-examples > div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .quick-examples button {
+    min-width: 2.8rem;
+    min-height: 2.8rem;
+    padding: 0 0.65rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 900;
+  }
+
+  .quick-examples button.active {
+    background: var(--lavender);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-1px, -1px);
+  }
+
+  .search-status {
+    min-height: 1.45rem;
+    margin: 0.85rem 0 0;
+    color: var(--ink-2);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .entry-card {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border: var(--line);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 10px 10px 0 var(--ink);
+  }
+
+  .entry-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 1.2rem;
+    min-height: 15rem;
+    padding: 1.6rem;
+    border-bottom: var(--line);
+    background: var(--magenta);
+  }
+
+  .entry-title {
+    display: flex;
+    min-width: 10rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .entry-title > span {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .entry-title > strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: clamp(5rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .entry-audio {
+    display: inline-flex;
+    width: max-content;
+    min-height: 3rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.8rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-weight: 700;
+  }
+
+  .entry-audio svg {
+    width: 1.25rem;
+  }
+
+  .entry-tags {
+    display: flex;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+
+  .entry-tags span {
+    padding: 0.35rem 0.6rem;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .entry-body {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.35rem;
+  }
+
+  .entry-body section {
+    padding: 1rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 11px;
+  }
+
+  .entry-body h3 {
+    margin-bottom: 0.7rem;
+    font-size: 0.8rem;
+    letter-spacing: 0;
+  }
+
+  ol {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ol li {
+    display: flex;
+    gap: 0.65rem;
+    font-size: 0.93rem;
+  }
+
+  ol b {
+    color: var(--klein);
+  }
+
+  .composition > div {
+    display: flex;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .composition > div > span {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.55rem;
+    border: 2px solid var(--ink);
+    border-radius: 9px;
+    background: var(--lime);
+  }
+
+  .composition > div > span:nth-of-type(2) {
+    background: var(--acid);
+  }
+
+  .composition > div > span:nth-of-type(3) {
+    background: var(--lavender);
+  }
+
+  .composition b {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+  }
+
+  .composition small {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .composition i {
+    align-self: center;
+    font-size: 1.1rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .entry-actions {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 0.7rem;
+  }
+
+  .entry-actions .button {
+    padding-inline: 0.85rem;
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 959px) {
+    .dictionary-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(25rem, 1.1fr);
+      gap: 2.5rem;
+    }
+
+    .entry-hero {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .entry-audio {
+      justify-self: center;
+    }
+  }
+
+  @media (max-width: 759px) {
+    .dictionary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    h2 {
+      max-width: 12ch;
+    }
+
+    .entry-card {
+      width: min(100%, 38rem);
+      margin-inline: auto;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .dictionary-section::before {
+      display: none;
+    }
+
+    .search-form {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .search-form button {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .quick-examples {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .entry-card {
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .entry-hero {
+      min-height: 13rem;
+      padding: 1.25rem;
+    }
+
+    .entry-title > strong {
+      font-size: 5.4rem;
+    }
+
+    .entry-actions {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

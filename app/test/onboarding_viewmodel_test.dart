@@ -156,15 +156,11 @@ void main() {
       placement: OnboardingPlacement.katakana,
       expected: const {'ア', 'ガ'},
     ),
-    (
-      placement: OnboardingPlacement.allKana,
-      expected: const {'あ', 'が', 'ア', 'ガ'},
-    ),
   ]) {
     test('${testCase.placement.name} uses the canonical dictionary syllabary',
         () async {
       final h = await _harness(kana: canonicalKana);
-      h.vm.selectPlacement(testCase.placement);
+      h.vm.togglePlacement(testCase.placement);
 
       expect(await h.vm.finish(), isTrue);
       expect(h.study.lastKnown, isTrue);
@@ -179,6 +175,46 @@ void main() {
     });
   }
 
+  test('both kana scripts combine into the full syllabary', () async {
+    final h = await _harness(kana: canonicalKana);
+    h.vm.togglePlacement(OnboardingPlacement.hiragana);
+    h.vm.togglePlacement(OnboardingPlacement.katakana);
+
+    expect(await h.vm.finish(), isTrue);
+    expect(
+      h.study.lastItems.map((item) => item.ref).toSet(),
+      {'あ', 'が', 'ア', 'ガ'},
+    );
+  });
+
+  test('independent axes seed a deduplicated union of known items', () async {
+    final h = await _harness(
+      kana: canonicalKana,
+      jlpt: {
+        5: [_kanji('日', 5)],
+        4: [_kanji('本', 4)],
+      },
+    );
+    // A kana script, a JLPT level and specific characters at once - including
+    // an overlap (日) that must only seed once.
+    h.vm.togglePlacement(OnboardingPlacement.hiragana);
+    h.vm.togglePlacement(OnboardingPlacement.jlpt4);
+    h.vm.togglePlacement(OnboardingPlacement.specific);
+    h.vm.addKnownCharacters('日 猫');
+
+    expect(await h.vm.finish(), isTrue);
+    expect(
+      h.study.lastItems.toSet(),
+      {
+        (type: ItemType.kana, ref: 'あ'),
+        (type: ItemType.kana, ref: 'が'),
+        (type: ItemType.kanji, ref: '日'),
+        (type: ItemType.kanji, ref: '本'),
+        (type: ItemType.kanji, ref: '猫'),
+      },
+    );
+  });
+
   test('JLPT placement is cumulative and reads canonical repository levels',
       () async {
     final h = await _harness(jlpt: {
@@ -186,7 +222,7 @@ void main() {
       4: [_kanji('本', 4)],
       3: [_kanji('語', 3), _kanji('日', 3)],
     });
-    h.vm.selectPlacement(OnboardingPlacement.jlpt3);
+    h.vm.togglePlacement(OnboardingPlacement.jlpt3);
 
     expect(await h.vm.finish(), isTrue);
     expect(h.dictionary.requestedJlptLevels, [5, 4, 3]);
@@ -203,7 +239,7 @@ void main() {
 
   test('specific characters deduplicate and ignore unsupported text', () async {
     final h = await _harness();
-    h.vm.selectPlacement(OnboardingPlacement.specific);
+    h.vm.togglePlacement(OnboardingPlacement.specific);
     expect(h.vm.canContinuePlacement, isFalse);
 
     h.vm.setKnownCharacters('日本日 abc あ!');
@@ -220,10 +256,56 @@ void main() {
     );
   });
 
+  test('placements toggle independently, cap JLPT at one, and clear to fresh',
+      () async {
+    final h = await _harness();
+    expect(h.vm.isSelected(OnboardingPlacement.fresh), isTrue);
+
+    // Independent axes coexist: a kana script and a JLPT level together.
+    h.vm.togglePlacement(OnboardingPlacement.hiragana);
+    h.vm.togglePlacement(OnboardingPlacement.jlpt4);
+    expect(h.vm.isSelected(OnboardingPlacement.hiragana), isTrue);
+    expect(h.vm.isSelected(OnboardingPlacement.jlpt4), isTrue);
+    expect(h.vm.isSelected(OnboardingPlacement.fresh), isFalse);
+
+    // JLPT levels are cumulative, so only one stays active.
+    h.vm.togglePlacement(OnboardingPlacement.jlpt2);
+    expect(h.vm.isSelected(OnboardingPlacement.jlpt4), isFalse);
+    expect(h.vm.isSelected(OnboardingPlacement.jlpt2), isTrue);
+
+    // Re-tapping a card deselects just that one.
+    h.vm.togglePlacement(OnboardingPlacement.hiragana);
+    expect(h.vm.isSelected(OnboardingPlacement.hiragana), isFalse);
+
+    // "Start fresh" clears everything back to the neutral state.
+    h.vm.togglePlacement(OnboardingPlacement.fresh);
+    expect(h.vm.placements, isEmpty);
+    expect(h.vm.isSelected(OnboardingPlacement.fresh), isTrue);
+  });
+
+  test('known characters add as chips, dedupe, and remove individually',
+      () async {
+    final h = await _harness();
+    h.vm.togglePlacement(OnboardingPlacement.specific);
+
+    // Only kana/kanji are kept, deduplicated, in entry order.
+    h.vm.addKnownCharacters('日 本 abc 日 あ');
+    expect(h.vm.knownCharacterList, ['日', '本', 'あ']);
+    expect(h.vm.specificCharacterCount, 3);
+
+    // Adding more merges without duplicating existing chips.
+    h.vm.addKnownCharacters('本 語');
+    expect(h.vm.knownCharacterList, ['日', '本', 'あ', '語']);
+
+    // Removing one chip drops just that character.
+    h.vm.removeKnownCharacter('本');
+    expect(h.vm.knownCharacterList, ['日', 'あ', '語']);
+  });
+
   test('every onboarding mutation is locked while finish is running', () async {
     final h = await _harness();
     await h.vm.goToPlacementStep();
-    h.vm.selectPlacement(OnboardingPlacement.specific);
+    h.vm.togglePlacement(OnboardingPlacement.specific);
     h.vm.setKnownCharacters('日');
     final offer = PackOffer(id: 'test', title: 'Test', blurb: 'Test');
     h.study.pendingBulkAdd = Completer<Map<String, dynamic>>();
@@ -234,7 +316,7 @@ void main() {
 
     h.vm.selectMode(AppMode.learning);
     h.vm.selectLanguage('fr');
-    h.vm.selectPlacement(OnboardingPlacement.fresh);
+    h.vm.togglePlacement(OnboardingPlacement.fresh);
     h.vm.setKnownCharacters('本');
     h.vm.toggleOffer(offer, true);
     h.vm.backToProfileStep();
@@ -242,7 +324,7 @@ void main() {
 
     expect(h.vm.mode, AppMode.middle);
     expect(h.vm.language, 'en');
-    expect(h.vm.placement, OnboardingPlacement.specific);
+    expect(h.vm.isSelected(OnboardingPlacement.specific), isTrue);
     expect(h.vm.knownCharacters, '日');
     expect(offer.selected, isFalse);
     expect(h.vm.step, 1);
@@ -256,7 +338,7 @@ void main() {
   test('an unavailable canonical level stays on onboarding with a useful error',
       () async {
     final h = await _harness();
-    h.vm.selectPlacement(OnboardingPlacement.jlpt5);
+    h.vm.togglePlacement(OnboardingPlacement.jlpt5);
 
     expect(await h.vm.finish(), isFalse);
     expect(h.vm.hasError, isTrue);
@@ -313,7 +395,6 @@ void main() {
         'I know specific characters',
         'Hiragana',
         'Katakana',
-        'All kana',
         'JLPT N5',
         'JLPT N4',
         'JLPT N3',

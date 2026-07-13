@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/telemetry.dart';
 import '../models/enums.dart';
 import '../models/study.dart';
 import '../repositories/study_repository.dart';
@@ -21,6 +22,7 @@ class ReviewViewModel extends BaseViewModel {
   int _startedMs = 0;
   bool _moreNewLikely = false; // the pool has new cards we haven't loaded yet
   bool _loadingMore = false;
+  bool _sessionCompletionLogged = false;
 
   int get index => _index;
   int get reviewed => _reviewed;
@@ -53,9 +55,18 @@ class ReviewViewModel extends BaseViewModel {
         ..addAll(q.session.map((c) => c.id));
       _index = 0;
       _reviewed = 0;
+      _sessionCompletionLogged = false;
       _answerShown = false;
       _moreNewLikely = q.newCards.length < q.newAvailable;
       _startCard();
+      unawaited(Telemetry.instance.logEvent(
+        'study_session_started',
+        parameters: {
+          'source': deckId == null ? 'review_queue' : 'deck',
+          'card_count': q.session.length,
+          'new_count': q.newCards.length,
+        },
+      ));
     }
   }
 
@@ -85,7 +96,14 @@ class ReviewViewModel extends BaseViewModel {
       _moreNewLikely = added > 0 && q.newCards.length < q.newAvailable;
       // _index already sits at the old length (the first appended card), so the
       // session simply resumes; just restart the per-card timer.
-      if (added > 0) _startCard();
+      if (added > 0) {
+        _sessionCompletionLogged = false;
+        _startCard();
+      }
+      unawaited(Telemetry.instance.logEvent(
+        'study_more',
+        parameters: {'added_count': added},
+      ));
     }
     _loadingMore = false;
     notifyListeners();
@@ -109,6 +127,16 @@ class ReviewViewModel extends BaseViewModel {
     _answerShown = false;
     _startCard();
     notifyListeners();
+    unawaited(Telemetry.instance.logEvent(
+      'card_rated',
+      parameters: {
+        'item_type': card.itemType.wire,
+        'rating': rating.name,
+        'card_state': card.isNew ? 'new' : 'scheduled',
+        'duration_bucket': _durationBucket(elapsed),
+      },
+    ));
+    _logCompletionIfNeeded();
     unawaited(runGuarded(
         () => _study.review(card.id, rating, durationMs: elapsed),
         silent: true));
@@ -126,6 +154,15 @@ class ReviewViewModel extends BaseViewModel {
     _answerShown = false;
     _startCard();
     notifyListeners();
+    unawaited(Telemetry.instance.logEvent(
+      'card_rated',
+      parameters: {
+        'item_type': 'mixed_batch',
+        'rating': rating.name,
+        'count': cards.length,
+      },
+    ));
+    _logCompletionIfNeeded();
     for (final c in cards) {
       unawaited(runGuarded(() => _study.review(c.id, rating, durationMs: 0),
           silent: true));
@@ -134,4 +171,24 @@ class ReviewViewModel extends BaseViewModel {
 
   void _startCard() => _startedMs = _nowMs();
   int _nowMs() => DateTime.now().millisecondsSinceEpoch;
+
+  void _logCompletionIfNeeded() {
+    if (!finished || _sessionCompletionLogged) return;
+    _sessionCompletionLogged = true;
+    unawaited(Telemetry.instance.logEvent(
+      'study_session_completed',
+      parameters: {
+        'reviewed_count': _reviewed,
+        'source': deckId == null ? 'review_queue' : 'deck',
+      },
+    ));
+  }
+
+  static String _durationBucket(int milliseconds) => switch (milliseconds) {
+        < 2000 => 'under_2s',
+        < 5000 => '2_5s',
+        < 10000 => '5_10s',
+        < 30000 => '10_30s',
+        _ => '30s_plus',
+      };
 }

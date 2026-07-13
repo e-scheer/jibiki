@@ -1,0 +1,274 @@
+---
+import type { Messages } from '../i18n/messages';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section memory-section" id="method">
+  <div class="container">
+    <div class="memory-heading">
+      <span class="kicker">{t.memory.kicker}</span>
+      <h2>{t.memory.title}</h2>
+      <p class="section-copy">{t.memory.body}</p>
+    </div>
+    <ol class="memory-steps">
+      {t.memory.steps.map((step, index) => (
+        <li class={`step step--${index + 1}`}>
+          <span class="step-number">{step.number}</span>
+          <div class="step-visual" aria-hidden="true">
+            {index === 0 && <><span class="visual-search">桜</span><i></i></>}
+            {index === 1 && <><span lang="ja">木</span><b>+</b><span lang="ja">女</span></>}
+            {index === 2 && <><strong>3</strong><i></i><i></i><i></i></>}
+          </div>
+          <h3>{step.title}</h3>
+          <p>{step.body}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .memory-section {
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--acid);
+  }
+
+  .memory-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+    align-items: end;
+    gap: 1.5rem 4rem;
+  }
+
+  .memory-heading .kicker {
+    grid-column: 1 / -1;
+    width: max-content;
+    margin-bottom: -0.2rem;
+    background: var(--magenta);
+  }
+
+  .memory-heading h2 {
+    max-width: 12ch;
+    margin-bottom: 0;
+  }
+
+  .memory-heading p {
+    margin-bottom: 0.5rem;
+  }
+
+  .memory-steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.4rem;
+    margin: clamp(3rem, 6vw, 5rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .memory-steps::before {
+    position: absolute;
+    z-index: 0;
+    top: 2.2rem;
+    right: 10%;
+    left: 10%;
+    height: 0.7rem;
+    border: var(--line);
+    border-radius: 1rem;
+    background: var(--klein);
+    content: '';
+  }
+
+  .step {
+    position: relative;
+    z-index: 1;
+    min-height: 23rem;
+    padding: 1.4rem;
+    border: var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 7px 7px 0 var(--ink);
+    transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+  }
+
+  .step:hover {
+    box-shadow: 10px 10px 0 var(--ink);
+    transform: translate(-2px, -4px) rotate(-0.5deg);
+  }
+
+  .step--2 {
+    margin-top: 2.2rem;
+    background: var(--lavender);
+  }
+
+  .step--3 {
+    background: var(--lime);
+  }
+
+  .step-number {
+    position: absolute;
+    top: -1rem;
+    left: 1.2rem;
+    display: grid;
+    width: 3.6rem;
+    height: 3.6rem;
+    place-items: center;
+    border: var(--line);
+    border-radius: 11px;
+    background: var(--ink);
+    box-shadow: 4px 4px 0 var(--magenta);
+    color: #fff;
+    font-size: 1.65rem;
+    font-weight: 700;
+    transform: rotate(-4deg);
+  }
+
+  .step-visual {
+    display: flex;
+    height: 11rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 12px;
+    background: var(--canvas);
+    overflow: hidden;
+  }
+
+  .step-visual span {
+    display: grid;
+    min-width: 4rem;
+    height: 4rem;
+    place-items: center;
+    border: 2.5px solid var(--ink);
+    border-radius: 10px;
+    background: var(--acid);
+    box-shadow: 3px 3px 0 var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+  }
+
+  .step--2 .step-visual span:last-of-type {
+    background: var(--magenta);
+  }
+
+  .step-visual b {
+    font-size: 1.5rem;
+  }
+
+  .visual-search {
+    width: 70%;
+  }
+
+  .step--1 .step-visual {
+    position: relative;
+    background: var(--klein);
+  }
+
+  .step--1 .step-visual i {
+    position: absolute;
+    right: 18%;
+    bottom: 2.2rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .step--1 .step-visual i::after {
+    position: absolute;
+    right: -0.7rem;
+    bottom: -0.45rem;
+    width: 0.9rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--ink);
+    content: '';
+    transform: rotate(45deg);
+  }
+
+  .step--3 .step-visual {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
+    gap: 0.5rem;
+    padding: 1.2rem;
+  }
+
+  .step--3 .step-visual strong {
+    position: absolute;
+    top: 0.6rem;
+    left: 1rem;
+    font-size: 3.8rem;
+    letter-spacing: -0.08em;
+    line-height: 1;
+  }
+
+  .step--3 .step-visual i {
+    display: block;
+    height: 38%;
+    border: 2.5px solid var(--ink);
+    border-radius: 6px 6px 2px 2px;
+    background: var(--klein);
+  }
+
+  .step--3 .step-visual i:nth-of-type(2) {
+    height: 58%;
+    background: var(--magenta);
+  }
+
+  .step--3 .step-visual i:nth-of-type(3) {
+    height: 78%;
+    background: var(--acid);
+  }
+
+  .step h3 {
+    margin-bottom: 0.65rem;
+  }
+
+  .step p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 759px) {
+    .memory-heading {
+      grid-template-columns: 1fr;
+    }
+
+    .memory-steps {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .memory-steps::before {
+      top: 4%;
+      right: auto;
+      bottom: 4%;
+      left: 1.6rem;
+      width: 0.7rem;
+      height: auto;
+    }
+
+    .step,
+    .step--2 {
+      min-height: 0;
+      margin: 0 0 0 2.4rem;
+    }
+
+    .step-visual {
+      height: 9rem;
+    }
+  }
+</style>

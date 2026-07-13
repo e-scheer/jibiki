@@ -1,0 +1,193 @@
+---
+import type { Messages } from '../i18n/messages';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section mnemonic-section" id="community">
+  <div class="container mnemonic-grid">
+    <div class="mnemonic-copy">
+      <span class="kicker">{t.mnemonic.kicker}</span>
+      <h2>{t.mnemonic.title}</h2>
+      <p class="section-copy">{t.mnemonic.body}</p>
+    </div>
+    <div class="mnemonic-cards">
+      {t.mnemonic.cards.map((card, index) => (
+        <article class:list={['mnemonic-card', `mnemonic-card--${index + 1}`]}>
+          <div class="mnemonic-header">
+            <span>{t.mnemonic.languageLabel} <b>{card.language}</b></span>
+            <i aria-hidden="true">{index === 0 ? '文' : 'A'}</i>
+          </div>
+          <blockquote lang={card.locale}>« {card.quote} »</blockquote>
+          <footer>
+            <span>{t.mnemonic.communityLabel}</span>
+            <b lang={card.locale}>{card.author}</b>
+          </footer>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .mnemonic-section {
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--klein);
+    color: #fff;
+  }
+
+  .mnemonic-section::after {
+    position: absolute;
+    right: -4rem;
+    bottom: -6rem;
+    width: 17rem;
+    height: 17rem;
+    border: 4px solid #fff;
+    border-radius: 42% 58% 48% 52%;
+    content: '';
+    opacity: 0.18;
+    transform: rotate(18deg);
+  }
+
+  .mnemonic-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(32rem, 1.2fr);
+    align-items: center;
+    gap: clamp(3rem, 7vw, 7rem);
+  }
+
+  .kicker {
+    color: var(--ink);
+  }
+
+  h2 {
+    max-width: 11ch;
+  }
+
+  .section-copy {
+    color: #fff;
+  }
+
+  .mnemonic-cards {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .mnemonic-card {
+    position: relative;
+    z-index: 1;
+    padding: 1.35rem;
+    border: 3px solid var(--ink);
+    border-radius: 15px;
+    background: var(--surface);
+    box-shadow: 8px 8px 0 var(--ink);
+    color: var(--ink);
+    transform: rotate(-1.2deg);
+  }
+
+  .mnemonic-card--2 {
+    margin-left: 4rem;
+    background: var(--lavender);
+    transform: rotate(1.1deg);
+  }
+
+  .mnemonic-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .mnemonic-header > span {
+    padding: 0.4rem 0.65rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--acid);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .mnemonic-header i {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 9px;
+    background: var(--magenta);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.25rem;
+    font-style: normal;
+    font-weight: 900;
+  }
+
+  blockquote {
+    margin: 1.4rem 0;
+    font-size: clamp(1.2rem, 2.25vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+
+  footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.8rem;
+    border-top: 2px solid rgb(23 19 31 / 18%);
+  }
+
+  footer span,
+  footer b {
+    font-size: 0.72rem;
+  }
+
+  footer b {
+    text-align: right;
+  }
+
+  @media (max-width: 959px) {
+    .mnemonic-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mnemonic-copy {
+      max-width: 44rem;
+    }
+
+    .mnemonic-cards {
+      width: min(100%, 46rem);
+      margin-inline: auto;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .mnemonic-card,
+    .mnemonic-card--2 {
+      margin-left: 0;
+      padding: 1rem;
+      box-shadow: 5px 5px 0 var(--ink);
+      transform: none;
+    }
+
+    blockquote {
+      font-size: 1.12rem;
+    }
+
+    footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    footer b {
+      text-align: left;
+    }
+  }
+</style>

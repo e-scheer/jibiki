@@ -1,0 +1,19 @@
+FROM caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+
+ARG JIBIKI_RELEASE
+ARG OCI_REVISION
+ARG OCI_SOURCE
+
+LABEL org.opencontainers.image.title="jibiki web runtime" \
+      org.opencontainers.image.description="Astro on jibiki.app and Flutter Web on my.jibiki.app" \
+      org.opencontainers.image.source="${OCI_SOURCE}" \
+      org.opencontainers.image.revision="${OCI_REVISION}" \
+      org.opencontainers.image.version="${JIBIKI_RELEASE}"
+
+ENV JIBIKI_RELEASE=${JIBIKI_RELEASE}
+
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY site/ /srv/site/
+COPY app/ /srv/app/
+COPY metadata/release.json /usr/share/jibiki/release.json
+COPY SHA256SUMS /usr/share/jibiki/SHA256SUMS

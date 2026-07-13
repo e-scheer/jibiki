@@ -23,16 +23,39 @@ class ApiConfig {
     return 'http://localhost:8000';
   }
 
+  /// Resolves an API-provided asset path against the configured API origin.
+  ///
+  /// Django normally returns `/media/...`, but imported or legacy records can
+  /// omit the leading slash. Absolute CDN and object-storage URLs are kept as
+  /// provided.
+  static String absoluteUrl(String value) {
+    final source = value.trim();
+    if (source.isEmpty) return '';
+
+    final parsed = Uri.tryParse(source);
+    if (parsed != null && parsed.hasScheme) return source;
+
+    final path = source.startsWith('/') ? source : '/$source';
+    return Uri.parse(baseUrl).resolve(path).toString();
+  }
+
   // ── allauth headless (app client), auth flows ──────────────────────────────
   static const String authSignup = '/_allauth/app/v1/auth/signup';
   static const String authLogin = '/_allauth/app/v1/auth/login';
-  static const String authSession = '/_allauth/app/v1/auth/session'; // GET current / DELETE logout
+  static const String authSession =
+      '/_allauth/app/v1/auth/session'; // GET current / DELETE logout
+  static const String authVerifyEmail = '/_allauth/app/v1/auth/email/verify';
+  static const String authRequestPasswordReset =
+      '/_allauth/app/v1/auth/password/request';
+  static const String authResetPassword =
+      '/_allauth/app/v1/auth/password/reset';
 
   // ── domain (authenticated by the same session token via X-Session-Token) ────
   static const String me = '/api/v1/auth/me';
 
   static const String dictSearch = '/api/v1/dict/search';
-  static const String dictWords = '/api/v1/dict/words'; // browse (category), paginated
+  static const String dictWords =
+      '/api/v1/dict/words'; // browse (category), paginated
   static String dictWord(int id) => '/api/v1/dict/words/$id';
   static const String dictKanjiList = '/api/v1/dict/kanji';
   static String dictKanji(String literal) => '/api/v1/dict/kanji/$literal';
@@ -61,7 +84,8 @@ class ApiConfig {
   static String cardFavorite(int id) => '/api/v1/study/cards/$id/favorite';
   static const String studyAdd = '/api/v1/study/add';
   static const String studyAddBulk = '/api/v1/study/add/bulk';
-  static const String studySet = '/api/v1/study/set'; // set one item's status (toggles)
+  static const String studySet =
+      '/api/v1/study/set'; // set one item's status (toggles)
   static const String studyStates = '/api/v1/study/states'; // {item_ref: state}
   static const String studyCards = '/api/v1/study/cards';
   static String studyCardReview(int id) => '/api/v1/study/cards/$id/review';
@@ -86,7 +110,9 @@ class ApiConfig {
   static const String mnemonicDecks = '/api/v1/mnemonics/decks';
   static const String mnemonicDeckCreate = '/api/v1/mnemonics/decks/create';
   static String mnemonicDeck(int id) => '/api/v1/mnemonics/decks/$id';
-  static String mnemonicDeckPublish(int id) => '/api/v1/mnemonics/decks/$id/publish';
+  static String mnemonicDeckPublish(int id) =>
+      '/api/v1/mnemonics/decks/$id/publish';
   static String mnemonicDeckVote(int id) => '/api/v1/mnemonics/decks/$id/vote';
-  static String mnemonicDeckEnroll(int id) => '/api/v1/mnemonics/decks/$id/enroll';
+  static String mnemonicDeckEnroll(int id) =>
+      '/api/v1/mnemonics/decks/$id/enroll';
 }

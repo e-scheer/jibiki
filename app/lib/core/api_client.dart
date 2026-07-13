@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'api_config.dart';
 import 'api_exception.dart';
 import 'session_store.dart';
+import 'telemetry_dio_interceptor.dart';
 
 /// Thin Dio wrapper: injects the allauth session token as `X-Session-Token` on
 /// every request and normalizes failures to [ApiException]. All services talk to
@@ -17,6 +18,7 @@ class ApiClient {
           receiveTimeout: const Duration(seconds: 20),
           sendTimeout: const Duration(seconds: 20),
         )) {
+    _dio.interceptors.add(TelemetryDioInterceptor());
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -39,8 +41,16 @@ class ApiClient {
     _interfaceLanguage = language == 'fr' ? 'fr' : 'en';
   }
 
-  Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>
-      _request(() => _dio.get(path, queryParameters: query));
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? query,
+    Map<String, Object?>? headers,
+  }) =>
+      _request(() => _dio.get(
+            path,
+            queryParameters: query,
+            options: headers == null ? null : Options(headers: headers),
+          ));
 
   /// A GET whose body is plain text (e.g. the Anki TSV export), not JSON.
   Future<String> getText(String path) async {
@@ -66,9 +76,24 @@ class ApiClient {
 
   /// A raw request that also exposes response headers (used by AuthService to
   /// read the X-Session-Token echoed on signup/login).
-  Future<Response<dynamic>> postRaw(String path, {Object? data}) async {
+  Future<Response<dynamic>> postRaw(
+    String path, {
+    Object? data,
+    Set<int> acceptedStatusCodes = const {},
+  }) async {
     try {
-      return await _dio.post(path, data: data);
+      return await _dio.post(
+        path,
+        data: data,
+        options: acceptedStatusCodes.isEmpty
+            ? null
+            : Options(
+                validateStatus: (status) =>
+                    status != null &&
+                    ((status >= 200 && status < 300) ||
+                        acceptedStatusCodes.contains(status)),
+              ),
+      );
     } on DioException catch (e) {
       throw _map(e);
     }

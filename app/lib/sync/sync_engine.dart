@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/telemetry.dart';
 import '../infrastructure/user_db_handle.dart';
 import '../services/sync_service.dart';
 
@@ -37,10 +38,16 @@ class SyncConflict {
 }
 
 class SyncEngine extends ChangeNotifier {
-  SyncEngine(this._user, this._service, {required this.canSync});
+  SyncEngine(
+    this._user,
+    this._service, {
+    required this.canSync,
+    TelemetrySink? telemetry,
+  }) : _telemetry = telemetry ?? Telemetry.instance;
 
   final UserDbHandle _user;
   final SyncService _service;
+  final TelemetrySink _telemetry;
 
   /// Sync only makes sense with a signed-in session (local-only users study
   /// without one; their outbox uploads wholesale when they create an account).
@@ -169,7 +176,7 @@ class SyncEngine extends ChangeNotifier {
         return;
       }
       await _bind(accountId);
-      await syncNow();
+      await syncNow(source: 'account_binding');
     } catch (error) {
       _lastError = error;
       notifyListeners();
@@ -191,13 +198,13 @@ class SyncEngine extends ChangeNotifier {
       await _clearLocalUserData();
       await _bind(conflict.accountId);
       notifyListeners();
-      await syncNow();
+      await syncNow(source: 'conflict_cloud');
     } else {
       await _prepareCompleteLocalUpload();
       await _resetCursor();
       await _bind(conflict.accountId);
       notifyListeners();
-      await syncNow(replaceCloud: true);
+      await syncNow(replaceCloud: true, source: 'conflict_local');
     }
   }
 
@@ -359,7 +366,10 @@ class SyncEngine extends ChangeNotifier {
     _debounce = Timer(debounce, () => unawaited(syncNow()));
   }
 
-  Future<void> syncNow({bool replaceCloud = false}) async {
+  Future<void> syncNow({
+    bool replaceCloud = false,
+    String source = 'automatic',
+  }) async {
     if (_disposed ||
         _syncing ||
         !_online ||
@@ -392,6 +402,10 @@ class SyncEngine extends ChangeNotifier {
         if (reviews.length < _reviewPage && ops.length < _opPage) break;
       }
       _backoff = const Duration(seconds: 5);
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.syncCompleted,
+        parameters: {'source': source},
+      ));
     } catch (e) {
       _lastError = e;
       // Try again later - outbox rows are durable, nothing is lost.

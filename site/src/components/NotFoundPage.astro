@@ -1,0 +1,90 @@
+---
+import type { Messages } from '../i18n/messages';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="not-found">
+  <div class="not-found-deco" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="container not-found-grid">
+    <strong>{t.notFound.code}</strong>
+    <div><h1>{t.notFound.title}</h1><p>{t.notFound.body}</p><a class="button button--ink" href={t.routes.home}>{t.common.backHome}</a></div>
+  </div>
+</section>
+
+<style>
+  .not-found {
+    position: relative;
+    display: grid;
+    min-height: 70vh;
+    place-items: center;
+    margin-top: -5.8rem;
+    padding: 10rem 0 6rem;
+    overflow: hidden;
+    background: var(--acid);
+  }
+
+  .not-found-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: clamp(2rem, 7vw, 6rem);
+  }
+
+  .not-found-grid > strong {
+    font-size: clamp(7rem, 22vw, 17rem);
+    letter-spacing: -0.1em;
+    line-height: 0.8;
+    text-shadow: 9px 9px 0 var(--magenta);
+    transform: rotate(-3deg);
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin-bottom: 1rem;
+    font-size: clamp(2.7rem, 6vw, 5rem);
+  }
+
+  p {
+    max-width: 46ch;
+    margin-bottom: 1.6rem;
+    color: var(--ink-2);
+    font-size: 1.1rem;
+  }
+
+  .not-found-deco {
+    position: absolute;
+    right: 7%;
+    bottom: 8%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .not-found-deco i {
+    width: 1.8rem;
+    height: 1.8rem;
+    border: var(--line);
+    border-radius: 6px;
+    background: var(--klein);
+    transform: rotate(-8deg);
+  }
+
+  .not-found-deco i:nth-child(2) { background: var(--magenta); transform: rotate(11deg); }
+  .not-found-deco i:nth-child(3) { background: var(--lime); transform: rotate(-4deg); }
+
+  @media (max-width: 699px) {
+    .not-found-grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    h1,
+    p {
+      margin-inline: auto;
+    }
+  }
+</style>

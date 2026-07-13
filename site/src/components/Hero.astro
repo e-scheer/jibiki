@@ -1,0 +1,582 @@
+---
+import type { Messages } from '../i18n/messages';
+import Brand from './Brand.astro';
+
+interface Props {
+  t: Messages;
+  appUrl: string;
+}
+
+const { t, appUrl } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-deco hero-deco--bar" aria-hidden="true"></div>
+  <div class="hero-deco hero-deco--square" aria-hidden="true"></div>
+  <div class="hero-deco hero-deco--asterisk" aria-hidden="true">＊</div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="kicker">{t.hero.badge}</span>
+      <h1>
+        {t.hero.titleLead}
+        <span>{t.hero.titleAccent}</span>
+        {t.hero.titleTail}
+      </h1>
+      <p>{t.hero.body}</p>
+      <div class="hero-actions">
+        <a class="button button--ink" href={appUrl} data-analytics-event="start_guest_clicked">
+          {t.common.startWithoutAccount}
+          <svg class="app-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </a>
+        <a class="button button--paper" href="#method" data-analytics-event="method_clicked">{t.common.learnMore}</a>
+      </div>
+      <p class="hero-note"><span aria-hidden="true">✓</span>{t.hero.note}</p>
+    </div>
+
+    <div class="hero-product" role="img" aria-label={t.hero.previewLabel}>
+      <div class="tablet-shell">
+        <aside class="mini-rail" aria-hidden="true">
+          <Brand compact label="" />
+          <i class="rail-item rail-item--active">字</i>
+          <i class="rail-item">あ</i>
+          <i class="rail-item">↺</i>
+          <i class="rail-item">○</i>
+        </aside>
+        <div class="tablet-content">
+          <div class="mini-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.5"></circle><path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path></svg>
+            <span lang="ja">桜</span>
+          </div>
+          <div class="mini-layout">
+            <div class="due-card">
+              <div class="due-top"><strong>12</strong><span>{t.hero.newCards}</span></div>
+              <b>{t.hero.due}</b>
+              <div class="due-lines" aria-hidden="true"><i></i><i></i></div>
+              <span class="mini-button">{t.hero.launch}</span>
+            </div>
+            <div class="word-card">
+              <span class="word-sticker">{t.hero.wordOfDay}</span>
+              <div class="word-glyph"><small lang="ja">はなみ</small><strong lang="ja">花見</strong></div>
+              <div class="word-info"><b>hanami</b><span>{t.hero.flowerViewing}</span></div>
+            </div>
+            <div class="forecast" aria-hidden="true">
+              <i style="--height: 42%"></i><i style="--height: 66%"></i><i style="--height: 52%"></i><i style="--height: 82%"></i><i style="--height: 34%"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="floating-card">
+        <span class="floating-furi" lang="ja">さくら</span>
+        <strong lang="ja">桜</strong>
+        <div class="floating-tags"><i>N5</i><i>3</i><i>♥</i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    min-height: min(54rem, calc(100vh - 2rem));
+    align-items: center;
+    margin-top: -5.8rem;
+    padding: 9.5rem 0 5rem;
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--acid);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(32rem, 1.08fr);
+    align-items: center;
+    gap: clamp(2.5rem, 6vw, 6rem);
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    max-width: 9ch;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 span {
+    position: relative;
+    display: inline-block;
+    z-index: 0;
+  }
+
+  h1 span::after {
+    position: absolute;
+    z-index: -1;
+    right: -0.08em;
+    bottom: 0.02em;
+    left: -0.04em;
+    height: 0.22em;
+    border: 3px solid var(--ink);
+    border-radius: 0.08em;
+    background: var(--magenta);
+    content: '';
+    transform: rotate(-1.5deg);
+  }
+
+  .hero-copy > p:not(.hero-note) {
+    max-width: 54ch;
+    margin-bottom: 1.7rem;
+    color: var(--ink-2);
+    font-size: clamp(1.05rem, 1.6vw, 1.28rem);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .hero-note {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 1.25rem 0 0;
+    font-size: 0.87rem;
+    font-weight: 700;
+  }
+
+  .hero-note span {
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--lime);
+    line-height: 1;
+  }
+
+  .hero-product {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    perspective: 1200px;
+  }
+
+  .tablet-shell {
+    display: flex;
+    min-height: 31rem;
+    overflow: hidden;
+    border: 4px solid var(--ink);
+    border-radius: 24px;
+    background: var(--canvas);
+    box-shadow: 14px 14px 0 var(--ink);
+    transform: rotate(1.2deg);
+    animation: product-rise 620ms 120ms cubic-bezier(0.18, 1, 0.4, 1) both;
+  }
+
+  @keyframes product-rise {
+    from { opacity: 0; transform: translateY(32px) rotate(4deg); }
+    to { opacity: 1; transform: translateY(0) rotate(1.2deg); }
+  }
+
+  .mini-rail {
+    display: flex;
+    width: 4.2rem;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.8rem 0.45rem;
+    border-right: var(--line);
+    background: #fff;
+  }
+
+  .mini-rail :global(.brand-lockup) {
+    transform: scale(0.82);
+  }
+
+  .rail-item {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 2px solid transparent;
+    border-radius: 9px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-style: normal;
+    font-weight: 900;
+  }
+
+  .rail-item--active {
+    border-color: var(--ink);
+    background: var(--acid);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .tablet-content {
+    min-width: 0;
+    flex: 1;
+    padding: 1rem;
+  }
+
+  .mini-search {
+    display: flex;
+    height: 3.2rem;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0 0.9rem;
+    border: var(--line);
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .mini-search svg {
+    width: 1.15rem;
+  }
+
+  .mini-search span {
+    font-size: 1.05rem;
+    font-weight: 900;
+  }
+
+  .mini-layout {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-rows: 1fr 0.55fr;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .due-card,
+  .word-card,
+  .forecast {
+    border: var(--line);
+    border-radius: 13px;
+    box-shadow: var(--shadow);
+  }
+
+  .due-card {
+    display: flex;
+    grid-row: 1 / 3;
+    flex-direction: column;
+    padding: 1rem;
+    background: var(--acid);
+  }
+
+  .due-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .due-top strong {
+    font-size: clamp(4.2rem, 8vw, 6.5rem);
+    letter-spacing: -0.08em;
+    line-height: 0.82;
+  }
+
+  .due-top span {
+    padding: 0.25rem 0.42rem;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.58rem;
+    font-weight: 700;
+  }
+
+  .due-card > b {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .due-lines {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+  }
+
+  .due-lines i {
+    width: 70%;
+    height: 0.5rem;
+    border-radius: 1rem;
+    background: rgb(23 19 31 / 18%);
+  }
+
+  .due-lines i:last-child {
+    width: 48%;
+  }
+
+  .mini-button {
+    display: grid;
+    min-height: 2.9rem;
+    place-items: center;
+    margin-top: auto;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: var(--ink);
+    color: var(--acid);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .word-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--lavender);
+  }
+
+  .word-sticker {
+    position: absolute;
+    top: -0.75rem;
+    left: 0.8rem;
+    padding: 0.24rem 0.52rem;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--magenta);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 0.58rem;
+    font-weight: 700;
+    transform: rotate(-2deg);
+  }
+
+  .word-glyph {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .word-glyph small {
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .word-glyph strong {
+    font-size: clamp(2.3rem, 5vw, 4.1rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .word-info {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .word-info span {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .forecast {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.45rem;
+    padding: 0.85rem 1rem;
+    background: #fff;
+  }
+
+  .forecast i {
+    width: 20%;
+    height: var(--height);
+    border: 2px solid var(--ink);
+    border-radius: 5px 5px 2px 2px;
+    background: var(--klein);
+  }
+
+  .floating-card {
+    position: absolute;
+    right: -1.5rem;
+    bottom: -2rem;
+    display: flex;
+    width: 11rem;
+    min-height: 13rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: var(--line);
+    border-radius: 17px;
+    background: var(--magenta);
+    box-shadow: 8px 8px 0 var(--ink);
+    transform: rotate(-4deg);
+    animation: card-float 4.2s 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes card-float {
+    from { transform: translateY(0) rotate(-4deg); }
+    to { transform: translateY(-9px) rotate(-2deg); }
+  }
+
+  .floating-furi {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .floating-card > strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 5.2rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .floating-tags {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+  }
+
+  .floating-tags i {
+    min-width: 1.75rem;
+    padding: 0.18rem 0.35rem;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.6rem;
+    font-style: normal;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .hero-deco {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .hero-deco--bar {
+    top: 8.5rem;
+    right: 8vw;
+    width: 5rem;
+    height: 1.25rem;
+    border: var(--line);
+    border-radius: 6px;
+    background: var(--klein);
+    transform: rotate(-10deg);
+  }
+
+  .hero-deco--square {
+    top: 7.5rem;
+    right: 15vw;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: var(--line);
+    border-radius: 5px;
+    background: var(--magenta);
+    transform: rotate(14deg);
+  }
+
+  .hero-deco--asterisk {
+    right: 2.8vw;
+    bottom: 2rem;
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1;
+    transform: rotate(8deg);
+  }
+
+  @media (max-width: 1099px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(29rem, 1.1fr);
+      gap: 2.5rem;
+    }
+
+    .floating-card {
+      right: -0.5rem;
+      width: 9rem;
+      min-height: 11rem;
+    }
+
+    .floating-card > strong {
+      font-size: 4.3rem;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .hero {
+      min-height: 0;
+      margin-top: -5.3rem;
+      padding: 9rem 0 5.5rem;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      max-width: 10ch;
+    }
+
+    .hero-product {
+      width: min(100%, 45rem);
+      margin: 1rem auto 0;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .hero {
+      margin-top: -4.7rem;
+      padding: 8.25rem 0 4.5rem;
+    }
+
+    .hero-actions {
+      display: grid;
+    }
+
+    .tablet-shell {
+      min-height: 25rem;
+      border-width: 3px;
+      border-radius: 20px;
+      box-shadow: 8px 8px 0 var(--ink);
+      transform: rotate(0.6deg);
+    }
+
+    .mini-rail {
+      display: none;
+    }
+
+    .tablet-content {
+      padding: 0.75rem;
+    }
+
+    .mini-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: 12.5rem auto;
+    }
+
+    .due-card {
+      grid-row: auto;
+    }
+
+    .due-top strong {
+      font-size: 5rem;
+    }
+
+    .forecast {
+      display: none;
+    }
+
+    .floating-card {
+      right: -0.25rem;
+      bottom: -1.8rem;
+      width: 7.6rem;
+      min-height: 9.5rem;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .floating-card > strong {
+      font-size: 3.6rem;
+    }
+
+    .hero-deco--asterisk {
+      display: none;
+    }
+  }
+</style>

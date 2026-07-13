@@ -1,0 +1,91 @@
+---
+import type { Messages } from '../i18n/messages';
+import Brand from './Brand.astro';
+
+interface Props {
+  t: Messages;
+  appUrl: string;
+}
+
+const { t, appUrl } = Astro.props;
+---
+
+<section class="final-cta">
+  <div class="container final-shell">
+    <div class="final-brand" aria-hidden="true"><Brand compact label="" /></div>
+    <div><h2>{t.finalCta.title}</h2><p>{t.finalCta.body}</p></div>
+    <a class="button" href={appUrl} data-analytics-event="start_guest_clicked">
+      {t.common.startWithoutAccount}
+      <svg class="app-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+  .final-cta {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+    background: var(--magenta);
+  }
+
+  .final-shell {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem 2rem;
+    padding: clamp(1.4rem, 4vw, 2.5rem);
+    border: var(--line);
+    border-radius: 20px;
+    background: var(--klein);
+    box-shadow: 10px 10px 0 var(--ink);
+    color: #fff;
+  }
+
+  .final-brand {
+    display: grid;
+    width: 5.5rem;
+    height: 5.5rem;
+    place-items: center;
+    border: 3px solid #fff;
+    border-radius: 18px;
+    background: var(--acid);
+    transform: rotate(-4deg);
+  }
+
+  .final-brand :global(.brand-lockup) {
+    transform: scale(1.3);
+  }
+
+  h2 {
+    margin-bottom: 0.4rem;
+    font-size: clamp(2.2rem, 5vw, 4.3rem);
+  }
+
+  p {
+    max-width: 58ch;
+    margin: 0;
+    color: #fff;
+  }
+
+  @media (max-width: 759px) {
+    .final-shell {
+      grid-template-columns: auto 1fr;
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .final-shell .button {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 449px) {
+    .final-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .final-brand {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+  }
+</style>

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jibiki/core/telemetry.dart';
 import 'package:jibiki/data/kana_strokes.dart';
 import 'package:jibiki/l10n/app_localizations.dart';
 import 'package:jibiki/models/kana.dart';
@@ -324,4 +325,48 @@ void main() {
     expect(canvasSize.shortestSide, greaterThanOrEqualTo(180));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('practice records start and completion without kana content',
+      (tester) async {
+    final recorder = _RecordingTelemetry();
+    final target = (await targets()).first;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: KanaWritingPracticePage(
+          targets: [target],
+          mode: KanaWritingMode.free,
+          telemetry: recorder,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Done'));
+    await tester.pump();
+
+    expect(
+      recorder.events.map((event) => event.name),
+      [
+        TelemetryEvent.writingPracticeStarted,
+        TelemetryEvent.writingPracticeCompleted,
+      ],
+    );
+    for (final event in recorder.events) {
+      expect(event.parameters, isNot(contains('character')));
+      expect(event.parameters, isNot(contains('ref')));
+      expect(event.parameters, isNot(contains('text')));
+    }
+  });
+}
+
+class _RecordingTelemetry implements TelemetrySink {
+  final events = <({String name, Map<String, Object?> parameters})>[];
+
+  @override
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> parameters = const {},
+  }) async {
+    events.add((name: name, parameters: Map.of(parameters)));
+  }
 }

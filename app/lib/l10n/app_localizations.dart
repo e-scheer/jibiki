@@ -104,6 +104,330 @@ abstract class AppLocalizations {
   /// **'jibiki'**
   String get appTitle;
 
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotPassword;
+
+  /// No description provided for @authBackToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get authBackToSignIn;
+
+  /// No description provided for @authContinueToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to sign in'**
+  String get authContinueToSignIn;
+
+  /// No description provided for @authCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get authCheckAgain;
+
+  /// No description provided for @authLinkUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not use this link'**
+  String get authLinkUnavailableTitle;
+
+  /// No description provided for @authLinkUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may be incomplete, expired or already used. Return to sign in or request a new link.'**
+  String get authLinkUnavailableBody;
+
+  /// No description provided for @verifyEmailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'EMAIL CHECK'**
+  String get verifyEmailEyebrow;
+
+  /// No description provided for @verifyEmailHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'One tap to confirm.'**
+  String get verifyEmailHeadline;
+
+  /// No description provided for @verifyEmailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure your jibiki account and keep every device in sync.'**
+  String get verifyEmailDescription;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @verifyEmailCheckingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your link'**
+  String get verifyEmailCheckingTitle;
+
+  /// No description provided for @verifyEmailCheckingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This only takes a moment.'**
+  String get verifyEmailCheckingBody;
+
+  /// No description provided for @verifyEmailReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is ready to verify'**
+  String get verifyEmailReadyTitle;
+
+  /// No description provided for @verifyEmailReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this address to finish securing your account.'**
+  String get verifyEmailReadyBody;
+
+  /// No description provided for @verifyEmailAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get verifyEmailAction;
+
+  /// No description provided for @verifyEmailSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified'**
+  String get verifyEmailSuccessTitle;
+
+  /// No description provided for @verifyEmailSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is ready. Sign in to continue where you stopped.'**
+  String get verifyEmailSuccessBody;
+
+  /// No description provided for @passwordResetEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT RECOVERY'**
+  String get passwordResetEyebrow;
+
+  /// No description provided for @passwordResetHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Back in, calmly.'**
+  String get passwordResetHeadline;
+
+  /// No description provided for @passwordResetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset access without losing your local dictionary or study history.'**
+  String get passwordResetDescription;
+
+  /// No description provided for @passwordResetRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get passwordResetRequestTitle;
+
+  /// No description provided for @passwordResetRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your account email. We will send a secure reset link if an account matches.'**
+  String get passwordResetRequestBody;
+
+  /// No description provided for @emailFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailFieldLabel;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get enterValidEmail;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get sendResetLink;
+
+  /// No description provided for @passwordResetRequestSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox'**
+  String get passwordResetRequestSuccessTitle;
+
+  /// No description provided for @passwordResetRequestSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account matches that email, a reset link is on its way.'**
+  String get passwordResetRequestSuccessBody;
+
+  /// No description provided for @passwordResetCheckingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your reset link'**
+  String get passwordResetCheckingTitle;
+
+  /// No description provided for @passwordResetCheckingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We are making sure it is still secure and active.'**
+  String get passwordResetCheckingBody;
+
+  /// No description provided for @chooseNewPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get chooseNewPasswordTitle;
+
+  /// No description provided for @chooseNewPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters. A longer, unique passphrase is even better.'**
+  String get chooseNewPasswordBody;
+
+  /// No description provided for @newPasswordFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPasswordFieldLabel;
+
+  /// No description provided for @confirmPasswordFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPasswordFieldLabel;
+
+  /// No description provided for @passwordAtLeastEight.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters'**
+  String get passwordAtLeastEight;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set new password'**
+  String get setNewPassword;
+
+  /// No description provided for @passwordResetSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get passwordResetSuccessTitle;
+
+  /// No description provided for @passwordResetSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password was changed. Sign in with the new one.'**
+  String get passwordResetSuccessBody;
+
+  /// No description provided for @requestAnotherResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Request another link'**
+  String get requestAnotherResetLink;
+
+  /// No description provided for @socialAuthEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'SIGN-IN STATUS'**
+  String get socialAuthEyebrow;
+
+  /// No description provided for @socialAuthHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'That handoff stopped.'**
+  String get socialAuthHeadline;
+
+  /// No description provided for @socialAuthDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account stays safe. Choose how you want to continue.'**
+  String get socialAuthDescription;
+
+  /// No description provided for @socialAuthCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in cancelled'**
+  String get socialAuthCancelledTitle;
+
+  /// No description provided for @socialAuthCancelledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was changed. You can try again whenever you are ready.'**
+  String get socialAuthCancelledBody;
+
+  /// No description provided for @socialAuthDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in was not approved'**
+  String get socialAuthDeniedTitle;
+
+  /// No description provided for @socialAuthDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider did not approve this request. Check its permissions, then try again.'**
+  String get socialAuthDeniedBody;
+
+  /// No description provided for @socialAuthReauthenticationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to continue'**
+  String get socialAuthReauthenticationTitle;
+
+  /// No description provided for @socialAuthReauthenticationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, the provider needs a fresh sign-in before this action can finish.'**
+  String get socialAuthReauthenticationBody;
+
+  /// No description provided for @socialAuthSignupClosedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account creation is unavailable'**
+  String get socialAuthSignupClosedTitle;
+
+  /// No description provided for @socialAuthSignupClosedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'New social accounts cannot be created right now. Try an existing account instead.'**
+  String get socialAuthSignupClosedBody;
+
+  /// No description provided for @socialAuthUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not finish sign-in'**
+  String get socialAuthUnknownTitle;
+
+  /// No description provided for @socialAuthUnknownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider returned an unexpected result. Your jibiki data was not changed.'**
+  String get socialAuthUnknownBody;
+
+  /// No description provided for @trySignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try sign-in again'**
+  String get trySignInAgain;
+
+  /// No description provided for @returnToJibiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to jibiki'**
+  String get returnToJibiki;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -271,6 +595,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data'**
   String get data;
+
+  /// No description provided for @privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// No description provided for @usageAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage analytics'**
+  String get usageAnalytics;
+
+  /// No description provided for @usageAnalyticsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share anonymous screen and feature usage to help improve jibiki. Search text and study content are never collected.'**
+  String get usageAnalyticsHelp;
+
+  /// No description provided for @diagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnostics;
+
+  /// No description provided for @diagnosticsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share performance timings and crash reports. Reports exclude account details and learning content.'**
+  String get diagnosticsHelp;
 
   /// No description provided for @offlineStorage.
   ///

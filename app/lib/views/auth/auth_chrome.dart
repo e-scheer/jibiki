@@ -76,7 +76,10 @@ class AuthChrome extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(
-              height: 300,
+              // Recovery headlines are deliberately more descriptive than the
+              // sign-in copy. Keep enough room for two-line mobile headings
+              // and translated descriptions before the card overlap begins.
+              height: 328,
               width: double.infinity,
               child: _BrandPanel(
                 eyebrow: eyebrow,
@@ -359,6 +362,69 @@ class AuthInlineError extends StatelessWidget {
                 message,
                 style: const TextStyle(
                     fontSize: 12.5, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class AuthStatusPanel extends StatelessWidget {
+  const AuthStatusPanel({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.tone = NeoTone.lavender,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final NeoTone tone;
+
+  @override
+  Widget build(BuildContext context) => NeoCard(
+        tone: tone,
+        shadow: 3,
+        radius: 12,
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: context.jc.surface,
+                border: Border.all(color: context.jc.ink, width: 2.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      height: 1.15,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

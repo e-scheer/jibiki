@@ -1,0 +1,66 @@
+---
+interface Props {
+  label: string;
+  small?: boolean;
+  alternate?: boolean;
+}
+
+const { label, small = false, alternate = false } = Astro.props;
+---
+
+<span class:list={['chase', { 'chase--small': small, 'chase--alternate': alternate }]} role="status" aria-label={label}>
+  <i></i><i></i><i></i>
+</span>
+
+<style>
+  .chase {
+    --size: 3.5rem;
+    --block: 1.45rem;
+    --travel: calc(var(--size) - var(--block));
+    position: relative;
+    display: inline-block;
+    width: var(--size);
+    height: var(--size);
+    flex: 0 0 auto;
+  }
+
+  .chase--small {
+    --size: 1.15rem;
+    --block: 0.5rem;
+  }
+
+  i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--block);
+    height: var(--block);
+    border: max(1.5px, calc(var(--block) * 0.1)) solid var(--ink);
+    border-radius: max(2px, calc(var(--block) * 0.25));
+    background: var(--klein);
+    box-shadow: max(1.5px, calc(var(--block) * 0.13)) max(1.5px, calc(var(--block) * 0.13)) 0 var(--ink);
+    animation: chase 640ms steps(1, end) infinite;
+  }
+
+  i:nth-child(2) {
+    background: var(--magenta);
+    animation-delay: -160ms;
+  }
+
+  i:nth-child(3) {
+    background: var(--lime);
+    animation-delay: -320ms;
+  }
+
+  .chase--alternate i:first-child {
+    background: var(--acid);
+  }
+
+  @keyframes chase {
+    0%,
+    100% { transform: translate(0, 0); }
+    25% { transform: translate(var(--travel), 0); }
+    50% { transform: translate(var(--travel), var(--travel)); }
+    75% { transform: translate(0, var(--travel)); }
+  }
+</style>

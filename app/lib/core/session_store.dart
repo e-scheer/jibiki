@@ -15,6 +15,10 @@ class SessionStore {
   static const _kLocalProfile = 'local_profile';
   static const _kThemePalette = 'theme_palette';
   static const _kThemeMode = 'theme_mode';
+  static const _kTelemetryConsent = 'telemetry_consent';
+  static const _kTelemetryAnalyticsConsent = 'telemetry_analytics_consent';
+  static const _kTelemetryDiagnosticsConsent = 'telemetry_diagnostics_consent';
+  static const _kTelemetryInstallId = 'telemetry_install_id';
 
   static Future<SessionStore> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -66,6 +70,34 @@ class SessionStore {
   String get themeMode => _prefs.getString(_kThemeMode) ?? 'system';
   Future<void> setThemeMode(String value) =>
       _prefs.setString(_kThemeMode, value);
+
+  /// Diagnostics and product analytics are opt-in. A null value means the user
+  /// has not made a choice yet, so every telemetry provider stays disabled.
+  bool? get telemetryAnalyticsConsent =>
+      _prefs.getBool(_kTelemetryAnalyticsConsent) ??
+      _prefs.getBool(_kTelemetryConsent);
+  bool? get telemetryDiagnosticsConsent =>
+      _prefs.getBool(_kTelemetryDiagnosticsConsent) ??
+      _prefs.getBool(_kTelemetryConsent);
+  Future<void> setTelemetryConsent({
+    required bool analytics,
+    required bool diagnostics,
+  }) async {
+    await _prefs.setBool(_kTelemetryAnalyticsConsent, analytics);
+    await _prefs.setBool(_kTelemetryDiagnosticsConsent, diagnostics);
+    await _prefs.remove(_kTelemetryConsent);
+  }
+
+  /// Pseudonymous installation identifier created only after consent. It is
+  /// removed when consent is revoked and never contains an account identifier.
+  String? get telemetryInstallId => _prefs.getString(_kTelemetryInstallId);
+  Future<void> setTelemetryInstallId(String? value) async {
+    if (value == null || value.isEmpty) {
+      await _prefs.remove(_kTelemetryInstallId);
+    } else {
+      await _prefs.setString(_kTelemetryInstallId, value);
+    }
+  }
 
   Future<void> clear() async {
     await _prefs.remove(_kToken);

@@ -1,0 +1,7 @@
+---
+import NotFoundPage from '../../components/NotFoundPage.astro';
+import { getMessages } from '../../i18n/messages';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const t = getMessages('en');
+---
+<BaseLayout locale="en" t={t} title={t.meta.notFoundTitle} description={t.meta.notFoundDescription} path="/en/404/" alternatePath="/fr/404/" alternateLocale="fr" noindex><NotFoundPage t={t} /></BaseLayout>

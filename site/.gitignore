@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+public/fonts/
+public/og/*.png
+.env
+.env.*
+!.env.example

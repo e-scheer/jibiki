@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
 import '../../core/languages.dart';
+import '../../core/telemetry.dart';
 import '../../l10n/l10n.dart';
 import '../widgets/language_picker.dart';
 import '../widgets/jibiki_brand.dart';
@@ -295,6 +298,32 @@ class _Settings extends StatelessWidget {
                           onTap: () =>
                               context.push('/settings/integrations/wanikani'),
                         ),
+                    ]),
+                    _section(context, context.l10n.privacy),
+                    _SettingsCard(children: [
+                      _SettingsSwitchRow(
+                        title: context.l10n.usageAnalytics,
+                        helper: context.l10n.usageAnalyticsHelp,
+                        value:
+                            context.watch<Telemetry>().analyticsConsentGranted,
+                        onChanged: (enabled) => unawaited(
+                          context
+                              .read<Telemetry>()
+                              .setAnalyticsConsent(enabled),
+                        ),
+                      ),
+                      _SettingsSwitchRow(
+                        title: context.l10n.diagnostics,
+                        helper: context.l10n.diagnosticsHelp,
+                        value: context
+                            .watch<Telemetry>()
+                            .diagnosticsConsentGranted,
+                        onChanged: (enabled) => unawaited(
+                          context
+                              .read<Telemetry>()
+                              .setDiagnosticsConsent(enabled),
+                        ),
+                      ),
                     ]),
                     _section(context, context.l10n.account),
                     _SettingsCard(children: [

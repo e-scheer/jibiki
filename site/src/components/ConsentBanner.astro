@@ -1,0 +1,399 @@
+---
+import type { Locale, Messages } from '../i18n/messages';
+
+interface Props {
+  locale: Locale;
+  t: Messages;
+  gaMeasurementId: string;
+}
+
+const { locale, t, gaMeasurementId } = Astro.props;
+---
+
+<aside
+      class="consent"
+      data-consent-banner
+      data-ga-id={gaMeasurementId}
+      data-locale={locale}
+      aria-label={t.consent.label}
+      aria-live="polite"
+      hidden
+    >
+      <div class="consent-mark" aria-hidden="true">字</div>
+      <div class="consent-copy">
+        <strong>{t.consent.title}</strong>
+        <p>{t.consent.body}</p>
+        <a href={t.routes.privacy}>{t.consent.privacy}</a>
+      </div>
+      <div class="consent-actions">
+        <button class="button" type="button" data-consent-accept>{t.consent.accept}</button>
+        <button class="button button--paper" type="button" data-consent-decline>{t.consent.decline}</button>
+        <button class="button button--paper" type="button" data-consent-customize>{t.consent.customize}</button>
+      </div>
+      <div class="consent-custom" data-consent-custom hidden>
+        <label>
+          <input type="checkbox" data-consent-analytics />
+          <span><strong>{t.consent.analyticsTitle}</strong><small>{t.consent.analyticsBody}</small></span>
+        </label>
+        <label>
+          <input type="checkbox" data-consent-diagnostics />
+          <span><strong>{t.consent.diagnosticsTitle}</strong><small>{t.consent.diagnosticsBody}</small></span>
+        </label>
+        <button class="button" type="button" data-consent-save>{t.consent.save}</button>
+      </div>
+    </aside>
+
+<script>
+  declare global {
+    interface Window {
+      dataLayer?: unknown[];
+      gtag?: (...args: unknown[]) => void;
+      jibikiAnalytics?: {
+        track: (name: string, params?: Record<string, string | number | boolean>) => void;
+      };
+    }
+  }
+
+  const consentKey = 'jibiki_consent_v1';
+  const banner = document.querySelector<HTMLElement>('[data-consent-banner]');
+
+  if (banner) {
+    const measurementId = banner.dataset.gaId || '';
+    const locale = banner.dataset.locale || 'fr';
+    const accept = banner.querySelector<HTMLButtonElement>('[data-consent-accept]');
+    const decline = banner.querySelector<HTMLButtonElement>('[data-consent-decline]');
+    const customize = banner.querySelector<HTMLButtonElement>('[data-consent-customize]');
+    const custom = banner.querySelector<HTMLElement>('[data-consent-custom]');
+    const analyticsChoice = banner.querySelector<HTMLInputElement>('[data-consent-analytics]');
+    const diagnosticsChoice = banner.querySelector<HTMLInputElement>('[data-consent-diagnostics]');
+    const save = banner.querySelector<HTMLButtonElement>('[data-consent-save]');
+
+    type ConsentRecord = {
+      version: 1;
+      analytics: boolean;
+      diagnostics: boolean;
+    };
+
+    const parseConsent = (value: string | null): ConsentRecord | null => {
+      if (!value) return null;
+      try {
+        const parsed = JSON.parse(decodeURIComponent(value)) as Partial<ConsentRecord>;
+        if (parsed.version !== 1 || typeof parsed.analytics !== 'boolean' || typeof parsed.diagnostics !== 'boolean') {
+          return null;
+        }
+        return parsed as ConsentRecord;
+      } catch {
+        return null;
+      }
+    };
+
+    const readConsent = (): ConsentRecord | null => {
+      const cookie = document.cookie
+        .split('; ')
+        .find((entry) => entry.startsWith(`${consentKey}=`))
+        ?.slice(consentKey.length + 1);
+      const fromCookie = parseConsent(cookie || null);
+      if (fromCookie) return fromCookie;
+      try {
+        return parseConsent(window.localStorage.getItem(consentKey));
+      } catch {
+        return null;
+      }
+    };
+
+    const writeConsent = (analytics: boolean, diagnostics: boolean) => {
+      const record: ConsentRecord = {
+        version: 1,
+        analytics,
+        diagnostics,
+      };
+      const value = encodeURIComponent(JSON.stringify(record));
+      try {
+        window.localStorage.setItem(consentKey, value);
+      } catch {
+        // The cookie still carries the choice when local storage is unavailable.
+      }
+      const productionDomain = window.location.hostname === 'jibiki.app' || window.location.hostname.endsWith('.jibiki.app');
+      const shared = productionDomain ? '; Domain=.jibiki.app; Secure' : '';
+      document.cookie = `${consentKey}=${value}; Max-Age=31536000; Path=/; SameSite=Lax${shared}`;
+    };
+
+    const loadAnalytics = () => {
+      if (!measurementId || document.querySelector('[data-jibiki-ga]')) return;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = (...args: unknown[]) => window.dataLayer?.push(args);
+      window.gtag('consent', 'default', {
+        analytics_storage: 'granted',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+      });
+      window.gtag('js', new Date());
+      window.gtag('config', measurementId, {
+        send_page_view: true,
+        page_title: document.title,
+        page_location: window.location.href,
+        language: locale,
+      });
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+      script.dataset.jibikiGa = 'true';
+      document.head.append(script);
+    };
+
+    const purgeGoogleAnalyticsCookies = () => {
+      const productionDomain = window.location.hostname === 'jibiki.app' || window.location.hostname.endsWith('.jibiki.app');
+      document.cookie.split(';').forEach((part) => {
+        const name = part.split('=')[0]?.trim();
+        if (!name || !name.startsWith('_ga')) return;
+        document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+        if (productionDomain) {
+          document.cookie = `${name}=; Max-Age=0; Domain=.jibiki.app; Path=/; SameSite=Lax; Secure`;
+        }
+      });
+    };
+
+    const disableAnalytics = () => {
+      window.gtag?.('consent', 'update', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+      });
+      purgeGoogleAnalyticsCookies();
+      document.querySelector('[data-jibiki-ga]')?.remove();
+    };
+
+    const hide = () => {
+      banner.hidden = true;
+    };
+
+    const show = () => {
+      const current = readConsent();
+      if (analyticsChoice) analyticsChoice.checked = current?.analytics ?? false;
+      if (diagnosticsChoice) diagnosticsChoice.checked = current?.diagnostics ?? false;
+      if (custom) custom.hidden = true;
+      banner.hidden = false;
+      accept?.focus();
+    };
+
+    window.jibikiAnalytics = {
+      track(name, params = {}) {
+        if (readConsent()?.analytics !== true) return;
+        loadAnalytics();
+        window.gtag?.('event', name, params);
+      },
+    };
+
+    accept?.addEventListener('click', () => {
+      writeConsent(true, true);
+      loadAnalytics();
+      hide();
+    });
+
+    decline?.addEventListener('click', () => {
+      const wasEnabled = readConsent()?.analytics === true;
+      writeConsent(false, false);
+      if (wasEnabled) {
+        disableAnalytics();
+        window.location.reload();
+      } else {
+        hide();
+      }
+    });
+
+    customize?.addEventListener('click', () => {
+      const current = readConsent();
+      if (analyticsChoice) analyticsChoice.checked = current?.analytics ?? false;
+      if (diagnosticsChoice) diagnosticsChoice.checked = current?.diagnostics ?? false;
+      if (custom) custom.hidden = false;
+      analyticsChoice?.focus();
+    });
+
+    save?.addEventListener('click', () => {
+      const wasEnabled = readConsent()?.analytics === true;
+      const analytics = analyticsChoice?.checked ?? false;
+      const diagnostics = diagnosticsChoice?.checked ?? false;
+      writeConsent(analytics, diagnostics);
+      if (analytics) {
+        loadAnalytics();
+        hide();
+      } else if (wasEnabled) {
+        disableAnalytics();
+        window.location.reload();
+      } else {
+        hide();
+      }
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-consent-settings]').forEach((control) => {
+      control.addEventListener('click', show);
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = (event.target as Element | null)?.closest<HTMLElement>('[data-analytics-event]');
+      if (!target) return;
+      const name = target.dataset.analyticsEvent;
+      if (name) window.jibikiAnalytics?.track(name, { surface: 'marketing_site' });
+    });
+
+    const saved = readConsent();
+    if (saved?.analytics === true) {
+      loadAnalytics();
+    } else if (!saved && !(navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) {
+      banner.hidden = false;
+    }
+  }
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    z-index: 500;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    display: grid;
+    width: min(46rem, calc(100% - 2rem));
+    grid-template-columns: auto 1fr;
+    gap: 1rem 1.25rem;
+    padding: 1.1rem;
+    border: var(--line);
+    border-radius: 18px;
+    background: var(--lavender);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  .consent-mark {
+    display: grid;
+    width: 3.2rem;
+    height: 3.2rem;
+    place-items: center;
+    border: 2.5px solid var(--ink);
+    border-radius: 11px;
+    background: var(--acid);
+    box-shadow: 3px 3px 0 var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 900;
+  }
+
+  .consent-copy strong {
+    display: block;
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+
+  .consent-copy p {
+    margin: 0.35rem 0 0.4rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .consent-copy a {
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .consent-actions {
+    display: flex;
+    grid-column: 2;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .consent-actions .button {
+    min-height: 2.9rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  .consent-custom {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 0.7rem;
+    padding-top: 0.9rem;
+    border-top: 2px solid rgb(23 19 31 / 24%);
+  }
+
+  .consent-custom[hidden] {
+    display: none;
+  }
+
+  .consent-custom label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 62%);
+    cursor: pointer;
+  }
+
+  .consent-custom input {
+    width: 1.35rem;
+    height: 1.35rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--klein);
+  }
+
+  .consent-custom span {
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  .consent-custom strong {
+    font-size: 0.9rem;
+  }
+
+  .consent-custom small {
+    color: var(--ink-2);
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .consent-custom > .button {
+    justify-self: end;
+    min-height: 2.9rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  @media (max-width: 599px) {
+    .consent {
+      right: 0.65rem;
+      bottom: max(0.65rem, env(safe-area-inset-bottom));
+      width: calc(100% - 1.3rem);
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem;
+      padding: 0.9rem;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .consent-mark {
+      width: 2.7rem;
+      height: 2.7rem;
+      font-size: 1.45rem;
+    }
+
+    .consent-actions {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: 1fr;
+    }
+
+    .consent-custom > .button {
+      width: 100%;
+    }
+
+    .consent-actions .button {
+      width: 100%;
+    }
+  }
+</style>

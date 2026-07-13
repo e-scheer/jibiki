@@ -1,0 +1,271 @@
+---
+import type { Messages } from '../i18n/messages';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section review-section">
+  <div class="container review-grid">
+    <div class="review-copy">
+      <span class="kicker">{t.review.kicker}</span>
+      <h2>{t.review.title}</h2>
+      <p class="section-copy">{t.review.body}</p>
+    </div>
+    <div class="review-demo">
+      <div class="review-top">
+        <strong>{t.review.progress}</strong>
+        <span>{t.review.remaining}</span>
+        <div class="review-progress" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="review-workspace">
+        <article class="flash-card">
+          <span class="retained">{t.review.retained}</span>
+          <strong lang="ja">勉強</strong>
+          <i aria-hidden="true"></i>
+          <b lang="ja">{t.review.reading}</b>
+          <span>« {t.review.gloss} »</span>
+          <small>{t.review.seen}</small>
+        </article>
+        <div class="rating-panel">
+          <p>{t.review.question}</p>
+          <div class="ratings">
+            {t.review.ratings.map((rating) => (
+              <button class={`rating rating--${rating.key}`} type="button" data-analytics-event="review_demo_rated">
+                <span>{rating.label}</span><b>{rating.interval}</b>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .review-section {
+    border-bottom: var(--line);
+    background: var(--lavender);
+  }
+
+  .review-grid {
+    display: grid;
+    grid-template-columns: minmax(19rem, 0.72fr) minmax(35rem, 1.28fr);
+    align-items: center;
+    gap: clamp(3rem, 7vw, 7rem);
+  }
+
+  .review-copy h2 {
+    max-width: 10ch;
+  }
+
+  .review-demo {
+    overflow: hidden;
+    border: var(--line);
+    border-radius: 22px;
+    background: var(--lavender);
+    box-shadow: 11px 11px 0 var(--ink);
+  }
+
+  .review-top {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: end;
+    gap: 0.15rem 1rem;
+    padding: 1rem 1.2rem;
+    border-bottom: var(--line);
+    background: rgb(255 255 255 / 30%);
+  }
+
+  .review-top strong {
+    grid-row: 1 / 3;
+    font-size: clamp(2.1rem, 4vw, 3.4rem);
+    letter-spacing: -0.06em;
+    line-height: 1;
+  }
+
+  .review-top > span {
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .review-progress {
+    height: 1rem;
+    overflow: hidden;
+    border: 2.5px solid var(--ink);
+    border-radius: 1rem;
+    background: #fff;
+  }
+
+  .review-progress i {
+    display: block;
+    width: 35%;
+    height: 100%;
+    border-right: 2.5px solid var(--ink);
+    background: var(--klein);
+    animation: progress-in 800ms 350ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes progress-in {
+    from { width: 0; }
+    to { width: 35%; }
+  }
+
+  .review-workspace {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 1.35rem;
+    padding: 2rem;
+  }
+
+  .flash-card {
+    position: relative;
+    display: flex;
+    min-height: 23rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.2rem;
+    border: var(--line);
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 8px 8px 0 var(--ink);
+    text-align: center;
+  }
+
+  .flash-card > strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: clamp(4.5rem, 9vw, 7.5rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .flash-card > i {
+    width: 3.6rem;
+    height: 0.25rem;
+    margin: 1rem 0 0.8rem;
+    border-radius: 1rem;
+    background: var(--ink);
+  }
+
+  .flash-card > b {
+    font-size: 1.25rem;
+  }
+
+  .flash-card > span:not(.retained) {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .flash-card > small {
+    margin-top: 1.3rem;
+    color: var(--ink-2);
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .retained {
+    position: absolute;
+    top: -1rem;
+    right: -0.65rem;
+    padding: 0.55rem 0.8rem;
+    border: var(--line);
+    border-radius: 9px;
+    background: var(--acid);
+    box-shadow: 4px 4px 0 var(--ink);
+    font-size: 0.85rem;
+    font-weight: 700;
+    transform: rotate(-5deg);
+    animation: stamp-in 400ms 650ms cubic-bezier(0.18, 1.4, 0.4, 1) both;
+  }
+
+  @keyframes stamp-in {
+    from { opacity: 0; transform: rotate(8deg) scale(0.2); }
+    to { opacity: 1; transform: rotate(-5deg) scale(1); }
+  }
+
+  .rating-panel > p {
+    margin-bottom: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .ratings {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .rating {
+    display: flex;
+    min-height: 3.9rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.65rem 0.8rem;
+    border: var(--line);
+    border-radius: 10px;
+    background: var(--coral);
+    box-shadow: 4px 4px 0 var(--ink);
+    font-weight: 700;
+    text-align: left;
+    transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+  }
+
+  .rating:hover {
+    box-shadow: 0 0 0 var(--ink);
+    transform: translate(4px, 4px);
+  }
+
+  .rating--hard { background: var(--acid); }
+  .rating--good { background: var(--lime); }
+  .rating--easy { background: var(--klein); color: #fff; }
+
+  .rating b {
+    padding: 0.22rem 0.45rem;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 959px) {
+    .review-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .review-copy {
+      max-width: 44rem;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .review-demo {
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .review-workspace {
+      grid-template-columns: 1fr;
+      padding: 1.1rem;
+    }
+
+    .flash-card {
+      min-height: 19rem;
+    }
+
+    .ratings {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .rating {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

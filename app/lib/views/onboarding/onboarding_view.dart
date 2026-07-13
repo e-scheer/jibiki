@@ -274,13 +274,6 @@ class _PlacementStep extends StatelessWidget {
         subtitle: 'Mark the full katakana syllabary as known.',
         icon: Icons.text_fields_rounded,
       ),
-      (
-        value: OnboardingPlacement.allKana,
-        badge: 'かカ',
-        title: 'All kana',
-        subtitle: 'Hiragana and katakana, including their variants.',
-        icon: Icons.grid_view_rounded,
-      ),
     ];
     const jlptOptions = [
       (
@@ -326,7 +319,7 @@ class _PlacementStep extends StatelessWidget {
           sticker: context.trText('YOUR LEVEL'),
           title: context.trText('Where should we place you?'),
           subtitle: context.trText(
-            'Choose the exact foundation you already know. You can change this later.',
+            'Select everything you already know. Combine kana, a JLPT level and your own characters.',
           ),
           showBack: true,
           onBack: vm.isLoading ? null : vm.backToProfileStep,
@@ -335,6 +328,17 @@ class _PlacementStep extends StatelessWidget {
         NeoSectionTitle(context.trText('Choose a starting point')),
         const SizedBox(height: 10),
         _PlacementGrid(options: startingOptions, vm: vm),
+        AnimatedSize(
+          duration: Motion.timed(context, Motion.base),
+          curve: Motion.out,
+          alignment: Alignment.topCenter,
+          child: vm.isSelected(OnboardingPlacement.specific)
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 14),
+                  child: _KnownCharactersField(vm: vm),
+                )
+              : const SizedBox.shrink(),
+        ),
         const SizedBox(height: 22),
         NeoSectionTitle(context.trText('Kana you already know')),
         const SizedBox(height: 10),
@@ -346,37 +350,6 @@ class _PlacementStep extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _PlacementGrid(options: jlptOptions, vm: vm),
-        AnimatedSize(
-          duration: Motion.timed(context, Motion.base),
-          curve: Motion.out,
-          child: vm.placement == OnboardingPlacement.specific
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 22),
-                  child: NeoCard(
-                    tone: NeoTone.lavender,
-                    shadow: 4,
-                    child: TextField(
-                      enabled: !vm.isLoading,
-                      onChanged: vm.setKnownCharacters,
-                      style: const TextStyle(
-                        fontFamily: 'ZenKakuGothicNew',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: context.trText('Known characters'),
-                        hintText: context.trText('Example: 日本語かな'),
-                        prefixIcon: const Icon(Icons.edit_outlined),
-                        suffixText: '${vm.specificCharacterCount}',
-                        helperText: context.trText(
-                          'Only kana and kanji are counted.',
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
         if (vm.hasError) ...[
           const SizedBox(height: 18),
           NeoCard(
@@ -468,9 +441,9 @@ class _PlacementGrid extends StatelessWidget {
             subtitle: context.trText(option.subtitle),
             badge: option.badge,
             icon: option.icon,
-            selected: vm.placement == option.value,
+            selected: vm.isSelected(option.value),
             enabled: !vm.isLoading,
-            onTap: () => vm.selectPlacement(option.value),
+            onTap: () => vm.togglePlacement(option.value),
           );
         },
       );
@@ -848,6 +821,138 @@ class _PlacementCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+            ],
+          ),
+        ),
+      );
+}
+
+/// Chip-based entry for the "I know specific characters" placement: every kana
+/// or kanji entered (typed or pasted) becomes a removable pill, mirroring a
+/// multi-select. The inline field only holds text still being composed.
+class _KnownCharactersField extends StatefulWidget {
+  const _KnownCharactersField({required this.vm});
+
+  final OnboardingViewModel vm;
+
+  @override
+  State<_KnownCharactersField> createState() => _KnownCharactersFieldState();
+}
+
+class _KnownCharactersFieldState extends State<_KnownCharactersField> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Peel committed kana/kanji out of the field into chips, leaving any text
+  /// still under composition (romaji under an IME) so input keeps flowing.
+  void _absorb(String text) {
+    if (_controller.value.composing.isValid) return;
+    final japanese = StringBuffer();
+    final leftover = StringBuffer();
+    for (final char in text.runes.map(String.fromCharCode)) {
+      final code = char.runes.single;
+      final isJapanese = (code >= 0x3040 && code <= 0x30ff) ||
+          (code >= 0x3400 && code <= 0x9fff);
+      (isJapanese ? japanese : leftover).write(char);
+    }
+    if (japanese.isEmpty) return;
+    widget.vm.addKnownCharacters(japanese.toString());
+    final kept = leftover.toString();
+    _controller.value = TextEditingValue(
+      text: kept,
+      selection: TextSelection.collapsed(offset: kept.length),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = widget.vm;
+    final chars = vm.knownCharacterList;
+    return NeoCard(
+      tone: NeoTone.lavender,
+      shadow: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NeoSectionTitle(
+            context.trText('Known characters'),
+            trailing: chars.isEmpty
+                ? null
+                : NeoBadge('${chars.length}', tone: NeoTone.acid),
+          ),
+          const SizedBox(height: 10),
+          if (chars.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final char in chars)
+                  _CharacterChip(
+                    char: char,
+                    onRemove: vm.isLoading
+                        ? null
+                        : () => vm.removeKnownCharacter(char),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+          TextField(
+            controller: _controller,
+            enabled: !vm.isLoading,
+            onChanged: _absorb,
+            style: const TextStyle(
+              fontFamily: 'ZenKakuGothicNew',
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+            decoration: InputDecoration(
+              hintText: context.trText('Type or paste kana and kanji'),
+              prefixIcon: const Icon(Icons.edit_outlined),
+              helperText: context.trText('Only kana and kanji are counted.'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CharacterChip extends StatelessWidget {
+  const _CharacterChip({required this.char, required this.onRemove});
+
+  final String char;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+        opacity: onRemove == null ? .5 : 1,
+        child: NeoCard(
+          tone: NeoTone.acid,
+          shadow: 3,
+          radius: 8,
+          padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+          onTap: onRemove,
+          semanticLabel: char,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                char,
+                style: const TextStyle(
+                  fontFamily: 'ZenKakuGothicNew',
+                  fontSize: 20,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.close_rounded, size: 16),
             ],
           ),
         ),

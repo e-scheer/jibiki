@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import '../core/languages.dart';
+import '../core/telemetry.dart';
 import '../models/enums.dart';
 import '../models/mnemonic.dart';
 import '../repositories/mnemonic_repository.dart';
@@ -14,13 +17,15 @@ class MnemonicViewModel extends BaseViewModel {
     required this.character,
     required this.kind,
     required this.language,
-  });
+    TelemetrySink? telemetry,
+  }) : _telemetry = telemetry ?? Telemetry.instance;
 
   final MnemonicRepository _mnemonics;
   final StudyRepository _study;
   final String character;
   final String kind; // 'kana' | 'kanji'
   final String language;
+  final TelemetrySink _telemetry;
 
   List<Mnemonic> _items = [];
   List<Mnemonic> get items => _items;
@@ -66,6 +71,15 @@ class MnemonicViewModel extends BaseViewModel {
         _englishFallback = true;
       }
     }
+    unawaited(_telemetry.logEvent(
+      TelemetryEvent.mnemonicViewed,
+      parameters: {
+        'kind': kind,
+        'mnemonic_language': _englishFallback ? fallbackLanguage : language,
+        'count': _items.length,
+        'source': _englishFallback ? 'fallback' : 'requested_language',
+      },
+    ));
     notifyListeners();
   }
 
@@ -89,6 +103,18 @@ class MnemonicViewModel extends BaseViewModel {
       if (res != null) {
         final (score, myVote) = res;
         _replace(prev.copyWith(score: score, myVote: myVote));
+        unawaited(_telemetry.logEvent(
+          TelemetryEvent.mnemonicVoted,
+          parameters: {
+            'kind': kind,
+            'mnemonic_language': language,
+            'action': switch (myVote) {
+              1 => 'up',
+              -1 => 'down',
+              _ => 'cleared',
+            },
+          },
+        ));
       } else {
         _replace(prev); // network/validation failed: undo the optimistic change
       }
@@ -100,10 +126,23 @@ class MnemonicViewModel extends BaseViewModel {
   Future<void> report(Mnemonic m, String reason, {String detail = ''}) async {
     if (!_beginItem(m.id)) return;
     try {
-      await runGuarded(
-        () => _mnemonics.report(m.id, reason, detail: detail),
+      final reported = await runGuarded(
+        () async {
+          await _mnemonics.report(m.id, reason, detail: detail);
+          return true;
+        },
         silent: true,
       );
+      if (reported == true) {
+        unawaited(_telemetry.logEvent(
+          TelemetryEvent.mnemonicReported,
+          parameters: {
+            'kind': kind,
+            'mnemonic_language': language,
+            'action': _reportCategory(reason),
+          },
+        ));
+      }
     } finally {
       _endItem(m.id);
     }
@@ -118,6 +157,14 @@ class MnemonicViewModel extends BaseViewModel {
       final res = await runGuarded(() => _mnemonics.save(m.id), silent: true);
       if (res != null) {
         _replace(prev.copyWith(saved: res));
+        unawaited(_telemetry.logEvent(
+          TelemetryEvent.mnemonicSaved,
+          parameters: {
+            'kind': kind,
+            'mnemonic_language': language,
+            'action': res ? 'saved' : 'removed',
+          },
+        ));
       } else {
         _replace(prev);
       }
@@ -143,6 +190,17 @@ class MnemonicViewModel extends BaseViewModel {
       _items = [..._items, m]..sort((a, b) => b.score.compareTo(a.score));
       notifyListeners();
     }
+    if (m != null) {
+      unawaited(_telemetry.logEvent(
+        TelemetryEvent.mnemonicCreated,
+        parameters: {
+          'kind': kind,
+          'mnemonic_language': language,
+          'status': m.status,
+          'action': imageBytes == null ? 'text' : 'with_image',
+        },
+      ));
+    }
     return m;
   }
 
@@ -155,4 +213,9 @@ class MnemonicViewModel extends BaseViewModel {
     }
     return !hasError;
   }
+
+  static String _reportCategory(String reason) => switch (reason) {
+        'spam' || 'inappropriate' || 'copyright' => reason,
+        _ => 'other',
+      };
 }

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../core/session_store.dart';
+import '../core/telemetry.dart';
 
 enum ThemePalette { neopop, harmonie }
 
@@ -14,7 +17,7 @@ extension ThemePaletteX on ThemePalette {
 }
 
 class ThemeController extends ChangeNotifier {
-  ThemeController(this._store)
+  ThemeController(this._store, {TelemetrySink? telemetry})
       : _palette = ThemePalette.values.firstWhere(
           (value) => value.name == _store.themePalette,
           orElse: () => ThemePalette.neopop,
@@ -22,9 +25,11 @@ class ThemeController extends ChangeNotifier {
         _mode = ThemeModeSetting.values.firstWhere(
           (value) => value.name == _store.themeMode,
           orElse: () => ThemeModeSetting.system,
-        );
+        ),
+        _telemetry = telemetry ?? Telemetry.instance;
 
   final SessionStore _store;
+  final TelemetrySink _telemetry;
   ThemePalette _palette;
   ThemeModeSetting _mode;
 
@@ -36,6 +41,10 @@ class ThemeController extends ChangeNotifier {
     _palette = value;
     notifyListeners();
     await _store.setThemePalette(value.name);
+    unawaited(_telemetry.logEvent(
+      TelemetryEvent.themeChanged,
+      parameters: {'palette': value.name, 'source': 'palette'},
+    ));
   }
 
   Future<void> setMode(ThemeModeSetting value) async {
@@ -43,5 +52,9 @@ class ThemeController extends ChangeNotifier {
     _mode = value;
     notifyListeners();
     await _store.setThemeMode(value.name);
+    unawaited(_telemetry.logEvent(
+      TelemetryEvent.themeChanged,
+      parameters: {'theme_mode': value.name, 'source': 'mode'},
+    ));
   }
 }

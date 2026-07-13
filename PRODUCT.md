@@ -35,6 +35,26 @@ looker-upper and a serious learner from a single set of feature flags. Success: 
 lookup becomes a remembered word; the dictionary stays fully usable with no
 account; contributed mnemonics accumulate and are never deleted.
 
+## Public Web and acquisition
+
+The public Web experience is split by responsibility. `jibiki.app` is a fast,
+localized NeoPop site rendered as indexable HTML. `my.jibiki.app` is the Flutter
+Web application and `api.jibiki.app` is the Django API. Flutter is never embedded
+in an iframe and is not expected to carry the product's editorial SEO.
+
+The public site explains the real dictionary-to-memory loop, exposes localized
+guides and reference pages, and hands learning actions to Flutter through deep
+links. Public word, kana and kanji pages may be rendered from the same Django
+data, with canonical URLs, language alternates and explicit source attribution.
+Arbitrary search result URLs remain outside the search index.
+
+Acquisition and product analytics share one consent-first event model across the
+site, Web app and native apps. Analytics and diagnostics are disabled until the
+user chooses them. Telemetry never contains raw searches, mnemonic text,
+feedback bodies, credentials, emails or user image URLs. Native stability uses
+Firebase Crashlytics, while Web and backend errors use a Web-capable error
+reporter and structured request logs.
+
 ## Brand Personality
 
 **Bold, encouraging and content-first.** The interface feels like a knowledgeable

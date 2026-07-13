@@ -38,6 +38,58 @@ the domain API is authenticated by the same token allauth issued.
 > `SessionStore` uses `shared_preferences` for simplicity. For production, swap in
 > `flutter_secure_storage` for the token (Keychain/Keystore) - it's a one-file change.
 
+### Telemetry and consent
+
+Analytics, diagnostics and performance collection are opt-in. With no saved
+consent or no provider configuration, the telemetry layer is a no-op. Web
+consent is shared with `jibiki.app` through the first-party
+`jibiki_consent_v1` cookie. It stores versioned `analytics` and `diagnostics`
+booleans and contains no user identifier.
+
+Product events and properties use an explicit allowlist. Raw searches,
+mnemonics, feedback, URLs, headers and request bodies are never accepted as
+telemetry parameters. Remote exceptions contain the exception class and the
+original stack trace, but not the original message, because messages can embed
+learner content. A random installation id is created only after consent and is
+deleted when both categories are disabled.
+
+Provider identifiers are injected at build time. `FIREBASE_APP_ID` must be the
+app id registered for the target being built, so Web, Android and iOS builds use
+different values where Firebase assigns different app ids.
+
+```bash
+flutter build web --release \
+  --dart-define=JIBIKI_API_BASE=https://api.jibiki.app \
+  --dart-define=JIBIKI_ENVIRONMENT=production \
+  --dart-define=JIBIKI_RELEASE=jibiki-web@<full-commit-sha> \
+  --dart-define=FIREBASE_API_KEY=... \
+  --dart-define=FIREBASE_APP_ID=... \
+  --dart-define=FIREBASE_MESSAGING_SENDER_ID=... \
+  --dart-define=FIREBASE_PROJECT_ID=... \
+  --dart-define=FIREBASE_AUTH_DOMAIN=... \
+  --dart-define=FIREBASE_STORAGE_BUCKET=... \
+  --dart-define=FIREBASE_MEASUREMENT_ID=... \
+  --dart-define=SENTRY_DSN=...
+```
+
+These Firebase identifiers and the Sentry DSN are public client configuration,
+not secrets. A Sentry auth token and provider administration credentials belong
+only in CI.
+
+The repository deliberately has no fabricated `firebase_options.dart` or fake
+native Firebase files. Once the real Firebase project and platform apps exist,
+run `flutterfire configure` to install the genuine Android and iOS configuration
+and Crashlytics build integrations. Verify Android mapping-file upload and the
+iOS dSYM upload phase before calling native crash symbolication production-ready.
+The current Firebase SDK floor is Android API 23 and iOS 15.
+
+For production Web builds, use `.github/workflows/release-web.yml`. It builds
+with `--source-maps`, injects Sentry Debug IDs, uploads the maps, verifies the
+exact `JIBIKI_RELEASE`, and only then creates a runtime without `.map` files.
+Keep `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` in the GitHub
+`production` environment only. The deployable image is published by digest so
+the JavaScript served from `my.jibiki.app` cannot drift from its Sentry maps.
+
 ### Run
 
 This repo tracks `lib/`, `pubspec.yaml`, `test/` and `analysis_options.yaml` - the
