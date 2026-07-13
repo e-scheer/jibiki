@@ -296,7 +296,7 @@ class _ReportSheetState extends State<_ReportSheet> {
             label: context.trText('Sign in'),
             onPressed: () {
               Navigator.of(context).pop();
-              context.push('/login');
+              context.push('/login?link=1');
             },
           ),
         ],

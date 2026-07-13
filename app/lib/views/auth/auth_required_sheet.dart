@@ -69,7 +69,7 @@ Future<void> showAuthRequiredSheet(
                 icon: Icons.arrow_forward_rounded,
                 onTap: () {
                   Navigator.of(sheetContext).pop();
-                  context.push('/login');
+                  context.push('/login?link=1');
                 },
               ),
               const SizedBox(height: 8),

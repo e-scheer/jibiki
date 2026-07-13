@@ -7,6 +7,7 @@ import '../../core/dev_login.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import 'auth_chrome.dart';
 
@@ -32,6 +33,8 @@ class _LoginFormState extends State<_LoginForm> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _continuingLocally = false;
+  String? _localEntryError;
 
   @override
   void initState() {
@@ -62,14 +65,49 @@ class _LoginFormState extends State<_LoginForm> {
   }
 
   Future<void> _continueWithoutAccount() async {
+    final app = context.read<AppState>();
     // Settings, report sheets and other signed-in entry points push this
     // screen. In that case "continue" means cancel the optional sign-in,
-    // not changing the current local/account state.
-    if (context.canPop()) {
-      context.pop();
+    // not changing the current local/account state. This intent is explicit:
+    // a Web history stack is not a reliable proxy for it.
+    final linkingAccount =
+        GoRouterState.of(context).uri.queryParameters['link'] == '1';
+    if (linkingAccount) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/');
+      }
       return;
     }
-    await context.read<AppState>().continueWithoutAccount();
+
+    // A local learner can arrive here after a reload or a copied /login URL.
+    // They are already allowed into the app, so there is nothing to persist.
+    if (app.canEnter) {
+      context.go('/');
+      return;
+    }
+
+    setState(() {
+      _continuingLocally = true;
+      _localEntryError = null;
+    });
+    try {
+      await app.continueWithoutAccount();
+      if (!mounted) return;
+      // When onboarding was completed in an earlier session the router keeps
+      // /login available for account linking. Leave the landing login
+      // explicitly so the guest CTA never looks inert on Web.
+      context.go('/');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _continuingLocally = false;
+        _localEntryError = context.trText(
+          'Could not continue without an account. Please try again.',
+        );
+      });
+    }
   }
 
   @override
@@ -186,9 +224,26 @@ class _LoginFormState extends State<_LoginForm> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: vm.isLoading ? null : _continueWithoutAccount,
-              child: Text(context.trText('Continue without an account')),
+              onPressed: vm.isLoading || _continuingLocally
+                  ? null
+                  : _continueWithoutAccount,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: _continuingLocally
+                    ? NeoChaseLoader.small(
+                        key: const ValueKey('local-entry-loader'),
+                        semanticLabel: context.trText('Opening local mode'),
+                      )
+                    : Text(
+                        context.trText('Continue without an account'),
+                        key: const ValueKey('local-entry-label'),
+                      ),
+              ),
             ),
+            if (_localEntryError != null) ...[
+              const SizedBox(height: 8),
+              AuthInlineError(_localEntryError!),
+            ],
           ],
         ),
       ),

@@ -315,7 +315,7 @@ class _Settings extends StatelessWidget {
                           title: Text(context.l10n.syncWithAccount),
                           subtitle: Text(context.l10n.syncWithAccountHelp),
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () => context.push('/login'),
+                          onTap: () => context.push('/login?link=1'),
                         ),
                       ],
                     ]),
