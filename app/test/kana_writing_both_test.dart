@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/data/kana_strokes.dart';
+import 'package:jibiki/l10n/app_localizations.dart';
 import 'package:jibiki/models/kana.dart';
 import 'package:jibiki/theme/app_theme.dart';
 import 'package:jibiki/views/kana/kana_detail_view.dart';
@@ -179,6 +180,106 @@ void main() {
     expect(diagrams[1].paths, pair[1].stroke!.paths);
     expect(find.text('Hiragana gesture · あ'), findsOneWidget);
     expect(find.text('Katakana gesture · ア'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final width in <double>[550, 390, 360]) {
+    testWidgets(
+        'Both reference uses aligned script columns at ${width.toInt()}',
+        (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = Size(width, 700);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      final pair = (await targets()).reversed.toList(growable: false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: KanaWritingReference(targets: pair),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final hiragana = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-column-hiragana')),
+      );
+      final katakana = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-column-katakana')),
+      );
+      expect(hiragana.top, closeTo(katakana.top, .1));
+      expect(hiragana.width, closeTo(katakana.width, .1));
+      expect(hiragana.right, lessThan(katakana.left));
+
+      final hiraganaDiagram = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-diagram-hiragana')),
+      );
+      final katakanaDiagram = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-diagram-katakana')),
+      );
+      expect(hiraganaDiagram.top, closeTo(katakanaDiagram.top, .1));
+      expect(hiraganaDiagram.width, closeTo(hiraganaDiagram.height, .1));
+      expect(hiraganaDiagram.size, equals(katakanaDiagram.size));
+      expect(hiraganaDiagram.width, greaterThanOrEqualTo(140));
+
+      final hiraganaGuided = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-guided-hiragana')),
+      );
+      final katakanaGuided = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-guided-katakana')),
+      );
+      final hiraganaFree = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-free-hiragana')),
+      );
+      final katakanaFree = tester.getRect(
+        find.byKey(const ValueKey('kana-writing-free-katakana')),
+      );
+      expect(hiraganaGuided.top, closeTo(katakanaGuided.top, .1));
+      expect(hiraganaFree.top, closeTo(katakanaFree.top, .1));
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('Both columns stay overflow-free in French with larger text',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(360, 760);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.light(),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(1.3),
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: KanaWritingReference(targets: await targets()),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Tracé guidé'), findsNWidgets(2));
+    expect(find.text('Pratique libre'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 

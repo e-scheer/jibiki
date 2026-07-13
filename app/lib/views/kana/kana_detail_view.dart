@@ -1019,10 +1019,9 @@ class _KanaHero extends StatelessWidget {
 }
 
 class _WritingGuide extends StatelessWidget {
-  const _WritingGuide({super.key, required this.target, this.title});
+  const _WritingGuide({required this.target});
 
   final KanaWritingTarget target;
-  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -1032,7 +1031,7 @@ class _WritingGuide extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title ?? _copy(context, 'Writing gesture', 'Geste d’écriture'),
+          _copy(context, 'Writing gesture', 'Geste d’écriture'),
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 7),
@@ -1209,6 +1208,205 @@ class _WritingGuide extends StatelessWidget {
   }
 }
 
+class _PairWritingGuide extends StatelessWidget {
+  const _PairWritingGuide({
+    super.key,
+    required this.target,
+    required this.title,
+  });
+
+  final KanaWritingTarget target;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final script = target.kana.script;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          key: ValueKey('kana-writing-title-$script'),
+          height: 44,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 176),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4, bottom: 4),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final size = constraints.biggest.shortestSide;
+                    return Container(
+                      key: ValueKey('kana-writing-diagram-$script'),
+                      decoration: BoxDecoration(
+                        color: context.jc.surface,
+                        border: Border.all(color: context.jc.ink, width: 3),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.jc.ink,
+                            blurRadius: 0,
+                            offset: const Offset(4, 4),
+                          ),
+                        ],
+                      ),
+                      child: _PairWritingDiagram(
+                        target: target,
+                        size: size,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        _PairWritingAction(
+          key: ValueKey('kana-writing-guided-$script'),
+          target: target,
+          mode: KanaWritingMode.guided,
+          tone: NeoTone.magenta,
+          icon: Icons.gesture_rounded,
+          label: _copy(context, 'Guided tracing', 'Tracé guidé'),
+          shadow: 3,
+        ),
+        const SizedBox(height: 7),
+        _PairWritingAction(
+          key: ValueKey('kana-writing-free-$script'),
+          target: target,
+          mode: KanaWritingMode.free,
+          tone: NeoTone.paper,
+          icon: Icons.edit_rounded,
+          label: _copy(context, 'Free practice', 'Pratique libre'),
+          shadow: 2,
+        ),
+      ],
+    );
+  }
+}
+
+class _PairWritingDiagram extends StatelessWidget {
+  const _PairWritingDiagram({required this.target, required this.size});
+
+  final KanaWritingTarget target;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final kana = target.kana;
+    final stroke = target.stroke;
+    if (stroke == null || stroke.paths.isEmpty) {
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _WritingGridPainter(color: context.jc.muted),
+            ),
+          ),
+          Center(
+            child: Text(
+              kana.char,
+              style: TextStyle(
+                fontFamily: 'ZenKakuGothicNew',
+                fontSize: size * .61,
+                height: 1,
+                fontWeight: FontWeight.w900,
+                color: context.jc.ink,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Center(
+      child: StrokeOrderView(
+        paths: stroke.paths,
+        viewBox: stroke.viewBox,
+        size: (size - 18).clamp(0.0, size).toDouble(),
+        showControls: false,
+        numberColor: kana.isHiragana ? context.jc.magenta : context.jc.brand,
+      ),
+    );
+  }
+}
+
+class _PairWritingAction extends StatelessWidget {
+  const _PairWritingAction({
+    super.key,
+    required this.target,
+    required this.mode,
+    required this.tone,
+    required this.icon,
+    required this.label,
+    required this.shadow,
+  });
+
+  final KanaWritingTarget target;
+  final KanaWritingMode mode;
+  final NeoTone tone;
+  final IconData icon;
+  final String label;
+  final double shadow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(right: shadow, bottom: shadow),
+      child: SizedBox(
+        height: 44,
+        child: NeoCard(
+          tone: tone,
+          shadow: shadow,
+          radius: 9,
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => KanaWritingPracticePage(
+                targets: [target],
+                mode: mode,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 15),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class KanaWritingReference extends StatelessWidget {
   const KanaWritingReference({super.key, required this.targets})
       : assert(targets.length > 0);
@@ -1228,8 +1426,14 @@ class _BothWritingGuide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget guide(KanaWritingTarget target) => _WritingGuide(
-          key: ValueKey('kana-writing-${target.kana.script}'),
+    final orderedTargets = List<KanaWritingTarget>.of(targets)
+      ..sort(
+        (a, b) => (a.kana.isHiragana ? 0 : 1).compareTo(
+          b.kana.isHiragana ? 0 : 1,
+        ),
+      );
+    Widget guide(KanaWritingTarget target) => _PairWritingGuide(
+          key: ValueKey('kana-writing-column-${target.kana.script}'),
           target: target,
           title: target.kana.isHiragana
               ? _copy(
@@ -1246,23 +1450,50 @@ class _BothWritingGuide extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 900) {
-          return Column(
-            children: [
-              for (var index = 0; index < targets.length; index++) ...[
-                if (index > 0) const SizedBox(height: 20),
-                guide(targets[index]),
-              ],
-            ],
-          );
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        final gap = constraints.maxWidth < 420 ? 10.0 : 18.0;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var index = 0; index < targets.length; index++) ...[
-              if (index > 0) const SizedBox(width: 18),
-              Expanded(child: guide(targets[index])),
-            ],
+            Row(
+              key: const ValueKey('kana-writing-both-columns'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var index = 0; index < orderedTargets.length; index++) ...[
+                  if (index > 0) SizedBox(width: gap),
+                  Expanded(child: guide(orderedTargets[index])),
+                ],
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              decoration: BoxDecoration(
+                color: context.jc.surfaceAlt,
+                border: Border.all(color: context.jc.ink, width: 2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.compare_arrows_rounded, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _copy(
+                        context,
+                        'Each column has its own stroke model. Choose a script above, or practise both forms with the action below.',
+                        'Chaque colonne a son propre modèle de traits. Choisissez une écriture ci-dessus ou pratiquez les deux formes avec l’action en bas.',
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        height: 1.35,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         );
       },
