@@ -1756,21 +1756,46 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
   late final List<bool> _showGuides = [
     for (final _ in widget.targets) widget.mode == KanaWritingMode.guided,
   ];
+  late final List<bool> _animateGuides = [
+    for (final _ in widget.targets) false,
+  ];
+  late final List<int> _guideReplayRevisions = [
+    for (final _ in widget.targets) 0,
+  ];
   int _step = 0;
 
   KanaWritingTarget get _target => widget.targets[_step];
   DrawingController get _controller => _controllers[_step];
   bool get _showGuide => _showGuides[_step];
+  bool get _animateGuide => _animateGuides[_step];
 
   void _setStep(int step) {
     if (step == _step || step < 0 || step >= widget.targets.length) return;
     Haptics.tick();
-    setState(() => _step = step);
+    setState(() {
+      _animateGuides[_step] = false;
+      _step = step;
+    });
   }
 
-  void _toggleGuide() {
+  void _toggleGuide({required bool hasStrokeOrder}) {
     Haptics.tick();
-    setState(() => _showGuides[_step] = !_showGuides[_step]);
+    setState(() {
+      if (hasStrokeOrder) {
+        _showGuides[_step] = true;
+        _animateGuides[_step] = Motion.enabled(context);
+        if (_animateGuides[_step]) _guideReplayRevisions[_step]++;
+        return;
+      }
+      final visible = !_showGuides[_step];
+      _showGuides[_step] = visible;
+      _animateGuides[_step] = false;
+    });
+  }
+
+  void _settleGuideAnimation(int step, int revision) {
+    if (!mounted || _guideReplayRevisions[step] != revision) return;
+    setState(() => _animateGuides[step] = false);
   }
 
   void _advanceOrFinish() {
@@ -2002,10 +2027,61 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                                   guideViewBox: hasStrokeOrder
                                       ? stroke.viewBox
                                       : '0 0 109 109',
-                                  showGuide: _showGuide,
-                                  showStrokeNumbers:
-                                      _showGuide && hasStrokeOrder,
+                                  showGuide: _showGuide && !_animateGuide,
+                                  showStrokeNumbers: _showGuide &&
+                                      hasStrokeOrder &&
+                                      !_animateGuide,
                                   strokeNumberColor: numberColor,
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: AbsorbPointer(
+                                  absorbing: _animateGuide,
+                                  child: AnimatedSwitcher(
+                                    key: ValueKey(
+                                      'practice-stroke-switcher-$_step',
+                                    ),
+                                    duration:
+                                        Motion.timed(context, Motion.fast),
+                                    switchInCurve: Motion.outStrong,
+                                    switchOutCurve: Motion.out,
+                                    child: _animateGuide && hasStrokeOrder
+                                        ? SizedBox.expand(
+                                            key: ValueKey(
+                                              'practice-stroke-replay-${kana.char}-${_guideReplayRevisions[_step]}',
+                                            ),
+                                            child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                final size = constraints
+                                                    .biggest.shortestSide;
+                                                final step = _step;
+                                                final revision =
+                                                    _guideReplayRevisions[step];
+                                                return Center(
+                                                  child: ExcludeSemantics(
+                                                    child: StrokeOrderView(
+                                                      paths: stroke.paths,
+                                                      viewBox: stroke.viewBox,
+                                                      size: size,
+                                                      numberColor: numberColor,
+                                                      showControls: false,
+                                                      onCompleted: () =>
+                                                          _settleGuideAnimation(
+                                                        step,
+                                                        revision,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          )
+                                        : const SizedBox.shrink(
+                                            key: ValueKey(
+                                              'practice-stroke-replay-idle',
+                                            ),
+                                          ),
+                                  ),
                                 ),
                               ),
                               if (_showGuide && !hasStrokeOrder)
@@ -2071,7 +2147,9 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                               )
                             : _copy(context, 'Guide', 'Guide'),
                         selected: _showGuide,
-                        onTap: _toggleGuide,
+                        onTap: () => _toggleGuide(
+                          hasStrokeOrder: hasStrokeOrder,
+                        ),
                       ),
                     ),
                   ],

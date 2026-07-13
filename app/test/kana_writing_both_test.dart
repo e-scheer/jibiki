@@ -81,7 +81,7 @@ void main() {
     expect(find.text('Katakana'), findsWidgets);
 
     await tester.tap(find.text('Stroke order'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
     expect(canvas.showGuide, isTrue);
     expect(canvas.showStrokeNumbers, isTrue);
@@ -98,6 +98,58 @@ void main() {
     canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
     expect(canvas.controller, same(katakanaController));
     expect(canvas.showGuide, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stroke order animates over free practice before settling',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    final target = (await targets()).first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: KanaWritingPracticePage(
+          targets: [target],
+          mode: KanaWritingMode.free,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(StrokeOrderView), findsNothing);
+    await tester.tap(find.text('Stroke order'));
+    await tester.pump();
+
+    expect(find.byType(StrokeOrderView), findsOneWidget);
+    var canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
+    expect(canvas.showGuide, isFalse);
+    expect(canvas.showStrokeNumbers, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(StrokeOrderView), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(StrokeOrderView), findsNothing);
+    canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
+    expect(canvas.showGuide, isTrue);
+    expect(canvas.showStrokeNumbers, isTrue);
+
+    await tester.tap(find.text('Stroke order'));
+    await tester.pump();
+    expect(find.byType(StrokeOrderView), findsOneWidget);
+    canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
+    expect(canvas.showGuide, isFalse);
+    expect(canvas.showStrokeNumbers, isFalse);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(StrokeOrderView), findsNothing);
+    canvas = tester.widget<DrawingCanvas>(find.byType(DrawingCanvas));
+    expect(canvas.showGuide, isTrue);
+    expect(canvas.showStrokeNumbers, isTrue);
     expect(tester.takeException(), isNull);
   });
 

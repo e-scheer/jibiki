@@ -17,6 +17,7 @@ class StrokeOrderView extends StatefulWidget {
     this.size = 200,
     this.showControls = true,
     this.numberColor,
+    this.onCompleted,
   });
 
   final List<String> paths; // SVG `d` strings, in stroke order
@@ -24,6 +25,7 @@ class StrokeOrderView extends StatefulWidget {
   final double size;
   final bool showControls;
   final Color? numberColor;
+  final VoidCallback? onCompleted;
 
   @override
   State<StrokeOrderView> createState() => _StrokeOrderViewState();
@@ -49,7 +51,11 @@ class _StrokeOrderViewState extends State<StrokeOrderView>
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 380 * widget.paths.length.clamp(1, 40)),
-    );
+    )..addStatusListener(_handleStatus);
+  }
+
+  void _handleStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) widget.onCompleted?.call();
   }
 
   @override
