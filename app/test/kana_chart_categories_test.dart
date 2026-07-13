@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/core/api_client.dart';
+import 'package:jibiki/core/api_exception.dart';
 import 'package:jibiki/core/session_store.dart';
 import 'package:jibiki/models/enums.dart';
 import 'package:jibiki/models/kana.dart';
@@ -120,10 +121,23 @@ class _EmptyStudyRepository extends StudyRepository {
   Future<Map<String, int>> studyStates({ItemType? type}) async => const {};
 }
 
-Future<Widget> _app() async {
+class _FailingStudyRepository extends StudyRepository {
+  _FailingStudyRepository(StudyService service) : super(service, service);
+
+  @override
+  Future<List<StudyCard>> cards({ItemType? type}) =>
+      Future.error(ApiException('Forbidden', statusCode: 403));
+
+  @override
+  Future<Map<String, int>> studyStates({ItemType? type}) =>
+      Future.error(ApiException('Forbidden', statusCode: 403));
+}
+
+Future<Widget> _app({bool failingStudy = false}) async {
   final prefs = await SharedPreferences.getInstance();
   final session = SessionStore(prefs);
   final api = ApiClient(session);
+  final studyService = StudyService(api);
 
   return MultiProvider(
     providers: [
@@ -137,7 +151,9 @@ Future<Widget> _app() async {
         create: (_) => _EmptyMnemonicRepository(MnemonicService(api)),
       ),
       Provider<StudyRepository>(
-        create: (_) => _EmptyStudyRepository(StudyService(api)),
+        create: (_) => failingStudy
+            ? _FailingStudyRepository(studyService)
+            : _EmptyStudyRepository(studyService),
       ),
     ],
     child: MaterialApp(
@@ -236,6 +252,22 @@ void main() {
         romaji: 'kya',
       );
 
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'parallel study failures stay contained inside the kana chart',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1280, 900);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(await _app(failingStudy: true));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(KanaCell), findsWidgets);
       expect(tester.takeException(), isNull);
     },
   );

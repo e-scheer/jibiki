@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../../core/breakpoints.dart';
 import '../../l10n/l10n.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
+import '../../models/study.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
@@ -113,12 +115,22 @@ class _KanaChartState extends State<_KanaChart> {
   }
 
   Future<void> _loadStates() async {
+    // On Web, guest/local-only sessions still use the remote StudyService.
+    // Those endpoints are authenticated, so avoid two guaranteed 403s for
+    // data that is only supplementary to the public kana reference.
+    if (kIsWeb && !context.read<AppState>().isAuthenticated) return;
     try {
       final repository = context.read<StudyRepository>();
-      final statesFuture = repository.studyStates(type: ItemType.kana);
-      final cardsFuture = repository.cards(type: ItemType.kana);
-      final states = await statesFuture;
-      final cards = await cardsFuture;
+      // Future.wait installs an error handler on both requests immediately.
+      // Awaiting them one by one could leave cardsFuture rejected and
+      // unobserved when statesFuture fails first, which surfaces as an
+      // "Uncaught Error" in Flutter Web.
+      final results = await Future.wait<Object>([
+        repository.studyStates(type: ItemType.kana),
+        repository.cards(type: ItemType.kana),
+      ]);
+      final states = results[0] as Map<String, int>;
+      final cards = results[1] as List<StudyCard>;
       final now = DateTime.now();
       final due = {
         for (final card in cards)

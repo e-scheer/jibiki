@@ -106,9 +106,11 @@ class _TrackingStudyRepository extends StudyRepository {
   _TrackingStudyRepository(
     StudyService service, {
     this.addError,
+    this.readError,
   }) : super(service, service);
 
   final Object? addError;
+  final Object? readError;
   int addCalls = 0;
 
   @override
@@ -134,10 +136,16 @@ class _TrackingStudyRepository extends StudyRepository {
   }
 
   @override
-  Future<List<StudyCard>> cards({ItemType? type}) async => const [];
+  Future<List<StudyCard>> cards({ItemType? type}) {
+    if (readError case final error?) return Future.error(error);
+    return Future.value(const []);
+  }
 
   @override
-  Future<Map<String, int>> studyStates({ItemType? type}) async => const {};
+  Future<Map<String, int>> studyStates({ItemType? type}) {
+    if (readError case final error?) return Future.error(error);
+    return Future.value(const {});
+  }
 }
 
 class _AuthRepository extends AuthRepository {
@@ -174,6 +182,7 @@ typedef _Dependencies = ({
 Future<_Dependencies> _dependencies({
   required bool authenticated,
   Object? addError,
+  Object? studyReadError,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final session = SessionStore(prefs);
@@ -191,7 +200,11 @@ Future<_Dependencies> _dependencies({
     app: app,
     dictionary: DictionaryRepository(_KanaDictionarySource()),
     mnemonics: _EmptyMnemonicRepository(MnemonicService(api)),
-    study: _TrackingStudyRepository(studyService, addError: addError),
+    study: _TrackingStudyRepository(
+      studyService,
+      addError: addError,
+      readError: studyReadError,
+    ),
   );
 }
 
@@ -266,6 +279,21 @@ void main() {
         find.text('Shows how this kana behaves in a sentence.'),
         findsOneWidget,
       );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'parallel study failures stay contained inside the kana detail',
+    (tester) async {
+      final dependencies = await _dependencies(
+        authenticated: true,
+        studyReadError: ApiException('Forbidden', statusCode: 403),
+      );
+      await _pumpBothPane(tester, dependencies);
+
+      expect(find.text('Hiragana gesture · あ'), findsOneWidget);
+      expect(find.text('Katakana gesture · ア'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

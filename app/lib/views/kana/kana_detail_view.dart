@@ -9,6 +9,7 @@ import '../../core/speech.dart';
 import '../../data/kana_strokes.dart';
 import '../../models/enums.dart';
 import '../../models/kana.dart';
+import '../../models/study.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../repositories/study_repository.dart';
@@ -169,10 +170,16 @@ class _KanaDetailState extends State<_KanaDetail> {
   Future<_KanaDetailData> _load() async {
     final dictionary = context.read<DictionaryRepository>();
     final study = context.read<StudyRepository>();
-    final focusedFuture = dictionary.kanaDetail(widget.char);
-    final allFuture = dictionary.kana();
-    final focused = await focusedFuture;
-    final all = await allFuture;
+    final canLoadStudy = !kIsWeb || context.read<AppState>().isAuthenticated;
+    // Attach listeners to both parallel reads at once. If one endpoint fails,
+    // Future.wait still observes the other Future instead of leaking a rejected
+    // promise to the Web console.
+    final dictionaryResults = await Future.wait<Object>([
+      dictionary.kanaDetail(widget.char),
+      dictionary.kana(),
+    ]);
+    final focused = dictionaryResults[0] as KanaEntry;
+    final all = dictionaryResults[1] as List<KanaEntry>;
     final stroke = await KanaStrokeCatalog.load(widget.char);
 
     final otherScript = focused.isHiragana ? 'katakana' : 'hiragana';
@@ -211,18 +218,25 @@ class _KanaDetailState extends State<_KanaDetail> {
 
     var states = <String, int>{};
     var dueChars = <String>{};
-    try {
-      final statesFuture = study.studyStates(type: ItemType.kana);
-      final cardsFuture = study.cards(type: ItemType.kana);
-      states = await statesFuture;
-      final cards = await cardsFuture;
-      final now = DateTime.now();
-      dueChars = {
-        for (final card in cards)
-          if (!card.isNew && !card.due.isAfter(now)) card.itemRef,
-      };
-    } catch (_) {
-      // Reference content is useful even when personal study data is offline.
+    // Web guests have no local StudyStore and the remote endpoints require a
+    // session. Keep the public reference fully functional without issuing
+    // guaranteed 403 requests.
+    if (canLoadStudy) {
+      try {
+        final studyResults = await Future.wait<Object>([
+          study.studyStates(type: ItemType.kana),
+          study.cards(type: ItemType.kana),
+        ]);
+        states = studyResults[0] as Map<String, int>;
+        final cards = studyResults[1] as List<StudyCard>;
+        final now = DateTime.now();
+        dueChars = {
+          for (final card in cards)
+            if (!card.isNew && !card.due.isAfter(now)) card.itemRef,
+        };
+      } catch (_) {
+        // Reference content is useful even when personal study data is offline.
+      }
     }
 
     return (
