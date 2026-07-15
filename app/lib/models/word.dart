@@ -125,12 +125,23 @@ class WordEntry {
   final List<KanjiEntry> kanjiBreakdown;
   final List<ExampleItem> examples;
 
-  /// A compact one-line meaning for list rows and card backs.
+  /// A compact one-line meaning for list rows and card backs. Prefers the
+  /// resolved display language, then English, then any language that carries a
+  /// definition, so a word that has a meaning never renders as a blank card.
   String summaryGloss(String lang) {
     final displayLanguage = glossLanguageFor(lang);
+    for (final language in {displayLanguage, 'en'}) {
+      for (final s in senses) {
+        final g = s.exactGlossesFor(language);
+        if (g.isNotEmpty) return g.take(3).join('; ');
+      }
+    }
     for (final s in senses) {
-      final g = s.exactGlossesFor(displayLanguage);
-      if (g.isNotEmpty) return g.take(3).join('; ');
+      final texts = s.glosses
+          .where((g) => g.text.trim().isNotEmpty)
+          .map((g) => g.text)
+          .toList();
+      if (texts.isNotEmpty) return texts.take(3).join('; ');
     }
     return '';
   }

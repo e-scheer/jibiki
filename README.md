@@ -123,6 +123,29 @@ make import-kanjidic FILE=kanjidic2.xml    LANGS=en,fr
 uv run --project server python server/manage.py import_kradfile kradfile
 ```
 
+### Source harvest helpers
+
+For exploratory upstream collection and measured site snapshots:
+
+```bash
+python scripts/source_harvest.py fetch-open
+python scripts/extract_kanjium_data.py
+python scripts/extract_yomitan_archives.py
+python scripts/extract_hochanh_rtk_index.py
+python scripts/source_harvest.py snapshot-sites
+python scripts/parse_site_snapshots.py --fetch-live
+```
+
+This writes into `var/source_harvest/`:
+
+- open upstream dumps from `Kanji Alive`, `Kanjium`, `Jitendex`,
+  `jmdict-yomitan`, `cyphar/heisig-rtk-index`, `sylhare/kanji`, and
+  `mr-kanji-search-wtk`;
+- a Kanjium-derived `accents.txt` ready for `python manage.py import_pitch`;
+- extracted Yomitan/Jitendex archive inventories;
+- a normalized RTK search index from `hochanh.github.io/rtk`;
+- one `robots.txt` plus one sample HTML snapshot per configured reference site.
+
 ### App
 
 Requirements: Flutter SDK (3.6+). The repo pins Flutter 3.44.5 via fvm

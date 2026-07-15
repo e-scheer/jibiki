@@ -173,17 +173,15 @@ class MnemonicViewModel extends BaseViewModel {
     }
   }
 
-  /// Submit a new mnemonic. Returns the created one (VISIBLE or PENDING) or null.
-  Future<Mnemonic?> contribute(String story,
-      {List<int>? imageBytes, String? imageFilename}) async {
+  /// Submit a new text mnemonic. Returns the created one (VISIBLE or PENDING)
+  /// or null. Drawn mascots go through the drawing pad, not this path.
+  Future<Mnemonic?> contribute(String story) async {
     final m = await runGuarded(
       () => _mnemonics.create(
         character: character,
         kind: kind,
         language: language,
         story: story,
-        imageBytes: imageBytes,
-        imageFilename: imageFilename,
       ),
     );
     if (m != null && m.status == 'visible') {
@@ -197,7 +195,7 @@ class MnemonicViewModel extends BaseViewModel {
           'kind': kind,
           'mnemonic_language': language,
           'status': m.status,
-          'action': imageBytes == null ? 'text' : 'with_image',
+          'action': 'text',
         },
       ));
     }

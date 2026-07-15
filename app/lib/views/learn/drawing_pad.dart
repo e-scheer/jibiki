@@ -183,7 +183,9 @@ class PaintController extends ChangeNotifier {
   }
 }
 
-/// The canvas: a faint reference glyph between two transparent drawing layers.
+/// The canvas: a solid reference glyph between two transparent drawing layers,
+/// so a "Behind" stroke reads as tucked under the character and a "Front"
+/// stroke sits over it.
 class DrawingPad extends StatelessWidget {
   const DrawingPad({
     super.key,
@@ -234,7 +236,10 @@ class DrawingPad extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 220,
                       fontWeight: FontWeight.w700,
-                      color: jc.ink.withValues(alpha: 0.14),
+                      // Solid enough to read as a real element: a "Behind" stroke
+                      // is clearly tucked under the glyph, a "Front" stroke sits
+                      // over it, so the two layers give genuine depth.
+                      color: jc.ink.withValues(alpha: 0.85),
                     ),
                   ),
                 ),

@@ -21,8 +21,6 @@ dependencies:
   # Local persistence of the allauth session token + cached profile.
   # (flutter_secure_storage is the recommended prod upgrade for the token - see README.)
   shared_preferences: ^2.3.3
-  # Pick a mnemonic image from the gallery/camera (bytes → uploaded, web-safe).
-  image_picker: ^1.1.2
   # Disk + memory cache for community images (feed, deck covers, tiles) so they
   # aren't re-downloaded/re-decoded on every scroll or revisit.
   cached_network_image: ^3.4.1

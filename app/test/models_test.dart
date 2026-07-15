@@ -69,6 +69,41 @@ void main() {
       expect(w.sensesFor('en').single.glossesFor('en'), ['door']);
     });
 
+    test('summaryGloss falls back to any definition rather than a blank card',
+        () {
+      // Requested language is English, but the word only carries a French
+      // definition: show it instead of an empty subtitle.
+      final frenchOnly = WordEntry.fromJson({
+        'id': 4,
+        'is_common': false,
+        'headword': '扉',
+        'primary_reading': 'とびら',
+        'kanji': const [],
+        'readings': const [],
+        'senses': [
+          {
+            'pos': const [],
+            'glosses': [
+              {'language': 'fr', 'text': 'porte'},
+            ],
+          },
+        ],
+      });
+      expect(frenchOnly.summaryGloss('en'), 'porte');
+
+      // A word with no glosses at all still yields an empty string.
+      final noGlosses = WordEntry.fromJson({
+        'id': 5,
+        'is_common': false,
+        'headword': '扉',
+        'primary_reading': 'とびら',
+        'kanji': const [],
+        'readings': const [],
+        'senses': const [],
+      });
+      expect(noGlosses.summaryGloss('en'), '');
+    });
+
     test('glossLanguageFor avoids mixing partial translations per word', () {
       final w = WordEntry.fromJson({
         'id': 3,

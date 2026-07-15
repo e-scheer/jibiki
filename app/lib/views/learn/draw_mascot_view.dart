@@ -13,7 +13,7 @@ import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import 'drawing_pad.dart';
 
-/// Turn a character into a picture: draw a mascot over the faint glyph (り →
+/// Turn a character into a picture: draw a mascot around the glyph (り →
 /// licorne), name what it looks like, and save it as a mnemonic image. A full
 /// little studio, six brush engines (pen · calligraphy · marker · pencil ·
 /// neon · spray), a curated palette plus custom colours, size + opacity, a real
@@ -553,7 +553,11 @@ class _Toolbar extends StatelessWidget {
                   // Row 2, the fixed house palette. A soft fade at both ends signals
                   // the strip scrolls - a quiet "there's more" cue.
                   SizedBox(
-                    height: 36,
+                    // Tall enough that a selected swatch's 1.08 scale-up and an
+                    // unselected swatch's drop shadow both fit; each swatch is
+                    // centered so the growth is symmetric and never clipped at
+                    // the top by the ListView's own viewport.
+                    height: 44,
                     child: HorizontalOverflowCue(
                       edgeColor: jc.lavender,
                       child: ListView.separated(
@@ -563,12 +567,17 @@ class _Toolbar extends StatelessWidget {
                         separatorBuilder: (_, __) => const SizedBox(width: 10),
                         itemBuilder: (_, i) {
                           final c = swatches[i];
-                          return _Swatch(
-                            color: c,
-                            selected:
-                                !controller.erasing && controller.color == c,
-                            enabled: enabled,
-                            onTap: () => onPickColor(c),
+                          return SizedBox(
+                            height: 44,
+                            child: Center(
+                              child: _Swatch(
+                                color: c,
+                                selected: !controller.erasing &&
+                                    controller.color == c,
+                                enabled: enabled,
+                                onTap: () => onPickColor(c),
+                              ),
+                            ),
                           );
                         },
                       ),

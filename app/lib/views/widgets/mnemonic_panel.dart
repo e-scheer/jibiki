@@ -1,8 +1,6 @@
 import 'package:jibiki/l10n/l10n.dart';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/languages.dart';
@@ -153,8 +151,6 @@ class MnemonicPanel extends StatelessWidget {
 
   Future<void> _contribute(BuildContext context, MnemonicViewModel vm) async {
     final controller = TextEditingController();
-    Uint8List? imageBytes;
-    String? imageName;
     bool submitting = false;
 
     await showModalBottomSheet<void>(
@@ -167,29 +163,11 @@ class MnemonicPanel extends StatelessWidget {
         final jc = sheetCtx.jc;
         return StatefulBuilder(
           builder: (sheetCtx, setSheet) {
-            Future<void> pick() async {
-              final picked = await ImagePicker().pickImage(
-                  source: ImageSource.gallery,
-                  maxWidth: 1600,
-                  imageQuality: 88);
-              if (picked != null) {
-                final bytes = await picked.readAsBytes();
-                setSheet(() {
-                  imageBytes = bytes;
-                  imageName = picked.name;
-                });
-              }
-            }
-
             Future<void> submit() async {
               final text = controller.text.trim();
               if (text.isEmpty || submitting) return;
               setSheet(() => submitting = true);
-              final created = await vm.contribute(
-                text,
-                imageBytes: imageBytes,
-                imageFilename: imageName,
-              );
+              final created = await vm.contribute(text);
               if (sheetCtx.mounted) Navigator.pop(sheetCtx);
               if (context.mounted) {
                 final msg = created == null
@@ -316,50 +294,6 @@ class MnemonicPanel extends StatelessWidget {
                               focusedBorder: InputBorder.none,
                               filled: false,
                               contentPadding: const EdgeInsets.all(14),
-                            ),
-                          ),
-                        ),
-                        if (imageBytes != null) ...[
-                          const SizedBox(height: 14),
-                          Container(
-                            height: 130,
-                            width: double.infinity,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(11),
-                              border: Border.all(color: jc.ink, width: 2.5),
-                            ),
-                            child: Image.memory(
-                              imageBytes!,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 44,
-                          child: NeoCard(
-                            tone: NeoTone.paper,
-                            radius: 9,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            semanticLabel: imageBytes == null
-                                ? 'Add a picture'
-                                : 'Change picture',
-                            onTap: submitting ? null : pick,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.image_outlined, size: 18),
-                                const SizedBox(width: 7),
-                                Text(
-                                  imageBytes == null
-                                      ? 'Add a picture (optional)'
-                                      : 'Change picture',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
