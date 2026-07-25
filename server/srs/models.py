@@ -210,6 +210,66 @@ class CardTombstone(models.Model):
         return f"tombstone({self.user_id}, {self.item_type}:{self.item_ref})"
 
 
+class BoosterStatus(models.TextChoices):
+    UNOPENED = "unopened"
+    OPENED = "opened"
+    SKIPPED_FULL = "skipped_full"
+
+
+class BoosterGrant(models.Model):
+    """Burn-milestone booster rewards mirrored from the client (docs/REWARDS.md).
+
+    The client is the authority: grants and openings happen offline and are
+    replayed through /study/sync ops. ``grant_id`` is the client's
+    deterministic id (streak:<run-start>:<milestone>), so the same milestone
+    reached on two devices converges to one row and never double-grants.
+    ``cards`` stores the opened draw so a fresh device restores the exact
+    opening history."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="booster_grants"
+    )
+    grant_id = models.CharField(max_length=64)
+    source = models.CharField(max_length=32, default="streak_milestone")
+    milestone = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=16, choices=BoosterStatus.choices, default=BoosterStatus.UNOPENED
+    )
+    granted_at = models.DateTimeField()
+    opened_at = models.DateTimeField(null=True, blank=True)
+    cards = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        db_table = "srs_booster_grants"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "grant_id"], name="uq_booster_user_grant"),
+        ]
+
+    def __str__(self) -> str:
+        return f"booster({self.user_id}, {self.grant_id}, {self.status})"
+
+
+class CollectionCard(models.Model):
+    """One owned collection card per user; ``count`` keeps duplicates. Derived
+    from booster openings, never decremented (docs/REWARDS.md)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="collection_cards"
+    )
+    card_id = models.CharField(max_length=64)
+    count = models.PositiveIntegerField(default=1)
+    first_obtained_at = models.DateTimeField()
+
+    class Meta:
+        db_table = "srs_collection_cards"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "card_id"], name="uq_collection_user_card"),
+        ]
+
+    def __str__(self) -> str:
+        return f"collection({self.user_id}, {self.card_id} x{self.count})"
+
+
 class SyncedOp(models.Model):
     """Ack ledger for non-review sync ops (set_status, favorite, votes…): a
     redelivered op is acked from here without being re-applied, which makes the

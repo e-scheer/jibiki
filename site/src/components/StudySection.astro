@@ -1,0 +1,454 @@
+---
+import type { Messages } from '../i18n/messages';
+
+interface Props {
+  t: Messages;
+}
+
+const { t } = Astro.props;
+const modeIcons: Record<string, string> = {
+  swipe: '⇄',
+  quiz: '?',
+  match: '⧉',
+  listen: '♪',
+};
+---
+
+<section class="section study-section" id="study">
+  <div class="container">
+    <div class="study-heading">
+      <div>
+        <span class="kicker">{t.study.kicker}</span>
+        <h2>{t.study.title}</h2>
+        <p class="section-copy">{t.study.body}</p>
+      </div>
+      <div class="deck-shelf">
+        <b>{t.study.decksLabel}</b>
+        <ul>
+          {t.study.decks.map((deck) => <li>{deck}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mode-grid">
+      {t.study.modes.map((mode) => (
+        <article class={`mode-card mode-card--${mode.key}`}>
+          <div class="mode-visual" aria-hidden="true">
+            {mode.key === 'swipe' && (
+              <div class="visual-swipe">
+                <i class="swipe-arrow">‹</i>
+                <div class="swipe-card">
+                  <strong lang="ja">{t.study.demo.cardGlyph}</strong>
+                  <small lang="ja">{t.study.demo.cardReading}</small>
+                  <span>{t.study.demo.cardGloss}</span>
+                </div>
+                <i class="swipe-arrow">›</i>
+              </div>
+            )}
+            {mode.key === 'quiz' && (
+              <div class="visual-quiz">
+                <strong lang="ja">{t.study.demo.quizPrompt}</strong>
+                <div class="quiz-options">
+                  {t.study.demo.quizOptions.map((option, index) => (
+                    <span class:list={{ correct: index === 0 }}>{option}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {mode.key === 'match' && (
+              <div class="visual-match">
+                {t.study.demo.pairs.map((pair) => (
+                  <>
+                    <span class:list={['match-tile', { matched: pair.matched }]} lang="ja">{pair.glyph}</span>
+                    <span class:list={['match-tile', { matched: pair.matched }]}>{pair.label}</span>
+                  </>
+                ))}
+              </div>
+            )}
+            {mode.key === 'listen' && (
+              <div class="visual-listen">
+                <span class="listen-speaker">♪</span>
+                <div class="listen-tiles">
+                  {t.study.demo.listenTiles.map((tile, index) => (
+                    <span class:list={{ empty: index >= t.study.demo.listenPlaced }} lang="ja">
+                      {index < t.study.demo.listenPlaced ? tile : ''}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div class="mode-text">
+            <h3><i aria-hidden="true">{modeIcons[mode.key]}</i>{mode.title}</h3>
+            <p>{mode.body}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <p class="study-directions"><span aria-hidden="true">⇆</span>{t.study.directions}</p>
+  </div>
+</section>
+
+<style>
+  .study-section {
+    overflow: hidden;
+    border-bottom: var(--line);
+    background: var(--lime);
+  }
+
+  .study-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(19rem, 0.85fr);
+    align-items: center;
+    gap: 2rem 4rem;
+  }
+
+  .study-heading .kicker {
+    background: #fff;
+  }
+
+  .study-heading h2 {
+    max-width: 13ch;
+  }
+
+  .study-heading p {
+    margin-bottom: 0;
+  }
+
+  .deck-shelf {
+    padding: 1.2rem 1.3rem;
+    border: var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 7px 7px 0 var(--ink);
+    transform: rotate(1deg);
+  }
+
+  .deck-shelf > b {
+    font-size: 0.8rem;
+  }
+
+  .deck-shelf ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .deck-shelf li {
+    padding: 0.42rem 0.7rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: var(--lavender);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .deck-shelf li:nth-child(2n) {
+    background: var(--acid);
+  }
+
+  .deck-shelf li:nth-child(3n) {
+    background: var(--magenta);
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .mode-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 7px 7px 0 var(--ink);
+    transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+  }
+
+  .mode-card:hover {
+    box-shadow: 10px 10px 0 var(--ink);
+    transform: translate(-2px, -4px);
+  }
+
+  .mode-visual {
+    display: flex;
+    min-height: 10.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-bottom: var(--line);
+    background: var(--canvas);
+  }
+
+  .mode-card--quiz .mode-visual { background: var(--lavender); }
+  .mode-card--match .mode-visual { background: var(--acid); }
+  .mode-card--listen .mode-visual { background: var(--magenta); }
+
+  .mode-text {
+    padding: 1.1rem 1.2rem 1.25rem;
+  }
+
+  .mode-text h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+  }
+
+  .mode-text h3 i {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: var(--lime);
+    font-size: 0.95rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .mode-card--quiz h3 i { background: var(--lavender); }
+  .mode-card--match h3 i { background: var(--acid); }
+  .mode-card--listen h3 i { background: var(--magenta); }
+
+  .mode-text p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .visual-swipe {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .swipe-arrow {
+    font-size: 1.6rem;
+    font-style: normal;
+    font-weight: 700;
+    animation: swipe-nudge 1.8s ease-in-out infinite alternate;
+  }
+
+  @keyframes swipe-nudge {
+    from { transform: translateX(0); }
+    to { transform: translateX(3px); }
+  }
+
+  .swipe-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.9rem 1.1rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--ink);
+    transform: rotate(-2deg);
+  }
+
+  .swipe-card strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .swipe-card small {
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+
+  .swipe-card span {
+    font-size: 0.6rem;
+    font-weight: 600;
+  }
+
+  .visual-quiz {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .visual-quiz strong {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .quiz-options {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+
+  .quiz-options span {
+    overflow: hidden;
+    padding: 0.4rem 0.5rem;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quiz-options span.correct {
+    background: var(--lime);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .visual-match {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .match-tile {
+    display: grid;
+    min-width: 4.1rem;
+    min-height: 2.6rem;
+    place-items: center;
+    padding: 0.3rem 0.5rem;
+    border: 2.5px solid var(--ink);
+    border-radius: 9px;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .match-tile[lang='ja'] {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+  .match-tile.matched {
+    background: var(--lime);
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-1px, -1px);
+  }
+
+  .visual-listen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .listen-speaker {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .listen-tiles {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .listen-tiles span {
+    display: grid;
+    width: 2rem;
+    height: 2.3rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: var(--acid);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 900;
+  }
+
+  .listen-tiles span.empty {
+    border-style: dashed;
+    background: #fff;
+  }
+
+  .study-directions {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.65rem;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    padding: 0.75rem 1.1rem;
+    border: var(--line);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 5px 5px 0 var(--ink);
+    font-size: 0.9rem;
+    font-weight: 700;
+    transform: rotate(-0.6deg);
+  }
+
+  .study-directions span {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: var(--klein);
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 1099px) {
+    .mode-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .study-heading {
+      grid-template-columns: 1fr;
+    }
+
+    .deck-shelf {
+      max-width: 44rem;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .mode-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mode-visual {
+      min-height: 9rem;
+    }
+
+    .study-directions {
+      width: 100%;
+      transform: none;
+    }
+  }
+</style>

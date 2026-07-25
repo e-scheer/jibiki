@@ -1,6 +1,10 @@
 param(
   [Parameter(Mandatory = $true)]
-  [string]$Site
+  [string]$Site,
+
+  [double]$DelaySeconds = 5,
+
+  [string]$UserAgent = 'jibiki-authorized-mirror/0.1 (+site owner authorized crawl)'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -14,7 +18,8 @@ New-Item -ItemType Directory -Force -Path $logDir, $siteRoot | Out-Null
 
 $commonArgs = @(
   'scripts/mirror_sites.py',
-  '--delay-seconds', '15',
+  '--delay-seconds', "$DelaySeconds",
+  '--user-agent', $UserAgent,
   '--discover-links',
   '--ignore-robots',
   '--scope', 'jibiki',

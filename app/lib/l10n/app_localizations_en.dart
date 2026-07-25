@@ -373,4 +373,282 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dictionaryCredits =>
       'jibiki · dictionary data © EDRDG (JMdict/KANJIDIC)';
+
+  @override
+  String get burnTitle => 'Learning burn';
+
+  @override
+  String burnDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+      zero: '0 days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String burnBest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Best: $_temp0';
+  }
+
+  @override
+  String get burnTodayCounted => 'Today is in. See you tomorrow.';
+
+  @override
+  String get burnComeBackToday => 'One review today keeps your burn going.';
+
+  @override
+  String burnNextBooster(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days to your next booster',
+      one: '1 day to your next booster',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterShelfTitle => 'Boosters';
+
+  @override
+  String boosterToOpen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosters to open',
+      one: '1 booster to open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterShelfFull =>
+      'Your shelf is full. Open a booster to make room for the next milestone.';
+
+  @override
+  String get boosterEarnedTitle => 'Booster earned!';
+
+  @override
+  String boosterEarnedBody(int milestone) {
+    return 'Day $milestone of your burn. Open it whenever you like.';
+  }
+
+  @override
+  String get boosterOpenAction => 'Open the booster';
+
+  @override
+  String get boosterOpenLater => 'Later';
+
+  @override
+  String get boosterSlideToOpen => 'Slide across the pack to open it';
+
+  @override
+  String get boosterTapToOpen => 'Tap to open';
+
+  @override
+  String get boosterSkipAnimation => 'Skip animation';
+
+  @override
+  String get boosterSwipeToReveal => 'Swipe to reveal';
+
+  @override
+  String get boosterTapToContinue => 'Tap to continue';
+
+  @override
+  String get boosterTapToReveal => 'Tap to reveal';
+
+  @override
+  String get boosterTiltHint => 'Drag the card to tilt it';
+
+  @override
+  String get boosterNewCard => 'New card';
+
+  @override
+  String boosterDuplicate(int count) {
+    return 'Duplicate ×$count';
+  }
+
+  @override
+  String get boosterSummaryTitle => 'Booster opened';
+
+  @override
+  String boosterSummaryNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new cards',
+      one: '1 new card',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boosterSummaryDuplicates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duplicates',
+      one: '1 duplicate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterGoToCollection => 'See the collection';
+
+  @override
+  String get collectionTitle => 'Collection';
+
+  @override
+  String collectionSetProgress(int owned, int total) {
+    return '$owned / $total cards';
+  }
+
+  @override
+  String collectionShinyCount(int count) {
+    return '$count shiny';
+  }
+
+  @override
+  String get collectionFilterAll => 'All';
+
+  @override
+  String get collectionFilterOwned => 'Owned';
+
+  @override
+  String get collectionFilterMissing => 'Missing';
+
+  @override
+  String get collectionFilterDuplicates => 'Duplicates';
+
+  @override
+  String get collectionCardNotOwned => 'Not obtained yet';
+
+  @override
+  String get collectionEmptyBody =>
+      'Real reviews feed your burn; milestones drop boosters full of Japan cards.';
+
+  @override
+  String collectionUnlocks(String what) {
+    return 'Unlocks: $what';
+  }
+
+  @override
+  String get collectionUnlocked => 'Unlocked';
+
+  @override
+  String get collectionVocab => 'Japanese to remember';
+
+  @override
+  String get collectionFlipCard => 'Flip the card';
+
+  @override
+  String get contentFallbackEnglish =>
+      'Not yet written in your language; shown in English.';
+
+  @override
+  String get rarityCommon => 'Common';
+
+  @override
+  String get rarityRare => 'Rare';
+
+  @override
+  String get raritySpecial => 'Special';
+
+  @override
+  String get rarityShiny => 'Shiny';
+
+  @override
+  String get categoryPlace => 'Place';
+
+  @override
+  String get categoryCulture => 'Culture';
+
+  @override
+  String get categoryFood => 'Food & drink';
+
+  @override
+  String get categoryObject => 'Everyday object';
+
+  @override
+  String get categoryTransport => 'Trains & cities';
+
+  @override
+  String get categoryNature => 'Nature';
+
+  @override
+  String get categoryCraft => 'Craft';
+
+  @override
+  String get categoryPerson => 'Personality';
+
+  @override
+  String get categorySociety => 'Society';
+
+  @override
+  String get categoryHistory => 'History';
+
+  @override
+  String get categoryFestival => 'Festivals & seasons';
+
+  @override
+  String get paletteLockedLabel => 'Locked';
+
+  @override
+  String collectionPhotoCredit(String credit) {
+    return 'Photo: $credit';
+  }
+
+  @override
+  String paletteLockedHint(String card) {
+    return 'Found in boosters: the $card card unlocks it.';
+  }
+
+  @override
+  String get devToolsTitle => 'Developer tools';
+
+  @override
+  String get devToolsHelp =>
+      'Local test data for the burn and the collection. Debug builds only, never shipped.';
+
+  @override
+  String devAddBurnDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count qualified days',
+      one: 'Add 1 qualified day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get devSeedApplied => 'Days added; milestones re-evaluated.';
+
+  @override
+  String get devResetRewards => 'Reset rewards';
+
+  @override
+  String get devResetRewardsHelp =>
+      'Removes seeded days, every booster and the whole collection on this device.';
+
+  @override
+  String get devResetDone => 'Rewards reset.';
+
+  @override
+  String get devSyncNote =>
+      'Seeded reviews never upload to an account; boosters and openings follow the normal account sync.';
+
+  @override
+  String get devNativeOnly => 'Available in the mobile and desktop apps only.';
 }

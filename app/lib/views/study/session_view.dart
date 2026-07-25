@@ -11,6 +11,7 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/review_viewmodel.dart';
+import '../rewards/rewards_session_hook.dart';
 import '../widgets/pressable.dart';
 import '../widgets/status_views.dart';
 import 'listen_stage.dart';
@@ -823,6 +824,9 @@ class _Summary extends StatelessWidget {
                       ),
                     ],
                   ),
+                  // Burn milestones are honored now that the session is real
+                  // study; renders only when a booster was just earned.
+                  const RewardsSessionHook(),
                   if (revisit.isNotEmpty) ...[
                     const SizedBox(height: 22),
                     Text(

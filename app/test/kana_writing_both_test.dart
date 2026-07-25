@@ -56,7 +56,6 @@ void main() {
         theme: AppTheme.light(),
         home: KanaWritingPracticePage(
           targets: pair,
-          mode: KanaWritingMode.free,
         ),
       ),
     );
@@ -116,7 +115,6 @@ void main() {
         theme: AppTheme.light(),
         home: KanaWritingPracticePage(
           targets: [target],
-          mode: KanaWritingMode.free,
         ),
       ),
     );
@@ -230,19 +228,12 @@ void main() {
       expect(hiraganaDiagram.size, equals(katakanaDiagram.size));
       expect(hiraganaDiagram.width, greaterThanOrEqualTo(140));
 
-      final hiraganaGuided = tester.getRect(
-        find.byKey(const ValueKey('kana-writing-guided-hiragana')),
-      );
-      final katakanaGuided = tester.getRect(
-        find.byKey(const ValueKey('kana-writing-guided-katakana')),
-      );
       final hiraganaFree = tester.getRect(
         find.byKey(const ValueKey('kana-writing-free-hiragana')),
       );
       final katakanaFree = tester.getRect(
         find.byKey(const ValueKey('kana-writing-free-katakana')),
       );
-      expect(hiraganaGuided.top, closeTo(katakanaGuided.top, .1));
       expect(hiraganaFree.top, closeTo(katakanaFree.top, .1));
       expect(tester.takeException(), isNull);
     });
@@ -279,7 +270,6 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(find.text('Tracé guidé'), findsNWidgets(2));
     expect(find.text('Pratique libre'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
@@ -295,17 +285,17 @@ void main() {
         theme: AppTheme.light(),
         home: KanaWritingPracticePage(
           targets: await targets(),
-          mode: KanaWritingMode.guided,
         ),
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Trace both forms'), findsOneWidget);
+    expect(find.text('Practice both forms'), findsOneWidget);
     expect(find.byType(DrawingCanvas), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('short phone keeps a usable Both guided canvas', (tester) async {
+  testWidgets('short phone keeps a usable Both practice canvas',
+      (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(360, 640);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -316,7 +306,6 @@ void main() {
         theme: AppTheme.light(),
         home: KanaWritingPracticePage(
           targets: await targets(),
-          mode: KanaWritingMode.guided,
         ),
       ),
     );
@@ -335,7 +324,6 @@ void main() {
         theme: AppTheme.light(),
         home: KanaWritingPracticePage(
           targets: [target],
-          mode: KanaWritingMode.free,
           telemetry: recorder,
         ),
       ),

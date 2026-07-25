@@ -13,6 +13,8 @@
 ///                  bulk_add, deck_enroll, profile_patch, mnemonic_*).
 ///  * mnemonic_state - optimistic mirror of votes/saves for offline UI.
 ///  * kv          - user_json, fsrs profile cache, last_synced_at, local_only.
+///  * booster_grants / collection_cards - burn-milestone boosters and the
+///                  Japan card collection (docs/REWARDS.md), local-only today.
 library;
 
 import 'dart:async';
@@ -209,6 +211,32 @@ class UserDb {
       db.execute(
           'ALTER TABLE cards ADD COLUMN source_media TEXT NOT NULL DEFAULT \'\'');
       db.execute('PRAGMA user_version = 2');
+    }
+    if (version <= 2) {
+      // Booster rewards + Japan card collection (docs/REWARDS.md).
+      //  * booster_grants - one row per honored burn milestone. The primary key
+      //    is deterministic (streak:<runStart>:<milestone>) so replaying the
+      //    evaluation never grants twice. cards_json is written at opening
+      //    time and makes the opening itself replayable.
+      //  * collection_cards - what the user owns; count keeps duplicates.
+      db.execute('''
+        CREATE TABLE booster_grants(
+          grant_id   TEXT PRIMARY KEY,
+          source     TEXT NOT NULL,
+          milestone  INTEGER NOT NULL,
+          status     TEXT NOT NULL DEFAULT 'unopened'
+                     CHECK (status IN ('unopened','opened','skipped_full')),
+          granted_at INTEGER NOT NULL,
+          opened_at  INTEGER,
+          cards_json TEXT
+        )''');
+      db.execute('''
+        CREATE TABLE collection_cards(
+          card_id           TEXT PRIMARY KEY,
+          count             INTEGER NOT NULL DEFAULT 1,
+          first_obtained_at INTEGER NOT NULL
+        )''');
+      db.execute('PRAGMA user_version = 3');
     }
   }
 }

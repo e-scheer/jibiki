@@ -14,7 +14,7 @@ $sites = @(
 
 $commonArgs = @(
   'scripts/mirror_sites.py',
-  '--delay-seconds', '15',
+  '--delay-seconds', '5',
   '--discover-links',
   '--include-assets',
   '--ignore-robots'

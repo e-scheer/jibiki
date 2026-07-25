@@ -33,7 +33,17 @@ from accounts.serializers import ProfileSerializer
 
 from . import services
 from .fsrs import MemoryState
-from .models import Card, CardTombstone, ItemType, ReviewLog, State, SyncedOp
+from .models import (
+    BoosterGrant,
+    BoosterStatus,
+    Card,
+    CardTombstone,
+    CollectionCard,
+    ItemType,
+    ReviewLog,
+    State,
+    SyncedOp,
+)
 
 # Client clocks can drift; what matters is per-card monotonic order, not wall
 # accuracy. Timestamps from the future are clamped to roughly "now".
@@ -50,6 +60,8 @@ OP_KINDS = (
     "mnemonic_choose",
     "mnemonic_deck_enroll",
     "mnemonic_deck_apply",
+    "booster_grant",
+    "booster_open",
 )
 
 
@@ -95,6 +107,7 @@ def apply_sync(user, data: dict) -> dict:
         "deleted": deleted,
         "profile": ProfileSerializer(profile).data,
         "cloud": _cloud_status(user),
+        "rewards": _rewards_state(user),
     }
 
 
@@ -123,6 +136,7 @@ def _empty_response(user, now, *, cloud: dict) -> dict:
         "deleted": [],
         "profile": ProfileSerializer(profile).data,
         "cloud": cloud,
+        "rewards": _rewards_state(user),
     }
 
 
@@ -131,6 +145,42 @@ def _clear_study_cloud(user) -> None:
     Card.objects.filter(user=user).delete()
     CardTombstone.objects.filter(user=user).delete()
     SyncedOp.objects.filter(user=user).delete()
+    # "Keep local" replaces the cloud rewards too: the client regenerates
+    # booster_grant/booster_open ops from its local state in the same request.
+    BoosterGrant.objects.filter(user=user).delete()
+    CollectionCard.objects.filter(user=user).delete()
+
+
+def _ms(dt) -> int | None:
+    return None if dt is None else int(dt.timestamp() * 1000)
+
+
+def _rewards_state(user) -> dict:
+    """The full booster/collection state, included in every sync response.
+    Small by construction (a handful of grants, at most one collection row per
+    catalog card), so a delta cursor would be more machinery than data."""
+    return {
+        "grants": [
+            {
+                "grant_id": g.grant_id,
+                "source": g.source,
+                "milestone": g.milestone,
+                "status": g.status,
+                "granted_at": _ms(g.granted_at),
+                "opened_at": _ms(g.opened_at),
+                "cards": g.cards,
+            }
+            for g in BoosterGrant.objects.filter(user=user).order_by("granted_at")
+        ],
+        "collection": [
+            {
+                "card_id": c.card_id,
+                "count": c.count,
+                "first_obtained_at": _ms(c.first_obtained_at),
+            }
+            for c in CollectionCard.objects.filter(user=user).order_by("card_id")
+        ],
+    }
 
 
 # ── ops ──────────────────────────────────────────────────────────────────────
@@ -206,8 +256,74 @@ def _apply_op(user, kind: str, payload: dict, performed_at) -> None:
         serializer.save()
     elif kind.startswith("mnemonic_"):
         _apply_mnemonic_op(user, kind, payload)
+    elif kind == "booster_grant":
+        _apply_booster_grant(user, payload, performed_at)
+    elif kind == "booster_open":
+        _apply_booster_open(user, payload, performed_at)
     else:
         raise OpRejected("unknown_kind")
+
+
+# ── rewards (docs/REWARDS.md) ────────────────────────────────────────────────
+
+
+def _apply_booster_grant(user, payload: dict, performed_at) -> None:
+    status_value = str(payload.get("status", BoosterStatus.UNOPENED))
+    if status_value not in (BoosterStatus.UNOPENED, BoosterStatus.SKIPPED_FULL):
+        # "opened" only ever arrives through booster_open.
+        raise OpRejected("invalid")
+    BoosterGrant.objects.get_or_create(
+        user=user,
+        grant_id=str(payload["grant_id"])[:64],
+        defaults={
+            "source": str(payload.get("source", "streak_milestone"))[:32],
+            "milestone": int(payload["milestone"]),
+            "status": status_value,
+            "granted_at": performed_at,
+        },
+    )
+
+
+def _apply_booster_open(user, payload: dict, performed_at) -> None:
+    raw_cards = payload["cards"]
+    if not isinstance(raw_cards, list) or not raw_cards or len(raw_cards) > 16:
+        raise OpRejected("invalid")
+    cards = [
+        {
+            "card_id": str(card["card_id"])[:64],
+            "is_new": bool(card.get("is_new")),
+            "count_after": int(card.get("count_after", 1)),
+        }
+        for card in raw_cards
+    ]
+    # An opening implies its grant (a device may replay the open before the
+    # grant op from another device arrives).
+    grant, _ = BoosterGrant.objects.get_or_create(
+        user=user,
+        grant_id=str(payload["grant_id"])[:64],
+        defaults={
+            "source": str(payload.get("source", "streak_milestone"))[:32],
+            "milestone": int(payload.get("milestone", 0)),
+            "status": BoosterStatus.UNOPENED,
+            "granted_at": performed_at,
+        },
+    )
+    if grant.status == BoosterStatus.OPENED:
+        # First open wins; the client draw is deterministic per grant anyway.
+        return
+    grant.status = BoosterStatus.OPENED
+    grant.opened_at = performed_at
+    grant.cards = cards
+    grant.save(update_fields=["status", "opened_at", "cards"])
+    for card in cards:
+        entry, created = CollectionCard.objects.get_or_create(
+            user=user,
+            card_id=card["card_id"],
+            defaults={"count": 1, "first_obtained_at": performed_at},
+        )
+        if not created:
+            entry.count += 1
+            entry.save(update_fields=["count"])
 
 
 def _apply_mnemonic_op(user, kind: str, payload: dict) -> None:

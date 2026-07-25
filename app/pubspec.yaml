@@ -50,8 +50,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Deterministic clocks for viewmodel timing tests.
+  fake_async: ^1.3.1
   flutter_lints: ^5.0.0
-  # Generate launcher icons (Android adaptive + monochrome, iOS, web).
+  # Generate launcher icons (Android adaptive + monochrome, iOS, web, Windows).
   flutter_launcher_icons: ^0.14.1
 
 # Exploration 17 app icon: ink 字 on the full NeoPop acid field.
@@ -68,6 +70,12 @@ flutter_launcher_icons:
     image_path: "assets/icon/icon.png"
     background_color: "#F2E51C"
     theme_color: "#2B36E3"
+  windows:
+    generate: true
+    # Rounded tile with a transparent margin: the desktop taskbar renders the
+    # square store icon full-bleed, which looks off next to other app icons.
+    image_path: "assets/icon/icon_windows.png"
+    icon_size: 256
 
 # Exploration 17 runtime splash. The OS launch stays a solid brand field so
 # device-specific scaling never distorts the lockup; Flutter takes over with
@@ -86,6 +94,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/kana_strokes.json
+    # Japan card collection catalog (booster rewards, docs/REWARDS.md).
+    - assets/data/collection_sets.json
+    # Card photos, curated from Wikimedia Commons by scripts/fetch_card_art.py;
+    # authors and licenses live in ATTRIBUTIONS.json and in each card's credit.
+    - assets/art/cards/
     # Bundled offline dictionary (the "base" content pack, installed on first
     # run). Regenerated at release time: make build-base-pack.
     - assets/packs/base.db.gz

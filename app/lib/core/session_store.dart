@@ -15,6 +15,8 @@ class SessionStore {
   static const _kLocalProfile = 'local_profile';
   static const _kThemePalette = 'theme_palette';
   static const _kThemeMode = 'theme_mode';
+  static const _kUnlockedPalettes = 'unlocked_palettes';
+  static const _kBoosterOpenedOnce = 'booster_opened_once';
   static const _kTelemetryConsent = 'telemetry_consent';
   static const _kTelemetryAnalyticsConsent = 'telemetry_analytics_consent';
   static const _kTelemetryDiagnosticsConsent = 'telemetry_diagnostics_consent';
@@ -67,6 +69,20 @@ class SessionStore {
   String get themePalette => _prefs.getString(_kThemePalette) ?? 'neopop';
   Future<void> setThemePalette(String value) =>
       _prefs.setString(_kThemePalette, value);
+
+  /// Cosmetic palettes unlocked by consumable collection cards. A mirror of
+  /// the collection (user.db is the source of truth) so the theme is correct
+  /// at cold start, before the rewards layer has loaded.
+  List<String> get unlockedPalettes =>
+      _prefs.getStringList(_kUnlockedPalettes) ?? const [];
+  Future<void> setUnlockedPalettes(List<String> values) =>
+      _prefs.setStringList(_kUnlockedPalettes, values);
+
+  /// True once any booster has been opened on this device: the first opening
+  /// plays the full sequence, later ones offer a skip.
+  bool get boosterOpenedOnce => _prefs.getBool(_kBoosterOpenedOnce) ?? false;
+  Future<void> setBoosterOpenedOnce() =>
+      _prefs.setBool(_kBoosterOpenedOnce, true);
   String get themeMode => _prefs.getString(_kThemeMode) ?? 'system';
   Future<void> setThemeMode(String value) =>
       _prefs.setString(_kThemeMode, value);

@@ -757,6 +757,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'jibiki · dictionary data © EDRDG (JMdict/KANJIDIC)'**
   String get dictionaryCredits;
+
+  /// No description provided for @burnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning burn'**
+  String get burnTitle;
+
+  /// No description provided for @burnDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 days} =1{1 day} other{{count} days}}'**
+  String burnDays(int count);
+
+  /// No description provided for @burnBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count, plural, =1{1 day} other{{count} days}}'**
+  String burnBest(int count);
+
+  /// No description provided for @burnTodayCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is in. See you tomorrow.'**
+  String get burnTodayCounted;
+
+  /// No description provided for @burnComeBackToday.
+  ///
+  /// In en, this message translates to:
+  /// **'One review today keeps your burn going.'**
+  String get burnComeBackToday;
+
+  /// No description provided for @burnNextBooster.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day to your next booster} other{{count} days to your next booster}}'**
+  String burnNextBooster(int count);
+
+  /// No description provided for @boosterShelfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boosters'**
+  String get boosterShelfTitle;
+
+  /// No description provided for @boosterToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 booster to open} other{{count} boosters to open}}'**
+  String boosterToOpen(int count);
+
+  /// No description provided for @boosterShelfFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shelf is full. Open a booster to make room for the next milestone.'**
+  String get boosterShelfFull;
+
+  /// No description provided for @boosterEarnedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booster earned!'**
+  String get boosterEarnedTitle;
+
+  /// No description provided for @boosterEarnedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {milestone} of your burn. Open it whenever you like.'**
+  String boosterEarnedBody(int milestone);
+
+  /// No description provided for @boosterOpenAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the booster'**
+  String get boosterOpenAction;
+
+  /// No description provided for @boosterOpenLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get boosterOpenLater;
+
+  /// No description provided for @boosterSlideToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide across the pack to open it'**
+  String get boosterSlideToOpen;
+
+  /// No description provided for @boosterTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open'**
+  String get boosterTapToOpen;
+
+  /// No description provided for @boosterSkipAnimation.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip animation'**
+  String get boosterSkipAnimation;
+
+  /// No description provided for @boosterSwipeToReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to reveal'**
+  String get boosterSwipeToReveal;
+
+  /// No description provided for @boosterTapToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue'**
+  String get boosterTapToContinue;
+
+  /// No description provided for @boosterTapToReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to reveal'**
+  String get boosterTapToReveal;
+
+  /// No description provided for @boosterTiltHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the card to tilt it'**
+  String get boosterTiltHint;
+
+  /// No description provided for @boosterNewCard.
+  ///
+  /// In en, this message translates to:
+  /// **'New card'**
+  String get boosterNewCard;
+
+  /// No description provided for @boosterDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate ×{count}'**
+  String boosterDuplicate(int count);
+
+  /// No description provided for @boosterSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booster opened'**
+  String get boosterSummaryTitle;
+
+  /// No description provided for @boosterSummaryNew.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new card} other{{count} new cards}}'**
+  String boosterSummaryNew(int count);
+
+  /// No description provided for @boosterSummaryDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 duplicate} other{{count} duplicates}}'**
+  String boosterSummaryDuplicates(int count);
+
+  /// No description provided for @boosterGoToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'See the collection'**
+  String get boosterGoToCollection;
+
+  /// No description provided for @collectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collectionTitle;
+
+  /// No description provided for @collectionSetProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{owned} / {total} cards'**
+  String collectionSetProgress(int owned, int total);
+
+  /// No description provided for @collectionShinyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shiny'**
+  String collectionShinyCount(int count);
+
+  /// No description provided for @collectionFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get collectionFilterAll;
+
+  /// No description provided for @collectionFilterOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get collectionFilterOwned;
+
+  /// No description provided for @collectionFilterMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing'**
+  String get collectionFilterMissing;
+
+  /// No description provided for @collectionFilterDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicates'**
+  String get collectionFilterDuplicates;
+
+  /// No description provided for @collectionCardNotOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not obtained yet'**
+  String get collectionCardNotOwned;
+
+  /// No description provided for @collectionEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Real reviews feed your burn; milestones drop boosters full of Japan cards.'**
+  String get collectionEmptyBody;
+
+  /// No description provided for @collectionUnlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks: {what}'**
+  String collectionUnlocks(String what);
+
+  /// No description provided for @collectionUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get collectionUnlocked;
+
+  /// No description provided for @collectionVocab.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese to remember'**
+  String get collectionVocab;
+
+  /// No description provided for @collectionFlipCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip the card'**
+  String get collectionFlipCard;
+
+  /// No description provided for @contentFallbackEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet written in your language; shown in English.'**
+  String get contentFallbackEnglish;
+
+  /// No description provided for @rarityCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Common'**
+  String get rarityCommon;
+
+  /// No description provided for @rarityRare.
+  ///
+  /// In en, this message translates to:
+  /// **'Rare'**
+  String get rarityRare;
+
+  /// No description provided for @raritySpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Special'**
+  String get raritySpecial;
+
+  /// No description provided for @rarityShiny.
+  ///
+  /// In en, this message translates to:
+  /// **'Shiny'**
+  String get rarityShiny;
+
+  /// No description provided for @categoryPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Place'**
+  String get categoryPlace;
+
+  /// No description provided for @categoryCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Culture'**
+  String get categoryCulture;
+
+  /// No description provided for @categoryFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & drink'**
+  String get categoryFood;
+
+  /// No description provided for @categoryObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday object'**
+  String get categoryObject;
+
+  /// No description provided for @categoryTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Trains & cities'**
+  String get categoryTransport;
+
+  /// No description provided for @categoryNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get categoryNature;
+
+  /// No description provided for @categoryCraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Craft'**
+  String get categoryCraft;
+
+  /// No description provided for @categoryPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Personality'**
+  String get categoryPerson;
+
+  /// No description provided for @categorySociety.
+  ///
+  /// In en, this message translates to:
+  /// **'Society'**
+  String get categorySociety;
+
+  /// No description provided for @categoryHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get categoryHistory;
+
+  /// No description provided for @categoryFestival.
+  ///
+  /// In en, this message translates to:
+  /// **'Festivals & seasons'**
+  String get categoryFestival;
+
+  /// No description provided for @paletteLockedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get paletteLockedLabel;
+
+  /// No description provided for @collectionPhotoCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: {credit}'**
+  String collectionPhotoCredit(String credit);
+
+  /// No description provided for @paletteLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Found in boosters: the {card} card unlocks it.'**
+  String paletteLockedHint(String card);
+
+  /// No description provided for @devToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer tools'**
+  String get devToolsTitle;
+
+  /// No description provided for @devToolsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Local test data for the burn and the collection. Debug builds only, never shipped.'**
+  String get devToolsHelp;
+
+  /// No description provided for @devAddBurnDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 qualified day} other{Add {count} qualified days}}'**
+  String devAddBurnDays(int count);
+
+  /// No description provided for @devSeedApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Days added; milestones re-evaluated.'**
+  String get devSeedApplied;
+
+  /// No description provided for @devResetRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset rewards'**
+  String get devResetRewards;
+
+  /// No description provided for @devResetRewardsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes seeded days, every booster and the whole collection on this device.'**
+  String get devResetRewardsHelp;
+
+  /// No description provided for @devResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards reset.'**
+  String get devResetDone;
+
+  /// No description provided for @devSyncNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded reviews never upload to an account; boosters and openings follow the normal account sync.'**
+  String get devSyncNote;
+
+  /// No description provided for @devNativeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in the mobile and desktop apps only.'**
+  String get devNativeOnly;
 }
 
 class _AppLocalizationsDelegate

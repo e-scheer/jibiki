@@ -15,7 +15,9 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../viewmodels/mnemonic_deck_viewmodel.dart';
+import '../../viewmodels/rewards_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
+import '../rewards/burn_booster_panel.dart';
 import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
@@ -113,17 +115,20 @@ class _DashboardHeader extends StatelessWidget {
                   variant: JibikiBrandVariant.negative,
                 ),
                 const Spacer(),
-                Text(
-                  streak == 1
-                      ? _copy(context, 'Streak: 1 day', 'Série : 1 jour')
-                      : _copy(context, 'Streak: $streak days',
-                          'Série : $streak jours'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                if (context.watch<RewardsViewModel?>()?.available ?? false)
+                  const BurnChip()
+                else
+                  Text(
+                    streak == 1
+                        ? _copy(context, 'Streak: 1 day', 'Série : 1 jour')
+                        : _copy(context, 'Streak: $streak days',
+                            'Série : $streak jours'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 14),
@@ -390,7 +395,7 @@ class _TwoColumnDashboard extends StatelessWidget {
               left: 0,
               top: 432,
               width: column,
-              height: 108,
+              height: 132,
               child: _RecentCard(
                 compact: true,
                 onOpenDictionary: onOpenDictionary,
@@ -1059,29 +1064,52 @@ class _RecentWordButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.read<SearchViewModel>();
+    final gloss = recent.word
+        .summaryGloss(vm.glossLanguage)
+        .split(';')
+        .first
+        .trim();
     return Pressable(
-      label: recent.word.headword,
+      label: gloss.isEmpty
+          ? recent.word.headword
+          : '${recent.word.headword}, $gloss',
       onTap: () {
         vm.rememberOpened(recent.word);
         onOpenDictionary(recent.word.headword);
       },
       child: Container(
-        constraints: const BoxConstraints(minHeight: 44, maxWidth: 96),
+        constraints: const BoxConstraints(minHeight: 44, maxWidth: 110),
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: context.jc.canvas,
           border: Border.all(color: context.jc.ink, width: 2.5),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          recent.word.headword,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              fontFamily: 'ZenKakuGothicNew',
-              fontSize: 15,
-              fontWeight: FontWeight.w700),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              recent.word.headword,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontFamily: 'ZenKakuGothicNew',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700),
+            ),
+            if (gloss.isNotEmpty)
+              Text(
+                gloss,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: context.jc.body,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -1095,7 +1123,14 @@ class _HistoryRow extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Pressable(
+  Widget build(BuildContext context) {
+    final gloss = recent.word
+        .summaryGloss(context.read<SearchViewModel>().glossLanguage);
+    final subtitle = [
+      if (recent.word.primaryReading.isNotEmpty) recent.word.primaryReading,
+      if (gloss.isNotEmpty) gloss,
+    ].join(' · ');
+    return Pressable(
         label: recent.word.headword,
         onTap: onTap,
         focusRadius: 10,
@@ -1123,9 +1158,9 @@ class _HistoryRow extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    if (recent.word.primaryReading.isNotEmpty)
+                    if (subtitle.isNotEmpty)
                       Text(
-                        recent.word.primaryReading,
+                        subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1142,6 +1177,7 @@ class _HistoryRow extends StatelessWidget {
           ),
         ),
       );
+  }
 }
 
 class _HistoryButton extends StatelessWidget {

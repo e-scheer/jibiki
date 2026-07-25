@@ -3,7 +3,7 @@
     "short_name": "jibiki",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#2B36E3",
+    "background_color": "#F2E51C",
     "theme_color": "#2B36E3",
     "description": "jibiki, dictionnaire japonais libre et mémoire durable.",
     "prefer_related_applications": false,

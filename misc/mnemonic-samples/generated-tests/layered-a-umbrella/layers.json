@@ -1,0 +1,11 @@
+﻿{
+    "character":  "あ",
+    "font":  "Yu Gothic",
+    "zOrder":  [
+                   "00-background.png",
+                   "01-under-illustration.png",
+                   "02-exact-glyph.png",
+                   "03-over-illustration.png"
+               ],
+    "glyphSha256":  "BCABB9E1A514D6309B3FEA48BFA8A72B8490FE11272864A2813D70E8B2DE3668"
+}

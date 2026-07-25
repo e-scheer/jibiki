@@ -321,6 +321,7 @@ class LocalStudyStore implements StudyStore {
       'SELECT count(*) AS n FROM review_log WHERE reviewed_at >= ?',
       [start],
     );
+    final streak = await _streak();
     final reviewSummary = await _user.select(
       'SELECT count(*) AS total, '
       'sum(CASE WHEN rating >= 2 THEN 1 ELSE 0 END) AS correct, '
@@ -368,7 +369,7 @@ class LocalStudyStore implements StudyStore {
       dueNow: rows.single['due_count'] as int? ?? 0,
       newRemaining: rows.single['new_count'] as int? ?? 0,
       reviewsToday: reviews.single['n'] as int,
-      streak: reviews.single['n'] == 0 ? 0 : 1,
+      streak: streak,
       totalCards: rows.single['total'] as int,
       byState: byState,
       totalReviews: reviewSummary.single['total'] as int? ?? 0,
@@ -485,6 +486,38 @@ class LocalStudyStore implements StudyStore {
       'value': value,
     });
     return value;
+  }
+
+  /// Consecutive local-calendar days with at least one review, ending today
+  /// or yesterday. Mirrors the server's streak_days() (srs/services.py) so the
+  /// number does not jump when a user signs in and the source switches.
+  /// Timestamps are folded into 15-minute buckets in SQL and converted to
+  /// local dates in Dart (SQLite's 'localtime' modifier is unreliable on some
+  /// bundled builds).
+  Future<int> _streak() async {
+    final rows = await _user.select(
+      'SELECT DISTINCT reviewed_at / 900000 AS bucket FROM review_log',
+    );
+    if (rows.isEmpty) return 0;
+    final days = <DateTime>{};
+    for (final row in rows) {
+      final local = DateTime.fromMillisecondsSinceEpoch(
+        (row['bucket'] as int) * 900000,
+        isUtc: true,
+      ).toLocal();
+      days.add(DateTime(local.year, local.month, local.day));
+    }
+    final now = DateTime.now();
+    var cursor = DateTime(now.year, now.month, now.day);
+    if (!days.contains(cursor)) {
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    var streak = 0;
+    while (days.contains(cursor)) {
+      streak += 1;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
   }
 
   Future<Map<String, Object?>?> _row(ItemType type, String ref) async {

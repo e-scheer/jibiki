@@ -7,6 +7,7 @@ import Hero from './Hero.astro';
 import MemoryFlow from './MemoryFlow.astro';
 import MnemonicSection from './MnemonicSection.astro';
 import ReviewSection from './ReviewSection.astro';
+import StudySection from './StudySection.astro';
 import TabletSection from './TabletSection.astro';
 import TrustSection from './TrustSection.astro';
 
@@ -22,6 +23,7 @@ const { locale, t } = Astro.props;
 <DictionaryDemo locale={locale} t={t} appUrl={publicConfig.appUrl} apiUrl={publicConfig.apiUrl} />
 <MemoryFlow t={t} />
 <MnemonicSection t={t} />
+<StudySection t={t} />
 <ReviewSection t={t} />
 <TabletSection t={t} />
 <TrustSection t={t} />

@@ -10,6 +10,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/statistics_viewmodel.dart';
+import '../rewards/burn_booster_panel.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/pressable.dart';
 import '../widgets/jibiki_brand.dart';
@@ -77,7 +78,7 @@ class _Statistics extends StatelessWidget {
               children: [
                 _Header(
                   refreshing: vm.isLoading,
-                  onRefresh: vm.load,
+                  onRefresh: vm.refresh,
                   showBack: showBack,
                 ),
                 const SizedBox(height: 18),
@@ -270,6 +271,9 @@ class _ProfileMetrics extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 10),
+        // Burn, boosters and collection shortcut (hidden when unavailable).
+        const BurnBoosterPanel(),
         const SizedBox(height: 10),
         Row(
           children: [

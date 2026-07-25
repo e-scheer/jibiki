@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,7 @@ import '../../repositories/study_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/theme_controller.dart';
 import '../../viewmodels/app_state.dart';
+import '../../viewmodels/rewards_viewmodel.dart';
 import '../../viewmodels/settings_viewmodel.dart';
 
 class SettingsView extends StatelessWidget {
@@ -348,6 +350,20 @@ class _Settings extends StatelessWidget {
                         ),
                       ],
                     ]),
+                    // Debug builds only: local test data for burn/boosters.
+                    // Never visible in a release build.
+                    if (kDebugMode) ...[
+                      _section(context, context.l10n.devToolsTitle),
+                      _SettingsCard(children: [
+                        ListTile(
+                          leading: const Icon(Icons.science_outlined),
+                          title: Text(context.l10n.devToolsTitle),
+                          subtitle: Text(context.l10n.devToolsHelp),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/settings/dev'),
+                        ),
+                      ]),
+                    ],
                     const SizedBox(height: 24),
                     Center(
                       child: Text(context.l10n.dictionaryCredits,
@@ -691,6 +707,7 @@ class _PalettePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeController>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth >= 368
@@ -705,6 +722,7 @@ class _PalettePicker extends StatelessWidget {
                 width: width,
                 palette: palette,
                 selected: value == palette,
+                unlocked: theme.isUnlocked(palette),
                 onTap: () => onChanged(palette),
               ),
           ],
@@ -719,68 +737,112 @@ class _PaletteSwatch extends StatelessWidget {
     required this.width,
     required this.palette,
     required this.selected,
+    required this.unlocked,
     required this.onTap,
   });
 
   final double width;
   final ThemePalette palette;
   final bool selected;
+  final bool unlocked;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = palette == ThemePalette.neopop
-        ? const [
-            Color(0xFFF2E51C),
-            Color(0xFF2B36E3),
-            Color(0xFFFF57A8),
-            Color(0xFF8FE838)
-          ]
-        : const [
-            Color(0xFFF28AB4),
-            Color(0xFF3441D4),
-            Color(0xFF7452C9),
-            Color(0xFFA9B6F2)
-          ];
+    final colors = switch (palette) {
+      ThemePalette.neopop => const [
+          Color(0xFFF2E51C),
+          Color(0xFF2B36E3),
+          Color(0xFFFF57A8),
+          Color(0xFF8FE838)
+        ],
+      ThemePalette.harmonie => const [
+          Color(0xFFF28AB4),
+          Color(0xFF3441D4),
+          Color(0xFF7452C9),
+          Color(0xFFA9B6F2)
+        ],
+      ThemePalette.sakura => const [
+          Color(0xFFF6E7EE),
+          Color(0xFFB93262),
+          Color(0xFFF06292),
+          Color(0xFFFFD54F)
+        ],
+      ThemePalette.neon => const [
+          Color(0xFF12131C),
+          Color(0xFFFF2DA8),
+          Color(0xFF35D0C0),
+          Color(0xFF7C8CFF)
+        ],
+    };
+    // A locked palette is visible with an honest "how to earn it" hint: it is
+    // a booster reward, never hidden and never sold (docs/REWARDS.md).
+    final unlockCard = unlocked
+        ? null
+        : context
+            .watch<RewardsViewModel?>()
+            ?.unlockCardForPalette(palette.name);
+    final language = Localizations.localeOf(context).languageCode;
     return SizedBox(
       width: width,
-      child: NeoCard(
-        onTap: onTap,
-        semanticLabel: context.trText('${palette.label} palette'),
-        tone: selected ? NeoTone.acid : NeoTone.paper,
-        shadow: selected ? 4 : 0,
-        radius: 10,
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: Row(children: [
-                for (final color in colors)
-                  Expanded(
-                    child: ColoredBox(
-                      color: color,
-                      child: const SizedBox(height: 28),
+      child: Opacity(
+        opacity: unlocked ? 1 : .6,
+        child: NeoCard(
+          onTap: unlocked ? onTap : null,
+          semanticLabel: unlocked
+              ? context.trText('${palette.label} palette')
+              : '${palette.label}, ${context.l10n.paletteLockedLabel}',
+          tone: selected ? NeoTone.acid : NeoTone.paper,
+          shadow: selected ? 4 : 0,
+          radius: 10,
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Row(children: [
+                  for (final color in colors)
+                    Expanded(
+                      child: ColoredBox(
+                        color: color,
+                        child: const SizedBox(height: 28),
+                      ),
                     ),
+                ]),
+              ),
+              const SizedBox(height: 9),
+              Row(children: [
+                Expanded(
+                  child: Text(
+                    palette.label,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+                if (!unlocked)
+                  const Icon(Icons.lock_outline_rounded, size: 18)
+                else
+                  AnimatedScale(
+                    scale: selected ? 1 : 0,
+                    duration: Motion.timed(context, Motion.fast),
+                    child: const Icon(Icons.check_rounded, size: 20),
                   ),
               ]),
-            ),
-            const SizedBox(height: 9),
-            Row(children: [
-              Expanded(
-                child: Text(
-                  palette.label,
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+              if (!unlocked && unlockCard != null) ...[
+                const SizedBox(height: 5),
+                Text(
+                  context.l10n
+                      .paletteLockedHint(unlockCard.name.resolve(language)),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: context.jc.muted,
+                    height: 1.3,
+                  ),
                 ),
-              ),
-              AnimatedScale(
-                scale: selected ? 1 : 0,
-                duration: Motion.timed(context, Motion.fast),
-                child: const Icon(Icons.check_rounded, size: 20),
-              ),
-            ]),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
     );

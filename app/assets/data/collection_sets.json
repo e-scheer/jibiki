@@ -1,0 +1,468 @@
+{
+  "version": 1,
+  "languages": ["fr", "en"],
+  "sets": [
+    {
+      "id": "set-001",
+      "number": 1,
+      "name": { "fr": "Japon essentiel", "en": "Essential Japan" },
+      "cards": [
+        {
+          "id": "set001-001",
+          "number": 1,
+          "category": "place",
+          "rarity": "common",
+          "nameJa": "富士山",
+          "reading": "ふじさん",
+          "name": { "fr": "Mont Fuji", "en": "Mount Fuji" },
+          "body": {
+            "fr": "Volcan sacré et plus haut sommet du Japon (3 776 m), le Fuji domine Honshū entre Shizuoka et Yamanashi. Sa silhouette presque parfaite inspire peintres et pèlerins depuis des siècles.",
+            "en": "A sacred volcano and Japan's highest peak (3,776 m), Fuji towers over Honshu between Shizuoka and Yamanashi. Its near-perfect cone has inspired painters and pilgrims for centuries."
+          },
+          "context": {
+            "fr": "Préfectures de Shizuoka et Yamanashi",
+            "en": "Shizuoka and Yamanashi prefectures"
+          },
+          "vocab": [
+            { "ja": "山", "reading": "やま", "gloss": { "fr": "montagne", "en": "mountain" } },
+            { "ja": "火山", "reading": "かざん", "gloss": { "fr": "volcan", "en": "volcano" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-001.jpg", "credit": "Midori · CC BY 3.0 · Wikimedia Commons", "motif": "mountain", "colors": ["#5B7FD4", "#DCE7FA"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-002",
+          "number": 2,
+          "category": "culture",
+          "rarity": "common",
+          "nameJa": "鳥居",
+          "reading": "とりい",
+          "name": { "fr": "Torii", "en": "Torii" },
+          "body": {
+            "fr": "Le torii marque l'entrée d'un sanctuaire shintō: le franchir, c'est passer du monde ordinaire au domaine des kami. Les plus célèbres, comme ceux de Fushimi Inari, forment de longs tunnels vermillon.",
+            "en": "A torii marks the entrance of a Shinto shrine: walking through it means crossing from the everyday world into the realm of the kami. The most famous ones, like those of Fushimi Inari, form long vermilion tunnels."
+          },
+          "context": {
+            "fr": "Sanctuaires shintō, tout le Japon",
+            "en": "Shinto shrines across Japan"
+          },
+          "vocab": [
+            { "ja": "神社", "reading": "じんじゃ", "gloss": { "fr": "sanctuaire shintō", "en": "Shinto shrine" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-002.jpg", "credit": "Maarten Heerlien · CC BY 2.0 · Wikimedia Commons", "motif": "gate", "colors": ["#D4402A", "#FBEAE4"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-003",
+          "number": 3,
+          "category": "food",
+          "rarity": "common",
+          "nameJa": "ラーメン",
+          "reading": "らーめん",
+          "name": { "fr": "Ramen", "en": "Ramen" },
+          "body": {
+            "fr": "Arrivé de Chine puis réinventé region par region, le ramen est devenu un plat national: bouillon travaillé pendant des heures, nouilles fermes et garnitures précises. Sapporo, Hakata ou Tokyo défendent chacune leur style.",
+            "en": "Brought over from China and reinvented region by region, ramen became a national dish: broth simmered for hours, firm noodles and precise toppings. Sapporo, Hakata and Tokyo each defend their own style."
+          },
+          "context": {
+            "fr": "Cuisine populaire, XXe siècle",
+            "en": "Popular cuisine, 20th century"
+          },
+          "vocab": [
+            { "ja": "麺", "reading": "めん", "gloss": { "fr": "nouilles", "en": "noodles" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-003.jpg", "credit": "Shisma · CC BY 4.0 · Wikimedia Commons", "motif": "bowl", "colors": ["#E8A13C", "#FFF3DD"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-004",
+          "number": 4,
+          "category": "food",
+          "rarity": "common",
+          "nameJa": "抹茶",
+          "reading": "まっちゃ",
+          "name": { "fr": "Matcha", "en": "Matcha" },
+          "body": {
+            "fr": "Poudre de thé vert moulue à la meule, le matcha est au cœur de la cérémonie du thé depuis le XIIe siècle. Fouetté à l'eau chaude, il donne une mousse d'un vert profond, à la fois amère et douce.",
+            "en": "Stone-ground green tea powder, matcha has been at the heart of the tea ceremony since the 12th century. Whisked with hot water, it yields a deep green foam that is both bitter and sweet."
+          },
+          "context": {
+            "fr": "Cérémonie du thé, depuis l'époque Kamakura",
+            "en": "Tea ceremony, since the Kamakura period"
+          },
+          "vocab": [
+            { "ja": "お茶", "reading": "おちゃ", "gloss": { "fr": "thé", "en": "tea" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-004.jpg", "credit": "rumpleteaser · CC BY 2.0 · Wikimedia Commons", "motif": "tea", "colors": ["#4E8F3A", "#E9F5DF"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-005",
+          "number": 5,
+          "category": "object",
+          "rarity": "common",
+          "nameJa": "招き猫",
+          "reading": "まねきねこ",
+          "name": { "fr": "Maneki-neko", "en": "Maneki-neko" },
+          "body": {
+            "fr": "Ce chat qui lève la patte invite la chance à entrer: patte droite pour l'argent, patte gauche pour les clients. On le trouve à l'entrée des boutiques et restaurants depuis l'époque Edo.",
+            "en": "This cat raising its paw beckons luck inside: right paw for money, left paw for customers. It has greeted visitors at shop and restaurant entrances since the Edo period."
+          },
+          "context": {
+            "fr": "Objet porte-bonheur, époque Edo",
+            "en": "Good-luck charm, Edo period"
+          },
+          "vocab": [
+            { "ja": "猫", "reading": "ねこ", "gloss": { "fr": "chat", "en": "cat" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-005.jpg", "credit": "Pierre André Leclercq · CC BY-SA 4.0 · Wikimedia Commons", "motif": "cat", "colors": ["#F2E51C", "#FFF9D6"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-006",
+          "number": 6,
+          "category": "transport",
+          "rarity": "common",
+          "nameJa": "新幹線",
+          "reading": "しんかんせん",
+          "name": { "fr": "Shinkansen", "en": "Shinkansen" },
+          "body": {
+            "fr": "Lancé pour les Jeux de Tokyo en 1964, le Shinkansen a inventé la grande vitesse ferroviaire moderne. Ponctualité à la seconde, nez profilés et personnel impeccable en ont fait un symbole national.",
+            "en": "Launched for the 1964 Tokyo Games, the Shinkansen invented modern high-speed rail. Second-level punctuality, streamlined noses and impeccable service made it a national symbol."
+          },
+          "context": {
+            "fr": "Depuis 1964, tout le Japon",
+            "en": "Since 1964, across Japan"
+          },
+          "vocab": [
+            { "ja": "電車", "reading": "でんしゃ", "gloss": { "fr": "train", "en": "train" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-006.jpg", "credit": "Takeshi Aida · CC BY-SA 2.0 · Wikimedia Commons", "motif": "train", "colors": ["#2B36E3", "#DFE3FB"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-007",
+          "number": 7,
+          "category": "nature",
+          "rarity": "common",
+          "nameJa": "紅葉",
+          "reading": "こうよう",
+          "name": { "fr": "Momiji, l'automne rouge", "en": "Momiji, autumn leaves" },
+          "body": {
+            "fr": "Chaque automne, la vague de feuilles rouges descend l'archipel du nord au sud, et les Japonais partent la contempler: c'est le momijigari, la chasse aux érables, pendant automnal du hanami.",
+            "en": "Every autumn a wave of red leaves sweeps the archipelago from north to south, and people travel to admire it: momijigari, the maple hunt, is autumn's answer to hanami."
+          },
+          "context": {
+            "fr": "Saison: octobre à décembre",
+            "en": "Season: October to December"
+          },
+          "vocab": [
+            { "ja": "秋", "reading": "あき", "gloss": { "fr": "automne", "en": "autumn" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-007.jpg", "credit": "Nankou Oronain · CC BY-SA 3.0 · Wikimedia Commons", "motif": "leaf", "colors": ["#C43E2B", "#FBE4DC"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-008",
+          "number": 8,
+          "category": "place",
+          "rarity": "common",
+          "nameJa": "温泉",
+          "reading": "おんせん",
+          "name": { "fr": "Onsen", "en": "Onsen" },
+          "body": {
+            "fr": "Grâce à son activité volcanique, le Japon compte des milliers de sources chaudes. Le bain, pris nu après s'être lavé, est un rituel de détente et de sociabilité, souvent au cœur de villages thermaux.",
+            "en": "Thanks to its volcanic activity, Japan has thousands of hot springs. Bathing, taken unclothed after washing, is a ritual of relaxation and sociability, often at the heart of hot-spring villages."
+          },
+          "context": {
+            "fr": "Villages thermaux, tout le Japon",
+            "en": "Hot-spring towns across Japan"
+          },
+          "vocab": [
+            { "ja": "お風呂", "reading": "おふろ", "gloss": { "fr": "bain", "en": "bath" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-008.jpg", "credit": "さかおり · CC BY-SA 4.0 · Wikimedia Commons", "motif": "steam", "colors": ["#3B9EA8", "#DFF2F4"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-009",
+          "number": 9,
+          "category": "craft",
+          "rarity": "common",
+          "nameJa": "折り紙",
+          "reading": "おりがみ",
+          "name": { "fr": "Origami", "en": "Origami" },
+          "body": {
+            "fr": "Plier une feuille sans la couper ni la coller: l'origami transforme un carré de papier en grue, en samouraï ou en fleur. La grue en mille exemplaires, senbazuru, est un vœu de guérison et de paix.",
+            "en": "Folding a sheet without cutting or gluing: origami turns a square of paper into a crane, a samurai or a flower. A thousand folded cranes, senbazuru, carry a wish for healing and peace."
+          },
+          "context": {
+            "fr": "Artisanat du papier, depuis l'époque Edo",
+            "en": "Paper craft, since the Edo period"
+          },
+          "vocab": [
+            { "ja": "紙", "reading": "かみ", "gloss": { "fr": "papier", "en": "paper" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-009.jpg", "credit": "Mr.ちゅらさん · CC BY-SA 4.0 · Wikimedia Commons", "motif": "crane", "colors": ["#C9B8F9", "#F3EEFE"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-010",
+          "number": 10,
+          "category": "object",
+          "rarity": "common",
+          "nameJa": "自動販売機",
+          "reading": "じどうはんばいき",
+          "name": { "fr": "Distributeurs automatiques", "en": "Vending machines" },
+          "body": {
+            "fr": "Avec des millions de machines, le Japon a la plus forte densité de distributeurs au monde. Café chaud ou froid, soupes, parapluies: ils fonctionnent partout, à toute heure, même en pleine campagne.",
+            "en": "With millions of machines, Japan has the highest density of vending machines in the world. Hot or cold coffee, soups, umbrellas: they work everywhere, around the clock, even deep in the countryside."
+          },
+          "context": {
+            "fr": "Vie quotidienne contemporaine",
+            "en": "Contemporary daily life"
+          },
+          "vocab": [
+            { "ja": "飲み物", "reading": "のみもの", "gloss": { "fr": "boisson", "en": "drink" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-010.jpg", "credit": "mrhayata · CC BY-SA 2.0 · Wikimedia Commons", "motif": "machine", "colors": ["#FF6952", "#FFE7E2"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-011",
+          "number": 11,
+          "category": "place",
+          "rarity": "rare",
+          "nameJa": "金閣寺",
+          "reading": "きんかくじ",
+          "name": { "fr": "Kinkaku-ji, le Pavillon d'or", "en": "Kinkaku-ji, the Golden Pavilion" },
+          "body": {
+            "fr": "Recouvert de feuilles d'or au bord de son étang miroir, le pavillon fut la villa du shōgun Yoshimitsu avant de devenir temple zen. Incendié en 1950, il fut reconstruit à l'identique cinq ans plus tard.",
+            "en": "Covered in gold leaf beside its mirror pond, the pavilion was shogun Yoshimitsu's villa before becoming a Zen temple. Burned down in 1950, it was rebuilt identically five years later."
+          },
+          "context": {
+            "fr": "Kyoto, époque Muromachi",
+            "en": "Kyoto, Muromachi period"
+          },
+          "vocab": [
+            { "ja": "金", "reading": "きん", "gloss": { "fr": "or", "en": "gold" } },
+            { "ja": "寺", "reading": "てら", "gloss": { "fr": "temple bouddhiste", "en": "Buddhist temple" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-011.jpg", "credit": "Nacaru · CC BY-SA 4.0 · Wikimedia Commons", "motif": "pavilion", "colors": ["#D8A824", "#FBF3D9"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-012",
+          "number": 12,
+          "category": "person",
+          "rarity": "rare",
+          "nameJa": "葛飾北斎",
+          "reading": "かつしかほくさい",
+          "name": { "fr": "Hokusai", "en": "Hokusai" },
+          "body": {
+            "fr": "Peintre et graveur de l'époque Edo, Hokusai a signé La Grande Vague de Kanagawa et les Trente-six vues du mont Fuji. Son trait a marqué l'estampe japonaise et influencé les impressionnistes européens.",
+            "en": "A painter and printmaker of the Edo period, Hokusai created The Great Wave off Kanagawa and the Thirty-six Views of Mount Fuji. His line shaped Japanese woodblock printing and influenced European impressionists."
+          },
+          "context": {
+            "fr": "1760 à 1849, Edo",
+            "en": "1760 to 1849, Edo"
+          },
+          "vocab": [
+            { "ja": "絵", "reading": "え", "gloss": { "fr": "image, peinture", "en": "picture, painting" } },
+            { "ja": "波", "reading": "なみ", "gloss": { "fr": "vague", "en": "wave" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-012.jpg", "credit": "Katsushika Hokusai · Public domain · Wikimedia Commons", "motif": "wave", "colors": ["#1F4FA3", "#DCE9FB"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-013",
+          "number": 13,
+          "category": "society",
+          "rarity": "rare",
+          "nameJa": "相撲",
+          "reading": "すもう",
+          "name": { "fr": "Sumo", "en": "Sumo" },
+          "body": {
+            "fr": "Sport national aux racines rituelles shintō, le sumo oppose deux lutteurs dans un cercle d'argile. Sel purificateur, cérémonies et hiérarchie stricte entourent des combats souvent réglés en quelques secondes.",
+            "en": "A national sport with Shinto ritual roots, sumo pits two wrestlers inside a clay ring. Purifying salt, ceremonies and a strict hierarchy surround bouts often decided in seconds."
+          },
+          "context": {
+            "fr": "Tournois professionnels depuis l'époque Edo",
+            "en": "Professional tournaments since the Edo period"
+          },
+          "vocab": [
+            { "ja": "力士", "reading": "りきし", "gloss": { "fr": "lutteur de sumo", "en": "sumo wrestler" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-013.jpg", "credit": "Simon Q · CC BY 2.0 · Wikimedia Commons", "motif": "ring", "colors": ["#8B4A00", "#F5E7D6"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-014",
+          "number": 14,
+          "category": "nature",
+          "rarity": "rare",
+          "nameJa": "狐",
+          "reading": "きつね",
+          "name": { "fr": "Kitsune", "en": "Kitsune" },
+          "body": {
+            "fr": "Dans le folklore, le renard est le messager d'Inari, divinité des moissons, et un métamorphe malicieux capable de prendre forme humaine. Ses statues gardent des milliers de sanctuaires.",
+            "en": "In folklore, the fox is the messenger of Inari, deity of harvests, and a mischievous shapeshifter able to take human form. Its statues guard thousands of shrines."
+          },
+          "context": {
+            "fr": "Folklore et sanctuaires Inari",
+            "en": "Folklore and Inari shrines"
+          },
+          "vocab": [
+            { "ja": "動物", "reading": "どうぶつ", "gloss": { "fr": "animal", "en": "animal" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-014.jpg", "credit": "Tomi Mäkitalo · CC BY-SA 3.0 · Wikimedia Commons", "motif": "fox", "colors": ["#E8722C", "#FCE9DC"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-015",
+          "number": 15,
+          "category": "culture",
+          "rarity": "special",
+          "nameJa": "桜",
+          "reading": "さくら",
+          "name": { "fr": "Sakura", "en": "Sakura" },
+          "body": {
+            "fr": "La floraison des cerisiers dure à peine deux semaines et le pays entier la suit ville par ville. Pique-niquer sous les pétales, le hanami, célèbre la beauté de ce qui passe.",
+            "en": "The cherry blossom season lasts barely two weeks and the whole country tracks it city by city. Picnicking under the petals, hanami, celebrates the beauty of what passes."
+          },
+          "context": {
+            "fr": "Saison: mars à mai",
+            "en": "Season: March to May"
+          },
+          "vocab": [
+            { "ja": "花見", "reading": "はなみ", "gloss": { "fr": "contemplation des fleurs", "en": "flower viewing" } },
+            { "ja": "春", "reading": "はる", "gloss": { "fr": "printemps", "en": "spring" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-015.jpg", "credit": "Htanaungg · CC BY-SA 4.0 · Wikimedia Commons", "motif": "blossom", "colors": ["#F28AB4", "#FDEBF3"] },
+          "unlock": {
+            "type": "palette",
+            "value": "sakura",
+            "label": { "fr": "Palette Sakura", "en": "Sakura palette" }
+          }
+        },
+        {
+          "id": "set001-016",
+          "number": 16,
+          "category": "place",
+          "rarity": "special",
+          "nameJa": "渋谷スクランブル交差点",
+          "reading": "しぶやスクランブルこうさてん",
+          "name": { "fr": "Carrefour de Shibuya", "en": "Shibuya Crossing" },
+          "body": {
+            "fr": "À chaque feu vert, des centaines de piétons traversent en diagonale sous les écrans géants: c'est l'image du Tokyo nocturne, électrique et ordonné à la fois. Le carrefour le plus traversé du monde.",
+            "en": "At every green light, hundreds of pedestrians cross diagonally beneath giant screens: the very image of night-time Tokyo, electric and orderly at once. The busiest crossing in the world."
+          },
+          "context": {
+            "fr": "Tokyo, quartier de Shibuya",
+            "en": "Tokyo, Shibuya district"
+          },
+          "vocab": [
+            { "ja": "交差点", "reading": "こうさてん", "gloss": { "fr": "carrefour", "en": "crossing, intersection" } },
+            { "ja": "夜", "reading": "よる", "gloss": { "fr": "nuit", "en": "night" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-016.jpg", "credit": "Syced · CC0 · Wikimedia Commons", "motif": "crossing", "colors": ["#FF57A8", "#17131F"] },
+          "unlock": {
+            "type": "palette",
+            "value": "neon",
+            "label": { "fr": "Palette Néon", "en": "Neon palette" }
+          }
+        },
+        {
+          "id": "set001-017",
+          "number": 17,
+          "category": "history",
+          "rarity": "shiny",
+          "nameJa": "龍",
+          "reading": "りゅう",
+          "name": { "fr": "Ryū, le dragon japonais", "en": "Ryu, the Japanese dragon" },
+          "body": {
+            "fr": "Serpent céleste lié à l'eau et à la pluie, le dragon japonais protège temples et sources. On le peint au plafond des salles de dharma zen, où son regard suit le visiteur.",
+            "en": "A celestial serpent tied to water and rain, the Japanese dragon protects temples and springs. It is painted on the ceilings of Zen dharma halls, where its gaze follows the visitor."
+          },
+          "context": {
+            "fr": "Iconographie bouddhiste et folklore",
+            "en": "Buddhist iconography and folklore"
+          },
+          "vocab": [
+            { "ja": "水", "reading": "みず", "gloss": { "fr": "eau", "en": "water" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-017.jpg", "credit": "Sketyl · CC BY 2.0 · Wikimedia Commons", "motif": "dragon", "colors": ["#2E7F8F", "#0E2A30"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-018",
+          "number": 18,
+          "category": "festival",
+          "rarity": "shiny",
+          "nameJa": "花火",
+          "reading": "はなび",
+          "name": { "fr": "Hanabi, feux d'artifice", "en": "Hanabi, fireworks" },
+          "body": {
+            "fr": "Les grands festivals d'été illuminent les rivières de dizaines de milliers de tirs, applaudis en yukata. L'art pyrotechnique japonais cultive des formes parfaites, jugées et primées comme un artisanat.",
+            "en": "Great summer festivals light up the rivers with tens of thousands of shells, applauded in yukata. Japanese pyrotechnics pursue perfect shapes, judged and awarded like a craft."
+          },
+          "context": {
+            "fr": "Festivals d'été, depuis l'époque Edo",
+            "en": "Summer festivals, since the Edo period"
+          },
+          "vocab": [
+            { "ja": "夏", "reading": "なつ", "gloss": { "fr": "été", "en": "summer" } },
+            { "ja": "祭り", "reading": "まつり", "gloss": { "fr": "festival", "en": "festival" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-018.jpg", "credit": "Dick Thomas Johnson · CC BY 2.0 · Wikimedia Commons", "motif": "burst", "colors": ["#FF57A8", "#12101D"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-019",
+          "number": 19,
+          "category": "place",
+          "rarity": "shiny",
+          "nameJa": "雷門",
+          "reading": "かみなりもん",
+          "name": { "fr": "Kaminarimon", "en": "Kaminarimon" },
+          "body": {
+            "fr": "La porte du Tonnerre garde l'entrée du Sensō-ji, plus vieux temple de Tokyo. Sous sa lanterne rouge de 700 kilos veillent Fūjin et Raijin, dieux du vent et de la foudre.",
+            "en": "The Thunder Gate guards the entrance to Senso-ji, Tokyo's oldest temple. Beneath its 700-kilogram red lantern stand Fujin and Raijin, gods of wind and lightning."
+          },
+          "context": {
+            "fr": "Tokyo, quartier d'Asakusa",
+            "en": "Tokyo, Asakusa district"
+          },
+          "vocab": [
+            { "ja": "雷", "reading": "かみなり", "gloss": { "fr": "tonnerre, foudre", "en": "thunder, lightning" } },
+            { "ja": "門", "reading": "もん", "gloss": { "fr": "porte", "en": "gate" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-019.jpg", "credit": "Tokumeigakarinoaoshima · CC0 · Wikimedia Commons", "motif": "lantern", "colors": ["#C62828", "#2A0E0E"] },
+          "unlock": null
+        },
+        {
+          "id": "set001-020",
+          "number": 20,
+          "category": "nature",
+          "rarity": "shiny",
+          "nameJa": "丹頂鶴",
+          "reading": "たんちょうづる",
+          "name": { "fr": "Tanchō, la grue du Japon", "en": "Tancho, the red-crowned crane" },
+          "body": {
+            "fr": "Symbole de longévité et de fidélité, la grue à couronne rouge danse dans les marais enneigés de Hokkaidō. Sauvée de l'extinction au XXe siècle, elle reste l'un des oiseaux les plus vénérés du pays.",
+            "en": "A symbol of longevity and fidelity, the red-crowned crane dances in the snowy marshes of Hokkaido. Rescued from extinction in the 20th century, it remains one of the country's most revered birds."
+          },
+          "context": {
+            "fr": "Hokkaidō, marais de Kushiro",
+            "en": "Hokkaido, Kushiro marshes"
+          },
+          "vocab": [
+            { "ja": "鳥", "reading": "とり", "gloss": { "fr": "oiseau", "en": "bird" } }
+          ],
+          "art": { "type": "photo", "asset": "assets/art/cards/set001-020.jpg", "credit": "Alastair Rae · CC BY-SA 2.0 · Wikimedia Commons", "motif": "crane-bird", "colors": ["#E4E9F2", "#B3122E"] },
+          "unlock": null
+        }
+      ]
+    }
+  ]
+}

@@ -19,6 +19,9 @@ import '../views/dictionary/word_detail_view.dart';
 import '../views/kana/kana_detail_view.dart';
 import '../views/feedback/feedback_view.dart';
 import '../views/onboarding/onboarding_view.dart';
+import '../views/rewards/booster_opening_view.dart';
+import '../views/rewards/collection_view.dart';
+import '../views/settings/dev_tools_view.dart';
 import '../views/settings/offline_storage_view.dart';
 import '../views/settings/settings_view.dart';
 import '../views/settings/wanikani_view.dart';
@@ -155,6 +158,16 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
         ),
       ),
       GoRoute(
+          name: 'collection',
+          path: '/collection',
+          builder: (_, __) => const CollectionView()),
+      GoRoute(
+        name: 'booster_opening',
+        path: '/booster/:grantId',
+        builder: (_, s) =>
+            BoosterOpeningView(grantId: s.pathParameters['grantId']!),
+      ),
+      GoRoute(
           name: 'settings',
           path: '/settings',
           builder: (_, __) => const SettingsView()),
@@ -171,6 +184,10 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
           name: 'offline_storage',
           path: '/settings/storage',
           builder: (_, __) => const OfflineStorageView()),
+      GoRoute(
+          name: 'dev_tools',
+          path: '/settings/dev',
+          builder: (_, __) => const DevToolsView()),
       GoRoute(
           name: 'wanikani',
           path: '/settings/integrations/wanikani',

@@ -17,7 +17,10 @@ enum TelemetryConsent { undecided, denied, partial, granted }
 /// Privacy-reviewed product events. Keep this list closed so a call site can
 /// never send an improvised event name or learner content by mistake.
 abstract final class TelemetryEvent {
+  static const boosterEarned = 'booster_earned';
+  static const boosterOpened = 'booster_opened';
   static const cardRated = 'card_rated';
+  static const collectionViewed = 'collection_viewed';
   static const deckEnrolled = 'deck_enrolled';
   static const deckPublished = 'deck_published';
   static const emailVerificationResult = 'email_verification_result';
@@ -53,7 +56,10 @@ abstract final class TelemetryEvent {
   static const writingPracticeStarted = 'writing_practice_started';
 
   static const allowedNames = <String>{
+    boosterEarned,
+    boosterOpened,
     cardRated,
+    collectionViewed,
     deckEnrolled,
     deckPublished,
     emailVerificationResult,

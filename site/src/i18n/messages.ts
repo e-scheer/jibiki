@@ -43,6 +43,7 @@ const fr = {
     features: 'Fonctionnalités',
     dictionary: 'Dictionnaire',
     method: 'Méthode',
+    study: 'Étudier',
     tablet: 'Tablette',
     community: 'Communauté',
   },
@@ -52,8 +53,10 @@ const fr = {
     titleAccent: 'maintenant.',
     titleTail: 'Le retenir pour de bon.',
     body:
-      'Un dictionnaire japonais qui transforme chaque recherche en souvenir durable, sans vous imposer un compte ni un rythme artificiel.',
-    note: 'Recherche immédiate. Mode local. Apprentissage à votre rythme.',
+      'Cherchez un mot, comprenez ses kanji, ajoutez-le à vos révisions. jibiki relie le dictionnaire et la mémorisation dans une seule app, à votre rythme.',
+    note: 'Recherche immédiate. Mode hors ligne. Gratuit.',
+    platformsLabel: 'Disponible sur',
+    platforms: ['Android', 'iPhone', 'Web'],
     previewLabel: 'Aperçu du dictionnaire jibiki',
     due: 'à réviser',
     newCards: '+ 5 nouvelles',
@@ -65,7 +68,7 @@ const fr = {
     kicker: 'Cherchez vraiment',
     title: 'Le dictionnaire est le point de départ.',
     body:
-      'Écriture, lecture, sens, fréquence, composants et exemples restent réunis. Une recherche peut rester une simple recherche ou devenir une carte à retenir.',
+      'Écriture, lectures, sens, fréquence et exemples restent réunis. Chaque kanji mène à ses composants, chaque composant mène aux mots qui l’utilisent, et l’ordre des traits s’anime sous vos yeux. Une recherche peut rester une simple recherche ou devenir une carte à retenir.',
     searchLabel: 'Rechercher un mot, un kanji, un kana ou un sens',
     placeholder: 'Essayez 桜, さくら ou cerisier…',
     submit: 'Rechercher',
@@ -130,7 +133,7 @@ const fr = {
     kicker: 'Un seul flux',
     title: 'Du mot inconnu à la mémoire durable.',
     body:
-      'jibiki relie la compréhension et la mémorisation au lieu de vous faire changer d’outil.',
+      'jibiki relie la compréhension et la mémorisation dans le même geste, du premier contact avec un mot jusqu’à son dernier rappel.',
     steps: [
       {
         number: '1',
@@ -149,35 +152,90 @@ const fr = {
       },
     ],
   },
-  mnemonic: {
-    kicker: 'Votre langue compte',
-    title: 'Une mnémotechnique ne se traduit pas au kilomètre.',
+  study: {
+    kicker: 'Decks et modes de jeu',
+    title: 'Une file de révision, quatre façons de la jouer.',
     body:
-      'Les jeux de sons et les images mentales sont écrits ou adaptés pour leur langue. Quand une bonne version n’existe pas, jibiki préfère le dire plutôt que servir une traduction bancale.',
-    languageLabel: 'Mnémotechnique en',
-    communityLabel: 'Exemple écrit pour cette langue',
-    cards: [
+      'Prenez un deck prêt à l’emploi ou construisez le vôtre au fil des recherches. La même session se joue en cartes, en quiz, en paires ou à l’oreille, et vous changez de mode quand vous voulez.',
+    decksLabel: 'Decks prêts à réviser',
+    decks: ['Hiragana', 'Katakana', 'Kanji N5', 'Mots courants', 'Favoris', 'À retravailler'],
+    modes: [
+      {
+        key: 'swipe',
+        title: 'Cartes',
+        body: 'Retournez la carte, puis balayez pour dire si vous la connaissiez.',
+      },
+      {
+        key: 'quiz',
+        title: 'Quiz',
+        body: 'Choisissez le bon sens parmi quatre propositions.',
+      },
+      {
+        key: 'match',
+        title: 'Paires',
+        body: 'Associez chaque caractère à son sens, deux tuiles à la fois.',
+      },
+      {
+        key: 'listen',
+        title: 'Écoute',
+        body: 'Écoutez, puis reconstruisez la lecture avec les tuiles kana.',
+      },
+    ],
+    directions:
+      'Chaque mode se joue dans les deux sens : reconnaître le japonais, ou le retrouver depuis le sens.',
+    demo: {
+      cardGlyph: '勉強',
+      cardReading: 'べんきょう',
+      cardGloss: 'étude, travail',
+      quizPrompt: '桜',
+      quizOptions: ['cerisier', 'montagne', 'rivière', 'voiture'],
+      pairs: [
+        { glyph: '犬', label: 'chien', matched: true },
+        { glyph: '山', label: 'montagne', matched: false },
+      ],
+      listenTiles: ['べ', 'ん', 'き', 'ょ', 'う'],
+      listenPlaced: 3,
+    },
+  },
+  mnemonic: {
+    kicker: 'Mnémotechniques',
+    title: 'Des histoires écrites pour votre langue.',
+    body:
+      'Le sens d’un kanji se retient avec une image, et une bonne image parle à toutes les langues. Sa lecture se retient avec un jeu de mots, et un jeu de mots appartient à sa langue. Prenez 本 : l’image raconte l’origine, puis chaque langue invente son propre calembour pour la lecture ホン.',
+    glyph: '本',
+    glyphReading: 'ホン',
+    glyphMeaning: 'livre, origine',
+    meaningCard: {
+      label: 'Le sens, en image',
+      scope: 'La même image pour toutes les langues',
+      quote:
+        'Un arbre (木) dont un trait (一) marque les racines : la racine, l’origine, le livre.',
+      parts: [
+        { glyph: '木', label: 'arbre' },
+        { glyph: '一', label: 'trait' },
+      ],
+    },
+    readingLabel: 'La lecture ホン, un jeu de mots par langue',
+    readingCards: [
       {
         locale: 'fr',
         language: 'Français',
-        quote:
-          'Pour 桜, imagine un cerisier qui sort son plus beau kimono rose dès que le printemps sonne à la porte.',
-        author: 'Exemple éditorial français',
+        quote: 'Quelle honte (ホン) de corner les pages d’un si beau livre.',
       },
       {
         locale: 'en',
         language: 'English',
-        quote:
-          'A cherry tree wears a pink crown, then showers the ground when spring says start.',
-        author: 'English editorial example',
+        quote: 'Hone (ホン) your mind by reading a good book from cover to cover.',
       },
     ],
+    community:
+      'La communauté écrit, dessine et vote les meilleures versions dans chaque langue. Gardez vos favorites ou dessinez la vôtre. Et quand une langue attend encore sa bonne version, jibiki le dit clairement.',
   },
   review: {
     kicker: 'Répétition espacée',
-    title: 'Réviser sans bruit, avancer sans culpabilité.',
+    title: 'Le bon rappel, juste avant l’oubli.',
     body:
-      'La difficulté réelle décide du prochain rappel. Pas de mur quotidien, pas de mascotte qui vous gronde, seulement une file claire et un rythme que vous contrôlez.',
+      'jibiki planifie chaque rappel avec FSRS, un algorithme moderne de répétition espacée : votre difficulté réelle décide de la prochaine date. Vous réglez votre rétention cible et le nombre de nouvelles cartes par session, et avec assez d’historique l’algorithme se cale sur votre propre mémoire.',
     progress: '7 sur 20',
     remaining: 'Encore 13. Vous gardez le rythme.',
     retained: 'RETENU',
@@ -193,10 +251,13 @@ const fr = {
     ],
   },
   tablet: {
-    kicker: 'Tablette premium',
-    title: 'Un espace de travail, pas un téléphone étiré.',
+    kicker: 'Téléphone et tablette',
+    title: 'Sur tablette, un vrai espace de travail.',
     body:
-      'La navigation reste compacte, la liste et le détail cohabitent, et les matrices utilisent réellement la largeur disponible.',
+      'Navigation en rail vertical, liste et détail côte à côte, matrices kana en pleine largeur. Sur téléphone, la même app reste compacte et utilisable d’une main.',
+    mnemonicLabel: 'Mnémotechnique de la communauté',
+    mnemonicQuote:
+      'Pour 桜, imagine un cerisier qui sort son plus beau kimono rose dès que le printemps sonne à la porte.',
     search: 'Rechercher sakura',
     results: '7 résultats',
     listLabel: 'Résultats du dictionnaire',
@@ -214,19 +275,24 @@ const fr = {
   },
   trust: {
     kicker: 'Utile dès la première seconde',
-    title: 'Le dictionnaire ne se cache pas derrière un compte.',
+    title: 'Ouvert, hors ligne, synchronisé.',
     body:
-      'Consultez, explorez et pratiquez localement. Le compte sert à synchroniser et contribuer, jamais à bloquer la référence.',
+      'Le dictionnaire se consulte gratuitement, dès l’arrivée. Un compte gratuit synchronise votre progression entre appareils, et les packs de contenu gardent l’essentiel disponible hors connexion.',
     items: [
       {
         icon: '字',
         title: 'Données de référence solides',
-        body: 'JMdict, KANJIDIC2, KanjiVG et des attributions visibles.',
+        body: 'JMdict, KANJIDIC2, KanjiVG, Tatoeba : des sources ouvertes, créditées dans l’app.',
+      },
+      {
+        icon: '⇣',
+        title: 'Hors ligne',
+        body: 'Téléchargez des packs de contenu et gardez dictionnaire et révisions sous la main, même sans réseau.',
       },
       {
         icon: '↺',
-        title: 'Mémoire locale et durable',
-        body: 'Vos recherches et votre apprentissage restent utiles sans connexion permanente.',
+        title: 'Synchronisé par compte',
+        body: 'Votre progression vous suit d’un appareil à l’autre, et vous validez la réconciliation avant toute fusion.',
       },
       {
         icon: '文',
@@ -238,7 +304,8 @@ const fr = {
   },
   finalCta: {
     title: 'Un mot à chercher ?',
-    body: 'Ouvrez jibiki et transformez cette recherche en quelque chose que vous retiendrez.',
+    body: 'Téléchargez jibiki sur Android ou iPhone, ou ouvrez-le directement dans le navigateur.',
+    platforms: ['Android', 'iPhone', 'Web'],
   },
   footer: {
     tagline: 'dictionnaire libre, mémoire durable',
@@ -251,9 +318,9 @@ const fr = {
     copyright: 'jibiki. Construit pour comprendre et retenir le japonais.',
   },
   consent: {
-    title: 'Mesurer sans vous suivre à votre insu.',
+    title: 'Vous décidez de ce qui est mesuré.',
     body:
-      'Vous choisissez séparément les mesures d’audience et les diagnostics techniques. Aucun texte recherché n’est envoyé.',
+      'Vous choisissez séparément les mesures d’audience et les diagnostics techniques. Le texte de vos recherches reste privé.',
     accept: 'Tout accepter',
     decline: 'Tout refuser',
     customize: 'Personnaliser',
@@ -453,6 +520,7 @@ const en: Messages = {
     features: 'Features',
     dictionary: 'Dictionary',
     method: 'Method',
+    study: 'Study',
     tablet: 'Tablet',
     community: 'Community',
   },
@@ -462,8 +530,10 @@ const en: Messages = {
     titleAccent: 'now.',
     titleTail: 'Remember it for good.',
     body:
-      'A Japanese dictionary that turns any lookup into durable memory, without forcing an account or an artificial pace on you.',
-    note: 'Instant lookup. Local mode. Learning at your pace.',
+      'Look a word up, understand its kanji, add it to your reviews. jibiki connects the dictionary and memorization in one app, at your own pace.',
+    note: 'Instant lookup. Offline mode. Free.',
+    platformsLabel: 'Available on',
+    platforms: ['Android', 'iPhone', 'Web'],
     previewLabel: 'Preview of the jibiki dictionary',
     due: 'due for review',
     newCards: '+ 5 new',
@@ -475,7 +545,7 @@ const en: Messages = {
     kicker: 'Try a real lookup',
     title: 'The dictionary is the starting point.',
     body:
-      'Writing, reading, meanings, frequency, components, and examples stay together. A lookup can remain a quick answer or become a card worth remembering.',
+      'Writing, readings, meanings, frequency, and examples stay together. Every kanji leads to its components, every component leads to the words that use it, and stroke order animates right on the page. A lookup can remain a quick answer or become a card worth remembering.',
     searchLabel: 'Search for a word, kanji, kana, or meaning',
     placeholder: 'Try 桜, さくら, or cherry tree…',
     submit: 'Search',
@@ -539,7 +609,7 @@ const en: Messages = {
     kicker: 'One connected flow',
     title: 'From unknown word to durable memory.',
     body:
-      'jibiki connects understanding and memorization instead of making you switch tools.',
+      'jibiki connects understanding and memorization in a single motion, from the first encounter with a word to its last recall.',
     steps: [
       {
         number: '1',
@@ -558,35 +628,90 @@ const en: Messages = {
       },
     ],
   },
-  mnemonic: {
-    kicker: 'Your language matters',
-    title: 'A mnemonic should not be translated by the yard.',
+  study: {
+    kicker: 'Decks and game modes',
+    title: 'One review queue, four ways to play it.',
     body:
-      'Sound play and mental images are written or adapted for their language. When a good version does not exist, jibiki would rather say so than serve a broken translation.',
-    languageLabel: 'Mnemonic in',
-    communityLabel: 'Example written for this language',
-    cards: [
+      'Pick a ready-made deck or build your own as you look words up. The same session plays as cards, quiz, pairs, or by ear, and you can switch modes whenever you like.',
+    decksLabel: 'Decks ready to review',
+    decks: ['Hiragana', 'Katakana', 'JLPT N5 kanji', 'Common words', 'Favorites', 'Struggling'],
+    modes: [
+      {
+        key: 'swipe',
+        title: 'Cards',
+        body: 'Flip the card, then swipe to say how well you knew it.',
+      },
+      {
+        key: 'quiz',
+        title: 'Quiz',
+        body: 'Pick the right meaning from four choices.',
+      },
+      {
+        key: 'match',
+        title: 'Pairs',
+        body: 'Match each character with its meaning, two tiles at a time.',
+      },
+      {
+        key: 'listen',
+        title: 'Listen',
+        body: 'Hear it, then rebuild the reading from the kana tiles.',
+      },
+    ],
+    directions:
+      'Every mode plays in both directions: recognize the Japanese, or recall it from the meaning.',
+    demo: {
+      cardGlyph: '勉強',
+      cardReading: 'べんきょう',
+      cardGloss: 'study, work',
+      quizPrompt: '桜',
+      quizOptions: ['cherry tree', 'mountain', 'river', 'car'],
+      pairs: [
+        { glyph: '犬', label: 'dog', matched: true },
+        { glyph: '山', label: 'mountain', matched: false },
+      ],
+      listenTiles: ['べ', 'ん', 'き', 'ょ', 'う'],
+      listenPlaced: 3,
+    },
+  },
+  mnemonic: {
+    kicker: 'Mnemonics',
+    title: 'Stories written for your language.',
+    body:
+      'A kanji’s meaning sticks with an image, and a good image speaks every language. Its reading sticks with wordplay, and wordplay belongs to its language. Take 本: the image tells the origin, then each language invents its own pun for the reading ホン.',
+    glyph: '本',
+    glyphReading: 'ホン',
+    glyphMeaning: 'book, origin',
+    meaningCard: {
+      label: 'The meaning, as an image',
+      scope: 'The same image for every language',
+      quote:
+        'A tree (木) with its roots marked by a stroke (一): the root, the origin, a book.',
+      parts: [
+        { glyph: '木', label: 'tree' },
+        { glyph: '一', label: 'stroke' },
+      ],
+    },
+    readingLabel: 'The reading ホン, one pun per language',
+    readingCards: [
       {
         locale: 'en',
         language: 'English',
-        quote:
-          'A cherry tree wears a pink crown, then showers the ground when spring says start.',
-        author: 'English editorial example',
+        quote: 'Hone (ホン) your mind by reading a good book from cover to cover.',
       },
       {
         locale: 'fr',
         language: 'Français',
-        quote:
-          'Pour 桜, imagine un cerisier qui sort son plus beau kimono rose dès que le printemps sonne à la porte.',
-        author: 'Exemple éditorial français',
+        quote: 'Quelle honte (ホン) de corner les pages d’un si beau livre.',
       },
     ],
+    community:
+      'The community writes, draws, and votes the best versions in each language. Keep your favorites or draw your own. And when a language is still waiting for its good version, jibiki says so clearly.',
   },
   review: {
     kicker: 'Spaced repetition',
-    title: 'Review without noise. Move forward without guilt.',
+    title: 'The right recall, right before you forget.',
     body:
-      'Real difficulty decides the next recall. No daily wall and no mascot scolding you, only a clear queue at a pace you control.',
+      'jibiki schedules every recall with FSRS, a modern spaced repetition algorithm: your real difficulty decides the next date. You set your target retention and how many new cards each session brings, and with enough history the algorithm tunes itself to your own memory.',
     progress: '7 of 20',
     remaining: '13 left. Keep the rhythm.',
     retained: 'GOT IT',
@@ -602,10 +727,13 @@ const en: Messages = {
     ],
   },
   tablet: {
-    kicker: 'Premium tablet experience',
-    title: 'A workspace, not a stretched phone.',
+    kicker: 'Phone and tablet',
+    title: 'On tablet, a real workspace.',
     body:
-      'Navigation stays compact, list and detail live side by side, and dense matrices make real use of the available width.',
+      'A vertical navigation rail, list and detail side by side, kana matrices at full width. On the phone, the same app stays compact and easy to use with one hand.',
+    mnemonicLabel: 'Community mnemonic',
+    mnemonicQuote:
+      'A cherry tree wears a pink crown, then showers the ground when spring says start.',
     search: 'Search for sakura',
     results: '7 results',
     listLabel: 'Dictionary results',
@@ -623,19 +751,24 @@ const en: Messages = {
   },
   trust: {
     kicker: 'Useful from the first second',
-    title: 'The dictionary does not hide behind an account.',
+    title: 'Open, offline, in sync.',
     body:
-      'Look up, explore, and practice locally. An account helps you sync and contribute, never blocks the reference.',
+      'The dictionary is free to browse the moment you arrive. A free account syncs your progress across devices, and content packs keep the essentials available offline.',
     items: [
       {
         icon: '字',
         title: 'Solid reference data',
-        body: 'JMdict, KANJIDIC2, KanjiVG, and visible attribution.',
+        body: 'JMdict, KANJIDIC2, KanjiVG, Tatoeba: open sources, credited inside the app.',
+      },
+      {
+        icon: '⇣',
+        title: 'Offline',
+        body: 'Download content packs and keep the dictionary and your reviews at hand, even without a network.',
       },
       {
         icon: '↺',
-        title: 'Local, durable memory',
-        body: 'Your lookups and learning stay useful without a permanent connection.',
+        title: 'Synced by account',
+        body: 'Your progress follows you from device to device, and you approve the reconciliation before anything merges.',
       },
       {
         icon: '文',
@@ -647,7 +780,8 @@ const en: Messages = {
   },
   finalCta: {
     title: 'Got a word to look up?',
-    body: 'Open jibiki and turn that lookup into something you will remember.',
+    body: 'Download jibiki on Android or iPhone, or open it right in the browser.',
+    platforms: ['Android', 'iPhone', 'Web'],
   },
   footer: {
     tagline: 'open dictionary, durable memory',
@@ -660,9 +794,9 @@ const en: Messages = {
     copyright: 'jibiki. Built to understand and remember Japanese.',
   },
   consent: {
-    title: 'Measure without watching you behind your back.',
+    title: 'You decide what gets measured.',
     body:
-      'You choose audience measurement and technical diagnostics separately. Search text is never sent.',
+      'You choose audience measurement and technical diagnostics separately. The text of your searches stays private.',
     accept: 'Accept all',
     decline: 'Reject all',
     customize: 'Customize',

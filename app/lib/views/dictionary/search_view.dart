@@ -10,7 +10,9 @@ import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/browse_viewmodel.dart';
 import '../../viewmodels/dashboard_viewmodel.dart';
+import '../../viewmodels/rewards_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
+import '../rewards/burn_booster_panel.dart';
 import '../widgets/horizontal_overflow_cue.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
@@ -461,21 +463,25 @@ class _HomeHeader extends StatelessWidget {
                           dotOutline: JibikiBrandColors.ink,
                         ),
                         const Spacer(),
-                        Text(
-                          streak == 1
-                              ? _copy(
-                                  context, 'Streak: 1 day', 'Série : 1 jour')
-                              : _copy(
-                                  context,
-                                  'Streak: $streak days',
-                                  'Série : $streak jours',
-                                ),
-                          style: TextStyle(
-                            color: jc.surface,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                        if (context.watch<RewardsViewModel?>()?.available ??
+                            false)
+                          const BurnChip()
+                        else
+                          Text(
+                            streak == 1
+                                ? _copy(
+                                    context, 'Streak: 1 day', 'Série : 1 jour')
+                                : _copy(
+                                    context,
+                                    'Streak: $streak days',
+                                    'Série : $streak jours',
+                                  ),
+                            style: TextStyle(
+                              color: jc.surface,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -1040,6 +1046,7 @@ class _RecentWords extends StatelessWidget {
                               if (i > 0) const SizedBox(width: 8),
                               _RecentWordButton(
                                 word: visibleWords[i].word,
+                                glossLanguage: vm.glossLanguage,
                                 onTap: () {
                                   vm.rememberOpened(visibleWords[i].word);
                                   context.push(
@@ -1061,34 +1068,56 @@ class _RecentWords extends StatelessWidget {
 }
 
 class _RecentWordButton extends StatelessWidget {
-  const _RecentWordButton({required this.word, required this.onTap});
+  const _RecentWordButton({
+    required this.word,
+    required this.glossLanguage,
+    required this.onTap,
+  });
 
   final WordEntry word;
+  final String glossLanguage;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final gloss = word.summaryGloss(glossLanguage).split(';').first.trim();
     return Pressable(
-      label: word.headword,
+      label: gloss.isEmpty ? word.headword : '${word.headword}, $gloss',
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 44, maxWidth: 92),
+        constraints: const BoxConstraints(minHeight: 44, maxWidth: 110),
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: context.jc.canvas,
           border: Border.all(color: context.jc.ink, width: 2.5),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          word.headword,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontFamily: 'ZenKakuGothicNew',
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              word.headword,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'ZenKakuGothicNew',
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            if (gloss.isNotEmpty)
+              Text(
+                gloss,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: context.jc.body,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
       ),
     );

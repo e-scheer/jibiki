@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../core/api_exception.dart';
 import '../core/session_store.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
@@ -53,8 +54,16 @@ class AuthRepository {
   }
 
   Future<AppUser> login(String email, String password) async {
-    final token = await _auth.login(email, password);
-    await _session.setToken(token);
+    try {
+      final token = await _auth.login(email, password);
+      await _session.setToken(token);
+    } on ApiException catch (e) {
+      // allauth headless answers 409 when this client already holds a live
+      // session (a previous login succeeded but the UI stayed on the form).
+      // The stored token is the session: proceed to the account instead of
+      // surfacing a dead-end error.
+      if (e.statusCode != 409 || !_session.hasToken) rethrow;
+    }
     await _session.setLocalOnly(false);
     return _cache(await _auth.me());
   }

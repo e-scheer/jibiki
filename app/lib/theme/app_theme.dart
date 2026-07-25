@@ -549,11 +549,120 @@ class JibikiColors extends ThemeExtension<JibikiColors> {
     coral: Color(0xFFE56C9F),
   );
 
+  // Sakura: warm petal light, deep rose accent. Unlocked by the Sakura card.
+  static const sakura = JibikiColors(
+    brand: Color(0xFFB93262), // deep sakura rose, white text 5.5:1
+    brandPressed: Color(0xFF93264D),
+    brandSoft: Color(0xFFFBE3ED),
+    canvas: Color(0xFFFAF3F6),
+    surface: Color(0xFFFFFFFF),
+    surfaceAlt: Color(0xFFF6E7EE),
+    ink: Color(0xFF2A161F),
+    body: Color(0xFF43242F),
+    muted: Color(0xFF735A65),
+    hairline: Color(0xFF2A161F),
+    ratingAgain: Color(0xFFC62828),
+    ratingHard: Color(0xFFB45309),
+    ratingGood: Color(0xFF15803D),
+    ratingEasy: Color(0xFFB93262),
+    success: Color(0xFF15803D),
+    warn: Color(0xFF8B4A00),
+    acid: Color(0xFFFFD54F),
+    magenta: Color(0xFFF06292),
+    lime: Color(0xFFAED581),
+    lavender: Color(0xFFE8C7DC),
+    coral: Color(0xFFFF8A80),
+  );
+
+  static const sakuraDark = JibikiColors(
+    brand: Color(0xFFF27FA8),
+    brandPressed: Color(0xFFF8A8C4),
+    brandSoft: Color(0xFF4A2536),
+    canvas: Color(0xFF1C1218),
+    surface: Color(0xFF291B22),
+    surfaceAlt: Color(0xFF35232C),
+    ink: Color(0xFFFFF5F9),
+    body: Color(0xFFF4E3EB),
+    muted: Color(0xFFC9AFBC),
+    hairline: Color(0xFFFFF5F9),
+    ratingAgain: Color(0xFFFF6B6B),
+    ratingHard: Color(0xFFF5A623),
+    ratingGood: Color(0xFF3DD07E),
+    ratingEasy: Color(0xFFF27FA8),
+    success: Color(0xFF3DD07E),
+    warn: Color(0xFFF5A623),
+    acid: Color(0xFFFFD54F),
+    magenta: Color(0xFFF48FB1),
+    lime: Color(0xFFAED581),
+    lavender: Color(0xFF6B4358),
+    coral: Color(0xFFFF8A80),
+  );
+
+  // Neon: Shibuya at night, electric magenta on deep indigo surfaces.
+  // Unlocked by the Shibuya Crossing card.
+  static const neonLight = JibikiColors(
+    brand: Color(0xFFC2127A), // electric magenta, white text 5.2:1
+    brandPressed: Color(0xFF970E5F),
+    brandSoft: Color(0xFFFCE0EF),
+    canvas: Color(0xFFF2F3F7),
+    surface: Color(0xFFFFFFFF),
+    surfaceAlt: Color(0xFFE8EAF2),
+    ink: Color(0xFF12131C),
+    body: Color(0xFF272A38),
+    muted: Color(0xFF5E6170),
+    hairline: Color(0xFF12131C),
+    ratingAgain: Color(0xFFC62828),
+    ratingHard: Color(0xFFB45309),
+    ratingGood: Color(0xFF0F766E),
+    ratingEasy: Color(0xFFC2127A),
+    success: Color(0xFF0F766E),
+    warn: Color(0xFF8B4A00),
+    acid: Color(0xFFF2E51C),
+    magenta: Color(0xFFFF2DA8),
+    lime: Color(0xFF35D0C0),
+    lavender: Color(0xFFB39DDB),
+    coral: Color(0xFFFF5C7A),
+  );
+
+  static const neonDark = JibikiColors(
+    brand: Color(0xFFFF4DAE),
+    brandPressed: Color(0xFFFF7DC4),
+    brandSoft: Color(0xFF3A1C33),
+    canvas: Color(0xFF0B0C14),
+    surface: Color(0xFF151726),
+    surfaceAlt: Color(0xFF1F2236),
+    ink: Color(0xFFF4F6FF),
+    body: Color(0xFFE4E7F7),
+    muted: Color(0xFFA9ADC7),
+    hairline: Color(0xFFF4F6FF),
+    ratingAgain: Color(0xFFFF6B81),
+    ratingHard: Color(0xFFFFB347),
+    ratingGood: Color(0xFF2EE6A8),
+    ratingEasy: Color(0xFF7C8CFF),
+    success: Color(0xFF2EE6A8),
+    warn: Color(0xFFFFB347),
+    acid: Color(0xFFF2E51C),
+    magenta: Color(0xFFFF4DAE),
+    lime: Color(0xFF45E0D8),
+    lavender: Color(0xFF564A85),
+    coral: Color(0xFFFF7D66),
+  );
+
   static JibikiColors forPalette(ThemePalette palette, Brightness brightness) {
     if (brightness == Brightness.dark) {
-      return palette == ThemePalette.harmonie ? harmonieDark : dark;
+      return switch (palette) {
+        ThemePalette.neopop => dark,
+        ThemePalette.harmonie => harmonieDark,
+        ThemePalette.sakura => sakuraDark,
+        ThemePalette.neon => neonDark,
+      };
     }
-    return palette == ThemePalette.harmonie ? harmonie : neopop;
+    return switch (palette) {
+      ThemePalette.neopop => neopop,
+      ThemePalette.harmonie => harmonie,
+      ThemePalette.sakura => sakura,
+      ThemePalette.neon => neonLight,
+    };
   }
 
   @override

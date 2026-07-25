@@ -31,6 +31,10 @@ const { t, appUrl } = Astro.props;
         <a class="button button--paper" href="#method" data-analytics-event="method_clicked">{t.common.learnMore}</a>
       </div>
       <p class="hero-note"><span aria-hidden="true">✓</span>{t.hero.note}</p>
+      <p class="hero-platforms">
+        <span class="hero-platforms-label">{t.hero.platformsLabel}</span>
+        {t.hero.platforms.map((platform) => <b>{platform}</b>)}
+      </p>
     </div>
 
     <div class="hero-product" role="img" aria-label={t.hero.previewLabel}>
@@ -156,6 +160,29 @@ const { t, appUrl } = Astro.props;
     border-radius: 6px;
     background: var(--lime);
     line-height: 1;
+  }
+
+  .hero-platforms {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.9rem 0 0;
+  }
+
+  .hero-platforms-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .hero-platforms b {
+    padding: 0.28rem 0.6rem;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 0.74rem;
+    font-weight: 700;
   }
 
   .hero-product {

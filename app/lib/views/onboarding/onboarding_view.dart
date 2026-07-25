@@ -221,7 +221,6 @@ class _ProfileStep extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         Align(
-          alignment: Alignment.centerRight,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: NeoPrimaryButton(
@@ -495,7 +494,6 @@ class _DataStep extends StatelessWidget {
           ),
         const SizedBox(height: 28),
         Align(
-          alignment: Alignment.centerRight,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: Column(
@@ -663,7 +661,11 @@ class _ResponsiveWrap extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
-          final columns = constraints.maxWidth >= 760 ? 3 : 1;
+          final columns = constraints.maxWidth >= 760
+              ? 3
+              : constraints.maxWidth >= 520
+                  ? 2
+                  : 1;
           final width = (constraints.maxWidth - (columns - 1) * 14) / columns;
           return Wrap(
             spacing: 14,

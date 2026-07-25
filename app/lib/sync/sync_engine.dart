@@ -297,9 +297,50 @@ class SyncEngine extends ChangeNotifier {
           _uuid.v4(),
           'profile_patch',
           profile.single['value'],
-          performedAt,
+          performedAt++,
         ],
       ));
+    }
+    // Rewards: regenerate one grant op per row plus an open op per opened
+    // booster, so "keep local" rebuilds the cloud collection exactly
+    // (docs/REWARDS.md). Openings carry their stored draw.
+    final grants = await _user.select(
+      'SELECT grant_id, source, milestone, status, cards_json FROM booster_grants '
+      'ORDER BY granted_at',
+    );
+    for (final grant in grants) {
+      final status = grant['status'] as String;
+      statements.add((
+        'INSERT INTO op_outbox '
+            '(client_op_id, kind, payload, performed_at) VALUES (?, ?, ?, ?)',
+        [
+          _uuid.v4(),
+          'booster_grant',
+          jsonEncode({
+            'grant_id': grant['grant_id'],
+            'source': grant['source'],
+            'milestone': grant['milestone'],
+            'status': status == 'opened' ? 'unopened' : status,
+          }),
+          performedAt++,
+        ],
+      ));
+      if (status == 'opened' && grant['cards_json'] != null) {
+        statements.add((
+          'INSERT INTO op_outbox '
+              '(client_op_id, kind, payload, performed_at) VALUES (?, ?, ?, ?)',
+          [
+            _uuid.v4(),
+            'booster_open',
+            jsonEncode({
+              'grant_id': grant['grant_id'],
+              'milestone': grant['milestone'],
+              'cards': jsonDecode(grant['cards_json'] as String),
+            }),
+            performedAt++,
+          ],
+        ));
+      }
     }
     await _user.tx(statements);
     await _refreshPending();
@@ -340,6 +381,10 @@ class SyncEngine extends ChangeNotifier {
       ('DELETE FROM op_outbox', const []),
       ('DELETE FROM cards', const []),
       ('DELETE FROM mnemonic_state', const []),
+      // Rewards follow the account: the cloud pull right after this restores
+      // the account's grants and collection.
+      ('DELETE FROM booster_grants', const []),
+      ('DELETE FROM collection_cards', const []),
       ('DELETE FROM kv WHERE key IN (?, ?)', ['last_synced_at', 'profile']),
     ]);
     _lastSyncedAt = null;
@@ -541,6 +586,48 @@ class SyncEngine extends ChangeNotifier {
           _parseMs(card['updated_at']) ?? 0,
         ],
       ));
+    }
+
+    // Booster grants + collection from the account (docs/REWARDS.md). Counts
+    // only ever grow and openings are first-win, so the merge is monotonic:
+    // MAX() on counts and a local 'opened' is never demoted. An opening made
+    // while this request was in flight still sits in op_outbox and uploads on
+    // the next loop, so taking the server rows here never loses it.
+    final rewards = response['rewards'];
+    if (rewards is Map) {
+      for (final g in (rewards['grants'] as List? ?? const [])) {
+        final grant = (g as Map).cast<String, dynamic>();
+        statements.add((
+          'INSERT INTO booster_grants (grant_id, source, milestone, status, granted_at, opened_at, cards_json) '
+              'VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(grant_id) DO UPDATE SET '
+              "status = CASE WHEN booster_grants.status = 'opened' THEN booster_grants.status ELSE excluded.status END, "
+              'opened_at = COALESCE(booster_grants.opened_at, excluded.opened_at), '
+              'cards_json = COALESCE(booster_grants.cards_json, excluded.cards_json)',
+          [
+            grant['grant_id'],
+            grant['source'] ?? 'streak_milestone',
+            grant['milestone'] ?? 0,
+            grant['status'] ?? 'unopened',
+            grant['granted_at'] ?? 0,
+            grant['opened_at'],
+            grant['cards'] == null ? null : jsonEncode(grant['cards']),
+          ],
+        ));
+      }
+      for (final c in (rewards['collection'] as List? ?? const [])) {
+        final entry = (c as Map).cast<String, dynamic>();
+        statements.add((
+          'INSERT INTO collection_cards (card_id, count, first_obtained_at) VALUES (?, ?, ?) '
+              'ON CONFLICT(card_id) DO UPDATE SET '
+              'count = MAX(collection_cards.count, excluded.count), '
+              'first_obtained_at = MIN(collection_cards.first_obtained_at, excluded.first_obtained_at)',
+          [
+            entry['card_id'],
+            entry['count'] ?? 1,
+            entry['first_obtained_at'] ?? 0,
+          ],
+        ));
+      }
     }
 
     // Fresh profile (incl. server-trained FSRS weights) + watermark.

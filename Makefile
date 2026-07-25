@@ -1,8 +1,8 @@
 .PHONY: sync db migrate makemigrations seed run test lint check shell \
         up down prod prod-check prod-down logs superuser import-jmdict import-kanjidic app-get app-run \
-        app-web site-get site-run site-build caddy-check sync-vectors
+        app-web app-web-serve site-get site-run site-build caddy-check sync-vectors
 
-UV := uv run --project server
+UV := uv run --project $(CURDIR)/server
 SERVER := cd server &&
 PORT ?= 8000
 
@@ -94,6 +94,9 @@ app-run:         ## run the app (point it at the API via --dart-define)
 
 app-web:         ## production Flutter Web build for my.jibiki.app
 	cd app && flutter build web --release --source-maps --dart-define=JIBIKI_API_BASE=$${JIBIKI_API_BASE:-https://api.jibiki.app}
+
+app-web-serve:   ## Flutter Web dev server (incremental rebuild, hot restart with `r`) against the local API
+	cd app && flutter run -d chrome --dart-define=JIBIKI_API_BASE=http://localhost:$(PORT)
 
 # Marketing site
 site-get:        ## install the Astro site dependencies

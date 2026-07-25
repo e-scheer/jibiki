@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site-dist",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", "site/dist", "-p", "4173", "-c-1"],
+      "port": 4173
+    },
+    {
+      "name": "app-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd app && flutter run -d web-server --web-port 5757 --no-pub --release"
+      ],
+      "port": 5757
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd server && .venv\\Scripts\\python.exe manage.py runserver 8000"
+      ],
+      "port": 8000
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+﻿{
+    "character":  "あ",
+    "font":  "MS PGothic",
+    "sourceBounds":  {
+                         "x":  206,
+                         "y":  159,
+                         "width":  504,
+                         "height":  570
+                     },
+    "glyphBox":  {
+                     "x":  213,
+                     "y":  484,
+                     "width":  696,
+                     "height":  470
+                 },
+    "anchors":  {
+                    "centerX":  561,
+                    "canopyBottom":  495.75,
+                    "handY":  827.1
+                },
+    "zOrder":  [
+                   "00-background.png",
+                   "01-under-illustration.png",
+                   "02-exact-glyph.png",
+                   "03-over-illustration.png"
+               ],
+    "glyphSha256":  "826D19B0CB535EC8F775691D09BAB1066C2C6262D7DE50E6298953B8BE7FE0C2"
+}

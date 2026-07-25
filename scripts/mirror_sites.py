@@ -14,6 +14,7 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import html
 import hashlib
 import html.parser
 import json
@@ -189,6 +190,8 @@ def mirror_site(
 
     for url in seed_urls(config, user_agent):
         enqueue(url, queue, enqueued, visited, config, scope=scope)
+    if discover_links:
+        rebuild_discovery_queue(log_path, queue, enqueued, visited, config, scope=scope)
 
     counts = {"pages": 0, "assets": 0, "total": 0}
     last_request_at = 0.0
@@ -346,7 +349,7 @@ def enqueue(
 
 
 def normalize_url(raw_url: str, config: SiteConfig, *, base_url: str | None = None) -> str | None:
-    raw_url = raw_url.strip()
+    raw_url = html.unescape(raw_url).replace("\\/", "/").rstrip("\\").strip()
     if not raw_url or raw_url.startswith(("#", "mailto:", "javascript:", "tel:", "data:")):
         return None
     joined = urllib.parse.urljoin(base_url or config.start_urls[0], raw_url)
@@ -442,7 +445,32 @@ def collect_links(body: bytes) -> LinkCollector:
 
 def extract_embedded_links(body: bytes) -> set[str]:
     text = body.decode("utf-8", errors="replace")
-    return {match.group("url") for match in INLINE_URL_RE.finditer(text)}
+    return {html.unescape(match.group("url")).replace("\\/", "/").rstrip("\\") for match in INLINE_URL_RE.finditer(text)}
+
+
+def rebuild_discovery_queue(
+    log_path: Path,
+    queue: deque[str],
+    enqueued: set[str],
+    visited: set[str],
+    config: SiteConfig,
+    *,
+    scope: str,
+) -> None:
+    for payload in iter_logged_html_entries(log_path):
+        base_url = payload.get("url")
+        saved_path = payload.get("saved_path")
+        if not isinstance(base_url, str) or not isinstance(saved_path, str):
+            continue
+        path = Path(saved_path)
+        if not path.exists():
+            continue
+        body = path.read_bytes()
+        collector = collect_links(body)
+        for candidate in collector.links:
+            enqueue(candidate, queue, enqueued, visited, config, scope=scope, base_url=base_url)
+        for candidate in extract_embedded_links(body):
+            enqueue(candidate, queue, enqueued, visited, config, scope=scope, base_url=base_url)
 
 
 def save_response(root: Path, url: str, body: bytes, content_type: Any) -> Path:
@@ -507,13 +535,7 @@ def load_visited(log_path: Path) -> set[str]:
     if not log_path.exists():
         return set()
     visited = set()
-    for line in log_path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        try:
-            payload = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    for payload in iter_logged_entries(log_path):
         url = payload.get("url")
         status = payload.get("status")
         succeeded = isinstance(status, int) and 200 <= status < 400
@@ -521,6 +543,36 @@ def load_visited(log_path: Path) -> set[str]:
         if isinstance(url, str) and (succeeded or skipped):
             visited.add(url)
     return visited
+
+
+def iter_logged_entries(log_path: Path) -> list[dict[str, Any]]:
+    if not log_path.exists():
+        return []
+    entries = []
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            entries.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return entries
+
+
+def iter_logged_html_entries(log_path: Path) -> list[dict[str, Any]]:
+    entries = []
+    for payload in iter_logged_entries(log_path):
+        status = payload.get("status")
+        content_type = str(payload.get("content_type", ""))
+        saved_path = payload.get("saved_path")
+        if not (isinstance(status, int) and 200 <= status < 400):
+            continue
+        if not content_type.startswith("text/html"):
+            continue
+        if not isinstance(saved_path, str):
+            continue
+        entries.append(payload)
+    return entries
 
 
 def iso_now() -> str:

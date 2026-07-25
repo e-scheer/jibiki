@@ -37,11 +37,13 @@ import 'services/integration_service.dart';
 import 'services/mnemonic_deck_service.dart';
 import 'services/mnemonic_service.dart';
 import 'services/study_service.dart';
+import 'services/collection_catalog_loader.dart';
 import 'services/sync_service.dart';
 import 'sync/sync_engine.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
 import 'viewmodels/app_state.dart';
+import 'viewmodels/rewards_viewmodel.dart';
 import 'views/widgets/sync_conflict_gate.dart';
 
 /// Composition root: wires SessionStore → ApiClient → services → repositories →
@@ -108,6 +110,17 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
 
   late final AppState _app = AppState(_authRepo);
   late final ThemeController _theme = ThemeController(widget.session);
+  // Burn milestones, boosters and the card collection: local-first (user.db),
+  // so guests get the full experience; hidden on web where no local DB exists.
+  // Grants and openings enqueue sync ops, so a signed-in account keeps its
+  // collection across devices (docs/REWARDS.md).
+  late final RewardsViewModel _rewards = RewardsViewModel(
+    userDb: _userDb,
+    loader: CollectionCatalogLoader(rootBundle),
+    theme: _theme,
+    session: widget.session,
+    onLocalMutation: () => _sync?.requestSync(),
+  );
   late final GoRouter _router = buildRouter(_app);
 
   // Built once, ColorScheme.fromSeed does real colour science; recomputing it on
@@ -149,6 +162,16 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
     // fires instantly instead of cold-starting the platform voice.
     WidgetsBinding.instance
         .addPostFrameCallback((_) => Speech.instance.warmUp());
+    // Rewards bootstrap: load the card catalog, recompute the burn and honor
+    // any milestone reached while the app was closed.
+    unawaited(_rewards.init().then((_) => _rewards.onStudyActivity()));
+    // A sync can pull grants/collection earned on another device (and their
+    // palette unlocks); refresh the rewards state whenever the engine settles.
+    _sync?.addListener(_onSyncChanged);
+  }
+
+  void _onSyncChanged() {
+    unawaited(_rewards.refresh());
   }
 
   void _onAuthChanged() {
@@ -168,6 +191,7 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _connectivity?.cancel();
     _app.removeListener(_onAuthChanged);
+    _sync?.removeListener(_onSyncChanged);
     final packs = _packs;
     if (packs != null) unawaited(packs.close());
     final userDb = _userDb;
@@ -194,6 +218,7 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
         Provider(create: (_) => FeedbackService(_api)),
         ChangeNotifierProvider.value(value: _app),
         ChangeNotifierProvider.value(value: _theme),
+        ChangeNotifierProvider.value(value: _rewards),
         ChangeNotifierProvider.value(value: Telemetry.instance),
       ],
       child: Builder(builder: (context) {

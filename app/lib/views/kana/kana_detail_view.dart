@@ -489,7 +489,6 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => KanaWritingPracticePage(
                         targets: targets,
-                        mode: KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -1123,7 +1122,6 @@ class _WritingGuide extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => KanaWritingPracticePage(
                           targets: [target],
-                          mode: KanaWritingMode.guided,
                         ),
                       ),
                     ),
@@ -1135,8 +1133,8 @@ class _WritingGuide extends StatelessWidget {
                           child: Text(
                             _copy(
                               context,
-                              'Guided tracing',
-                              'Tracé guidé',
+                              'Free practice',
+                              'Pratique libre',
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1146,68 +1144,12 @@ class _WritingGuide extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 42,
-                    child: NeoCard(
-                      tone: NeoTone.paper,
-                      shadow: 2,
-                      radius: 9,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => KanaWritingPracticePage(
-                            targets: [target],
-                            mode: KanaWritingMode.free,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.edit_rounded, size: 16),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              _copy(
-                                context,
-                                'Free practice',
-                                'Pratique libre',
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 10),
                   Text(
                     _copy(
                       context,
-                      'Guided tracing overlays the model and replays stroke order.',
-                      'Le tracé guidé superpose le modèle et rejoue l’ordre des traits.',
-                    ),
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      height: 1.35,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _copy(
-                      context,
-                      'Free practice starts blank; reveal the guide only when needed.',
-                      'La pratique libre commence à blanc ; affichez le guide si besoin.',
+                      'Write from memory on a blank canvas; reveal the stroke order if you get stuck.',
+                      'Écrivez de mémoire sur une toile blanche ; affichez l’ordre des traits en cas de doute.',
                     ),
                     style: const TextStyle(
                       fontSize: 12.5,
@@ -1295,23 +1237,12 @@ class _PairWritingGuide extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _PairWritingAction(
-          key: ValueKey('kana-writing-guided-$script'),
-          target: target,
-          mode: KanaWritingMode.guided,
-          tone: NeoTone.magenta,
-          icon: Icons.gesture_rounded,
-          label: _copy(context, 'Guided tracing', 'Tracé guidé'),
-          shadow: 3,
-        ),
-        const SizedBox(height: 7),
-        _PairWritingAction(
           key: ValueKey('kana-writing-free-$script'),
           target: target,
-          mode: KanaWritingMode.free,
-          tone: NeoTone.paper,
+          tone: NeoTone.magenta,
           icon: Icons.edit_rounded,
           label: _copy(context, 'Free practice', 'Pratique libre'),
-          shadow: 2,
+          shadow: 3,
         ),
       ],
     );
@@ -1367,7 +1298,6 @@ class _PairWritingAction extends StatelessWidget {
   const _PairWritingAction({
     super.key,
     required this.target,
-    required this.mode,
     required this.tone,
     required this.icon,
     required this.label,
@@ -1375,7 +1305,6 @@ class _PairWritingAction extends StatelessWidget {
   });
 
   final KanaWritingTarget target;
-  final KanaWritingMode mode;
   final NeoTone tone;
   final IconData icon;
   final String label;
@@ -1396,7 +1325,6 @@ class _PairWritingAction extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => KanaWritingPracticePage(
                 targets: [target],
-                mode: mode,
               ),
             ),
           ),
@@ -1941,7 +1869,6 @@ class _DetailActions extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => KanaWritingPracticePage(
                         targets: targets,
-                        mode: KanaWritingMode.free,
                       ),
                     ),
                   ),
@@ -1980,18 +1907,14 @@ class _DetailActions extends StatelessWidget {
   }
 }
 
-enum KanaWritingMode { guided, free }
-
 class KanaWritingPracticePage extends StatefulWidget {
   const KanaWritingPracticePage({
     super.key,
     required this.targets,
-    required this.mode,
     this.telemetry,
   }) : assert(targets.length > 0);
 
   final List<KanaWritingTarget> targets;
-  final KanaWritingMode mode;
   final TelemetrySink? telemetry;
 
   @override
@@ -2004,7 +1927,7 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
     for (final _ in widget.targets) DrawingController(),
   ];
   late final List<bool> _showGuides = [
-    for (final _ in widget.targets) widget.mode == KanaWritingMode.guided,
+    for (final _ in widget.targets) false,
   ];
   late final List<bool> _animateGuides = [
     for (final _ in widget.targets) false,
@@ -2024,7 +1947,7 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
       TelemetryEvent.writingPracticeStarted,
       parameters: {
         'item_type': ItemType.kana.wire,
-        'kind': widget.mode.name,
+        'kind': 'free',
         'count': widget.targets.length,
         'source': 'kana_detail',
       },
@@ -2075,7 +1998,7 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
           TelemetryEvent.writingPracticeCompleted,
           parameters: {
             'item_type': ItemType.kana.wire,
-            'kind': widget.mode.name,
+            'kind': 'free',
             'count': widget.targets.length,
             'source': 'kana_detail',
           },
@@ -2098,16 +2021,12 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
     final target = _target;
     final kana = target.kana;
     final stroke = target.stroke;
-    final guided = widget.mode == KanaWritingMode.guided;
     final hasStrokeOrder = stroke != null && stroke.paths.isNotEmpty;
     final hasPair = widget.targets.length == 2;
     final next = _step < widget.targets.length - 1
         ? widget.targets[_step + 1].kana
         : null;
     final numberColor = kana.isHiragana ? context.jc.magenta : context.jc.brand;
-    final showReferencePanel = guided &&
-        hasStrokeOrder &&
-        (!hasPair || MediaQuery.sizeOf(context).height >= 700);
     return Scaffold(
       backgroundColor: context.jc.lavender,
       body: SafeArea(
@@ -2126,28 +2045,16 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                         children: [
                           Text(
                             hasPair
-                                ? guided
-                                    ? _copy(
-                                        context,
-                                        'Trace both forms',
-                                        'Tracer les deux formes',
-                                      )
-                                    : _copy(
-                                        context,
-                                        'Practice both forms',
-                                        'Pratiquer les deux formes',
-                                      )
-                                : guided
-                                    ? _copy(
-                                        context,
-                                        'Guided tracing',
-                                        'Tracé guidé',
-                                      )
-                                    : _copy(
-                                        context,
-                                        'Free practice',
-                                        'Pratique libre',
-                                      ),
+                                ? _copy(
+                                    context,
+                                    'Practice both forms',
+                                    'Pratiquer les deux formes',
+                                  )
+                                : _copy(
+                                    context,
+                                    'Free practice',
+                                    'Pratique libre',
+                                  ),
                             style: const TextStyle(
                               fontSize: 28,
                               height: 1,
@@ -2162,17 +2069,11 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                                     'Complete both scripts. Each form keeps its own canvas.',
                                     'Complétez les deux écritures. Chaque forme garde son propre canvas.',
                                   )
-                                : guided
-                                    ? _copy(
-                                        context,
-                                        'Follow the model and stroke order, then try once without it.',
-                                        'Suivez le modèle et l’ordre des traits, puis essayez sans aide.',
-                                      )
-                                    : _copy(
-                                        context,
-                                        'Write from memory on a blank canvas. Reveal the stroke order if you get stuck.',
-                                        'Écrivez de mémoire sur une toile blanche. Affichez l’ordre des traits en cas de doute.',
-                                      ),
+                                : _copy(
+                                    context,
+                                    'Write from memory on a blank canvas. Reveal the stroke order if you get stuck.',
+                                    'Écrivez de mémoire sur une toile blanche. Affichez l’ordre des traits en cas de doute.',
+                                  ),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -2215,11 +2116,7 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                   switchOutCurve: Motion.out,
                   child: NeoCard(
                     key: ValueKey('practice-target-${kana.char}'),
-                    tone: guided
-                        ? NeoTone.magenta
-                        : kana.isHiragana
-                            ? NeoTone.acid
-                            : NeoTone.lime,
+                    tone: kana.isHiragana ? NeoTone.acid : NeoTone.lime,
                     shadow: 3,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -2268,24 +2165,6 @@ class _KanaWritingPracticePageState extends State<KanaWritingPracticePage> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                if (showReferencePanel) ...[
-                  SizedBox(
-                    height: hasPair ? 168 : 190,
-                    child: NeoCard(
-                      tone: NeoTone.paper,
-                      shadow: 4,
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: StrokeOrderView(
-                        paths: stroke.paths,
-                        viewBox: stroke.viewBox,
-                        size: hasPair ? 124 : 140,
-                        numberColor: numberColor,
-                        showControls: false,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
                 Expanded(
                   child: Center(
                     child: ConstrainedBox(

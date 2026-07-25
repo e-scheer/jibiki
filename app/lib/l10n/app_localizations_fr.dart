@@ -382,4 +382,285 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dictionaryCredits =>
       'jibiki · données du dictionnaire © EDRDG (JMdict/KANJIDIC)';
+
+  @override
+  String get burnTitle => 'Burn d\'apprentissage';
+
+  @override
+  String burnDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+      zero: '0 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String burnBest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
+    return 'Record : $_temp0';
+  }
+
+  @override
+  String get burnTodayCounted => 'Aujourd\'hui est compté. À demain.';
+
+  @override
+  String get burnComeBackToday =>
+      'Une révision aujourd\'hui prolonge votre burn.';
+
+  @override
+  String burnNextBooster(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours avant votre prochain booster',
+      one: '1 jour avant votre prochain booster',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterShelfTitle => 'Boosters';
+
+  @override
+  String boosterToOpen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count boosters à ouvrir',
+      one: '1 booster à ouvrir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterShelfFull =>
+      'Votre réserve est pleine. Ouvrez un booster pour faire de la place au prochain palier.';
+
+  @override
+  String get boosterEarnedTitle => 'Booster gagné !';
+
+  @override
+  String boosterEarnedBody(int milestone) {
+    return 'Jour $milestone de votre burn. Ouvrez-le quand vous voulez.';
+  }
+
+  @override
+  String get boosterOpenAction => 'Ouvrir le booster';
+
+  @override
+  String get boosterOpenLater => 'Plus tard';
+
+  @override
+  String get boosterSlideToOpen =>
+      'Glissez à travers le booster pour l\'ouvrir';
+
+  @override
+  String get boosterTapToOpen => 'Touchez pour ouvrir';
+
+  @override
+  String get boosterSkipAnimation => 'Passer l\'animation';
+
+  @override
+  String get boosterSwipeToReveal => 'Glissez pour révéler';
+
+  @override
+  String get boosterTapToContinue => 'Appuyez pour continuer';
+
+  @override
+  String get boosterTapToReveal => 'Appuyez pour révéler';
+
+  @override
+  String get boosterTiltHint => 'Faites glisser la carte pour l\'incliner';
+
+  @override
+  String get boosterNewCard => 'Nouvelle carte';
+
+  @override
+  String boosterDuplicate(int count) {
+    return 'Doublon ×$count';
+  }
+
+  @override
+  String get boosterSummaryTitle => 'Booster ouvert';
+
+  @override
+  String boosterSummaryNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nouvelles cartes',
+      one: '1 nouvelle carte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boosterSummaryDuplicates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count doublons',
+      one: '1 doublon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boosterGoToCollection => 'Voir la collection';
+
+  @override
+  String get collectionTitle => 'Collection';
+
+  @override
+  String collectionSetProgress(int owned, int total) {
+    return '$owned / $total cartes';
+  }
+
+  @override
+  String collectionShinyCount(int count) {
+    return '$count shiny';
+  }
+
+  @override
+  String get collectionFilterAll => 'Toutes';
+
+  @override
+  String get collectionFilterOwned => 'Obtenues';
+
+  @override
+  String get collectionFilterMissing => 'Manquantes';
+
+  @override
+  String get collectionFilterDuplicates => 'Doublons';
+
+  @override
+  String get collectionCardNotOwned => 'Pas encore obtenue';
+
+  @override
+  String get collectionEmptyBody =>
+      'Les vraies révisions nourrissent votre burn ; les paliers offrent des boosters remplis de cartes du Japon.';
+
+  @override
+  String collectionUnlocks(String what) {
+    return 'Débloque : $what';
+  }
+
+  @override
+  String get collectionUnlocked => 'Débloqué';
+
+  @override
+  String get collectionVocab => 'Le japonais à retenir';
+
+  @override
+  String get collectionFlipCard => 'Retourner la carte';
+
+  @override
+  String get contentFallbackEnglish =>
+      'Pas encore rédigé dans votre langue ; affiché en anglais.';
+
+  @override
+  String get rarityCommon => 'Commune';
+
+  @override
+  String get rarityRare => 'Rare';
+
+  @override
+  String get raritySpecial => 'Spéciale';
+
+  @override
+  String get rarityShiny => 'Shiny';
+
+  @override
+  String get categoryPlace => 'Lieu';
+
+  @override
+  String get categoryCulture => 'Culture';
+
+  @override
+  String get categoryFood => 'Plats et boissons';
+
+  @override
+  String get categoryObject => 'Objet du quotidien';
+
+  @override
+  String get categoryTransport => 'Trains et villes';
+
+  @override
+  String get categoryNature => 'Nature';
+
+  @override
+  String get categoryCraft => 'Artisanat';
+
+  @override
+  String get categoryPerson => 'Personnalité';
+
+  @override
+  String get categorySociety => 'Société';
+
+  @override
+  String get categoryHistory => 'Histoire';
+
+  @override
+  String get categoryFestival => 'Fêtes et saisons';
+
+  @override
+  String get paletteLockedLabel => 'Verrouillée';
+
+  @override
+  String collectionPhotoCredit(String credit) {
+    return 'Photo : $credit';
+  }
+
+  @override
+  String paletteLockedHint(String card) {
+    return 'Se trouve dans les boosters : la carte $card la débloque.';
+  }
+
+  @override
+  String get devToolsTitle => 'Outils développeur';
+
+  @override
+  String get devToolsHelp =>
+      'Données de test locales pour le burn et la collection. Uniquement en build debug, jamais livré.';
+
+  @override
+  String devAddBurnDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ajouter $count jours qualifiés',
+      one: 'Ajouter 1 jour qualifié',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get devSeedApplied => 'Jours ajoutés ; paliers réévalués.';
+
+  @override
+  String get devResetRewards => 'Réinitialiser les récompenses';
+
+  @override
+  String get devResetRewardsHelp =>
+      'Supprime les jours générés, tous les boosters et toute la collection sur cet appareil.';
+
+  @override
+  String get devResetDone => 'Récompenses réinitialisées.';
+
+  @override
+  String get devSyncNote =>
+      'Les révisions générées ne partent jamais vers un compte ; les boosters et ouvertures suivent la sync normale du compte.';
+
+  @override
+  String get devNativeOnly =>
+      'Disponible uniquement dans les apps mobile et desktop.';
 }
