@@ -1,0 +1,1211 @@
+{
+ "kanji": {
+  "character": "々",
+  "character_image": null,
+  "character_image_label": null,
+  "subject_name": "Repeater",
+  "level": 2,
+  "slug": "々",
+  "primary_meaning": "Repeater",
+  "alternative_meanings": [
+   "Repetition",
+   "Reduplication",
+   "Iteration Mark"
+  ],
+  "readings": [
+   {
+    "reading": "のま",
+    "type": "kunyomi",
+    "primary": true
+   }
+  ],
+  "on_readings": [],
+  "kun_readings": [
+   "のま"
+  ],
+  "nanori": [],
+  "primary_reading_type": "kunyomi",
+  "radical_combination": [
+   {
+    "character": "勹",
+    "character_image": null,
+    "slug": "prison",
+    "url": "https://www.wanikani.com/radicals/prison"
+   },
+   {
+    "character": "丶",
+    "character_image": null,
+    "slug": "drop",
+    "url": "https://www.wanikani.com/radicals/drop"
+   }
+  ],
+  "radical_component_names": [
+   {
+    "slug": "prison",
+    "name": "Prison"
+   },
+   {
+    "slug": "drop",
+    "name": "Drop"
+   }
+  ],
+  "visually_similar_kanji": [],
+  "found_in_vocabulary": [
+   {
+    "character": "人々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ひとびと",
+    "meaning": "People",
+    "slug": "人々",
+    "url": "https://www.wanikani.com/vocabulary/%E4%BA%BA%E3%80%85"
+   },
+   {
+    "character": "中々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "なかなか",
+    "meaning": "Rather",
+    "slug": "中々",
+    "url": "https://www.wanikani.com/vocabulary/%E4%B8%AD%E3%80%85"
+   },
+   {
+    "character": "早々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "そうそう",
+    "meaning": "As Soon As",
+    "slug": "早々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%97%A9%E3%80%85"
+   },
+   {
+    "character": "先々月",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "せんせんげつ",
+    "meaning": "Month Before Last",
+    "slug": "先々月",
+    "url": "https://www.wanikani.com/vocabulary/%E5%85%88%E3%80%85%E6%9C%88"
+   },
+   {
+    "character": "色々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "いろいろ",
+    "meaning": "Various",
+    "slug": "色々",
+    "url": "https://www.wanikani.com/vocabulary/%E8%89%B2%E3%80%85"
+   },
+   {
+    "character": "近々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ちかぢか",
+    "meaning": "In The Near Future",
+    "slug": "近々",
+    "url": "https://www.wanikani.com/vocabulary/%E8%BF%91%E3%80%85"
+   },
+   {
+    "character": "元々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "もともと",
+    "meaning": "Originally",
+    "slug": "元々",
+    "url": "https://www.wanikani.com/vocabulary/%E5%85%83%E3%80%85"
+   },
+   {
+    "character": "弱々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "よわよわしい",
+    "meaning": "Weak Looking",
+    "slug": "弱々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E5%BC%B1%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "次々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "つぎつぎ",
+    "meaning": "One After Another",
+    "slug": "次々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%AC%A1%E3%80%85"
+   },
+   {
+    "character": "別々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "べつべつ",
+    "meaning": "Separate",
+    "slug": "別々",
+    "url": "https://www.wanikani.com/vocabulary/%E5%88%A5%E3%80%85"
+   },
+   {
+    "character": "時々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ときどき",
+    "meaning": "Sometimes",
+    "slug": "時々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%99%82%E3%80%85"
+   },
+   {
+    "character": "着々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ちゃくちゃく",
+    "meaning": "Steadily",
+    "slug": "着々",
+    "url": "https://www.wanikani.com/vocabulary/%E7%9D%80%E3%80%85"
+   },
+   {
+    "character": "様々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "さまざま",
+    "meaning": "Various",
+    "slug": "様々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%A7%98%E3%80%85"
+   },
+   {
+    "character": "続々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ぞくぞく",
+    "meaning": "One After Another",
+    "slug": "続々",
+    "url": "https://www.wanikani.com/vocabulary/%E7%B6%9A%E3%80%85"
+   },
+   {
+    "character": "若々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "わかわかしい",
+    "meaning": "Youthful",
+    "slug": "若々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E8%8B%A5%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "静々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "しずしず",
+    "meaning": "Quietly",
+    "slug": "静々",
+    "url": "https://www.wanikani.com/vocabulary/%E9%9D%99%E3%80%85"
+   },
+   {
+    "character": "苛々する",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "いらいらする",
+    "meaning": "To Get Irritated",
+    "slug": "苛々する",
+    "url": "https://www.wanikani.com/vocabulary/%E8%8B%9B%E3%80%85%E3%81%99%E3%82%8B"
+   },
+   {
+    "character": "各々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "おのおの",
+    "meaning": "Each",
+    "slug": "各々",
+    "url": "https://www.wanikani.com/vocabulary/%E5%90%84%E3%80%85"
+   },
+   {
+    "character": "段々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "だんだん",
+    "meaning": "Gradually",
+    "slug": "段々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%AE%B5%E3%80%85"
+   },
+   {
+    "character": "我々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "われわれ",
+    "meaning": "We",
+    "slug": "我々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%88%91%E3%80%85"
+   },
+   {
+    "character": "節々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ふしぶし",
+    "meaning": "Various Joints",
+    "slug": "節々",
+    "url": "https://www.wanikani.com/vocabulary/%E7%AF%80%E3%80%85"
+   },
+   {
+    "character": "華々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "はなばなしい",
+    "meaning": "Gorgeous",
+    "slug": "華々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E8%8F%AF%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "諸々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "もろもろ",
+    "meaning": "Various",
+    "slug": "諸々",
+    "url": "https://www.wanikani.com/vocabulary/%E8%AB%B8%E3%80%85"
+   },
+   {
+    "character": "嬉々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "きき",
+    "meaning": "State Of Enjoyment",
+    "slug": "嬉々",
+    "url": "https://www.wanikani.com/vocabulary/%E5%AC%89%E3%80%85"
+   },
+   {
+    "character": "渋々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "しぶしぶ",
+    "meaning": "Reluctantly",
+    "slug": "渋々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%B8%8B%E3%80%85"
+   },
+   {
+    "character": "謎々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "なぞなぞ",
+    "meaning": "Riddle",
+    "slug": "謎々",
+    "url": "https://www.wanikani.com/vocabulary/%E8%AC%8E%E3%80%85"
+   },
+   {
+    "character": "荒々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "あらあらしい",
+    "meaning": "Wild",
+    "slug": "荒々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E8%8D%92%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "粘々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ねばねば",
+    "meaning": "Stickiness",
+    "slug": "粘々",
+    "url": "https://www.wanikani.com/vocabulary/%E7%B2%98%E3%80%85"
+   },
+   {
+    "character": "銘々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "めいめい",
+    "meaning": "Each",
+    "slug": "銘々",
+    "url": "https://www.wanikani.com/vocabulary/%E9%8A%98%E3%80%85"
+   },
+   {
+    "character": "仰々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ぎょうぎょうしい",
+    "meaning": "Pompous",
+    "slug": "仰々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E4%BB%B0%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "隅々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "すみずみ",
+    "meaning": "Nooks",
+    "slug": "隅々",
+    "url": "https://www.wanikani.com/vocabulary/%E9%9A%85%E3%80%85"
+   },
+   {
+    "character": "徐々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "じょじょ",
+    "meaning": "Gradually",
+    "slug": "徐々",
+    "url": "https://www.wanikani.com/vocabulary/%E5%BE%90%E3%80%85"
+   },
+   {
+    "character": "悠々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ゆうゆう",
+    "meaning": "Quiet",
+    "slug": "悠々",
+    "url": "https://www.wanikani.com/vocabulary/%E6%82%A0%E3%80%85"
+   },
+   {
+    "character": "蝶々",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "ちょうちょう",
+    "meaning": "Butterfly",
+    "slug": "蝶々",
+    "url": "https://www.wanikani.com/vocabulary/%E8%9D%B6%E3%80%85"
+   },
+   {
+    "character": "凛々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "りりしい",
+    "meaning": "Gallant",
+    "slug": "凛々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E5%87%9B%E3%80%85%E3%81%97%E3%81%84"
+   },
+   {
+    "character": "瑞々しい",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "vocabulary",
+    "reading": "みずみずしい",
+    "meaning": "Fresh",
+    "slug": "瑞々しい",
+    "url": "https://www.wanikani.com/vocabulary/%E7%91%9E%E3%80%85%E3%81%97%E3%81%84"
+   }
+  ],
+  "mnemonics": [
+   {
+    "kind": "meaning",
+    "label": "Mnemonic",
+    "language": "en",
+    "reading": null,
+    "origin": "extracted",
+    "presence": "present",
+    "text": {
+     "text": "This is a strange kanji because it doesn't really mean anything at all. In fact, what it does is it repeats the kanji that comes before it. For example: 人々 is actually 人人. This kanji shows up whenever there's a repeating kanji, because it's often easier to write than writing a more complicated kanji twice. That's why this kanji is the repeater. It repeats what comes before it.\n\nTo remember that this kanji is the repeater, though, think of a prison with drops of water dripping over and over in it. Drip drop drip drop. It does that over and over again, driving the prisoners nuts. But it never stops. It just repeats over and over.",
+     "spans": [
+      {
+       "text": "人々",
+       "role": "ja",
+       "start": 153,
+       "end": 155
+      },
+      {
+       "text": "人人",
+       "role": "ja",
+       "start": 168,
+       "end": 170
+      },
+      {
+       "text": "repeater",
+       "role": "kanji",
+       "start": 337,
+       "end": 345
+      },
+      {
+       "text": "prison",
+       "role": "radical",
+       "start": 445,
+       "end": 451
+      },
+      {
+       "text": "drop",
+       "role": "radical",
+       "start": 457,
+       "end": 461
+      }
+     ]
+    },
+    "hint": {
+     "text": "Since this kanji doesn't really have a meaning as much as it does a function, try to change the way you think about it when you're memorizing it."
+    },
+    "image": null
+   },
+   {
+    "kind": "reading",
+    "label": "Mnemonic",
+    "language": "en",
+    "reading": "のま",
+    "origin": "extracted",
+    "presence": "present",
+    "text": {
+     "text": "This symbol doesn't really have a name, but it's sometimes called the のま because it looks like the katakana characters ノ and マ put together. If you know katakana then this will be easy to read. If you don't, think of it this way:\n\nYour mom is the repeater. She is trying to force feed you over and over again until you explode (literally). You keep yelling \"No ma (のま)!\" but she doesn't stop. She's on a repeating track, never stopping, repeating forever.",
+     "spans": [
+      {
+       "text": "のま",
+       "role": "ja",
+       "start": 70,
+       "end": 72
+      },
+      {
+       "text": "ノ",
+       "role": "ja",
+       "start": 119,
+       "end": 120
+      },
+      {
+       "text": "マ",
+       "role": "ja",
+       "start": 125,
+       "end": 126
+      },
+      {
+       "text": "repeater",
+       "role": "kanji",
+       "start": 247,
+       "end": 255
+      },
+      {
+       "text": "No ma",
+       "role": "reading",
+       "start": 358,
+       "end": 363
+      },
+      {
+       "text": "のま",
+       "role": "ja",
+       "start": 365,
+       "end": 367
+      }
+     ]
+    },
+    "hint": {
+     "text": "If you feel like you're so full you're about to burst, and if you imagine your mom doing this to you (how could you, ma?), you should be able to remember the reading of this kanji. That being said, the reading is mostly only useful in the event that you have to identify a 々 — otherwise, you won't see it much.",
+     "spans": [
+      {
+       "text": "々",
+       "role": "ja",
+       "start": 273,
+       "end": 274
+      }
+     ]
+    },
+    "image": null
+   }
+  ],
+  "page_type": "kanji",
+  "subject_type": "kanji",
+  "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+  "_provenance": {
+   "character": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image_label": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "slug": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "level": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_name": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "primary_meaning": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "alternative_meanings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "source_url": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "page_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "readings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "on_readings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "kun_readings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "nanori": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "primary_reading_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "radical_combination": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "visually_similar_kanji": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "found_in_vocabulary": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "mnemonics": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "radical_component_names": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/kanji/%E3%80%85",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   }
+  }
+ },
+ "vocabulary": {
+  "character": "〜の様に",
+  "character_image": null,
+  "character_image_label": null,
+  "subject_name": "Similarly To",
+  "level": 25,
+  "slug": "〜の様に",
+  "primary_meaning": "Similarly To",
+  "alternative_meanings": [
+   "In The Same Way As",
+   "Like",
+   "As If"
+  ],
+  "word_type": "adverb",
+  "word_types": [
+   "adverb"
+  ],
+  "readings": [
+   "のように"
+  ],
+  "reading_audio": [
+   {
+    "reading": "のように",
+    "voices": [
+     {
+      "name": "Miyuki",
+      "description": "(Tokyo accent, female)",
+      "sources": [
+       {
+        "url": "https://files.wanikani.com/m3owfwndkpy1aeiqljd0runur4i8",
+        "content_type": "audio/webm"
+       },
+       {
+        "url": "https://files.wanikani.com/augcebw3qz70cv95j293dm7f2sw1",
+        "content_type": "audio/mpeg"
+       }
+      ]
+     },
+     {
+      "name": "Kenichi",
+      "description": "(Tokyo accent, male)",
+      "sources": [
+       {
+        "url": "https://files.wanikani.com/pv1o5q39qb4i784v8gtpcl77d7ud",
+        "content_type": "audio/webm"
+       },
+       {
+        "url": "https://files.wanikani.com/yhxcqi8fe8duzthnvzh9rsllr63x",
+        "content_type": "audio/mpeg"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "component_subjects": [
+   {
+    "character": "様",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "kanji",
+    "reading": "さま",
+    "meaning": "Formal Name Ender",
+    "slug": "様",
+    "url": "https://www.wanikani.com/kanji/%E6%A7%98"
+   }
+  ],
+  "context_sentences": [
+   {
+    "japanese": "昨日の台風がウソの様に晴れてるね。",
+    "english": "It's so sunny — almost like yesterday's typhoon didn't really happen."
+   },
+   {
+    "japanese": "うちのWiFiは光の様に速い。",
+    "english": "Our Wi-Fi is as fast as light."
+   },
+   {
+    "japanese": "彼は初めてのデートに王子の様に馬に乗って現れたの。",
+    "english": "He showed up for our first date riding a horse, as though he were a prince."
+   }
+  ],
+  "collocations": [
+   {
+    "pattern": "〜の様に",
+    "items": [
+     {
+      "japanese": "風の様に",
+      "english": "like the wind"
+     },
+     {
+      "japanese": "夢の様に",
+      "english": "as if in a dream"
+     },
+     {
+      "japanese": "天使の様に",
+      "english": "like an angel"
+     }
+    ]
+   },
+   {
+    "pattern": "〜の様に〜",
+    "items": [
+     {
+      "japanese": "〜の様に見える",
+      "english": "to look like"
+     },
+     {
+      "japanese": "〜の様に感じる",
+      "english": "to feel similarly to"
+     },
+     {
+      "japanese": "〜の様に話す",
+      "english": "to speak as if"
+     }
+    ]
+   }
+  ],
+  "mnemonics": [
+   {
+    "kind": "meaning",
+    "label": "Explanation",
+    "language": "en",
+    "reading": null,
+    "origin": "extracted",
+    "presence": "present",
+    "text": {
+     "text": "You learned 様 is a \"formal name ender,\" but it can also mean manner. When you attach this to another noun with の and add に on the end to make it an adverb, you can describe something that's being done similarly to or in the same way as something else. In other words, something about it is just like that other thing — almost as if they were one and the same!",
+     "spans": [
+      {
+       "text": "様",
+       "role": "ja",
+       "start": 12,
+       "end": 13
+      },
+      {
+       "text": "manner",
+       "role": "kanji",
+       "start": 61,
+       "end": 67
+      },
+      {
+       "text": "の",
+       "role": "ja",
+       "start": 111,
+       "end": 112
+      },
+      {
+       "text": "に",
+       "role": "ja",
+       "start": 121,
+       "end": 122
+      },
+      {
+       "text": "similarly to",
+       "role": "vocabulary",
+       "start": 201,
+       "end": 213
+      },
+      {
+       "text": "in the same way as",
+       "role": "vocabulary",
+       "start": 217,
+       "end": 235
+      },
+      {
+       "text": "like",
+       "role": "vocabulary",
+       "start": 295,
+       "end": 299
+      },
+      {
+       "text": "as if",
+       "role": "vocabulary",
+       "start": 326,
+       "end": 331
+      }
+     ]
+    },
+    "hint": null,
+    "image": null
+   },
+   {
+    "kind": "reading",
+    "label": "Explanation",
+    "language": "en",
+    "reading": "のように",
+    "origin": "extracted",
+    "presence": "present",
+    "text": {
+     "text": "Even though this word isn't a compound, 様 actually uses the on'yomi here. Since you didn't learn the on'yomi with the kanji, here's a mnemonic to help you out:\n\nMany foods are made similarly to yogurt (よう): kefir, skyr, lassi… The list goes on. What's that? Those are just subcategories of yogurt, you say? No, no, no. They're made in the same way as yogurt and they taste a lot like yogurt, but they're not yogurt. Yogurt stands alone.",
+     "spans": [
+      {
+       "text": "様",
+       "role": "ja",
+       "start": 40,
+       "end": 41
+      },
+      {
+       "text": "similarly to",
+       "role": "vocabulary",
+       "start": 181,
+       "end": 193
+      },
+      {
+       "text": "yo",
+       "role": "reading",
+       "start": 194,
+       "end": 196
+      },
+      {
+       "text": "よう",
+       "role": "ja",
+       "start": 202,
+       "end": 204
+      },
+      {
+       "text": "in the same way as",
+       "role": "vocabulary",
+       "start": 332,
+       "end": 350
+      },
+      {
+       "text": "like",
+       "role": "vocabulary",
+       "start": 379,
+       "end": 383
+      }
+     ]
+    },
+    "hint": null,
+    "image": null
+   }
+  ],
+  "page_type": "vocabulary",
+  "subject_type": "vocabulary",
+  "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+  "_provenance": {
+   "character": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image_label": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "slug": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "level": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_name": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "primary_meaning": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "alternative_meanings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "source_url": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "page_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "word_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "word_types": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "readings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "component_subjects": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "mnemonics": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "reading_audio": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "context_sentences": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "collocations": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/vocabulary/%E3%80%9C%E3%81%AE%E6%A7%98%E3%81%AB",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   }
+  }
+ },
+ "radicals": {
+  "character": "能",
+  "character_image": null,
+  "character_image_label": null,
+  "subject_name": "Ability",
+  "level": 22,
+  "slug": "ability",
+  "primary_meaning": "Ability",
+  "alternative_meanings": [],
+  "found_in_kanji": [
+   {
+    "character": "態",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "kanji",
+    "reading": "たい",
+    "meaning": "Appearance",
+    "slug": "態",
+    "url": "https://www.wanikani.com/kanji/%E6%85%8B"
+   },
+   {
+    "character": "熊",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "kanji",
+    "reading": "くま",
+    "meaning": "Bear",
+    "slug": "熊",
+    "url": "https://www.wanikani.com/kanji/%E7%86%8A"
+   },
+   {
+    "character": "罷",
+    "character_image": null,
+    "character_image_label": null,
+    "kind": "kanji",
+    "reading": "ひ",
+    "meaning": "Quit",
+    "slug": "罷",
+    "url": "https://www.wanikani.com/kanji/%E7%BD%B7"
+   }
+  ],
+  "mnemonics": [
+   {
+    "kind": "meaning",
+    "label": "Mnemonic",
+    "language": "en",
+    "reading": null,
+    "origin": "extracted",
+    "presence": "present",
+    "text": {
+     "text": "This radical is the same as the kanji. It means ability.",
+     "spans": [
+      {
+       "text": "ability",
+       "role": "radical",
+       "start": 48,
+       "end": 55
+      }
+     ]
+    },
+    "hint": null,
+    "image": null
+   }
+  ],
+  "page_type": "radicals",
+  "subject_type": "radical",
+  "source_url": "https://www.wanikani.com/radicals/ability",
+  "_provenance": {
+   "character": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "character_image_label": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "slug": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "level": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "source_url": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "page_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_type": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "found_in_kanji": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "factual",
+    "ship": "allowed",
+    "method": "dom_parser_v1"
+   },
+   "subject_name": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "primary_meaning": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "alternative_meanings": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   },
+   "mnemonics": {
+    "source": "wanikani",
+    "source_url": "https://www.wanikani.com/radicals/ability",
+    "license_class": "authored-third-party",
+    "ship": "reference-only",
+    "method": "dom_parser_v1"
+   }
+  }
+ }
+}
