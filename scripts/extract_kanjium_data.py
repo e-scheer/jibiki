@@ -16,6 +16,7 @@ Outputs:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -42,7 +43,7 @@ def main() -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path.resolve().as_uri() + "?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
 
     accents_count = export_accents(conn, out_dir / "accents.txt")
@@ -67,8 +68,19 @@ def main() -> int:
     )
 
     summary = {
-        "schema": "jibiki-kanjium-normalized/1",
-        "source_db": str(db_path),
+        "schema": "jibiki-kanjium-normalized/2",
+        "source_db": str(db_path.resolve()),
+        "source_sha256": hashlib.sha256(db_path.read_bytes()).hexdigest(),
+        "extractor_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "output_sha256": {
+            name: hashlib.sha256((out_dir / name).read_bytes()).hexdigest()
+            for name in (
+                "accents.txt",
+                "edict_headwords.jsonl",
+                "kanjidict.jsonl",
+                "elements.jsonl",
+            )
+        },
         "outputs": {
             "accents.txt": accents_count,
             "edict_headwords.jsonl": edict_count,
@@ -88,10 +100,12 @@ def export_accents(conn: sqlite3.Connection, path: Path) -> int:
     seen: set[tuple[str, str, str]] = set()
     count = 0
     with path.open("w", encoding="utf-8", newline="") as handle:
-        for kanji, reading, pitch in conn.execute(
-            "select kanji, reading, acc_pos from edict where acc_pos is not null and acc_pos != ''"
+        for kanji, reading, surface, pitch in conn.execute(
+            "select kanji, reading, okurigana, acc_pos from edict where acc_pos is not null and acc_pos != ''"
         ):
-            row = (kanji or "", reading or "", pitch or "")
+            # Despite its name, `okurigana` contains the complete written word
+            # (e.g. 上げる). `kanji` alone is only 上 for that record.
+            row = (surface or kanji or reading or "", reading or "", pitch or "")
             if row in seen or not row[1] or not row[2]:
                 continue
             seen.add(row)

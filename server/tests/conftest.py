@@ -9,9 +9,16 @@ from django.core.management import call_command
 
 @pytest.fixture
 def seeded(db):
-    """A database populated with the curated demo dataset (dictionary + kana
-    mnemonics). Exercises the seed command as a side effect."""
+    """Dictionary plus explicitly published test mnemonics for API behavior.
+
+    Seed publication policy is tested separately in test_seed_*; API tests need
+    a public catalogue to exercise ranking, reporting and language selection.
+    """
+    from mnemonics.models import DeckStatus, Mnemonic, MnemonicDeck, MnemonicStatus
+
     call_command("seed_demo")
+    Mnemonic.objects.filter(is_seed=True).update(status=MnemonicStatus.VISIBLE)
+    MnemonicDeck.objects.filter(is_seed=True).update(status=DeckStatus.VISIBLE)
 
 
 @pytest.fixture

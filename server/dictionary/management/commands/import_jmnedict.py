@@ -1,109 +1,116 @@
-"""Import JMnedict (EDRDG) proper names into the Name table.
+"""Refresh JMnedict names by stable ent_seq without deleting the catalogue."""
 
-Same XML/entity handling as JMdict (name_type is an entity like &place;). One-shot;
-clears the table first, then bulk-inserts one row per entry (first kanji + first
-reading, all translations/types).
-
-    python manage.py import_jmnedict /path/to/JMnedict.xml
-"""
-
-from __future__ import annotations
-
-import re
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
+from dictionary.importing import XML_LANG, entries, language, source_provenance, xml_metadata
 from dictionary.models import Name, NameTranslation
-
-_ENTITY_RE = re.compile(r'<!ENTITY\s+([\w-]+)\s+"[^"]*">')
-_ISO2 = {"eng": "en", "fre": "fr", "ger": "de", "dut": "nl", "spa": "es"}
-_XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
-
-
-def _entity_map(path: Path) -> dict[str, str]:
-    entities: dict[str, str] = {}
-    with path.open("r", encoding="utf-8", errors="replace") as fh:
-        for line in fh:
-            if "<!ENTITY" in line:
-                for name in _ENTITY_RE.findall(line):
-                    entities[name] = name
-            elif line.lstrip().startswith("<JMnedict"):
-                break
-    return entities
 
 
 class Command(BaseCommand):
-    help = "Import JMnedict XML (EDRDG) into the names table."
+    help = "Import JMnedict XML or XML.gz without changing existing name IDs."
 
     def add_arguments(self, parser):
-        parser.add_argument("path", help="Path to JMnedict.xml")
+        parser.add_argument("path")
         parser.add_argument("--limit", type=int, default=0)
+        parser.add_argument("--langs", default="all", help="Comma-separated language codes, or all")
 
     def handle(self, *args, **opts):
         path = Path(opts["path"])
-        if not path.exists():
-            raise CommandError(f"file not found: {path}")
-        limit = opts["limit"]
-
-        parser = ET.XMLParser()
-        parser.entity.update(_entity_map(path))
-
-        Name.objects.all().delete()
-        batch: list[tuple[Name, list[tuple[str, str]]]] = []
-        total = 0
-        self.stdout.write(f"Importing {path.name} …")
-        for _event, elem in ET.iterparse(str(path), events=("end",), parser=parser):
-            if elem.tag != "entry":
-                continue
-            seq_text = elem.findtext("ent_seq")
-            seq = int(seq_text) if seq_text and seq_text.isdigit() else None
-            kanji = elem.findtext("k_ele/keb") or ""
-            reading = elem.findtext("r_ele/reb") or ""
-            types: set[str] = set()
-            trans: list[tuple[str, str]] = []
-            for t in elem.findall("trans"):
-                types.update(nt.text for nt in t.findall("name_type") if nt.text)
-                trans.extend(
-                    (
-                        _ISO2.get(td.get(_XML_LANG, "eng"), td.get(_XML_LANG, "eng")),
-                        td.text,
+        if not path.is_file() or opts["limit"] < 0:
+            raise CommandError("A readable source and nonnegative limit are required.")
+        provenance = source_provenance(path, "jmnedict")
+        langs = {language(code.strip()) for code in opts["langs"].split(",") if code.strip()}
+        if not langs:
+            raise CommandError("Choose at least one language.")
+        count, batch = 0, []
+        with transaction.atomic():
+            for elem in entries(path, "JMnedict", "entry"):
+                seq = int(elem.findtext("ent_seq") or "0")
+                if seq <= 0:
+                    raise CommandError("JMnedict requires a positive ent_seq.")
+                kanji = [e.text for e in elem.findall("k_ele/keb") if e.text]
+                readings = [e.text for e in elem.findall("r_ele/reb") if e.text]
+                if not kanji and not readings:
+                    raise CommandError(f"Name {seq} has no form or reading.")
+                if any(len(text) > 64 for text in kanji + readings):
+                    raise CommandError(f"Name {seq} exceeds the supported form length.")
+                types, translations = set(), []
+                for group in elem.findall("trans"):
+                    types.update(t.text for t in group.findall("name_type") if t.text)
+                    translations.extend(
+                        (language(t.get(XML_LANG, "eng")), t.text)
+                        for t in group.findall("trans_det")
+                        if t.text and ("all" in langs or language(t.get(XML_LANG, "eng")) in langs)
                     )
-                    for td in t.findall("trans_det")
-                    if td.text
+                batch.append(
+                    (
+                        dict(
+                            seq=seq,
+                            kanji=next(iter(kanji), ""),
+                            reading=next(iter(readings), ""),
+                            name_types=sorted(types),
+                            metadata={
+                                "kanji": kanji,
+                                "readings": readings,
+                                "raw": xml_metadata(elem),
+                            },
+                            provenance={"jmnedict": provenance},
+                        ),
+                        translations,
+                    )
                 )
-            elem.clear()
-            if not (reading or kanji):
-                continue
-            batch.append(
-                (Name(
-                    seq=seq,
-                    kanji=kanji,
-                    reading=reading or kanji,
-                    name_types=sorted(types),
-                ), trans)
-            )
-            if len(batch) >= 3000:
-                self._flush(batch)
-                total += len(batch)
-                batch = []
-                if total % 60000 == 0:
-                    self.stdout.write(f"  … {total} names")
-            if limit and total >= limit:
-                break
-        if batch:
-            self._flush(batch)
-            total += len(batch)
-        self.stdout.write(self.style.SUCCESS(f"Done - {total} names imported."))
+                count += 1
+                if len(batch) >= 3000:
+                    self._flush(batch, langs)
+                    batch = []
+                if opts["limit"] and count >= opts["limit"]:
+                    break
+            if batch:
+                self._flush(batch, langs)
+        self.stdout.write(self.style.SUCCESS(f"Done: {count} names imported."))
 
     @staticmethod
-    def _flush(batch: list[tuple[Name, list[tuple[str, str]]]]) -> None:
-        names = Name.objects.bulk_create([name for name, _translations in batch])
-        rows = []
-        for name, (_source, translations) in zip(names, batch, strict=True):
-            rows.extend(
-                NameTranslation(name=name, language=language, text=text, order=order)
-                for order, (language, text) in enumerate(translations)
-            )
-        NameTranslation.objects.bulk_create(rows)
+    def _flush(batch, langs=frozenset({"all"})):
+        existing = {
+            n.seq: n for n in Name.objects.filter(seq__in=[data["seq"] for data, _ in batch])
+        }
+        new, changed = [], []
+        for data, _ in batch:
+            name = existing.get(data["seq"])
+            if name is None:
+                name = Name(**data)
+                existing[name.seq] = name
+                new.append(name)
+            else:
+                for key, value in data.items():
+                    setattr(
+                        name,
+                        key,
+                        {**getattr(name, key), **value}
+                        if key in ("provenance", "metadata")
+                        else value,
+                    )
+                changed.append(name)
+        Name.objects.bulk_create(new)
+        Name.objects.bulk_update(
+            changed, ["kanji", "reading", "name_types", "metadata", "provenance"]
+        )
+        selected = NameTranslation.objects.filter(name_id__in=[n.pk for n in existing.values()])
+        if "all" not in langs:
+            selected = selected.filter(language__in=langs)
+        selected.delete()
+        translations = []
+        for data, values in batch:
+            counts = {}
+            for lang, text in values:
+                order = counts.get(lang, 0)
+                counts[lang] = order + 1
+                translations.append(
+                    NameTranslation(
+                        name=existing[data["seq"]], language=lang, text=text, order=order
+                    )
+                )
+        NameTranslation.objects.bulk_create(translations)

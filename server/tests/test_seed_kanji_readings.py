@@ -32,9 +32,17 @@ def brief_dir(tmp_path, settings):
 
 def test_seeds_reading_rows_with_reading_field(db, brief_dir):
     _write_brief(
-        brief_dir, "n5",
-        [{"literal": "山", "reading": "サン", "meaning": "mountain",
-          "en": "The sun (サン) behind the mountain.", "fr": "Le soleil sans (サン) nuage sur la montagne."}],
+        brief_dir,
+        "n5",
+        [
+            {
+                "literal": "山",
+                "reading": "サン",
+                "meaning": "mountain",
+                "en": "The sun (サン) behind the mountain.",
+                "fr": "Le soleil sans (サン) nuage sur la montagne.",
+            }
+        ],
     )
     call_command("seed_kanji_readings", "--levels", "n5")
 
@@ -42,7 +50,8 @@ def test_seeds_reading_rows_with_reading_field(db, brief_dir):
     assert rows.count() == 2
     en = rows.get(language="en")
     assert en.reading == "サン"
-    assert en.status == MnemonicStatus.VISIBLE
+    assert en.status == MnemonicStatus.PENDING
+    assert en.provenance["review_status"] == "unverified"
     assert en.author_id is None
     # A reading mnemonic never collides with the meaning mnemonic for 山.
     assert not Mnemonic.objects.filter(character="山", kind="kanji").exists()
@@ -50,18 +59,34 @@ def test_seeds_reading_rows_with_reading_field(db, brief_dir):
 
 def test_idempotent_and_updates_in_place(db, brief_dir):
     _write_brief(
-        brief_dir, "n5",
-        [{"literal": "人", "reading": "ジン", "meaning": "person",
-          "en": "A person with gin (ジン).", "fr": "Une personne, un djinn (ジン)."}],
+        brief_dir,
+        "n5",
+        [
+            {
+                "literal": "人",
+                "reading": "ジン",
+                "meaning": "person",
+                "en": "A person with gin (ジン).",
+                "fr": "Une personne, un djinn (ジン).",
+            }
+        ],
     )
     call_command("seed_kanji_readings", "--levels", "n5")
     call_command("seed_kanji_readings", "--levels", "n5")
     assert Mnemonic.objects.filter(character="人", kind="kanji_reading", is_seed=True).count() == 2
 
     _write_brief(
-        brief_dir, "n5",
-        [{"literal": "人", "reading": "ジン", "meaning": "person",
-          "en": "Down a cold gin (ジン): a person unwinds.", "fr": "Une personne, un djinn (ジン)."}],
+        brief_dir,
+        "n5",
+        [
+            {
+                "literal": "人",
+                "reading": "ジン",
+                "meaning": "person",
+                "en": "Down a cold gin (ジン): a person unwinds.",
+                "fr": "Une personne, un djinn (ジン).",
+            }
+        ],
     )
     call_command("seed_kanji_readings", "--levels", "n5")
     rows = Mnemonic.objects.filter(character="人", kind="kanji_reading", is_seed=True)
@@ -73,8 +98,13 @@ def test_serializer_exposes_reading(db):
     from mnemonics.serializers import MnemonicSerializer
 
     m = Mnemonic.objects.create(
-        character="日", kind="kanji_reading", language="en", reading="ニチ",
-        story="A dog in its niche (ニチ).", status=MnemonicStatus.VISIBLE, is_seed=True,
+        character="日",
+        kind="kanji_reading",
+        language="en",
+        reading="ニチ",
+        story="A dog in its niche (ニチ).",
+        status=MnemonicStatus.VISIBLE,
+        is_seed=True,
     )
     data = MnemonicSerializer(m).data
     assert data["reading"] == "ニチ"

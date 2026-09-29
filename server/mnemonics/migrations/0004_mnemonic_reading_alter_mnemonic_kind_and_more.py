@@ -4,30 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mnemonics', '0003_usermnemonicchoice'),
+        ("mnemonics", "0003_usermnemonicchoice"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mnemonic',
-            name='reading',
-            field=models.CharField(blank=True, default='', max_length=32),
+            model_name="mnemonic",
+            name="reading",
+            field=models.CharField(blank=True, default="", max_length=32),
         ),
         migrations.AlterField(
-            model_name='mnemonic',
-            name='kind',
-            field=models.CharField(choices=[('kana', 'Kana'), ('kanji', 'Kanji'), ('kanji_reading', 'Kanji reading')], max_length=16),
+            model_name="mnemonic",
+            name="kind",
+            field=models.CharField(
+                choices=[("kana", "Kana"), ("kanji", "Kanji"), ("kanji_reading", "Kanji reading")],
+                max_length=16,
+            ),
         ),
         migrations.AlterField(
-            model_name='mnemonicdeck',
-            name='kind',
-            field=models.CharField(choices=[('kana', 'Kana'), ('kanji', 'Kanji'), ('kanji_reading', 'Kanji reading')], default='kana', max_length=16),
+            model_name="mnemonicdeck",
+            name="kind",
+            field=models.CharField(
+                choices=[("kana", "Kana"), ("kanji", "Kanji"), ("kanji_reading", "Kanji reading")],
+                default="kana",
+                max_length=16,
+            ),
         ),
         migrations.AlterField(
-            model_name='usermnemonicchoice',
-            name='kind',
-            field=models.CharField(choices=[('kana', 'Kana'), ('kanji', 'Kanji'), ('kanji_reading', 'Kanji reading')], max_length=16),
+            model_name="usermnemonicchoice",
+            name="kind",
+            field=models.CharField(
+                choices=[("kana", "Kana"), ("kanji", "Kanji"), ("kanji_reading", "Kanji reading")],
+                max_length=16,
+            ),
         ),
     ]

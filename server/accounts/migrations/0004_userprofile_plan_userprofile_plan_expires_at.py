@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0003_userprofile_active_pack'),
+        ("accounts", "0003_userprofile_active_pack"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='plan',
-            field=models.CharField(choices=[('free', 'Free'), ('premium', 'Premium'), ('lifetime', 'Lifetime')], default='lifetime', max_length=12),
+            model_name="userprofile",
+            name="plan",
+            field=models.CharField(
+                choices=[("free", "Free"), ("premium", "Premium"), ("lifetime", "Lifetime")],
+                default="lifetime",
+                max_length=12,
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='plan_expires_at',
+            model_name="userprofile",
+            name="plan_expires_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

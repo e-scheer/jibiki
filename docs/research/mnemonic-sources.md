@@ -3,15 +3,18 @@
 Research notes that informed the mnemonic model. Everything here is
 **idea-level extraction from public pages** (shape-association + sound anchor,
 paraphrased): no story text was copied verbatim and no source image is shipped.
-No paywall or login was bypassed. jibiki's own seed stories are original writing;
-this file exists for provenance and to avoid re-scraping.
+No paywall or login was bypassed. Earlier notes described Jibiki's seed stories as
+original writing, but they record no author or independent review evidence.
+Their authorship remains unverified. This file preserves research context and
+helps avoid repeating source collection; it does not certify the seed stories.
 
 ## Publication status
 
-The reviewed built-in catalogue is `server/content_sources/mnemonics/kana_stories.json`.
+The legacy built-in catalogue is `server/content_sources/mnemonics/kana_stories.json`.
 It contains separate stories for all 46 hiragana and 46 katakana in English and
 French. An association may share a visual idea across languages, but its sound
-anchor and wording are reviewed in the target language.
+anchor and wording need a traceable review in the target language. The existing
+file does not record who reviewed each story, so its editorial status is unverified.
 
 Other researched languages are not published as default decks yet:
 

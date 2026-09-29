@@ -27,6 +27,9 @@ def hide(modeladmin, request, queryset):
 
 @admin.register(Mnemonic)
 class MnemonicAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     list_display = [
         "character",
         "kind",
@@ -40,6 +43,7 @@ class MnemonicAdmin(admin.ModelAdmin):
     list_filter = ["status", "kind", "language", "is_seed"]
     search_fields = ["character", "story", "author__email"]
     actions = [publish, hide]
+    readonly_fields = ["provenance"]
 
 
 @admin.register(MnemonicReport)
@@ -79,6 +83,9 @@ class MnemonicDeckItemInline(admin.TabularInline):
 
 @admin.register(MnemonicDeck)
 class MnemonicDeckAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     list_display = ["title", "language", "kind", "status", "score", "author", "created_at"]
     list_filter = ["status", "kind", "language", "is_seed"]
     search_fields = ["title", "description", "author__email"]

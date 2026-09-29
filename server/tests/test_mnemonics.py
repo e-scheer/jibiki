@@ -8,7 +8,7 @@ pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 
-def test_seeded_kana_mnemonics_are_visible(seeded, client):
+def test_published_kana_mnemonics_are_visible(seeded, client):
     resp = client.get("/api/v1/mnemonics/", {"character": "く", "language": "en", "kind": "kana"})
     assert resp.status_code == 200
     results = resp.json()["results"]
@@ -134,14 +134,21 @@ def test_author_sees_own_pending_mnemonic_in_feed_others_do_not(seeded, api):
     # A low-trust author's post is held pending...
     created = api.post(
         "/api/v1/mnemonics/create",
-        {"character": "ふ", "kind": "kana", "language": "en", "story": "ふ looks like Mount Fuji (fu)."},
+        {
+            "character": "ふ",
+            "kind": "kana",
+            "language": "en",
+            "story": "ふ looks like Mount Fuji (fu).",
+        },
         format="json",
     )
     assert created.status_code == 201
     assert created.json()["status"] == "pending"
 
     # ...but the author still sees it (badged), so their work never vanishes.
-    mine = api.get("/api/v1/mnemonics/", {"character": "ふ", "language": "en", "kind": "kana"}).json()
+    mine = api.get(
+        "/api/v1/mnemonics/", {"character": "ふ", "language": "en", "kind": "kana"}
+    ).json()
     my_pending = [m for m in mine["results"] if m["status"] == "pending"]
     assert len(my_pending) == 1
 
@@ -151,5 +158,7 @@ def test_author_sees_own_pending_mnemonic_in_feed_others_do_not(seeded, api):
     other = User.objects.create_user(email="other@example.com", password="pw-test-12345")
     oc = APIClient()
     oc.force_authenticate(user=other)
-    theirs = oc.get("/api/v1/mnemonics/", {"character": "ふ", "language": "en", "kind": "kana"}).json()
+    theirs = oc.get(
+        "/api/v1/mnemonics/", {"character": "ふ", "language": "en", "kind": "kana"}
+    ).json()
     assert all(m["status"] == "visible" for m in theirs["results"])

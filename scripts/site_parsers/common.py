@@ -154,8 +154,8 @@ class RichText:
 def normalize_text(value: str) -> str:
     """Collapse whitespace without ever inserting a separator.
 
-    Removes spaces that sit between two Japanese characters, since Japanese
-    does not space its words and such a space can only come from markup.
+    Preserve explicit Japanese word spacing: teaching materials can deliberately
+    separate words or readings. Inline markup itself never inserts a separator.
     """
     if not value:
         return ""
@@ -164,7 +164,6 @@ def normalize_text(value: str) -> str:
     text = _SPACE_RUN.sub(" ", text)
     text = _SPACE_AROUND_NEWLINE.sub("\n", text)
     text = _NEWLINE_RUN.sub("\n\n", text)
-    text = _strip_interior_japanese_spaces(text)
     return text.strip()
 
 
@@ -217,23 +216,31 @@ def rich_text(
 
     chunks: list[str] = []
     raw_spans: list[tuple[int, int, str]] = []
+    emitted_length = 0
 
     def emit(value: str | None) -> None:
+        nonlocal emitted_length
         if value:
             chunks.append(value)
+            emitted_length += len(value)
 
     def position() -> int:
-        return sum(len(chunk) for chunk in chunks)
+        return emitted_length
 
-    def walk(node: HtmlElement) -> None:
+    def walk(node: HtmlElement, *, include_tail: bool = True) -> None:
         tag = node.tag if isinstance(node.tag, str) else ""
-        if tag in DROPPED_TAGS:
-            return
-        if not keep_ruby_annotations and tag in RUBY_ANNOTATION_TAGS:
+        if not tag or tag in DROPPED_TAGS or (
+            not keep_ruby_annotations and tag in RUBY_ANNOTATION_TAGS
+        ):
+            # A skipped annotation/comment/script must not swallow the ordinary
+            # sentence text immediately following it.
+            if include_tail:
+                emit(node.tail)
             return
         if tag == "br":
             emit(BLOCK_SEPARATOR)
-            emit(node.tail)
+            if include_tail:
+                emit(node.tail)
             return
 
         is_block = bool(tag) and tag not in INLINE_TAGS
@@ -250,9 +257,11 @@ def rich_text(
 
         if is_block:
             emit(BLOCK_SEPARATOR)
-        emit(node.tail)
+        if include_tail:
+            emit(node.tail)
 
-    walk(el)
+    # The root's tail belongs to its parent, outside the requested field.
+    walk(el, include_tail=False)
     raw = "".join(chunks)
     plain = normalize_text(raw)
     spans = _remap_spans(raw, plain, raw_spans)

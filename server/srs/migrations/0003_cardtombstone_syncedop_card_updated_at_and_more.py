@@ -7,71 +7,100 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dictionary', '0008_kana_usage_examples'),
-        ('srs', '0002_card_favorite'),
+        ("dictionary", "0008_kana_usage_examples"),
+        ("srs", "0002_card_favorite"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CardTombstone',
+            name="CardTombstone",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('item_type', models.CharField(choices=[('word', 'Word'), ('kanji', 'Kanji'), ('kana', 'Kana')], max_length=8)),
-                ('item_ref', models.CharField(max_length=64)),
-                ('deleted_at', models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "item_type",
+                    models.CharField(
+                        choices=[("word", "Word"), ("kanji", "Kanji"), ("kana", "Kana")],
+                        max_length=8,
+                    ),
+                ),
+                ("item_ref", models.CharField(max_length=64)),
+                ("deleted_at", models.DateTimeField(default=django.utils.timezone.now)),
             ],
             options={
-                'db_table': 'srs_card_tombstones',
+                "db_table": "srs_card_tombstones",
             },
         ),
         migrations.CreateModel(
-            name='SyncedOp',
+            name="SyncedOp",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('client_op_id', models.UUIDField()),
-                ('applied_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("client_op_id", models.UUIDField()),
+                ("applied_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'db_table': 'srs_synced_ops',
+                "db_table": "srs_synced_ops",
             },
         ),
         migrations.AddField(
-            model_name='card',
-            name='updated_at',
+            model_name="card",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='reviewlog',
-            name='client_review_id',
+            model_name="reviewlog",
+            name="client_review_id",
             field=models.UUIDField(blank=True, null=True, unique=True),
         ),
         migrations.AddIndex(
-            model_name='card',
-            index=models.Index(fields=['user', 'updated_at'], name='srs_cards_user_id_bcb82a_idx'),
+            model_name="card",
+            index=models.Index(fields=["user", "updated_at"], name="srs_cards_user_id_bcb82a_idx"),
         ),
         migrations.AddField(
-            model_name='cardtombstone',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='card_tombstones', to=settings.AUTH_USER_MODEL),
+            model_name="cardtombstone",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="card_tombstones",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='syncedop',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='synced_ops', to=settings.AUTH_USER_MODEL),
+            model_name="syncedop",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="synced_ops",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddIndex(
-            model_name='cardtombstone',
-            index=models.Index(fields=['user', 'deleted_at'], name='srs_card_to_user_id_ca5860_idx'),
+            model_name="cardtombstone",
+            index=models.Index(
+                fields=["user", "deleted_at"], name="srs_card_to_user_id_ca5860_idx"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='cardtombstone',
-            constraint=models.UniqueConstraint(fields=('user', 'item_type', 'item_ref'), name='uq_tombstone_user_item'),
+            model_name="cardtombstone",
+            constraint=models.UniqueConstraint(
+                fields=("user", "item_type", "item_ref"), name="uq_tombstone_user_item"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='syncedop',
-            constraint=models.UniqueConstraint(fields=('user', 'client_op_id'), name='uq_synced_op_user'),
+            model_name="syncedop",
+            constraint=models.UniqueConstraint(
+                fields=("user", "client_op_id"), name="uq_synced_op_user"
+            ),
         ),
     ]

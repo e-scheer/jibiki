@@ -109,4 +109,3 @@ class WaniKaniCancelView(APIView):
         if connection:
             connection.clear_preview()
         return Response({"cancelled": True})
-

@@ -30,6 +30,13 @@ class Word(models.Model):
     jlpt = models.PositiveSmallIntegerField(null=True, blank=True)  # 5..1 (community mapping)
     freq_rank = models.PositiveIntegerField(null=True, blank=True)  # lower = more frequent
 
+    provenance = models.JSONField(default=dict, blank=True)
+    # Legacy demo IDs remain addressable for personal study history, while their
+    # reference content can resolve to one verified official dictionary entry.
+    canonical_word = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="legacy_aliases"
+    )
+
     class Meta:
         db_table = "dict_words"
         indexes = [
@@ -76,6 +83,8 @@ class WordForm(models.Model):
     # (multiple accepted patterns). Blank when unknown.
     pitch = models.CharField(max_length=32, blank=True)
 
+    metadata = models.JSONField(default=dict, blank=True)
+
     class Meta:
         db_table = "dict_word_forms"
         indexes = [
@@ -100,6 +109,8 @@ class Sense(models.Model):
     misc = models.JSONField(default=list, blank=True)  # ["uk", "col", ...]
     field = models.JSONField(default=list, blank=True)  # ["comp", "med", ...]
 
+    metadata = models.JSONField(default=dict, blank=True)
+
     class Meta:
         db_table = "dict_senses"
         ordering = ["word", "order"]
@@ -115,7 +126,8 @@ class Gloss(models.Model):
     id = models.BigAutoField(primary_key=True)
     sense = models.ForeignKey(Sense, on_delete=models.CASCADE, related_name="glosses")
     language = models.CharField(max_length=8, default="en")
-    text = models.CharField(max_length=255)
+    text = models.TextField()
+    metadata = models.JSONField(default=dict, blank=True)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -126,9 +138,7 @@ class Gloss(models.Model):
             )
         ]
         indexes = [
-            models.Index(
-                fields=["language", "text"], name="dict_glosse_lang_d7fe9f_idx"
-            ),
+            models.Index(fields=["language"], name="dict_glosse_lang_d7fe9f_idx"),
         ]
         ordering = ["sense", "order"]
 
@@ -142,7 +152,7 @@ class SenseNote(models.Model):
     id = models.BigAutoField(primary_key=True)
     sense = models.ForeignKey(Sense, on_delete=models.CASCADE, related_name="notes")
     language = models.CharField(max_length=8, default="en")
-    text = models.CharField(max_length=255)
+    text = models.TextField()
 
     class Meta:
         db_table = "dict_sense_notes"
@@ -166,6 +176,7 @@ class Radical(models.Model):
     literal = models.CharField(max_length=4, unique=True)
     strokes = models.PositiveSmallIntegerField(default=0)
     reading = models.CharField(max_length=32, blank=True)  # kana name of the radical
+    provenance = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "dict_radicals"
@@ -190,9 +201,7 @@ class RadicalMeaning(models.Model):
                 fields=["radical", "language"], name="uq_radical_meaning_language"
             )
         ]
-        indexes = [
-            models.Index(fields=["language", "text"], name="dict_radica_languag_8f2c77_idx")
-        ]
+        indexes = [models.Index(fields=["language", "text"], name="dict_radica_languag_8f2c77_idx")]
 
     def __str__(self) -> str:
         return f"[{self.language}] {self.text}"
@@ -231,6 +240,9 @@ class Kanji(models.Model):
     stroke_paths = models.JSONField(default=list, blank=True)
     stroke_viewbox = models.CharField(max_length=32, blank=True, default="0 0 109 109")
 
+    provenance = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
     class Meta:
         db_table = "dict_kanji"
         indexes = [
@@ -248,7 +260,7 @@ class KanjiMeaning(models.Model):
     id = models.BigAutoField(primary_key=True)
     kanji = models.ForeignKey(Kanji, on_delete=models.CASCADE, related_name="meanings")
     language = models.CharField(max_length=8, default="en")
-    text = models.CharField(max_length=128)
+    text = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -259,11 +271,7 @@ class KanjiMeaning(models.Model):
                 name="uq_kanji_meaning_language_order",
             )
         ]
-        indexes = [
-            models.Index(
-                fields=["language", "text"], name="dict_kanji__lang_53ea8b_idx"
-            )
-        ]
+        indexes = [models.Index(fields=["language"], name="dict_kanji__lang_53ea8b_idx")]
         ordering = ["kanji", "order"]
 
     def __str__(self) -> str:
@@ -357,9 +365,7 @@ class KanaUsage(models.Model):
     """A language-neutral grammatical role carried by a kana."""
 
     id = models.BigAutoField(primary_key=True)
-    kana = models.OneToOneField(
-        Kana, on_delete=models.CASCADE, related_name="grammatical_usage"
-    )
+    kana = models.OneToOneField(Kana, on_delete=models.CASCADE, related_name="grammatical_usage")
 
     class Meta:
         db_table = "dict_kana_usages"
@@ -396,9 +402,7 @@ class KanaUsageExample(models.Model):
         db_table = "dict_kana_usage_examples"
         ordering = ["usage", "order"]
         constraints = [
-            models.UniqueConstraint(
-                fields=["usage", "order"], name="uq_kana_usage_example_order"
-            )
+            models.UniqueConstraint(fields=["usage", "order"], name="uq_kana_usage_example_order")
         ]
 
 
@@ -428,6 +432,9 @@ class ExampleSentence(models.Model):
     id = models.BigAutoField(primary_key=True)
     japanese = models.TextField()
 
+    source_key = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+
     class Meta:
         db_table = "dict_examples"
 
@@ -452,6 +459,31 @@ class ExampleTranslation(models.Model):
         ]
 
 
+class ExampleSenseLink(models.Model):
+    """An explicit source assertion that a sentence illustrates this sense.
+
+    JMdict sense positions are snapshot-specific, so retain the source position
+    as evidence as well as the canonical sense foreign key.
+    """
+
+    example = models.ForeignKey(
+        ExampleSentence, on_delete=models.CASCADE, related_name="sense_links"
+    )
+    sense = models.ForeignKey(Sense, on_delete=models.CASCADE, related_name="example_links")
+    source = models.CharField(max_length=32, default="jmdict")
+    source_sense_order = models.PositiveSmallIntegerField()
+    text = models.TextField(blank=True)
+    provenance = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = "dict_example_sense_links"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["example", "sense", "source"], name="uq_example_sense_source"
+            )
+        ]
+
+
 # ── Proper names (JMnedict) ────────────────────────────────────────────────────
 
 
@@ -464,6 +496,9 @@ class Name(models.Model):
     kanji = models.CharField(max_length=64, blank=True)  # surface form (may be empty)
     reading = models.CharField(max_length=64)  # kana reading
     name_types = models.JSONField(default=list, blank=True)  # ["place", "surname", …]
+
+    provenance = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "dict_names"
@@ -478,11 +513,9 @@ class Name(models.Model):
 
 class NameTranslation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    name = models.ForeignKey(
-        Name, on_delete=models.CASCADE, related_name="localized_names"
-    )
+    name = models.ForeignKey(Name, on_delete=models.CASCADE, related_name="localized_names")
     language = models.CharField(max_length=8, default="en")
-    text = models.CharField(max_length=255)
+    text = models.TextField()
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -494,6 +527,26 @@ class NameTranslation(models.Model):
                 name="uq_name_translation_language_order",
             )
         ]
-        indexes = [
-            models.Index(fields=["language", "text"], name="dict_name_t_languag_f34c86_idx")
+        indexes = [models.Index(fields=["language"], name="dict_name_t_languag_f34c86_idx")]
+
+
+class KanaWordExample(models.Model):
+    """A kana occurrence linked to an unambiguous canonical dictionary reading.
+
+    This lexical relationship is independent of grammatical particle examples.
+    Definitions always come from the linked dictionary entry, never scraped prose.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    kana = models.ForeignKey(Kana, on_delete=models.CASCADE, related_name="word_examples")
+    word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name="kana_examples")
+    reading = models.CharField(max_length=64)
+    order = models.PositiveSmallIntegerField(default=0)
+    provenance = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = "dict_kana_word_examples"
+        ordering = ["kana", "order", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["kana", "word", "reading"], name="uq_kana_word_reading")
         ]

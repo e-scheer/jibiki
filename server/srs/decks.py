@@ -68,9 +68,15 @@ def _universe(spec: DeckSpec):
         case "kanji_all":
             return Kanji.objects.all()
         case "words_common":
-            return Word.objects.filter(is_common=True)
+            return Word.objects.filter(is_common=True, canonical_word__isnull=True).exclude(
+                provenance__has_key="source_status",
+                provenance__source_status__in=["upstream_not_in_snapshot", "legacy_merged_entry"],
+            )
         case "words_all":
-            return Word.objects.all()
+            return Word.objects.filter(canonical_word__isnull=True).exclude(
+                provenance__has_key="source_status",
+                provenance__source_status__in=["upstream_not_in_snapshot", "legacy_merged_entry"],
+            )
     return None
 
 

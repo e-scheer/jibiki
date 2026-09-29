@@ -95,7 +95,12 @@ def test_re_reporting_the_same_entry_updates_in_place(api, user):
     )
     second = api.post(
         REPORT_URL,
-        {"item_type": "kana", "item_ref": "あ", "reason": "wrong", "message": "Actually mislabeled."},
+        {
+            "item_type": "kana",
+            "item_ref": "あ",
+            "reason": "wrong",
+            "message": "Actually mislabeled.",
+        },
         format="json",
     )
     assert first.status_code == second.status_code == 201

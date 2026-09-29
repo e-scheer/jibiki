@@ -7,8 +7,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ExampleSentence, Kana, Kanji, Name, Radical, Word
-from .search import kanji_in, search_words
+from .models import ExampleSentence, Kana, Kanji, Radical, Word
+from .search import kanji_in, search_names, search_words
 from .serializers import (
     ExampleSerializer,
     KanaSerializer,
@@ -41,19 +41,7 @@ class SearchView(APIView):
         words = search_words(q, lang=lang, limit=limit)
         # Proper names live in their own table so they never dilute word search;
         # surface a small ranked set alongside (trigram-indexed on Postgres).
-        names = (
-            list(
-                Name.objects.filter(
-                    Q(kanji__icontains=q)
-                    | Q(reading__icontains=q)
-                    | Q(localized_names__text__icontains=q, localized_names__language=lang)
-                )
-                .prefetch_related("localized_names")
-                .distinct()[:12]
-            )
-            if q
-            else []
-        )
+        names = search_names(q, lang=lang)
         context = {"request": request}
         return Response(
             {
@@ -78,6 +66,8 @@ class WordDetailView(APIView):
             return Response({"detail": _("Not found.")}, status=404)
         context = {"request": request}
         data = WordSerializer(word, context=context).data
+        if word.canonical_word_id is not None:
+            word = word.canonical_word
         # Break the headword into its constituent kanji so the app can render the
         # per-kanji breakdown inline (jpdb-style, DEEP_SEARCH feature 7).
         chars = kanji_in(word.headword)
@@ -86,10 +76,14 @@ class WordDetailView(APIView):
         data["kanji_breakdown"] = [
             KanjiSerializer(by_lit[c], context=context).data for c in chars if c in by_lit
         ]
-        # A few example sentences containing the headword (Tanaka corpus).
-        examples = ExampleSentence.objects.filter(
-            japanese__contains=word.headword
-        ).prefetch_related("translations")[:6]
+        # Only a source-authored sense link establishes that an example is
+        # relevant. Substring hits confuse homographs and word boundaries.
+        examples = (
+            ExampleSentence.objects.filter(sense_links__sense__word=word)
+            .distinct()
+            .order_by("pk")
+            .prefetch_related("translations")[:6]
+        )
         data["examples"] = ExampleSerializer(examples, many=True, context=context).data
         return Response(data)
 
@@ -116,7 +110,14 @@ class WordListView(generics.ListAPIView):
     serializer_class = WordSerializer
 
     def get_queryset(self):
-        qs = Word.objects.prefetch_related("forms", "senses__glosses", "senses__notes")
+        qs = (
+            Word.objects.filter(canonical_word__isnull=True)
+            .prefetch_related("forms", "senses__glosses", "senses__notes")
+            .exclude(
+                provenance__has_key="source_status",
+                provenance__source_status__in=["upstream_not_in_snapshot", "legacy_merged_entry"],
+            )
+        )
         p = self.request.query_params
         if p.get("common") in ("1", "true", "yes"):
             qs = qs.filter(is_common=True)
@@ -143,7 +144,10 @@ class KanjiListView(generics.ListAPIView):
         if contains:
             # kanji whose component list includes ALL requested radical literals
             for radical in contains:
-                qs = qs.filter(components__contains=radical)
+                qs = qs.filter(
+                    Q(components__contains=radical)
+                    | Q(metadata__kanjialive__radical__literal=radical)
+                )
         return qs
 
 
@@ -155,6 +159,8 @@ class KanaListView(generics.ListAPIView):
     def get_queryset(self):
         qs = Kana.objects.prefetch_related(
             "explanations",
+            "word_examples__word__forms",
+            "word_examples__word__senses__glosses",
             "grammatical_usage__translations",
             "grammatical_usage__examples__translations",
         )
@@ -172,6 +178,8 @@ class KanaDetailView(APIView):
             Kana.objects.filter(char=char)
             .prefetch_related(
                 "explanations",
+                "word_examples__word__forms",
+                "word_examples__word__senses__glosses",
                 "grammatical_usage__translations",
                 "grammatical_usage__examples__translations",
             )

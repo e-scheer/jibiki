@@ -13,15 +13,14 @@ derivatives of these assets).
 
 from __future__ import annotations
 
-import re
+import hashlib
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from dictionary.models import Kanji
-
-_PATH_RE = re.compile(r'<path[^>]*\sd="([^"]+)"')
-_VIEWBOX_RE = re.compile(r'viewBox="([^"]+)"')
 
 
 def strokes_for(svg_dir: Path, literal: str) -> tuple[list[str], str] | None:
@@ -29,12 +28,19 @@ def strokes_for(svg_dir: Path, literal: str) -> tuple[list[str], str] | None:
     svg = svg_dir / f"{ord(literal):05x}.svg"
     if not svg.exists():
         return None
-    text = svg.read_text(encoding="utf-8")
-    paths = _PATH_RE.findall(text)
+    root = ET.fromstring(svg.read_text(encoding="utf-8"))
+    paths = [
+        node.attrib["d"]
+        for node in root.iter()
+        if node.tag.rsplit("}", 1)[-1] == "path" and node.attrib.get("d")
+    ]
     if not paths:
         return None
-    vb = _VIEWBOX_RE.search(text)
-    return paths, (vb.group(1) if vb else "0 0 109 109")
+    viewbox = root.attrib.get("viewBox", "0 0 109 109")
+    values = [float(v) for v in viewbox.split()]
+    if len(values) != 4 or values[2] <= 0 or values[3] <= 0:
+        raise ValueError(f"Invalid SVG viewBox for {literal}")
+    return paths, viewbox
 
 
 class Command(BaseCommand):
@@ -42,7 +48,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("dir", help="Path to the KanjiVG kanji/ directory")
+        parser.add_argument(
+            "--source-url", default="", help="Release URL recorded as source evidence"
+        )
 
+    @transaction.atomic
     def handle(self, *args, **opts):
         svg_dir = Path(opts["dir"])
         if not svg_dir.is_dir():
@@ -55,6 +65,21 @@ class Command(BaseCommand):
                 missing += 1
                 continue
             kanji.stroke_paths, kanji.stroke_viewbox = result
-            kanji.save(update_fields=["stroke_paths", "stroke_viewbox"])
+            svg = svg_dir / f"{ord(kanji.literal):05x}.svg"
+            kanji.provenance = {
+                **kanji.provenance,
+                "kanjivg": {
+                    "source": "kanjivg",
+                    "file": svg.name,
+                    "sha256": hashlib.sha256(svg.read_bytes()).hexdigest(),
+                    "source_url": opts["source_url"],
+                    "transformation": "deterministic_svg_path_extraction",
+                    "authoring_method": "upstream_unspecified",
+                    "stroke_path_count": len(kanji.stroke_paths),
+                },
+            }
+            kanji.save(update_fields=["stroke_paths", "stroke_viewbox", "provenance"])
             updated += 1
-        self.stdout.write(self.style.SUCCESS(f"Done - strokes set on {updated} kanji ({missing} not in KanjiVG)."))
+        self.stdout.write(
+            self.style.SUCCESS(f"Done - strokes set on {updated} kanji ({missing} not in KanjiVG).")
+        )

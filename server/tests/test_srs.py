@@ -85,7 +85,9 @@ def test_new_cards_are_a_session_batch_not_a_daily_wall(seeded, api, user):
     user.profile.save()
     for ch in ["あ", "い", "う", "え"]:
         assert (
-            api.post("/api/v1/study/add", {"item_type": "kana", "ref": ch}, format="json").status_code
+            api.post(
+                "/api/v1/study/add", {"item_type": "kana", "ref": ch}, format="json"
+            ).status_code
             == 201
         )
 
@@ -115,7 +117,7 @@ def test_bulk_add_new_cards(seeded, api):
 
 
 def test_bulk_mark_known_seeds_mature_cards_out_of_the_new_queue(seeded, api):
-    """"I know all of these": known items become mature REVIEW cards, so they are
+    """ "I know all of these": known items become mature REVIEW cards, so they are
     counted as studied and kept OUT of the new-learning queue."""
     items = [{"item_type": "kana", "ref": ch} for ch in ["あ", "い", "う", "え", "お"]]
     resp = api.post("/api/v1/study/add/bulk", {"items": items, "known": True}, format="json")
@@ -137,7 +139,7 @@ def test_bulk_mark_known_seeds_mature_cards_out_of_the_new_queue(seeded, api):
 
 
 def test_mark_known_promotes_a_learning_card(seeded, user):
-    """"I know these" over an item already tapped into study (still LEARNING) must
+    """ "I know these" over an item already tapped into study (still LEARNING) must
     flip it to known (REVIEW), not leave it stuck as "seen"."""
     from srs.models import State
     from srs.services import add_card, mark_known
@@ -159,17 +161,25 @@ def test_set_status_toggles_none_learning_known(seeded, api):
     def state_of(ch):
         return api.get("/api/v1/study/states?item_type=kana").json().get(ch)
 
-    assert api.post(url, {"item_type": "kana", "ref": "あ", "status": "learning"}, format="json").json() == {"status": "learning"}
+    assert api.post(
+        url, {"item_type": "kana", "ref": "あ", "status": "learning"}, format="json"
+    ).json() == {"status": "learning"}
     assert state_of("あ") in (0, 1)
 
-    assert api.post(url, {"item_type": "kana", "ref": "あ", "status": "known"}, format="json").json() == {"status": "known"}
+    assert api.post(
+        url, {"item_type": "kana", "ref": "あ", "status": "known"}, format="json"
+    ).json() == {"status": "known"}
     assert state_of("あ") == 2  # promoted to review
 
     # Toggling Study back on demotes a known card to new.
-    assert api.post(url, {"item_type": "kana", "ref": "あ", "status": "learning"}, format="json").json() == {"status": "learning"}
+    assert api.post(
+        url, {"item_type": "kana", "ref": "あ", "status": "learning"}, format="json"
+    ).json() == {"status": "learning"}
     assert state_of("あ") == 0
 
-    assert api.post(url, {"item_type": "kana", "ref": "あ", "status": "none"}, format="json").json() == {"status": "none"}
+    assert api.post(
+        url, {"item_type": "kana", "ref": "あ", "status": "none"}, format="json"
+    ).json() == {"status": "none"}
     assert state_of("あ") is None  # removed from the deck
 
 

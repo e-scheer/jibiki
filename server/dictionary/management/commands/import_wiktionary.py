@@ -40,9 +40,7 @@ UA = "jibiki-dev/0.1 (kanji etymology importer; contact e.scheer@deuse.be)"
 
 # The Glyph-origin section header carries id="Glyph_origin"; capture everything up
 # to the next heading (h2/h3/h4 or the modern mw-heading wrapper div).
-_SECTION_RE = re.compile(
-    r'id="Glyph_origin".*?</h[34]>(.*?)(<h[234]|<div class="mw-heading)', re.S
-)
+_SECTION_RE = re.compile(r'id="Glyph_origin".*?</h[34]>(.*?)(<h[234]|<div class="mw-heading)', re.S)
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
 # CJK ranges - used to pull the single phonetic component character out of the
@@ -107,7 +105,9 @@ class Command(BaseCommand):
         parser.add_argument(
             "--force", action="store_true", help="Re-fetch even kanji that already have an origin."
         )
-        parser.add_argument("--limit", type=int, default=0, help="Cap the number processed (0=all).")
+        parser.add_argument(
+            "--limit", type=int, default=0, help="Cap the number processed (0=all)."
+        )
         parser.add_argument("--delay", type=float, default=1.0, help="Seconds between requests.")
 
     def handle(self, *args, **opts):
@@ -137,9 +137,7 @@ class Command(BaseCommand):
                 continue
             origin, formation, phonetic = parsed
             kanji = Kanji.objects.get(literal=literal)
-            Kanji.objects.filter(pk=kanji.pk).update(
-                formation=formation, phonetic=phonetic
-            )
+            Kanji.objects.filter(pk=kanji.pk).update(formation=formation, phonetic=phonetic)
             KanjiExplanation.objects.update_or_create(
                 kanji=kanji, language="en", defaults={"origin": origin}
             )
@@ -234,7 +232,7 @@ def _extract(page_html: str) -> tuple[str, str, str] | None:
     # Keep it to a few sentences: cut at the last sentence end before the cap.
     if len(prose) > _MAX_LEN:
         cut = prose.rfind(". ", 0, _MAX_LEN)
-        prose = (prose[: cut + 1] if cut > 150 else prose[:_MAX_LEN].rstrip() + "…")
+        prose = prose[: cut + 1] if cut > 150 else prose[:_MAX_LEN].rstrip() + "…"
 
     phonetic = ""
     if formation == "phono-semantic":

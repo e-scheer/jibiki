@@ -8,15 +8,19 @@ and assembling the daily queue under the user's new-card limit.
 from __future__ import annotations
 
 import hashlib
+import html
 import io
 import json
 import sqlite3
 import time
 import zipfile
 from datetime import timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 
 from dictionary.models import Kana, Kanji, Word
 
@@ -41,7 +45,10 @@ def scheduler_for(user) -> FSRS:
 def resolve_item(item_type: str, ref: str):
     """Resolve an (item_type, ref) pair to a dictionary row, or None."""
     if item_type == ItemType.WORD:
-        return Word.objects.filter(pk=ref).first() if str(ref).isdigit() else None
+        value = str(ref)
+        if not value.isascii() or not value.isdigit() or not 0 < int(value) < 2**63:
+            return None
+        return Word.objects.filter(pk=int(value)).first()
     if item_type == ItemType.KANJI:
         return Kanji.objects.filter(literal=ref).first()
     if item_type == ItemType.KANA:
@@ -82,9 +89,15 @@ def add_card(
                 setattr(card, field, value)
                 changed = True
         if changed:
-            card.save(update_fields=[
-                "source_sentence", "source_url", "source_title", "source_media", "updated_at"
-            ])
+            card.save(
+                update_fields=[
+                    "source_sentence",
+                    "source_url",
+                    "source_title",
+                    "source_media",
+                    "updated_at",
+                ]
+            )
     return card, created
 
 
@@ -136,6 +149,7 @@ def bulk_add(user, items: list[dict], known: bool = False, now=None) -> dict:
     return {"requested": len(items), "resolved": resolved, "created": created, "known": known}
 
 
+@transaction.atomic
 def set_status(user, item_type: str, ref: str, target: str, now=None) -> str:
     """Set the user's status for one item to exactly `target` - "none" (not in the
     deck), "learning" (queued to study) or "known" (marked mature). Creates,
@@ -146,9 +160,10 @@ def set_status(user, item_type: str, ref: str, target: str, now=None) -> str:
         return "none"
     field = {ItemType.WORD: "word", ItemType.KANJI: "kanji", ItemType.KANA: "kana"}[item_type]
     if target == "none":
-        deleted, _ = Card.objects.filter(user=user, item_type=item_type, **{field: item}).delete()
-        if deleted:
-            write_tombstone(user, item_type, str(ref), now=now)
+        Card.objects.filter(user=user, item_type=item_type, **{field: item}).delete()
+        # Even a missing cloud card may exist on an offline device. Record
+        # arrival time so clients past the operation's old timestamp see it.
+        write_tombstone(user, item_type, str(ref))
         return "none"
     if target == "known":
         mark_known(user, item_type, ref, now=now)
@@ -199,6 +214,19 @@ def review_card(
 ) -> ReviewLog:
     """Apply a rating to a card: advance its FSRS state, persist it, and append a
     ReviewLog. Returns the created log."""
+    # Callers can hold stale model instances. Lock and reload before advancing
+    # the scheduler so concurrent ratings preserve both the log and counters.
+    type(card.user).objects.select_for_update().get(pk=card.user_id)
+    locked = Card.objects.select_for_update().get(pk=card.pk, user_id=card.user_id)
+    card.__dict__.update(locked.__dict__)
+    if client_review_id:
+        existing = ReviewLog.objects.filter(
+            user_id=card.user_id, client_review_id=client_review_id
+        ).first()
+        if existing:
+            if existing.card_id != card.pk:
+                raise ValidationError(_("This review identifier belongs to another card."))
+            return existing
     now = now or timezone.now()
     scheduler = scheduler_for(card.user)
 
@@ -233,11 +261,21 @@ def review_card(
     )
 
 
+def user_timezone(user):
+    name = getattr(getattr(user, "profile", None), "timezone", "UTC")
+    try:
+        return ZoneInfo(name)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")
+
+
 def new_introduced_today(user, now=None) -> int:
     """How many brand-new cards the user has already started today (state_before
     NEW), so the daily new-card limit accounts for progress within the day."""
     now = now or timezone.now()
-    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    start = timezone.localtime(now, user_timezone(user)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     return ReviewLog.objects.filter(user=user, state_before=NEW, reviewed_at__gte=start).count()
 
 
@@ -399,11 +437,11 @@ def export_apkg(user, lang: str = "en") -> bytes:
           sfld integer not null, csum integer not null, flags integer not null, data text not null);
         CREATE TABLE cards (id integer primary key, nid integer not null, did integer not null,
           ord integer not null, mod integer not null, usn integer not null, type integer not null,
-          queue integer not null, due integer not null, iv integer not null, factor integer not null,
+          queue integer not null, due integer not null, ivl integer not null, factor integer not null,
           reps integer not null, lapses integer not null, left integer not null, odue integer not null,
           odid integer not null, flags integer not null, data text not null);
         CREATE TABLE revlog (id integer primary key, cid integer not null, usn integer not null,
-          ease integer not null, iv integer not null, lastIvl integer not null, factor integer not null,
+          ease integer not null, ivl integer not null, lastIvl integer not null, factor integer not null,
           time integer not null, type integer not null);
         CREATE TABLE graves (usn integer not null, oid integer not null, type integer not null);
         """
@@ -417,8 +455,35 @@ def export_apkg(user, lang: str = "en") -> bytes:
             "usn": -1,
             "sortf": 0,
             "did": deck_id,
-            "tmpls": [{"name": "Jibiki", "ord": 0, "qfmt": "{{Front}}", "afmt": "{{FrontSide}}<hr id=answer>{{Back}}", "bqfmt": "", "bafmt": "", "did": None}],
-            "flds": [{"name": "Front", "ord": 0, "sticky": False, "rtl": False, "font": "Arial", "size": 20}, {"name": "Back", "ord": 1, "sticky": False, "rtl": False, "font": "Arial", "size": 20}],
+            "tmpls": [
+                {
+                    "name": "Jibiki",
+                    "ord": 0,
+                    "qfmt": "{{Front}}",
+                    "afmt": "{{FrontSide}}<hr id=answer>{{Back}}",
+                    "bqfmt": "",
+                    "bafmt": "",
+                    "did": None,
+                }
+            ],
+            "flds": [
+                {
+                    "name": "Front",
+                    "ord": 0,
+                    "sticky": False,
+                    "rtl": False,
+                    "font": "Arial",
+                    "size": 20,
+                },
+                {
+                    "name": "Back",
+                    "ord": 1,
+                    "sticky": False,
+                    "rtl": False,
+                    "font": "Arial",
+                    "size": 20,
+                },
+            ],
             "css": ".card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }",
             "latexPre": "\\documentclass[12pt]{article}\n\\begin{document}\n",
             "latexPost": "\\end{document}",
@@ -426,29 +491,115 @@ def export_apkg(user, lang: str = "en") -> bytes:
             "req": [[0, "all", [0]]],
         }
     }
-    deck = {str(deck_id): {"id": deck_id, "name": "Jibiki", "desc": "", "dyn": 0, "extendNew": 0, "extendRev": 0, "conf": 1, "mid": model_id}}
+    deck = {
+        str(deck_id): {
+            "id": deck_id,
+            "name": "Jibiki",
+            "desc": "",
+            "dyn": 0,
+            "extendNew": 0,
+            "extendRev": 0,
+            "conf": 1,
+            "mid": model_id,
+        }
+    }
     db.execute(
         "INSERT INTO col VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (1, now // 86400, now, now, 11, 0, -1, now * 1000, json.dumps({"nextPos": 1, "sortType": "noteFld", "newSpread": 0, "collapseTime": 1200, "curDeck": deck_id, "activeDecks": [deck_id], "schedVer": 2, "dayLearnFirst": 0, "sched2021": False}), json.dumps(model), json.dumps(deck), json.dumps({"1": {"id": 1, "name": "Default", "new": 20, "rev": 200, "maxTaken": 60, "perDay": 200, "delDay": 5, "ints": [1, 4], "initialFactor": 2500, "fuzz": 0.05, "lapse": {"delays": [10], "mult": 0, "minInt": 1, "leechFails": 8}}}), "{}"),
+        (
+            1,
+            now // 86400,
+            now,
+            now,
+            11,
+            0,
+            -1,
+            now * 1000,
+            json.dumps(
+                {
+                    "nextPos": 1,
+                    "sortType": "noteFld",
+                    "newSpread": 0,
+                    "collapseTime": 1200,
+                    "curDeck": deck_id,
+                    "activeDecks": [deck_id],
+                    "schedVer": 2,
+                    "dayLearnFirst": 0,
+                    "sched2021": False,
+                }
+            ),
+            json.dumps(model),
+            json.dumps(deck),
+            json.dumps(
+                {
+                    "1": {
+                        "id": 1,
+                        "name": "Default",
+                        "new": 20,
+                        "rev": 200,
+                        "maxTaken": 60,
+                        "perDay": 200,
+                        "delDay": 5,
+                        "ints": [1, 4],
+                        "initialFactor": 2500,
+                        "fuzz": 0.05,
+                        "lapse": {"delays": [10], "mult": 0, "minInt": 1, "leechFails": 8},
+                    }
+                }
+            ),
+            "{}",
+        ),
     )
     for index, card in enumerate(cards, start=1):
-        front = _front(card)
-        back = _back(card, lang)
+        front = html.escape(_front(card)).replace("\x1f", " ")
+        back = html.escape(_back(card, lang)).replace("\x1f", " ")
         context = []
         if card.source_sentence:
-            context.append(f"<div class=source-sentence>{card.source_sentence}</div>")
+            context.append(
+                f"<div class=source-sentence>{html.escape(card.source_sentence).replace(chr(31), ' ')}</div>"
+            )
         if card.source_title:
-            context.append(f"<div class=source-title>{card.source_title}</div>")
+            context.append(
+                f"<div class=source-title>{html.escape(card.source_title).replace(chr(31), ' ')}</div>"
+            )
         if card.source_url:
-            context.append(f"<div class=source-url>{card.source_url}</div>")
+            context.append(
+                f"<div class=source-url>{html.escape(card.source_url).replace(chr(31), ' ')}</div>"
+            )
         back = "<br>".join([back, *context]) if context else back
         note_id = now * 1000 + index
         card_id = note_id + 500_000_000
-        guid = hashlib.sha1(f"jibiki:{user.pk}:{card.item_type}:{card.item_ref}".encode()).hexdigest()[:10]
+        guid = hashlib.sha1(
+            f"jibiki:{user.pk}:{card.item_type}:{card.item_ref}".encode()
+        ).hexdigest()[:10]
         fields = f"{front}\x1f{back}"
         checksum = int(hashlib.sha1(front.encode()).hexdigest()[:8], 16)
-        db.execute("INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)", (note_id, guid, model_id, now, -1, "", fields, front, checksum, 0, ""))
-        db.execute("INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (card_id, note_id, deck_id, 0, now, -1, 0, 0 if card.state == State.NEW else 2, index, 0, 0, card.reps, card.lapses, 0, 0, 0, 0, ""))
+        db.execute(
+            "INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (note_id, guid, model_id, now, -1, "", fields, front, checksum, 0, ""),
+        )
+        db.execute(
+            "INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                card_id,
+                note_id,
+                deck_id,
+                0,
+                now,
+                -1,
+                0,
+                0 if card.state == State.NEW else 2,
+                index,
+                0,
+                0,
+                card.reps,
+                card.lapses,
+                0,
+                0,
+                0,
+                0,
+                "",
+            ),
+        )
     db.commit()
     collection = db.serialize()
     db.close()
@@ -490,7 +641,7 @@ def _back(card, lang: str) -> str:
 
 def _clean(s: str) -> str:
     # Tabs/newlines would break the TSV row; collapse them.
-    return (s or "").replace("\t", " ").replace("\n", " ").strip()
+    return (s or "").replace("\t", " ").replace("\n", " ").replace("\r", " ").strip()
 
 
 def streak_days(user, now=None) -> int:
@@ -504,10 +655,11 @@ def streak_days(user, now=None) -> int:
         .values_list("reviewed_at", flat=True)
         .order_by("-reviewed_at")
     )
-    review_days = {timezone.localtime(dt).date() for dt in dates}
+    tz = user_timezone(user)
+    review_days = {timezone.localtime(dt, tz).date() for dt in dates}
     if not review_days:
         return 0
-    today = timezone.localtime(now).date()
+    today = timezone.localtime(now, tz).date()
     # Allow the streak to be "alive" if the user reviewed today OR yesterday.
     cursor = today if today in review_days else today - timedelta(days=1)
     if cursor not in review_days:

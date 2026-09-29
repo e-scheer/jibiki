@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from django.db.models import Prefetch
 from django.utils.translation import gettext as _
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -30,6 +30,7 @@ from .serializers import (
 )
 from .services import (
     ImageRejected,
+    accessible_for,
     active_for_many,
     apply_pack,
     cast_deck_vote,
@@ -233,7 +234,11 @@ class MnemonicSaveView(APIView):
         # An explicit {"value": bool} is replay-safe (offline sync); without it,
         # keep the historical toggle behavior.
         if "value" in request.data:
-            saved = set_save(request.user, mnemonic, bool(request.data["value"]))
+            saved = set_save(
+                request.user,
+                mnemonic,
+                serializers.BooleanField().run_validation(request.data["value"]),
+            )
         else:
             saved = toggle_save(request.user, mnemonic)
         return Response({"id": mnemonic.id, "saved": saved})
@@ -290,12 +295,8 @@ class MnemonicChooseView(APIView):
     throttle_scope = "write"
 
     def post(self, request):
-        mid = request.data.get("mnemonic_id")
-        mnemonic = (
-            Mnemonic.objects.filter(pk=mid)
-            .exclude(status__in=[MnemonicStatus.HIDDEN, MnemonicStatus.REMOVED])
-            .first()
-        )
+        mid = serializers.IntegerField(min_value=1).run_validation(request.data.get("mnemonic_id"))
+        mnemonic = accessible_for(request.user).filter(pk=mid).first()
         if mnemonic is None:
             return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
         set_choice(request.user, mnemonic)

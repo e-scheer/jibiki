@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-23",
+  "python_parsers_and_scripts": {
+    "passed": 210,
+    "command": "server/.venv/Scripts/python.exe -m pytest scripts/site_parsers/tests scripts/tests -q"
+  },
+  "python_source_review_and_kana_audit": {
+    "passed": 7,
+    "cwd": "server",
+    "command": ".venv/Scripts/python.exe -m pytest tests/test_source_review_validation.py tests/test_kana_examples_audit.py -q"
+  },
+  "flutter": {
+    "passed": 31,
+    "cwd": "app",
+    "command": "flutter test test/local/local_dictionary_locales_test.dart test/packs/pack_manager_test.dart test/reading_mnemonic_section_test.dart test/content_quality_notice_test.dart test/models_test.dart --reporter compact"
+  },
+  "postgresql": "connection timeout; no live import or database tests performed"
+}

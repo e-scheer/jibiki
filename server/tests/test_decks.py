@@ -7,8 +7,17 @@ def test_deck_catalogue(seeded, api):
     resp = api.get("/api/v1/study/decks")
     assert resp.status_code == 200
     ids = {d["id"] for d in resp.json()}
-    assert {"hiragana", "katakana", "kana", "kanji_n5", "kanji_all",
-            "words_common", "words_all", "favorites", "struggling"} <= ids
+    assert {
+        "hiragana",
+        "katakana",
+        "kana",
+        "kanji_n5",
+        "kanji_all",
+        "words_common",
+        "words_all",
+        "favorites",
+        "struggling",
+    } <= ids
 
 
 def test_enroll_a_whole_deck_at_once(seeded, api):

@@ -1,0 +1,43 @@
+{
+  "example_only": true,
+  "items": [
+    {
+      "id": "example:ka:fr:carapace",
+      "target": {
+        "kind": "kana",
+        "key": "か",
+        "sense_id": null,
+        "reading": null,
+        "goals": [
+          "shape",
+          "reading"
+        ]
+      },
+      "language": "fr",
+      "story": null,
+      "anchor": {
+        "word": "carapace",
+        "segment": "ca",
+        "target_sound": "ka",
+        "explanation": "Piste proposée par l’utilisateur : le début de carapace rappelle ka. Pertinence pédagogique à valider."
+      },
+      "visual": {
+        "idea": "Une tortue et sa carapace, avec une relation à la forme de か qui reste à concevoir.",
+        "glyph_mapping": [],
+        "image": null
+      },
+      "origin": {
+        "kind": "user_idea",
+        "source_refs": [
+          "Conversation à l’origine du chantier de consolidation"
+        ],
+        "author": "user"
+      },
+      "review": {
+        "status": "pending",
+        "comment": "Exemple de piste, pas une sélection approuvée. Phrase, correspondance graphique et validation encore nécessaires avant génération.",
+        "reviewer": null
+      }
+    }
+  ]
+}

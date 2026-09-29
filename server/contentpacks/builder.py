@@ -28,6 +28,7 @@ from django.db.models import Q
 from contentpacks import schema as pack_schema
 from contentpacks.manifest import MANIFEST_SCHEMA, validate_manifest
 from dictionary.models import (
+    ExampleSenseLink,
     ExampleSentence,
     ExampleTranslation,
     Gloss,
@@ -37,6 +38,7 @@ from dictionary.models import (
     KanaUsageExample,
     KanaUsageExampleTranslation,
     KanaUsageTranslation,
+    KanaWordExample,
     Kanji,
     KanjiExplanation,
     KanjiMeaning,
@@ -61,9 +63,14 @@ DEFAULT_PACKS = [
 MIN_APP_VERSION = "0.2.0"
 
 # The bundled base pack ships the useful core: common words + anything JLPT.
-BASE_WORDS = Q(is_common=True) | Q(jlpt__isnull=False)
-BASE_WORDS_REL = Q(word__is_common=True) | Q(word__jlpt__isnull=False)
-BASE_WORDS_GLOSS = Q(sense__word__is_common=True) | Q(sense__word__jlpt__isnull=False)
+_BASE_WORDS_DIRECT = Q(is_common=True) | Q(jlpt__isnull=False)
+BASE_WORDS = _BASE_WORDS_DIRECT | Q(
+    pk__in=Word.objects.filter(_BASE_WORDS_DIRECT, canonical_word__isnull=False).values(
+        "canonical_word_id"
+    )
+)
+BASE_WORDS_REL = Q(word__in=Word.objects.filter(BASE_WORDS))
+BASE_WORDS_GLOSS = Q(sense__word__in=Word.objects.filter(BASE_WORDS))
 BASE_LANGS = ["en", "fr"]
 
 RANK_MAX = 99_999_999  # COALESCE(freq_rank, RANK_MAX): unranked words sort last
@@ -72,6 +79,7 @@ KANJI_WORDS_CAP = 12
 ATTRIBUTION = {
     "words": "JMdict © EDRDG, used under the EDRDG Licence.",
     "kanji": "KANJIDIC2 © EDRDG, used under the EDRDG Licence.",
+    "radicals": "Kanji alive radical data (CC BY 4.0), https://kanjialive.com/; https://creativecommons.org/licenses/by/4.0/.",
     "components": "KRADFILE © EDRDG (CC BY-SA 3.0).",
     "strokes": "KanjiVG © Ulrich Apel (CC BY-SA 3.0).",
     "pitch": "Kanjium pitch-accent data (CC BY-SA 4.0).",
@@ -83,26 +91,25 @@ ATTRIBUTION = {
 LANG_TITLES = {"en": ("English", "anglais"), "fr": ("French", "français")}
 
 INSERT_WORD = (
-    "INSERT INTO words(id, seq, is_common, jlpt, freq_rank, headword, primary_reading)"
-    " VALUES (?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO words(id, seq, is_common, jlpt, freq_rank, headword, primary_reading, provenance, canonical_word_id)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 INSERT_FORM = (
-    "INSERT INTO word_forms(id, word_id, text, kind, is_common, ord, pitch)"
-    " VALUES (?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO word_forms(id, word_id, text, kind, is_common, ord, pitch, metadata)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 )
 INSERT_SENSE = (
-    "INSERT INTO senses(id, word_id, ord, pos, misc, field) VALUES (?, ?, ?, ?, ?, ?)"
+    "INSERT INTO senses(id, word_id, ord, pos, misc, field, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)"
 )
 INSERT_KANJI = (
     "INSERT INTO kanji(literal, grade, stroke_count, jlpt, freq_rank, radical_number,"
     " on_readings, kun_readings, nanori, components, formation, phonetic,"
-    " stroke_paths, stroke_viewbox) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    " stroke_paths, stroke_viewbox, metadata, provenance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 INSERT_KANJI_COMPONENT = "INSERT INTO kanji_components(kanji, component) VALUES (?, ?)"
 INSERT_KANJI_WORD = "INSERT INTO kanji_words(kanji, word_id, rank) VALUES (?, ?, ?)"
 INSERT_KANA = (
-    'INSERT INTO kana(char, romaji, script, kind, "row", ord, origin)'
-    " VALUES (?, ?, ?, ?, ?, ?, ?)"
+    'INSERT INTO kana(char, romaji, script, kind, "row", ord, origin) VALUES (?, ?, ?, ?, ?, ?, ?)'
 )
 INSERT_KANA_USAGE = "INSERT INTO kana_usages(id, kana) VALUES (?, ?)"
 INSERT_KANA_EXAMPLE = (
@@ -110,18 +117,14 @@ INSERT_KANA_EXAMPLE = (
     "(id, usage_id, ord, before_text, particle, after_text, pronunciation)"
     " VALUES (?, ?, ?, ?, ?, ?, ?)"
 )
-INSERT_RADICAL = "INSERT INTO radicals(literal, strokes, reading) VALUES (?, ?, ?)"
+INSERT_RADICAL = "INSERT INTO radicals(literal, strokes, reading, provenance) VALUES (?, ?, ?, ?)"
 INSERT_GLOSS = (
-    "INSERT INTO glosses(id, sense_id, word_id, language, ord, text, word_rank, word_common)"
-    " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO glosses(id, sense_id, word_id, language, ord, text, word_rank, word_common, metadata)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
-INSERT_KANJI_MEANING = (
-    "INSERT INTO kanji_meanings(kanji, language, ord, text) VALUES (?, ?, ?, ?)"
-)
+INSERT_KANJI_MEANING = "INSERT INTO kanji_meanings(kanji, language, ord, text) VALUES (?, ?, ?, ?)"
 INSERT_SENSE_NOTE = "INSERT INTO sense_notes(sense_id, language, text) VALUES (?, ?, ?)"
-INSERT_RADICAL_MEANING = (
-    "INSERT INTO radical_meanings(radical, language, text) VALUES (?, ?, ?)"
-)
+INSERT_RADICAL_MEANING = "INSERT INTO radical_meanings(radical, language, text) VALUES (?, ?, ?)"
 INSERT_KANJI_EXPLANATION = (
     "INSERT INTO kanji_explanations(kanji, language, origin) VALUES (?, ?, ?)"
 )
@@ -133,28 +136,35 @@ INSERT_KANA_USAGE_TRANSLATION = (
     " VALUES (?, ?, ?, ?)"
 )
 INSERT_KANA_EXAMPLE_TRANSLATION = (
-    "INSERT INTO kana_usage_example_translations(example_id, language, text)"
-    " VALUES (?, ?, ?)"
+    "INSERT INTO kana_usage_example_translations(example_id, language, text) VALUES (?, ?, ?)"
 )
-INSERT_NAME = (
-    "INSERT INTO names(id, kanji, reading, name_types) VALUES (?, ?, ?, ?)"
-)
+INSERT_NAME = "INSERT INTO names(id, kanji, reading, name_types, metadata, provenance) VALUES (?, ?, ?, ?, ?, ?)"
 INSERT_NAME_TRANSLATION = (
     "INSERT INTO name_translations(name_id, language, ord, text) VALUES (?, ?, ?, ?)"
 )
-INSERT_EXAMPLE = "INSERT INTO examples(id, japanese) VALUES (?, ?)"
+INSERT_EXAMPLE = "INSERT INTO examples(id, japanese, source_key, provenance) VALUES (?, ?, ?, ?)"
+INSERT_EXAMPLE_LINK = (
+    "INSERT INTO example_sense_links(example_id, sense_id, word_id, source, source_sense_order, text, provenance)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?)"
+)
 INSERT_EXAMPLE_TRANSLATION = (
     "INSERT INTO example_translations(example_id, language, text) VALUES (?, ?, ?)"
 )
 INSERT_MNEMONIC = (
     "INSERT INTO mnemonics"
-    "(id, kind, character, language, reading, story, score, image, image_w, image_h)"
-    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "(id, kind, character, language, reading, story, score, image, image_w, image_h, provenance)"
+    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
 
 def _json(value) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+def _metadata(value) -> str:
+    # The lossless XML evidence stays in Postgres. Shipping it here would copy
+    # every source-language gloss into the supposedly language-neutral core.
+    return _json({key: item for key, item in (value or {}).items() if key != "raw"})
 
 
 def _batched(conn: sqlite3.Connection, sql: str, rows, size: int = 2000) -> int:
@@ -197,6 +207,8 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
                 w.freq_rank,
                 w.headword,
                 w.primary_reading,
+                _json(w.provenance),
+                w.canonical_word_id,
             )
 
     counts["words"] = _batched(conn, INSERT_WORD, word_rows())
@@ -208,9 +220,18 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
         conn,
         INSERT_FORM,
         (
-            (pk, wid, text, pack_schema.FORM_KIND[kind], int(common), ord_, pitch)
-            for pk, wid, text, kind, common, ord_, pitch in form_q.values_list(
-                "id", "word_id", "text", "kind", "is_common", "order", "pitch"
+            (
+                pk,
+                wid,
+                text,
+                pack_schema.FORM_KIND[kind],
+                int(common),
+                ord_,
+                pitch,
+                _metadata(metadata),
+            )
+            for pk, wid, text, kind, common, ord_, pitch, metadata in form_q.values_list(
+                "id", "word_id", "text", "kind", "is_common", "order", "pitch", "metadata"
             ).iterator(chunk_size=2000)
         ),
     )
@@ -222,9 +243,17 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
         conn,
         INSERT_SENSE,
         (
-            (pk, wid, ord_, _json(pos or []), _json(misc or []), _json(field or []))
-            for pk, wid, ord_, pos, misc, field in sense_q.values_list(
-                "id", "word_id", "order", "pos", "misc", "field"
+            (
+                pk,
+                wid,
+                ord_,
+                _json(pos or []),
+                _json(misc or []),
+                _json(field or []),
+                _metadata(metadata),
+            )
+            for pk, wid, ord_, pos, misc, field, metadata in sense_q.values_list(
+                "id", "word_id", "order", "pos", "misc", "field", "metadata"
             ).iterator(chunk_size=2000)
         ),
     )
@@ -244,6 +273,7 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
                 _json(k.on_readings or []), _json(k.kun_readings or []), _json(k.nanori or []),
                 _json(k.components or []), k.formation, k.phonetic,
                 _json(k.stroke_paths or []), k.stroke_viewbox or "0 0 109 109",
+                _metadata(k.metadata), _json(k.provenance),
             )  # fmt: skip
 
     counts["kanji"] = _batched(conn, INSERT_KANJI, kanji_rows())
@@ -251,7 +281,14 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
 
     # kanji_words: one pass over kanji-kind forms - every character of every form
     # text is a candidate link; rank by is_common DESC, freq_rank ASC, cap at 12.
-    kform_q = WordForm.objects.filter(kind=WordForm.Kind.KANJI)
+    kform_q = WordForm.objects.filter(
+        kind=WordForm.Kind.KANJI, word__canonical_word__isnull=True
+    ).filter(
+        Q(word__provenance__source_status__isnull=True)
+        | ~Q(
+            word__provenance__source_status__in=["upstream_not_in_snapshot", "legacy_merged_entry"]
+        )
+    )
     if base:
         kform_q = kform_q.filter(BASE_WORDS_REL)
     candidates: dict[str, set[int]] = {}
@@ -273,12 +310,23 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
             yield (k.char, k.romaji, k.script, k.kind, k.row, k.order, k.origin)
 
     counts["kana"] = _batched(conn, INSERT_KANA, kana_rows())
+    kana_words = KanaWordExample.objects.order_by("kana_id", "order", "pk")
+    if base:
+        kana_words = kana_words.filter(BASE_WORDS_REL)
+    counts["kana_word_examples"] = _batched(
+        conn,
+        "INSERT INTO kana_word_examples(kana, word_id, reading, ord, provenance) VALUES (?, ?, ?, ?, ?)",
+        (
+            (kana, word, reading, order, _json(provenance))
+            for kana, word, reading, order, provenance in kana_words.values_list(
+                "kana__char", "word_id", "reading", "order", "provenance"
+            ).iterator(chunk_size=2000)
+        ),
+    )
     counts["kana_usages"] = _batched(
         conn,
         INSERT_KANA_USAGE,
-        KanaUsage.objects.order_by("pk")
-        .values_list("id", "kana__char")
-        .iterator(chunk_size=2000),
+        KanaUsage.objects.order_by("pk").values_list("id", "kana__char").iterator(chunk_size=2000),
     )
     counts["kana_usage_examples"] = _batched(
         conn,
@@ -298,9 +346,12 @@ def _fill_core(conn: sqlite3.Connection, *, base: bool) -> dict[str, int]:
     counts["radicals"] = _batched(
         conn,
         INSERT_RADICAL,
-        Radical.objects.order_by("pk")
-        .values_list("literal", "strokes", "reading")
-        .iterator(chunk_size=2000),
+        (
+            (literal, strokes, reading, _json(provenance))
+            for literal, strokes, reading, provenance in Radical.objects.order_by("pk")
+            .values_list("literal", "strokes", "reading", "provenance")
+            .iterator(chunk_size=2000)
+        ),
     )
     return counts
 
@@ -317,13 +368,13 @@ def _fill_localized(
     def gloss_rows():
         fields = (
             "id", "sense_id", "sense__word_id", "language", "order", "text",
-            "sense__word__freq_rank", "sense__word__is_common",
+            "sense__word__freq_rank", "sense__word__is_common", "metadata",
         )  # fmt: skip
-        for pk, sid, wid, language, ord_, text, rank, common in gloss_q.values_list(*fields).iterator(
-            chunk_size=2000
-        ):
+        for pk, sid, wid, language, ord_, text, rank, common, metadata in gloss_q.values_list(
+            *fields
+        ).iterator(chunk_size=2000):
             word_rank = rank if rank is not None else RANK_MAX
-            yield (pk, sid, wid, language, ord_, text, word_rank, int(common))
+            yield (pk, sid, wid, language, ord_, text, word_rank, int(common), _metadata(metadata))
 
     counts["glosses"] = _batched(conn, INSERT_GLOSS, gloss_rows())
 
@@ -360,9 +411,7 @@ def _fill_localized(
     counts["kanji_explanations"] = _batched(
         conn,
         INSERT_KANJI_EXPLANATION,
-        explanations.values_list("kanji__literal", "language", "origin").iterator(
-            chunk_size=2000
-        ),
+        explanations.values_list("kanji__literal", "language", "origin").iterator(chunk_size=2000),
     )
     counts["kana_explanations"] = _batched(
         conn,
@@ -397,9 +446,9 @@ def _fill_localized(
 
 def _fill_names(conn: sqlite3.Connection) -> dict[str, int]:
     rows = (
-        (pk, kanji or "", reading, _json(name_types or []))
-        for pk, kanji, reading, name_types in Name.objects.order_by("pk")
-        .values_list("id", "kanji", "reading", "name_types")
+        (pk, kanji or "", reading, _json(name_types or []), _metadata(metadata), _json(provenance))
+        for pk, kanji, reading, name_types, metadata, provenance in Name.objects.order_by("pk")
+        .values_list("id", "kanji", "reading", "name_types", "metadata", "provenance")
         .iterator(chunk_size=2000)
     )
     counts = {"names": _batched(conn, INSERT_NAME, rows)}
@@ -413,22 +462,47 @@ def _fill_names(conn: sqlite3.Connection) -> dict[str, int]:
     return counts
 
 
-def _fill_examples(conn: sqlite3.Connection, language: str) -> dict[str, int]:
+def _fill_examples(
+    conn: sqlite3.Connection, languages: str | list[str], *, base: bool = False
+) -> dict[str, int]:
+    languages = [languages] if isinstance(languages, str) else languages
+    examples = ExampleSentence.objects.filter(translations__language__in=languages)
+    if base:
+        examples = examples.filter(sense_links__sense__word__in=Word.objects.filter(BASE_WORDS))
+    example_ids = examples.values("pk").distinct()
     rows = (
-        (pk, japanese)
-        for pk, japanese in ExampleSentence.objects.filter(
-            translations__language=language
-        )
-        .distinct()
+        (pk, japanese, source_key, _json(provenance))
+        for pk, japanese, source_key, provenance in examples.distinct()
         .order_by("pk")
-        .values_list("id", "japanese")
+        .values_list("id", "japanese", "source_key", "provenance")
         .iterator(chunk_size=2000)
     )
     counts = {"examples": _batched(conn, INSERT_EXAMPLE, rows)}
+    links = ExampleSenseLink.objects.filter(example_id__in=example_ids)
+    if base:
+        links = links.filter(BASE_WORDS_GLOSS)
+    counts["example_sense_links"] = _batched(
+        conn,
+        INSERT_EXAMPLE_LINK,
+        (
+            (eid, sid, wid, source, order, text, _json(provenance))
+            for eid, sid, wid, source, order, text, provenance in links.order_by("pk")
+            .values_list(
+                "example_id",
+                "sense_id",
+                "sense__word_id",
+                "source",
+                "source_sense_order",
+                "text",
+                "provenance",
+            )
+            .iterator(chunk_size=2000)
+        ),
+    )
     counts["example_translations"] = _batched(
         conn,
         INSERT_EXAMPLE_TRANSLATION,
-        ExampleTranslation.objects.filter(language=language)
+        ExampleTranslation.objects.filter(language__in=languages, example_id__in=example_ids)
         .order_by("pk")
         .values_list("example_id", "language", "text")
         .iterator(chunk_size=2000),
@@ -454,7 +528,7 @@ def _fill_mnemonics(conn: sqlite3.Connection, lang: str) -> dict[str, int]:
                     blob = None
             yield (
                 m.pk, m.kind, m.character, m.language, m.reading, m.story, m.score,
-                blob, m.image_width, m.image_height,
+                blob, m.image_width, m.image_height, _json(m.provenance),
             )  # fmt: skip
 
     return {"mnemonics": _batched(conn, INSERT_MNEMONIC, rows())}
@@ -488,15 +562,18 @@ def _plan(name: str) -> PackPlan:
             requires=(),
             title={"en": "Japanese dictionary core", "fr": "Cœur du dictionnaire japonais"},
             attribution={
-                k: ATTRIBUTION[k] for k in ("words", "kanji", "components", "strokes", "pitch")
+                k: ATTRIBUTION[k]
+                for k in ("words", "kanji", "components", "strokes", "pitch", "radicals")
             },
         )
     if name.startswith("locale-"):
         language = name.removeprefix("locale-")
         en, fr = LANG_TITLES.get(language, (language, language))
         return PackPlan(
-            id=f"dict-locale-{language}", content_type="dictionary_locale",
-            languages=(language,), tables=pack_schema.LOCALIZED_TABLES,
+            id=f"dict-locale-{language}",
+            content_type="dictionary_locale",
+            languages=(language,),
+            tables=pack_schema.LOCALIZED_TABLES,
             indexes=pack_schema.LOCALIZED_INDEXES,
             fill=lambda conn: _fill_localized(conn, [language], base=False),
             requires=("dict-core",),
@@ -505,9 +582,13 @@ def _plan(name: str) -> PackPlan:
         )
     if name == "names":
         return PackPlan(
-            id="names", content_type="names", languages=(),
-            tables=pack_schema.NAMES_TABLES, indexes=pack_schema.NAMES_INDEXES,
-            fill=_fill_names, requires=(),
+            id="names",
+            content_type="names",
+            languages=(),
+            tables=pack_schema.NAMES_TABLES,
+            indexes=pack_schema.NAMES_INDEXES,
+            fill=_fill_names,
+            requires=(),
             title={"en": "Proper names (JMnedict)", "fr": "Noms propres (JMnedict)"},
             attribution={"names": ATTRIBUTION["names"]},
         )
@@ -515,10 +596,13 @@ def _plan(name: str) -> PackPlan:
         language = name.removeprefix("examples-")
         en, fr = LANG_TITLES.get(language, (language, language))
         return PackPlan(
-            id=f"examples-{language}", content_type="examples",
-            languages=(language,), tables=pack_schema.EXAMPLES_TABLES,
+            id=f"examples-{language}",
+            content_type="examples",
+            languages=(language,),
+            tables=pack_schema.EXAMPLES_TABLES,
             indexes=pack_schema.EXAMPLES_INDEXES,
-            fill=lambda conn: _fill_examples(conn, language), requires=(),
+            fill=lambda conn: _fill_examples(conn, language),
+            requires=(),
             title={
                 "en": f"Example sentences - {en}",
                 "fr": f"Phrases d'exemple - {fr}",
@@ -529,9 +613,13 @@ def _plan(name: str) -> PackPlan:
         lang = name.removeprefix("mnemonics-")
         en, fr = LANG_TITLES.get(lang, (lang, lang))
         return PackPlan(
-            id=name, content_type="mnemonics", languages=(lang,),
-            tables=pack_schema.MNEMONICS_TABLES, indexes=pack_schema.MNEMONICS_INDEXES,
-            fill=lambda conn: _fill_mnemonics(conn, lang), requires=(),
+            id=name,
+            content_type="mnemonics",
+            languages=(lang,),
+            tables=pack_schema.MNEMONICS_TABLES,
+            indexes=pack_schema.MNEMONICS_INDEXES,
+            fill=lambda conn: _fill_mnemonics(conn, lang),
+            requires=(),
             title={"en": f"Starter mnemonics - {en}", "fr": f"Mnémoniques de base - {fr}"},
             attribution={"mnemonics": ATTRIBUTION["mnemonics"]},
         )
@@ -679,12 +767,13 @@ class Command(BaseCommand):
 
     def _build_base(self, out: Path, version: str, rev: int) -> None:
         attribution = {
-            k: ATTRIBUTION[k] for k in ("words", "kanji", "components", "strokes", "pitch")
+            k: ATTRIBUTION[k]
+            for k in ("words", "kanji", "components", "strokes", "pitch", "examples", "radicals")
         }
         db_path = out / "base.db"
         conn = _create_db(
             db_path,
-            [*pack_schema.CORE_TABLES, *pack_schema.LOCALIZED_TABLES],
+            [*pack_schema.CORE_TABLES, *pack_schema.LOCALIZED_TABLES, *pack_schema.EXAMPLES_TABLES],
             "dict-base",
             "dictionary_base",
             version,
@@ -694,7 +783,15 @@ class Command(BaseCommand):
         )  # fmt: skip
         counts = _fill_core(conn, base=True)
         counts |= _fill_localized(conn, BASE_LANGS, base=True)
-        _finish_db(conn, [*pack_schema.CORE_INDEXES, *pack_schema.LOCALIZED_INDEXES])
+        counts |= _fill_examples(conn, BASE_LANGS, base=True)
+        _finish_db(
+            conn,
+            [
+                *pack_schema.CORE_INDEXES,
+                *pack_schema.LOCALIZED_INDEXES,
+                *pack_schema.EXAMPLES_INDEXES,
+            ],
+        )
         pkg = _package(db_path)
         entry = {
             "id": "dict-base",

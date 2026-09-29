@@ -139,7 +139,7 @@ def test_malformed_rewards_ops_are_rejected_not_retried(api):
 
 
 def test_replace_cloud_resets_rewards_before_replay(api, user):
-    """"Keep local" wipes the cloud rewards; the ops carried by the same
+    """ "Keep local" wipes the cloud rewards; the ops carried by the same
     request rebuild them from the device's state."""
     from srs.models import BoosterGrant, CollectionCard
 

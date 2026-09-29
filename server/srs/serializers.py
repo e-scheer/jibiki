@@ -86,8 +86,11 @@ class BulkAddSerializer(serializers.Serializer):
 
 
 class ReviewSerializer(serializers.Serializer):
+    client_review_id = serializers.UUIDField(required=False)
     rating = serializers.IntegerField(min_value=1, max_value=4)
-    duration_ms = serializers.IntegerField(min_value=0, default=0, required=False)
+    duration_ms = serializers.IntegerField(
+        min_value=0, max_value=2147483647, default=0, required=False
+    )
 
 
 class SyncCardSerializer(serializers.ModelSerializer):
@@ -126,7 +129,9 @@ class SyncReviewSerializer(serializers.Serializer):
     item_type = serializers.ChoiceField(choices=ItemType.choices)
     ref = serializers.CharField(max_length=64)
     rating = serializers.IntegerField(min_value=1, max_value=4)
-    duration_ms = serializers.IntegerField(min_value=0, default=0, required=False)
+    duration_ms = serializers.IntegerField(
+        min_value=0, max_value=2147483647, default=0, required=False
+    )
     # Informational - the server recomputes state; kept as the log placeholder
     # for out-of-order inserts until the fold rewrites it.
     state_before = serializers.IntegerField(min_value=0, max_value=3, required=False)
@@ -145,6 +150,7 @@ class SyncSerializer(serializers.Serializer):
     until drained) plus its delta watermark."""
 
     last_synced_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    replacement_id = serializers.UUIDField(required=False)
     mode = serializers.ChoiceField(
         choices=("sync", "preview", "replace_cloud"), default="sync", required=False
     )

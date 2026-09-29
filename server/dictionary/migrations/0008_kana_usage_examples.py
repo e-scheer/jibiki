@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dictionary', '0007_kana_usage_kana_usage_label'),
+        ("dictionary", "0007_kana_usage_kana_usage_label"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kana',
-            name='usage_examples',
+            model_name="kana",
+            name="usage_examples",
             field=models.JSONField(blank=True, default=list),
         ),
     ]

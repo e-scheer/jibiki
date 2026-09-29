@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.db import transaction
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
 from rest_framework import serializers, status
@@ -31,6 +32,7 @@ from .services import (
     review_card,
     set_status,
     streak_days,
+    user_timezone,
 )
 
 
@@ -152,6 +154,7 @@ class ReviewView(APIView):
             card,
             serializer.validated_data["rating"],
             serializer.validated_data.get("duration_ms", 0),
+            client_review_id=serializer.validated_data.get("client_review_id"),
         )
         return Response(
             {"card": CardSerializer(card).data, "review": ReviewLogSerializer(log).data}
@@ -176,9 +179,11 @@ class CardListView(APIView):
 class CardDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def delete(self, request, pk: int):
         card = (
-            Card.objects.filter(pk=pk, user=request.user)
+            Card.objects.select_for_update(of=("self",))
+            .filter(pk=pk, user=request.user)
             .select_related("kanji", "kana")
             .first()
         )
@@ -211,25 +216,27 @@ class StatsView(APIView):
         from django.utils import timezone
 
         now = timezone.now()
-        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        tz = user_timezone(user)
+        start = timezone.localtime(now, tz).replace(hour=0, minute=0, second=0, microsecond=0)
         logs = user.review_logs.all()
         reviews_today = logs.filter(reviewed_at__gte=start).count()
         total_reviews = logs.count()
         correct_reviews = logs.filter(rating__gte=2).count()
         mature_logs = logs.filter(state_before=State.REVIEW)
-        rating_counts = {
-            str(rating): logs.filter(rating=rating).count() for rating in range(1, 5)
-        }
+        rating_counts = {str(rating): logs.filter(rating=rating).count() for rating in range(1, 5)}
         since = start - timedelta(days=13)
+        from django.db.models.functions import TruncDate
+
         history_rows = (
             logs.filter(reviewed_at__gte=since)
-            .values("reviewed_at__date")
+            .annotate(local_date=TruncDate("reviewed_at", tzinfo=tz))
+            .values("local_date")
             .annotate(reviews=Count("id"), correct=Count("id", filter=Q(rating__gte=2)))
-            .order_by("reviewed_at__date")
+            .order_by("local_date")
         )
         history = [
             {
-                "date": row["reviewed_at__date"].isoformat(),
+                "date": row["local_date"].isoformat(),
                 "reviews": row["reviews"],
                 "correct": row["correct"],
             }
@@ -317,7 +324,9 @@ class FavoriteView(APIView):
         card = Card.objects.filter(pk=pk, user=request.user).first()
         if card is None:
             return Response({"detail": _("Not found.")}, status=status.HTTP_404_NOT_FOUND)
-        card.favorite = bool(request.data.get("value", not card.favorite))
+        card.favorite = serializers.BooleanField().run_validation(
+            request.data.get("value", not card.favorite)
+        )
         card.save(update_fields=["favorite", "updated_at"])
         return Response({"id": card.id, "favorite": card.favorite})
 

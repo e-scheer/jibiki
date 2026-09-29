@@ -38,11 +38,13 @@ from .models import (
     BoosterStatus,
     Card,
     CardTombstone,
+    CloudReplacement,
     CollectionCard,
     ItemType,
     ReviewLog,
     State,
     SyncedOp,
+    SyncFieldClock,
 )
 
 # Client clocks can drift; what matters is per-card monotonic order, not wall
@@ -73,25 +75,49 @@ class OpRejected(Exception):
 def apply_sync(user, data: dict) -> dict:
     """Apply one sync request. Returns the response payload with ``cards`` as
     model instances (the view serializes them)."""
+    # Serialize a user's outboxes, including first card creation and reward
+    # opening, before checking their idempotency ledgers.
+    type(user).objects.select_for_update().get(pk=user.pk)
     now = timezone.now()
     cursor = data.get("last_synced_at")
     mode = data.get("mode", "sync")
+    replacement_id = data.get("replacement_id") if mode == "replace_cloud" else None
+    previous_replacement = None
 
     if mode == "preview":
         return _empty_response(user, now, cloud=_cloud_status(user))
     if mode == "replace_cloud":
         if cursor is not None:
             raise drf_serializers.ValidationError(
-                {
-                    "last_synced_at": gettext(
-                        "Cloud replacement requires an initial sync."
-                    )
-                }
+                {"last_synced_at": gettext("Cloud replacement requires an initial sync.")}
             )
-        _clear_study_cloud(user)
+        if replacement_id:
+            previous_replacement = CloudReplacement.objects.filter(
+                user=user, replacement_id=replacement_id
+            ).first()
+        if previous_replacement is None:
+            _clear_study_cloud(user)
 
-    applied_ops, rejected_ops = _apply_ops(user, data.get("ops") or [], now)
-    applied_reviews, rejected_reviews = _apply_reviews(user, data.get("reviews") or [], now)
+    if previous_replacement is not None:
+        result = previous_replacement.result
+        applied_ops, rejected_ops = result["applied_op_ids"], result["rejected_ops"]
+        applied_reviews, rejected_reviews = result["applied_review_ids"], result["rejected"]
+    else:
+        applied_ops, rejected_ops = _apply_ops(user, data.get("ops") or [], now)
+        applied_reviews, rejected_reviews = _apply_reviews(
+            user, data.get("reviews") or [], now, allow_deleted=mode == "replace_cloud"
+        )
+        if replacement_id:
+            CloudReplacement.objects.create(
+                user=user,
+                replacement_id=replacement_id,
+                result={
+                    "applied_op_ids": applied_ops,
+                    "rejected_ops": rejected_ops,
+                    "applied_review_ids": applied_reviews,
+                    "rejected": rejected_reviews,
+                },
+            )
 
     delta_cards, deleted = _delta(user, cursor)
     from accounts.models import UserProfile
@@ -141,10 +167,22 @@ def _empty_response(user, now, *, cloud: dict) -> dict:
 
 
 def _clear_study_cloud(user) -> None:
+    removed = [
+        CardTombstone(user=user, item_type=card.item_type, item_ref=card.item_ref)
+        for card in Card.objects.filter(user=user).select_related("kanji", "kana")
+    ]
     ReviewLog.objects.filter(user=user).delete()
     Card.objects.filter(user=user).delete()
-    CardTombstone.objects.filter(user=user).delete()
+    # Other devices still need deletions after a replacement. A re-added live
+    # card takes precedence when the delta is assembled.
+    CardTombstone.objects.bulk_create(
+        removed,
+        update_conflicts=True,
+        update_fields=["deleted_at"],
+        unique_fields=["user", "item_type", "item_ref"],
+    )
     SyncedOp.objects.filter(user=user).delete()
+    SyncFieldClock.objects.filter(user=user).delete()
     # "Keep local" replaces the cloud rewards too: the client regenerates
     # booster_grant/booster_open ops from its local state in the same request.
     BoosterGrant.objects.filter(user=user).delete()
@@ -197,7 +235,7 @@ def _apply_ops(user, ops: list[dict], now) -> tuple[list[str], list[dict]]:
         performed_at = min(op["performed_at"], now + MAX_CLOCK_SKEW)
         try:
             with transaction.atomic():
-                _apply_op(user, op["kind"], op.get("payload") or {}, performed_at)
+                _apply_ordered_op(user, op, performed_at)
                 SyncedOp.objects.create(user=user, client_op_id=op_id)
             applied.append(str(op_id))
         except OpRejected as exc:
@@ -209,18 +247,78 @@ def _apply_ops(user, ops: list[dict], now) -> tuple[list[str], list[dict]]:
     return applied, rejected
 
 
+def _apply_ordered_op(user, op, performed_at):
+    """Track independent preference fields across batches, not just within one upload."""
+    kind, payload = op["kind"], op.get("payload") or {}
+    if not isinstance(payload, dict):
+        raise OpRejected("invalid")
+    key = None
+    if kind in ("set_status", "favorite"):
+        key = f"{kind}:{payload.get('item_type')}:{payload.get('ref')}"
+    elif kind in ("mnemonic_vote", "mnemonic_save"):
+        key = f"{kind}:{payload.get('mnemonic_id')}"
+    elif kind == "mnemonic_choose":
+        from mnemonics.services import accessible_for
+
+        mnemonic = accessible_for(user).filter(pk=payload["mnemonic_id"]).first()
+        if mnemonic is None:
+            raise OpRejected("unknown_mnemonic")
+        key = f"choice:{mnemonic.kind}:{mnemonic.character}:{mnemonic.language}:{mnemonic.reading}"
+    elif kind == "profile_patch":
+        validator = ProfileSerializer(data=payload, partial=True)
+        validator.is_valid(raise_exception=True)
+        for field, value in validator.validated_data.items():
+            _apply_with_clock(user, f"profile:{field}", op, performed_at, {field: value})
+        return
+    if key is None:
+        _apply_op(user, kind, payload, performed_at)
+    else:
+        _apply_with_clock(user, key, op, performed_at, payload)
+
+
+def _apply_with_clock(user, key, op, performed_at, payload):
+    previous = SyncFieldClock.objects.filter(user=user, key=key).first()
+    current_order = (performed_at, str(op["client_op_id"]))
+    if previous and current_order <= (previous.performed_at, str(previous.client_op_id)):
+        return
+    _apply_op(user, op["kind"], payload, performed_at)
+    SyncFieldClock.objects.update_or_create(
+        user=user,
+        key=key,
+        defaults={"performed_at": performed_at, "client_op_id": op["client_op_id"]},
+    )
+
+
 def _apply_op(user, kind: str, payload: dict, performed_at) -> None:
+    from .serializers import AddCardSerializer, BulkAddSerializer, SetStatusSerializer
+
+    if not isinstance(payload, dict):
+        raise OpRejected("invalid")
     if kind == "set_status":
+        validator = SetStatusSerializer(data=payload)
+        validator.is_valid(raise_exception=True)
+        payload = validator.validated_data
+        if services.resolve_item(payload["item_type"], payload["ref"]) is None:
+            raise OpRejected("unknown_item")
         services.set_status(
             user, payload["item_type"], payload["ref"], payload["status"], now=performed_at
         )
     elif kind == "favorite":
+        validator = AddCardSerializer(data=payload)
+        validator.is_valid(raise_exception=True)
+        value = drf_serializers.BooleanField().run_validation(payload["value"])
         card, _ = services.add_card(user, payload["item_type"], payload["ref"])
         if card is None:
             raise OpRejected("unknown_item")
-        card.favorite = bool(payload["value"])
+        card.favorite = value
         card.save(update_fields=["favorite", "updated_at"])
     elif kind == "bulk_add":
+        validator = BulkAddSerializer(data=payload)
+        validator.is_valid(raise_exception=True)
+        context_validator = AddCardSerializer(
+            data={**payload, "item_type": "kana", "ref": "context"}
+        )
+        context_validator.is_valid(raise_exception=True)
         items = payload["items"]
         if not isinstance(items, list):
             raise OpRejected("invalid")
@@ -238,8 +336,12 @@ def _apply_op(user, kind: str, payload: dict, performed_at) -> None:
                 )
                 if card is None:
                     raise OpRejected("unknown_item")
+                if validator.validated_data["known"]:
+                    services.mark_known(user, item["item_type"], item["ref"], now=performed_at)
         else:
-            services.bulk_add(user, items, known=bool(payload.get("known")), now=performed_at)
+            services.bulk_add(
+                user, items, known=validator.validated_data["known"], now=performed_at
+            )
     elif kind == "deck_enroll":
         from .decks import deck_by_id, enroll
 
@@ -268,16 +370,23 @@ def _apply_op(user, kind: str, payload: dict, performed_at) -> None:
 
 
 def _apply_booster_grant(user, payload: dict, performed_at) -> None:
+    grant_id = drf_serializers.CharField(max_length=64).run_validation(payload["grant_id"])
+    milestone = drf_serializers.IntegerField(min_value=0, max_value=2147483647).run_validation(
+        payload["milestone"]
+    )
+    source = drf_serializers.CharField(max_length=32).run_validation(
+        payload.get("source", "streak_milestone")
+    )
     status_value = str(payload.get("status", BoosterStatus.UNOPENED))
     if status_value not in (BoosterStatus.UNOPENED, BoosterStatus.SKIPPED_FULL):
         # "opened" only ever arrives through booster_open.
         raise OpRejected("invalid")
     BoosterGrant.objects.get_or_create(
         user=user,
-        grant_id=str(payload["grant_id"])[:64],
+        grant_id=grant_id,
         defaults={
-            "source": str(payload.get("source", "streak_milestone"))[:32],
-            "milestone": int(payload["milestone"]),
+            "source": source,
+            "milestone": milestone,
             "status": status_value,
             "granted_at": performed_at,
         },
@@ -285,14 +394,23 @@ def _apply_booster_grant(user, payload: dict, performed_at) -> None:
 
 
 def _apply_booster_open(user, payload: dict, performed_at) -> None:
+    grant_id = drf_serializers.CharField(max_length=64).run_validation(payload["grant_id"])
+    milestone = drf_serializers.IntegerField(min_value=0, max_value=2147483647).run_validation(
+        payload.get("milestone", 0)
+    )
+    source = drf_serializers.CharField(max_length=32).run_validation(
+        payload.get("source", "streak_milestone")
+    )
     raw_cards = payload["cards"]
     if not isinstance(raw_cards, list) or not raw_cards or len(raw_cards) > 16:
         raise OpRejected("invalid")
     cards = [
         {
-            "card_id": str(card["card_id"])[:64],
-            "is_new": bool(card.get("is_new")),
-            "count_after": int(card.get("count_after", 1)),
+            "card_id": drf_serializers.CharField(max_length=64).run_validation(card["card_id"]),
+            "is_new": drf_serializers.BooleanField().run_validation(card.get("is_new", False)),
+            "count_after": drf_serializers.IntegerField(
+                min_value=1, max_value=2147483647
+            ).run_validation(card.get("count_after", 1)),
         }
         for card in raw_cards
     ]
@@ -300,10 +418,10 @@ def _apply_booster_open(user, payload: dict, performed_at) -> None:
     # grant op from another device arrives).
     grant, _ = BoosterGrant.objects.get_or_create(
         user=user,
-        grant_id=str(payload["grant_id"])[:64],
+        grant_id=grant_id,
         defaults={
-            "source": str(payload.get("source", "streak_milestone"))[:32],
-            "milestone": int(payload.get("milestone", 0)),
+            "source": source,
+            "milestone": milestone,
             "status": BoosterStatus.UNOPENED,
             "granted_at": performed_at,
         },
@@ -328,21 +446,33 @@ def _apply_booster_open(user, payload: dict, performed_at) -> None:
 
 def _apply_mnemonic_op(user, kind: str, payload: dict) -> None:
     from mnemonics.models import DeckStatus, Mnemonic, MnemonicDeck, MnemonicStatus
-    from mnemonics.services import apply_pack, cast_vote, enroll_deck, set_choice, set_save
+    from mnemonics.serializers import VoteSerializer
+    from mnemonics.services import (
+        accessible_for,
+        apply_pack,
+        cast_vote,
+        enroll_deck,
+        set_choice,
+        set_save,
+    )
 
     if kind in ("mnemonic_vote", "mnemonic_save", "mnemonic_choose"):
         qs = Mnemonic.objects.filter(pk=payload["mnemonic_id"])
         if kind == "mnemonic_choose":
-            qs = qs.exclude(status__in=[MnemonicStatus.HIDDEN, MnemonicStatus.REMOVED])
+            qs = accessible_for(user).filter(pk=payload["mnemonic_id"])
         else:
             qs = qs.filter(status=MnemonicStatus.VISIBLE)
         mnemonic = qs.first()
         if mnemonic is None:
             raise OpRejected("unknown_mnemonic")
         if kind == "mnemonic_vote":
-            cast_vote(user, mnemonic, int(payload["value"]))
+            validator = VoteSerializer(data=payload)
+            validator.is_valid(raise_exception=True)
+            cast_vote(user, mnemonic, validator.validated_data["value"])
         elif kind == "mnemonic_save":
-            set_save(user, mnemonic, bool(payload["value"]))
+            set_save(
+                user, mnemonic, drf_serializers.BooleanField().run_validation(payload["value"])
+            )
         else:
             set_choice(user, mnemonic)
     elif kind in ("mnemonic_deck_enroll", "mnemonic_deck_apply"):
@@ -360,7 +490,9 @@ def _apply_mnemonic_op(user, kind: str, payload: dict) -> None:
 # ── reviews ──────────────────────────────────────────────────────────────────
 
 
-def _apply_reviews(user, reviews: list[dict], now) -> tuple[list[str], list[dict]]:
+def _apply_reviews(
+    user, reviews: list[dict], now, *, allow_deleted=False
+) -> tuple[list[str], list[dict]]:
     applied: list[str] = []
     rejected: list[dict] = []
     for r in sorted(reviews, key=lambda x: (x["reviewed_at"], str(x["client_review_id"]))):
@@ -373,9 +505,12 @@ def _apply_reviews(user, reviews: list[dict], now) -> tuple[list[str], list[dict
 
         card = _card_for(user, item_type, ref)
         if card is None:
-            if CardTombstone.objects.filter(
-                user=user, item_type=item_type, item_ref=str(ref)
-            ).exists():
+            if (
+                not allow_deleted
+                and CardTombstone.objects.filter(
+                    user=user, item_type=item_type, item_ref=str(ref)
+                ).exists()
+            ):
                 # Delete wins: the card was removed on another device and not
                 # re-added; the client drops the review and the local card.
                 rejected.append({"id": str(rid), "reason": "deleted"})
@@ -387,7 +522,8 @@ def _apply_reviews(user, reviews: list[dict], now) -> tuple[list[str], list[dict
                 continue
 
         with transaction.atomic():
-            if card.last_review is None or reviewed_at >= card.last_review:
+            card = Card.objects.select_for_update().get(pk=card.pk)
+            if card.last_review is None or reviewed_at > card.last_review:
                 services.review_card(
                     card,
                     r["rating"],
@@ -405,7 +541,10 @@ def _card_for(user, item_type: str, ref: str) -> Card | None:
     """Resolve a card by its natural key - mirrors Card.item_ref."""
     qs = Card.objects.filter(user=user, item_type=item_type)
     if item_type == ItemType.WORD:
-        return qs.filter(word_id=ref).first() if str(ref).isdigit() else None
+        value = str(ref)
+        if not value.isascii() or not value.isdigit() or not 0 < int(value) < 2**63:
+            return None
+        return qs.filter(word_id=int(value)).first()
     if item_type == ItemType.KANJI:
         return qs.filter(kanji__literal=ref).select_related("kanji").first()
     return qs.filter(kana__char=ref).select_related("kana").first()

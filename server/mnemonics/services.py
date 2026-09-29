@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 
 from .imaging import ImageRejected, process_upload
@@ -28,6 +28,14 @@ from .models import (
 )
 
 _MODERATED = (MnemonicStatus.HIDDEN, MnemonicStatus.REMOVED)
+
+
+def accessible_for(user):
+    """Public content and the author's pending work, excluding takedowns."""
+    allowed = Q(status=MnemonicStatus.VISIBLE)
+    if user and user.is_authenticated:
+        allowed |= Q(status=MnemonicStatus.PENDING, author=user)
+    return Mnemonic.objects.filter(allowed)
 
 
 def user_trust(user) -> int:
@@ -78,6 +86,7 @@ def create_mnemonic(
 def cast_vote(user, mnemonic: Mnemonic, value: int) -> int:
     """Set (value ∈ {+1,-1}) or clear (value == 0) the user's vote; return the new
     score. Recomputed from rows so it can never drift from the votes table."""
+    Mnemonic.objects.select_for_update().get(pk=mnemonic.pk)
     if value == 0:
         MnemonicVote.objects.filter(mnemonic=mnemonic, user=user).delete()
     else:
@@ -94,6 +103,8 @@ def cast_vote(user, mnemonic: Mnemonic, value: int) -> int:
 def file_report(user, mnemonic: Mnemonic, reason: str, detail: str = "") -> bool:
     """Record a report (idempotent per user). Auto-hide the mnemonic once enough
     distinct users have flagged it. Returns True if this call hid it."""
+    locked = Mnemonic.objects.select_for_update().get(pk=mnemonic.pk)
+    mnemonic.__dict__.update(locked.__dict__)
     MnemonicReport.objects.get_or_create(
         mnemonic=mnemonic,
         reporter=user,
@@ -161,7 +172,10 @@ def active_for_many(user, characters, kind, language) -> dict:
             user=user, kind=kind, language=language, reading="", character__in=chars
         ).select_related("mnemonic__author__profile")
         for c in choices:
-            if c.mnemonic and c.mnemonic.status not in _MODERATED:
+            if c.mnemonic and (
+                c.mnemonic.status == MnemonicStatus.VISIBLE
+                or (c.mnemonic.status == MnemonicStatus.PENDING and c.mnemonic.author_id == user.pk)
+            ):
                 result[c.character] = c.mnemonic
     missing = [c for c in chars if c not in result]
     if missing:
@@ -213,7 +227,7 @@ def apply_pack(user, deck: MnemonicDeck) -> int:
     n = 0
     for item in deck.items.select_related("mnemonic").all():
         m = item.mnemonic
-        if m is None:
+        if m is None or not accessible_for(user).filter(pk=m.pk).exists():
             continue
         UserMnemonicChoice.objects.update_or_create(
             user=user,
@@ -246,8 +260,10 @@ def reset_choices(user, kind: str | None = None) -> int:
     return count
 
 
+@transaction.atomic
 def toggle_save(user, mnemonic: Mnemonic) -> bool:
     """Bookmark / un-bookmark a mnemonic (Instagram 🔖). Returns the new state."""
+    Mnemonic.objects.select_for_update().get(pk=mnemonic.pk)
     obj, created = MnemonicSave.objects.get_or_create(mnemonic=mnemonic, user=user)
     if not created:
         obj.delete()
@@ -267,7 +283,7 @@ def set_save(user, mnemonic: Mnemonic, value: bool) -> bool:
 
 def saved_for(user):
     """The user's saved mnemonics, most-recently-saved first."""
-    return Mnemonic.objects.filter(saves__user=user).order_by("-saves__created_at")
+    return accessible_for(user).filter(saves__user=user).order_by("-saves__created_at")
 
 
 # ── Community decks - the drawing → pack → propose flow ──────────────────────
@@ -310,9 +326,7 @@ def set_deck_items(deck: MnemonicDeck, user, mnemonic_ids) -> int:
         if target in targets:
             continue
         targets.add(target)
-        items.append(
-            MnemonicDeckItem(deck=deck, mnemonic=mnemonic, position=len(items))
-        )
+        items.append(MnemonicDeckItem(deck=deck, mnemonic=mnemonic, position=len(items)))
     if items:
         MnemonicDeckItem.objects.bulk_create(items)
     return len(items)
@@ -356,6 +370,7 @@ def publish_deck(deck: MnemonicDeck, user) -> str:
 @transaction.atomic
 def cast_deck_vote(user, deck: MnemonicDeck, value: int) -> int:
     """Like (value > 0) or un-like (value <= 0) a deck; return the new score."""
+    MnemonicDeck.objects.select_for_update().get(pk=deck.pk)
     if value <= 0:
         MnemonicDeckVote.objects.filter(deck=deck, user=user).delete()
     else:

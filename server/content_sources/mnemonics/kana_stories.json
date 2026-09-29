@@ -1,7 +1,9 @@
 {
   "schema": "jibiki-kana-mnemonics/1",
   "strategy": "shape_plus_native_sound_anchor",
-  "status": "Reviewed language-native text mnemonics for all 46 basic hiragana and katakana.",
+  "status": "Legacy language-scoped catalogue. Per-story linguistic review evidence has not been recorded.",
+  "review_status": "unverified",
+  "generation_method": "unknown",
   "method": "Original jibiki wording informed by the local English and French reference samples and the idea-level source review in docs/research/mnemonic-sources.md.",
   "legal": "No third-party story text or image is bundled. Source associations were compared, selected and rewritten.",
   "languages": ["en", "fr"],

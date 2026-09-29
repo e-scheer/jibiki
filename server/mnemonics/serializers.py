@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from accounts.languages import DEFAULT_LANGUAGE, validate_language_code
 
-from .models import Mnemonic, MnemonicDeck, ReportReason
+from .models import Mnemonic, MnemonicDeck, MnemonicStatus, ReportReason
 
 
 def _display_name(author, *, is_seed: bool) -> str:
@@ -21,6 +21,7 @@ class MnemonicSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     my_vote = serializers.SerializerMethodField()
     saved = serializers.SerializerMethodField()
+    provenance = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Mnemonic
@@ -30,6 +31,7 @@ class MnemonicSerializer(serializers.ModelSerializer):
             "kind",
             "language",
             "reading",
+            "provenance",
             "story",
             "image_src",
             "image_width",
@@ -87,10 +89,27 @@ class MnemonicDeckSerializer(serializers.ModelSerializer):
 
     def get_item_count(self, d: MnemonicDeck) -> int:
         # `items` is prefetched by the view, so len() avoids a per-deck query.
-        return len(d.items.all())
+        return len(self.available_items(d))
+
+    def available_items(self, d: MnemonicDeck) -> list:
+        user = getattr(self.context.get("request"), "user", None)
+        user_id = user.pk if user and user.is_authenticated else None
+        return [
+            item.mnemonic
+            for item in d.items.all()
+            if item.mnemonic_id
+            and (
+                item.mnemonic.status == MnemonicStatus.VISIBLE
+                or (
+                    user_id is not None
+                    and item.mnemonic.author_id == user_id
+                    and item.mnemonic.status == MnemonicStatus.PENDING
+                )
+            )
+        ]
 
     def get_cover_src(self, d: MnemonicDeck) -> str:
-        m = d.cover_item()
+        m = next((item for item in self.available_items(d) if item.image), None)
         return m.image_src if m else ""
 
     def get_my_vote(self, d: MnemonicDeck) -> int:
@@ -107,7 +126,7 @@ class MnemonicDeckDetailSerializer(MnemonicDeckSerializer):
         fields = [*MnemonicDeckSerializer.Meta.fields, "items"]
 
     def get_items(self, d: MnemonicDeck) -> list:
-        mnemonics = [it.mnemonic for it in d.items.all() if it.mnemonic_id]
+        mnemonics = self.available_items(d)
         return MnemonicSerializer(mnemonics, many=True, context=self.context).data
 
 

@@ -160,7 +160,7 @@ class ReviewLog(models.Model):
     # Idempotency key for offline replay: the client stamps every review with a
     # UUID so redelivered sync batches are acked without duplicating the log.
     # Null for reviews born through the online endpoint.
-    client_review_id = models.UUIDField(null=True, blank=True, unique=True)
+    client_review_id = models.UUIDField(null=True, blank=True)
 
     # Snapshot of the state the scheduler saw / produced (for offline retraining).
     state_before = models.PositiveSmallIntegerField()
@@ -174,6 +174,11 @@ class ReviewLog(models.Model):
 
     class Meta:
         db_table = "srs_review_logs"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client_review_id"], name="uq_review_user_client"
+            ),
+        ]
         ordering = ["-reviewed_at"]
         indexes = [
             models.Index(fields=["user", "reviewed_at"]),
@@ -268,6 +273,36 @@ class CollectionCard(models.Model):
 
     def __str__(self) -> str:
         return f"collection({self.user_id}, {self.card_id} x{self.count})"
+
+
+class CloudReplacement(models.Model):
+    """Durable result of a cloud replacement, retained across later replacements."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    replacement_id = models.UUIDField()
+    result = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "replacement_id"], name="uq_cloud_replacement_user"
+            ),
+        ]
+
+
+class SyncFieldClock(models.Model):
+    """Last accepted offline mutation per account and independently editable field."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    key = models.CharField(max_length=200)
+    performed_at = models.DateTimeField()
+    client_op_id = models.UUIDField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "key"], name="uq_sync_clock_user_key"),
+        ]
 
 
 class SyncedOp(models.Model):

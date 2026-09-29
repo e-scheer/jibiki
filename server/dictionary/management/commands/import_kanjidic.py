@@ -8,12 +8,12 @@ iterparse suffices.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from dictionary.importing import entries, language, source_provenance, xml_metadata
 from dictionary.models import Kanji, KanjiMeaning
 
 
@@ -22,20 +22,23 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("path", help="Path to kanjidic2.xml")
-        parser.add_argument("--langs", default="en", help="Comma list of meaning langs to keep")
+        parser.add_argument(
+            "--langs", default="en,fr", help="Comma list of meaning langs to keep, or all"
+        )
 
     def handle(self, *args, **opts):
         path = Path(opts["path"])
-        if not path.exists():
+        if not path.is_file():
             raise CommandError(f"file not found: {path}")
-        langs = {code.strip() for code in opts["langs"].split(",") if code.strip()}
+        langs = {language(code.strip()) for code in opts["langs"].split(",") if code.strip()}
+        if not langs:
+            raise CommandError("Choose at least one language.")
 
+        self.provenance = source_provenance(path, "kanjidic2")
         count = 0
         self.stdout.write(f"Importing {path.name} …")
         with transaction.atomic():
-            for _event, elem in ET.iterparse(str(path), events=("end",)):
-                if elem.tag != "character":
-                    continue
+            for elem in entries(path, "kanjidic2", "character"):
                 self._ingest(elem, langs)
                 elem.clear()
                 count += 1
@@ -51,14 +54,12 @@ class Command(BaseCommand):
         grade = _int(misc.findtext("grade")) if misc is not None else None
         strokes = _int(misc.findtext("stroke_count")) if misc is not None else 0
         freq = _int(misc.findtext("freq")) if misc is not None else None
-        jlpt = (
-            _int(misc.findtext("jlpt_level")) if misc is not None else None
-        )  # kanjidic2 modern tag
 
         radical_number = None
         rad = ch.find("radical")
         if rad is not None:
-            radical_number = _int(rad.findtext("rad_value"))
+            classical = rad.find("rad_value[@rad_type='classical']")
+            radical_number = _int(classical.text) if classical is not None else None
 
         on_r, kun_r, nanori = [], [], []
         rm = ch.find("reading_meaning")
@@ -72,18 +73,29 @@ class Command(BaseCommand):
                     elif rtype == "ja_kun":
                         kun_r.append(r.text or "")
                 for m in grp.findall("meaning"):
-                    lang = m.get("m_lang", "en")  # absent attr → English
-                    if lang in langs:
+                    lang = language(m.get("m_lang", "en"))  # absent attr → English
+                    if "all" in langs or lang in langs:
                         meanings.append((lang, m.text or ""))
             for nr in rm.findall("nanori"):
                 nanori.append(nr.text or "")
 
+        previous = (
+            Kanji.objects.filter(literal=literal).values("provenance", "metadata").first() or {}
+        )
         kanji, _ = Kanji.objects.update_or_create(
             literal=literal,
             defaults={
                 "grade": grade,
                 "stroke_count": strokes or 0,
-                "jlpt": jlpt,
+                "metadata": {
+                    **previous.get("metadata", {}),
+                    "legacy_jlpt": _int(misc.findtext("jlpt")) if misc is not None else None,
+                    "raw": xml_metadata(ch),
+                },
+                "provenance": {
+                    **previous.get("provenance", {}),
+                    "kanjidic2": getattr(self, "provenance", {"source": "kanjidic2"}),
+                },
                 "freq_rank": freq,
                 "radical_number": radical_number,
                 "on_readings": [r for r in on_r if r],
@@ -91,12 +103,17 @@ class Command(BaseCommand):
                 "nanori": [n for n in nanori if n],
             },
         )
-        kanji.meanings.all().delete()
-        KanjiMeaning.objects.bulk_create(
-            KanjiMeaning(kanji=kanji, language=lang, text=text[:128], order=i)
-            for i, (lang, text) in enumerate(meanings)
-            if text
-        )
+        selected = kanji.meanings.all()
+        if "all" not in langs:
+            selected = selected.filter(language__in=langs)
+        selected.delete()
+        counts, rows = {}, []
+        for lang, text in meanings:
+            if text:
+                order = counts.get(lang, 0)
+                counts[lang] = order + 1
+                rows.append(KanjiMeaning(kanji=kanji, language=lang, text=text, order=order))
+        KanjiMeaning.objects.bulk_create(rows)
 
 
 def _int(value) -> int | None:

@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dictionary', '0005_examples_trgm'),
+        ("dictionary", "0005_examples_trgm"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kana',
-            name='origin',
+            model_name="kana",
+            name="origin",
             field=models.CharField(blank=True, max_length=8),
         ),
         migrations.AddField(
-            model_name='kana',
-            name='origin_note',
+            model_name="kana",
+            name="origin_note",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='kanji',
-            name='formation',
+            model_name="kanji",
+            name="formation",
             field=models.CharField(blank=True, max_length=32),
         ),
         migrations.AddField(
-            model_name='kanji',
-            name='origin',
+            model_name="kanji",
+            name="origin",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='kanji',
-            name='phonetic',
+            model_name="kanji",
+            name="phonetic",
             field=models.CharField(blank=True, max_length=8),
         ),
     ]

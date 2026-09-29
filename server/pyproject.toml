@@ -25,6 +25,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "lxml>=6,<7",
     "pytest>=8.3",
     "pytest-django>=4.9",
     "ruff>=0.8",

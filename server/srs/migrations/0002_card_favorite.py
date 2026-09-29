@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('srs', '0001_initial'),
+        ("srs", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='card',
-            name='favorite',
+            model_name="card",
+            name="favorite",
             field=models.BooleanField(default=False),
         ),
     ]

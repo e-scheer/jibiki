@@ -1,4 +1,4 @@
-"""Seed reviewed kana mnemonics from the canonical content source."""
+"""Install traceable kana sources; new unverified stories remain pending."""
 
 from pathlib import Path
 
@@ -28,6 +28,7 @@ class Command(BaseCommand):
         created, updated, decks = install_kana_entries(entries)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Kana mnemonics: {created} created, {updated} updated, {decks} decks"
+                f"Kana mnemonics: {created} created, {updated} updated, {decks} decks. "
+                "New stories without review evidence remain pending."
             )
         )

@@ -72,9 +72,7 @@ def test_build_core_and_locale_packs(seeded, tmp_path):
     packs = {p["id"]: p for p in manifest["packs"]}
     assert set(packs) == {"dict-core", "dict-locale-en"}
     assert packs["dict-core"]["requires"] == []
-    assert packs["dict-locale-en"]["requires"] == [
-        {"id": "dict-core", "version": VERSION}
-    ]
+    assert packs["dict-locale-en"]["requires"] == [{"id": "dict-core", "version": VERSION}]
 
     # kanji_words: dense ranks from 0, capped at 12, ordered by the words' own
     # ranking (is_common DESC, freq_rank ASC - the build-time precomputation).
@@ -111,6 +109,136 @@ def test_build_core_and_locale_packs(seeded, tmp_path):
     assert got == expected == ["to eat"]
 
 
+def test_export_preserves_source_metadata_and_explicit_example_links(tmp_path):
+    from dictionary.models import (
+        ExampleSenseLink,
+        ExampleSentence,
+        ExampleTranslation,
+        Gloss,
+        Kana,
+        KanaWordExample,
+        Kanji,
+        Name,
+        Radical,
+        Sense,
+        Word,
+        WordForm,
+    )
+
+    # Artificial fixtures verify transport, not linguistic correctness.
+    evidence = {"source": "fixture", "snapshot": "test"}
+    Radical.objects.create(literal="日", provenance=evidence)
+    word = Word.objects.create(seq=123, is_common=True, provenance=evidence)
+    form = WordForm.objects.create(word=word, text="かな", kind="kana", metadata={"no_kanji": True})
+    sense = Sense.objects.create(
+        word=word,
+        metadata={"restricted_readings": ["かな"], "raw": {"gloss": "all source languages"}},
+    )
+    kana = Kana.objects.create(char="か", romaji="ka", script="hiragana")
+    KanaWordExample.objects.create(kana=kana, word=word, reading="かな", provenance=evidence)
+    excluded_word = Word.objects.create()
+    KanaWordExample.objects.create(kana=kana, word=excluded_word, reading="fixture")
+    gloss = Gloss.objects.create(
+        sense=sense, language="fr", text="fixture gloss", metadata={"type": "literal"}
+    )
+    kanji = Kanji.objects.create(
+        literal="日", jlpt=5, provenance=evidence, metadata={"legacy_jlpt": 4}
+    )
+    name = Name.objects.create(
+        reading="かな", provenance=evidence, metadata={"references": ["fixture"]}
+    )
+    sentence = ExampleSentence.objects.create(
+        japanese="fixture sentence", source_key="test:1", provenance=evidence
+    )
+    ExampleTranslation.objects.create(example=sentence, language="fr", text="fixture translation")
+    ExampleSenseLink.objects.create(
+        example=sentence,
+        sense=sense,
+        source="fixture",
+        source_sense_order=0,
+        text="かな",
+        provenance=evidence,
+    )
+    unlinked = ExampleSentence.objects.create(japanese="かな unlinked substring")
+    ExampleTranslation.objects.create(example=unlinked, language="fr", text="unlinked")
+    _build(tmp_path, "--base")
+    base = _connect(tmp_path, "base.db.gz")
+    assert (
+        json.loads(base.execute("SELECT provenance FROM words WHERE id=?", [word.id]).fetchone()[0])
+        == evidence
+    )
+    assert (
+        json.loads(
+            base.execute("SELECT metadata FROM word_forms WHERE id=?", [form.id]).fetchone()[0]
+        )
+        == form.metadata
+    )
+    assert json.loads(
+        base.execute("SELECT metadata FROM senses WHERE id=?", [sense.id]).fetchone()[0]
+    ) == {"restricted_readings": ["かな"]}
+    assert (
+        json.loads(
+            base.execute("SELECT metadata FROM glosses WHERE id=?", [gloss.id]).fetchone()[0]
+        )
+        == gloss.metadata
+    )
+    assert (
+        json.loads(
+            base.execute("SELECT metadata FROM kanji WHERE literal=?", [kanji.literal]).fetchone()[
+                0
+            ]
+        )
+        == kanji.metadata
+    )
+    assert base.execute("SELECT source_key FROM examples").fetchall() == [("test:1",)]
+    assert base.execute(
+        "SELECT example_id, sense_id, word_id FROM example_sense_links"
+    ).fetchall() == [(sentence.id, sense.id, word.id)]
+    assert json.loads(base.execute("SELECT provenance FROM examples").fetchone()[0]) == evidence
+    assert (
+        json.loads(base.execute("SELECT provenance FROM radicals WHERE literal='日'").fetchone()[0])
+        == evidence
+    )
+    sense.refresh_from_db()
+    assert "raw" in sense.metadata
+    assert base.execute("SELECT kana, word_id, reading FROM kana_word_examples").fetchall() == [
+        ("か", word.id, "かな")
+    ]
+    _build(tmp_path, "--packs", "names,examples-fr")
+    manifest = json.loads((tmp_path / "packs_manifest.json").read_text(encoding="utf-8"))
+    entries = {entry["id"]: entry for entry in manifest["packs"]}
+    names = _connect(tmp_path, entries["names"]["file"])
+    assert (
+        json.loads(names.execute("SELECT metadata FROM names WHERE id=?", [name.id]).fetchone()[0])
+        == name.metadata
+    )
+    examples = _connect(tmp_path, entries["examples-fr"]["file"])
+    assert examples.execute("SELECT COUNT(*) FROM examples").fetchone()[0] == 2
+    assert examples.execute("SELECT example_id FROM example_sense_links").fetchall() == [
+        (sentence.id,)
+    ]
+
+
+def test_base_preserves_alias_ids_and_includes_uncommon_canonical_target(tmp_path):
+    from dictionary.models import Gloss, Sense, Word, WordForm
+
+    canonical = Word.objects.create(seq=999, is_common=False)
+    WordForm.objects.create(word=canonical, text="fixture", kind="kana")
+    sense = Sense.objects.create(word=canonical)
+    Gloss.objects.create(sense=sense, language="en", text="canonical fixture")
+    alias = Word.objects.create(seq=-999, is_common=True, canonical_word=canonical)
+    WordForm.objects.create(word=alias, text="fixture", kind="kana")
+    _build(tmp_path, "--base")
+    base = _connect(tmp_path, "base.db.gz")
+    assert base.execute("SELECT id, canonical_word_id FROM words ORDER BY id").fetchall() == [
+        (canonical.id, None),
+        (alias.id, canonical.id),
+    ]
+    assert base.execute("SELECT text FROM glosses WHERE word_id=?", [canonical.id]).fetchone() == (
+        "canonical fixture",
+    )
+
+
 def test_build_french_mnemonic_pack_is_language_native(seeded, tmp_path):
     _build(tmp_path, "--packs", "mnemonics-fr")
     manifest = json.loads((tmp_path / "packs_manifest.json").read_text(encoding="utf-8"))
@@ -119,9 +247,7 @@ def test_build_french_mnemonic_pack_is_language_native(seeded, tmp_path):
     assert entry["languages"] == ["fr"]
 
     conn = _connect(tmp_path, entry["file"])
-    rows = conn.execute(
-        "SELECT character, language, story FROM mnemonics ORDER BY id"
-    ).fetchall()
+    rows = conn.execute("SELECT character, language, story FROM mnemonics ORDER BY id").fetchall()
     assert len(rows) == 92
     assert {language for _, language, _ in rows} == {"fr"}
     stories = {character: story for character, _, story in rows}

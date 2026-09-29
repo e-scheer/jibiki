@@ -926,6 +926,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="also store the generic headings/paragraphs/list dump. Off by default: it is nav chrome.",
     )
     parser.add_argument(
+        "--out", type=Path, default=EXTRACT_ROOT,
+        help="Output directory. Use a new directory to compare parser revisions.",
+    )
+    parser.add_argument(
         "--progress-every",
         type=int,
         default=250,
@@ -945,7 +949,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     sites = args.sites or list(SUPPORTED_SITES)
-    EXTRACT_ROOT.mkdir(parents=True, exist_ok=True)
+    extract_root = args.out.resolve()
+    extract_root.mkdir(parents=True, exist_ok=True)
 
     processed: list[str] = []
     failed_sites: dict[str, str] = {}
@@ -963,6 +968,7 @@ def main(argv: list[str] | None = None) -> int:
                 jobs=args.jobs,
                 debug_envelope=args.debug_envelope,
                 progress_every=max(0, args.progress_every),
+                extract_root=extract_root,
             )
         except Exception as error:  # noqa: BLE001 - one site must not end the run
             failed_sites[site_id] = f"{type(error).__name__}: {error}"
@@ -971,13 +977,13 @@ def main(argv: list[str] | None = None) -> int:
             continue
         processed.append(site_id)
 
-    manifest = build_manifest(EXTRACT_ROOT, processed)
+    manifest = build_manifest(extract_root, processed)
     if failed_sites:
         manifest["sites_not_extracted"] = failed_sites
-    write_json(EXTRACT_ROOT / "manifest.json", manifest)
+    write_json(extract_root / "manifest.json", manifest)
     totals = manifest["totals"]
     print(
-        f"Wrote {EXTRACT_ROOT / 'manifest.json'} in {time.monotonic() - started:.1f}s: "
+        f"Wrote {extract_root / 'manifest.json'} in {time.monotonic() - started:.1f}s: "
         f"{totals.get('records_emitted', 0)} records, "
         f"{totals.get('deduped_away', 0)} deduped away, "
         f"{totals.get('shells', 0)} need refetch, "

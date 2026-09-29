@@ -63,6 +63,8 @@ class Mnemonic(models.Model):
         related_name="mnemonics",
     )
     is_seed = models.BooleanField(default=False)  # bundled baseline content
+    # Visibility is moderation state, not evidence of editorial verification.
+    provenance = models.JSONField(default=dict, blank=True)
 
     status = models.CharField(
         max_length=10, choices=MnemonicStatus.choices, default=MnemonicStatus.VISIBLE
@@ -97,13 +99,9 @@ class Mnemonic(models.Model):
     def clean(self):
         super().clean()
         if self.kind == self.Kind.KANJI_READING and not self.reading:
-            raise ValidationError(
-                {"reading": _("A reading mnemonic requires a reading.")}
-            )
+            raise ValidationError({"reading": _("A reading mnemonic requires a reading.")})
         if self.kind != self.Kind.KANJI_READING and self.reading:
-            raise ValidationError(
-                {"reading": _("Only reading mnemonics can carry a reading.")}
-            )
+            raise ValidationError({"reading": _("Only reading mnemonics can carry a reading.")})
 
     def __str__(self) -> str:
         return f"{self.character} [{self.language}] score={self.score}"
@@ -262,7 +260,9 @@ class MnemonicDeck(models.Model):
     description = models.TextField(blank=True)
     # Same per-language segmentation as mnemonics - a FR pack keys off FR sounds.
     language = models.CharField(max_length=8, default="en")
-    kind = models.CharField(max_length=16, choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA)
+    kind = models.CharField(
+        max_length=16, choices=Mnemonic.Kind.choices, default=Mnemonic.Kind.KANA
+    )
 
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

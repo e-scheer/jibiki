@@ -19,9 +19,7 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, default="", max_length=32),
         ),
         migrations.RunPython(copy_choice_readings, migrations.RunPython.noop),
-        migrations.RemoveConstraint(
-            model_name="usermnemonicchoice", name="uq_choice_per_char"
-        ),
+        migrations.RemoveConstraint(model_name="usermnemonicchoice", name="uq_choice_per_char"),
         migrations.AddConstraint(
             model_name="usermnemonicchoice",
             constraint=models.UniqueConstraint(

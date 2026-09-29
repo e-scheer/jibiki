@@ -1,0 +1,40 @@
+{
+  "serializer_probes": [
+    {
+      "input": {
+        "character": "ABCD",
+        "kind": "kanji",
+        "language": "fr",
+        "story": "audit"
+      },
+      "accepted": true,
+      "errors": {}
+    },
+    {
+      "input": {
+        "character": "木",
+        "kind": "kanji_reading",
+        "language": "fr",
+        "reading": "not-a-reading",
+        "story": "audit"
+      },
+      "accepted": true,
+      "errors": {}
+    }
+  ],
+  "language_probes": {
+    "fr": {
+      "accepted": true,
+      "value": "fr"
+    },
+    "pt-BR": {
+      "accepted": false
+    },
+    "zh-Hant": {
+      "accepted": false
+    },
+    "yue": {
+      "accepted": false
+    }
+  }
+}

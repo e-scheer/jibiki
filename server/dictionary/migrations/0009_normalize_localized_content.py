@@ -14,9 +14,7 @@ def move_localized_content(apps, schema_editor):
     KanaUsage = apps.get_model("dictionary", "KanaUsage")
     KanaUsageTranslation = apps.get_model("dictionary", "KanaUsageTranslation")
     KanaUsageExample = apps.get_model("dictionary", "KanaUsageExample")
-    KanaUsageExampleTranslation = apps.get_model(
-        "dictionary", "KanaUsageExampleTranslation"
-    )
+    KanaUsageExampleTranslation = apps.get_model("dictionary", "KanaUsageExampleTranslation")
     ExampleSentence = apps.get_model("dictionary", "ExampleSentence")
     ExampleTranslation = apps.get_model("dictionary", "ExampleTranslation")
     Name = apps.get_model("dictionary", "Name")
@@ -135,26 +133,16 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(model_name="gloss", old_name="lang", new_name="language"),
-        migrations.RenameField(
-            model_name="kanjimeaning", old_name="lang", new_name="language"
-        ),
-        migrations.RemoveIndex(
-            model_name="gloss", name="dict_glosse_lang_d7fe9f_idx"
-        ),
-        migrations.RemoveIndex(
-            model_name="kanjimeaning", name="dict_kanji__lang_53ea8b_idx"
-        ),
+        migrations.RenameField(model_name="kanjimeaning", old_name="lang", new_name="language"),
+        migrations.RemoveIndex(model_name="gloss", name="dict_glosse_lang_d7fe9f_idx"),
+        migrations.RemoveIndex(model_name="kanjimeaning", name="dict_kanji__lang_53ea8b_idx"),
         migrations.AddIndex(
             model_name="gloss",
-            index=models.Index(
-                fields=["language", "text"], name="dict_glosse_lang_d7fe9f_idx"
-            ),
+            index=models.Index(fields=["language", "text"], name="dict_glosse_lang_d7fe9f_idx"),
         ),
         migrations.AddIndex(
             model_name="kanjimeaning",
-            index=models.Index(
-                fields=["language", "text"], name="dict_kanji__lang_53ea8b_idx"
-            ),
+            index=models.Index(fields=["language", "text"], name="dict_kanji__lang_53ea8b_idx"),
         ),
         migrations.CreateModel(
             name="SenseNote",
@@ -362,9 +350,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="radicalmeaning",
-            index=models.Index(
-                fields=["language", "text"], name="dict_radica_languag_8f2c77_idx"
-            ),
+            index=models.Index(fields=["language", "text"], name="dict_radica_languag_8f2c77_idx"),
         ),
         migrations.AddConstraint(
             model_name="kanjiexplanation",
@@ -404,9 +390,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="nametranslation",
-            index=models.Index(
-                fields=["language", "text"], name="dict_name_t_languag_f34c86_idx"
-            ),
+            index=models.Index(fields=["language", "text"], name="dict_name_t_languag_f34c86_idx"),
         ),
         migrations.AddConstraint(
             model_name="nametranslation",

@@ -22,7 +22,15 @@ class ContentReportAdmin(admin.ModelAdmin):
     list_filter = ["item_type", "reason", "status", "created_at"]
     search_fields = ["item_ref", "message", "reporter__email"]
     list_editable = ["status"]
-    readonly_fields = ["reporter", "item_type", "item_ref", "reason", "message", "context", "created_at"]
+    readonly_fields = [
+        "reporter",
+        "item_type",
+        "item_ref",
+        "reason",
+        "message",
+        "context",
+        "created_at",
+    ]
 
     @admin.display(description="message")
     def short_message(self, obj: ContentReport) -> str:

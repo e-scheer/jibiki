@@ -36,10 +36,20 @@ def _localized(rows, language: str):
     return english or values[:1]
 
 
+class PublicMetadataField(serializers.JSONField):
+    """Serve normalized scope fields; archival XML remains in the source store."""
+
+    def to_representation(self, value):
+        data = super().to_representation(value)
+        return {key: item for key, item in data.items() if key != "raw"}
+
+
 class GlossSerializer(serializers.ModelSerializer):
+    metadata = PublicMetadataField(read_only=True)
+
     class Meta:
         model = Gloss
-        fields = ["language", "text"]
+        fields = ["language", "text", "metadata"]
 
 
 class TranslationSerializer(serializers.Serializer):
@@ -50,27 +60,47 @@ class TranslationSerializer(serializers.Serializer):
 class ExampleSerializer(serializers.ModelSerializer):
     translations = TranslationSerializer(many=True, read_only=True)
     translation = serializers.SerializerMethodField()
+    language = serializers.SerializerMethodField()
 
     class Meta:
         model = ExampleSentence
-        fields = ["japanese", "translation", "translations"]
+        fields = ["japanese", "translation", "language", "translations", "source_key", "provenance"]
 
     def get_translation(self, example: ExampleSentence) -> str:
         rows = _localized(example.translations.all(), _requested_language(self.context))
         return rows[0].text if rows else ""
 
+    def get_language(self, example: ExampleSentence) -> str:
+        rows = _localized(example.translations.all(), _requested_language(self.context))
+        return rows[0].language if rows else ""
+
 
 class NameSerializer(serializers.ModelSerializer):
+    metadata = PublicMetadataField(read_only=True)
     translations = TranslationSerializer(source="localized_names", many=True, read_only=True)
     translation = serializers.SerializerMethodField()
+    language = serializers.SerializerMethodField()
 
     class Meta:
         model = Name
-        fields = ["kanji", "reading", "translation", "translations", "name_types"]
+        fields = [
+            "kanji",
+            "reading",
+            "translation",
+            "language",
+            "translations",
+            "name_types",
+            "metadata",
+            "provenance",
+        ]
 
     def get_translation(self, name: Name) -> str:
         rows = _localized(name.localized_names.all(), _requested_language(self.context))
         return rows[0].text if rows else ""
+
+    def get_language(self, name: Name) -> str:
+        rows = _localized(name.localized_names.all(), _requested_language(self.context))
+        return rows[0].language if rows else ""
 
 
 class SenseNoteSerializer(serializers.ModelSerializer):
@@ -80,21 +110,30 @@ class SenseNoteSerializer(serializers.ModelSerializer):
 
 
 class SenseSerializer(serializers.ModelSerializer):
+    metadata = PublicMetadataField(read_only=True)
     glosses = GlossSerializer(many=True, read_only=True)
     notes = SenseNoteSerializer(many=True, read_only=True)
 
     class Meta:
         model = Sense
-        fields = ["order", "pos", "misc", "field", "notes", "glosses"]
+        fields = ["order", "pos", "misc", "field", "notes", "glosses", "metadata"]
 
 
 class WordFormSerializer(serializers.ModelSerializer):
+    metadata = PublicMetadataField(read_only=True)
+
     class Meta:
         model = WordForm
-        fields = ["text", "is_common", "pitch"]
+        fields = ["text", "is_common", "pitch", "metadata"]
 
 
 class WordSerializer(serializers.ModelSerializer):
+    source_status = serializers.CharField(
+        source="provenance.source_status", default="", read_only=True
+    )
+    canonical_id = serializers.IntegerField(
+        source="canonical_word_id", read_only=True, allow_null=True
+    )
     headword = serializers.CharField(read_only=True)
     primary_reading = serializers.CharField(read_only=True)
     kanji = serializers.SerializerMethodField()
@@ -105,6 +144,8 @@ class WordSerializer(serializers.ModelSerializer):
         model = Word
         fields = [
             "id",
+            "canonical_id",
+            "source_status",
             "seq",
             "is_common",
             "jlpt",
@@ -114,12 +155,24 @@ class WordSerializer(serializers.ModelSerializer):
             "kanji",
             "readings",
             "senses",
+            "provenance",
         ]
 
     def _forms(self, word: Word, kind: str) -> list[dict]:
         forms = [form for form in word.forms.all() if form.kind == kind]
         forms.sort(key=lambda form: form.order)
         return WordFormSerializer(forms, many=True).data
+
+    def to_representation(self, instance):
+        if instance.canonical_word_id is None:
+            return super().to_representation(instance)
+        canonical = Word.objects.prefetch_related("forms", "senses__glosses", "senses__notes").get(
+            pk=instance.canonical_word_id
+        )
+        data = super().to_representation(canonical)
+        data["id"] = instance.pk
+        data["canonical_id"] = canonical.pk
+        return data
 
     def get_kanji(self, word: Word) -> list[dict]:
         return self._forms(word, WordForm.Kind.KANJI)
@@ -135,6 +188,7 @@ class KanjiMeaningSerializer(serializers.ModelSerializer):
 
 
 class KanjiSerializer(serializers.ModelSerializer):
+    metadata = PublicMetadataField(read_only=True)
     meanings = KanjiMeaningSerializer(many=True, read_only=True)
 
     class Meta:
@@ -151,6 +205,8 @@ class KanjiSerializer(serializers.ModelSerializer):
             "nanori",
             "components",
             "meanings",
+            "metadata",
+            "provenance",
         ]
 
 
@@ -206,12 +262,23 @@ class KanjiDetailSerializer(KanjiSerializer):
         from django.db.models import Q
 
         word_ids = list(
-            WordForm.objects.filter(kind=WordForm.Kind.KANJI, text__contains=kanji.literal)
+            WordForm.objects.filter(
+                kind=WordForm.Kind.KANJI,
+                text__contains=kanji.literal,
+                word__canonical_word__isnull=True,
+            )
+            .exclude(
+                word__provenance__has_key="source_status",
+                word__provenance__source_status__in=[
+                    "upstream_not_in_snapshot",
+                    "legacy_merged_entry",
+                ],
+            )
             .order_by("-is_common")
             .values_list("word_id", flat=True)[:12]
         )
         words = (
-            Word.objects.filter(Q(pk__in=word_ids))
+            Word.objects.filter(Q(pk__in=word_ids), canonical_word__isnull=True)
             .prefetch_related("forms", "senses__glosses", "senses__notes")
             .order_by("-is_common", "freq_rank")[:12]
         )
@@ -224,7 +291,7 @@ class RadicalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Radical
-        fields = ["literal", "strokes", "reading", "meaning", "meanings"]
+        fields = ["literal", "strokes", "reading", "meaning", "meanings", "provenance"]
 
     def get_meaning(self, radical: Radical) -> str:
         rows = _localized(radical.meanings.all(), _requested_language(self.context))
@@ -233,9 +300,12 @@ class RadicalSerializer(serializers.ModelSerializer):
 
 class KanaSerializer(serializers.ModelSerializer):
     origin_note = serializers.SerializerMethodField()
+    origin_language = serializers.SerializerMethodField()
     usage_label = serializers.SerializerMethodField()
     usage = serializers.SerializerMethodField()
+    usage_language = serializers.SerializerMethodField()
     usage_examples = serializers.SerializerMethodField()
+    word_examples = serializers.SerializerMethodField()
 
     class Meta:
         model = Kana
@@ -248,9 +318,12 @@ class KanaSerializer(serializers.ModelSerializer):
             "order",
             "origin",
             "origin_note",
+            "origin_language",
             "usage_label",
             "usage",
+            "usage_language",
             "usage_examples",
+            "word_examples",
         ]
 
     def _usage_translation(self, kana: Kana):
@@ -260,9 +333,35 @@ class KanaSerializer(serializers.ModelSerializer):
         rows = _localized(role.translations.all(), _requested_language(self.context))
         return rows[0] if rows else None
 
+    def get_word_examples(self, kana: Kana) -> list[dict]:
+        language = _requested_language(self.context)
+        examples = []
+        for example in list(kana.word_examples.all())[:8]:
+            word = example.word
+            rows = [gloss for sense in word.senses.all() for gloss in sense.glosses.all()]
+            glosses = _localized(rows, language)
+            examples.append(
+                {
+                    "word_id": word.pk,
+                    "headword": word.headword,
+                    "reading": example.reading,
+                    "glosses": [{"language": row.language, "text": row.text} for row in glosses],
+                    "provenance": example.provenance,
+                }
+            )
+        return examples
+
     def get_origin_note(self, kana: Kana) -> str:
         rows = _localized(kana.explanations.all(), _requested_language(self.context))
         return rows[0].origin_note if rows else ""
+
+    def get_origin_language(self, kana: Kana) -> str:
+        rows = _localized(kana.explanations.all(), _requested_language(self.context))
+        return rows[0].language if rows else ""
+
+    def get_usage_language(self, kana: Kana) -> str:
+        translation = self._usage_translation(kana)
+        return translation.language if translation else ""
 
     def get_usage_label(self, kana: Kana) -> str:
         translation = self._usage_translation(kana)

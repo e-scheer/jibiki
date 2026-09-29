@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dictionary', '0006_kana_origin_kana_origin_note_kanji_formation_and_more'),
+        ("dictionary", "0006_kana_origin_kana_origin_note_kanji_formation_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kana',
-            name='usage',
+            model_name="kana",
+            name="usage",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='kana',
-            name='usage_label',
+            model_name="kana",
+            name="usage_label",
             field=models.CharField(blank=True, max_length=48),
         ),
     ]

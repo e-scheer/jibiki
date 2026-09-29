@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -10,6 +12,15 @@ User = get_user_model()
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        # Persist only the submitted preferences. A concurrent entitlement or
+        # trained-parameter update must not be overwritten by a stale profile.
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        if validated_data:
+            instance.save(update_fields=[*validated_data, "updated_at"])
+        return instance
+
     class Meta:
         model = UserProfile
         fields = [
@@ -47,9 +58,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     def validate_desired_retention(self, value: float) -> float:
         # FSRS is only sane in this band; outside it the interval solver degenerates.
         if not (0.7 <= value <= 0.97):
-            raise serializers.ValidationError(
-                _("Desired retention must be between 0.70 and 0.97.")
-            )
+            raise serializers.ValidationError(_("Desired retention must be between 0.70 and 0.97."))
+        return value
+
+    def validate_timezone(self, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise serializers.ValidationError(_("Choose a valid time zone.")) from None
         return value
 
 

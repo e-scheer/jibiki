@@ -10,14 +10,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from dictionary.kana_seeding import set_kana_content
 from dictionary.models import (
     Gloss,
     Kana,
-    KanaExplanation,
-    KanaUsage,
-    KanaUsageExample,
-    KanaUsageExampleTranslation,
-    KanaUsageTranslation,
     Kanji,
     KanjiMeaning,
     Radical,
@@ -71,14 +67,22 @@ class Command(BaseCommand):
             Kana.objects.update_or_create(
                 char=hira,
                 defaults=dict(
-                    romaji=romaji, script=Kana.Script.HIRAGANA, kind=kind, row=row, order=order,
+                    romaji=romaji,
+                    script=Kana.Script.HIRAGANA,
+                    kind=kind,
+                    row=row,
+                    order=order,
                     origin=o_h,
                 ),
             )
             Kana.objects.update_or_create(
                 char=kata,
                 defaults=dict(
-                    romaji=romaji, script=Kana.Script.KATAKANA, kind=kind, row=row, order=order,
+                    romaji=romaji,
+                    script=Kana.Script.KATAKANA,
+                    kind=kind,
+                    row=row,
+                    order=order,
                     origin=o_k,
                 ),
             )
@@ -88,32 +92,7 @@ class Command(BaseCommand):
 
     def _set_kana_content(self, char, origin_note, label, explanation, examples) -> None:
         kana = Kana.objects.get(char=char)
-        kana.explanations.all().delete()
-        if origin_note:
-            KanaExplanation.objects.create(
-                kana=kana, language="en", origin_note=origin_note
-            )
-        KanaUsage.objects.filter(kana=kana).delete()
-        if not (label or explanation or examples):
-            return
-        usage = KanaUsage.objects.create(kana=kana)
-        if label or explanation:
-            KanaUsageTranslation.objects.create(
-                usage=usage, language="en", label=label, explanation=explanation
-            )
-        for order, item in enumerate(examples):
-            example = KanaUsageExample.objects.create(
-                usage=usage,
-                order=order,
-                before=item.get("before", ""),
-                particle=item.get("particle", ""),
-                after=item.get("after", ""),
-                pronunciation=item.get("romaji", ""),
-            )
-            if item.get("en"):
-                KanaUsageExampleTranslation.objects.create(
-                    example=example, language="en", text=item["en"]
-                )
+        set_kana_content(kana, origin_note, label, explanation, examples)
 
     def _seed_radicals(self) -> None:
         for literal, (strokes, reading, meaning) in RADICALS.items():
@@ -148,9 +127,7 @@ class Command(BaseCommand):
             order = 0
             for lang, key in (("en", "en"), ("fr", "fr")):
                 for text in d.get(key, []):
-                    KanjiMeaning.objects.create(
-                        kanji=kanji, language=lang, text=text, order=order
-                    )
+                    KanjiMeaning.objects.create(kanji=kanji, language=lang, text=text, order=order)
                     order += 1
         self.stdout.write(f"  kanji: {Kanji.objects.count()}")
 
@@ -178,9 +155,7 @@ class Command(BaseCommand):
                 go = 0
                 for lang, key in (("en", "en"), ("fr", "fr")):
                     for text in sense.get(key, []):
-                        Gloss.objects.create(
-                            sense=s, language=lang, text=text, order=go
-                        )
+                        Gloss.objects.create(sense=s, language=lang, text=text, order=go)
                         go += 1
         self.stdout.write(f"  words: {Word.objects.count()}")
 
@@ -188,5 +163,6 @@ class Command(BaseCommand):
         path = Path(settings.CONTENT_SOURCE_DIR) / "mnemonics" / "kana_stories.json"
         created, updated, decks = install_kana_entries(load_kana_entries(path))
         self.stdout.write(
-            f"  kana mnemonics: {created} created, {updated} updated, {decks} default packs"
+            f"  kana mnemonics: {created} created, {updated} updated, {decks} seed packs "
+            "(new unverified stories remain pending)"
         )

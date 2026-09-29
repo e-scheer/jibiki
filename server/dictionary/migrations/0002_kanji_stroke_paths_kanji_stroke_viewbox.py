@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dictionary', '0001_initial'),
+        ("dictionary", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kanji',
-            name='stroke_paths',
+            model_name="kanji",
+            name="stroke_paths",
             field=models.JSONField(blank=True, default=list),
         ),
         migrations.AddField(
-            model_name='kanji',
-            name='stroke_viewbox',
-            field=models.CharField(blank=True, default='0 0 109 109', max_length=32),
+            model_name="kanji",
+            name="stroke_viewbox",
+            field=models.CharField(blank=True, default="0 0 109 109", max_length=32),
         ),
     ]

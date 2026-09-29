@@ -10,6 +10,7 @@ from collections.abc import Iterable
 
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 
 from dictionary.models import Kanji, Word
@@ -135,14 +136,14 @@ def build_wanikani_preview(user, token: str, mastery_threshold: str = "guru") ->
             ignored += 1
             continue
         if kind == "kanji":
-            matches = list(Kanji.objects.filter(literal=characters).values_list("literal", flat=True))
+            matches = list(
+                Kanji.objects.filter(literal=characters).values_list("literal", flat=True)
+            )
             item_type = ItemType.KANJI
             refs = matches
         else:
             matches = list(
-                Word.objects.filter(forms__text=characters)
-                .distinct()
-                .values_list("id", flat=True)
+                Word.objects.filter(forms__text=characters).distinct().values_list("id", flat=True)
             )
             item_type = ItemType.WORD
             refs = [str(ref) for ref in matches]
@@ -209,9 +210,8 @@ def save_wanikani_preview(
 def refresh_wanikani_preview(connection: WaniKaniConnection) -> dict:
     threshold = THRESHOLD_NAMES.get(connection.mastery_threshold, "guru")
     try:
-        _, preview = save_wanikani_preview(
-            connection.user, decrypt_token(connection), threshold
-        )
+        _, preview = save_wanikani_preview(connection.user, decrypt_token(connection), threshold)
+        connection.refresh_from_db()
         return preview
     except WaniKaniError as exc:
         connection.last_error = str(exc)
@@ -219,15 +219,16 @@ def refresh_wanikani_preview(connection: WaniKaniConnection) -> dict:
         raise
 
 
+@transaction.atomic
 def import_wanikani_preview(connection: WaniKaniConnection) -> dict:
+    locked = WaniKaniConnection.objects.select_for_update().get(pk=connection.pk)
+    connection.__dict__.update(locked.__dict__)
     preview = connection.pending_preview or {}
     items = preview.get("items") or []
     if not items:
         return {"requested": 0, "resolved": 0, "created": 0, "known": 0, "learning": 0}
     known_items = [
-        {"item_type": item["item_type"], "ref": item["ref"]}
-        for item in items
-        if item.get("known")
+        {"item_type": item["item_type"], "ref": item["ref"]} for item in items if item.get("known")
     ]
     learning_items = [
         {"item_type": item["item_type"], "ref": item["ref"]}

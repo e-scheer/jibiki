@@ -5,16 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0002_userprofile_fsrs_parameters'),
-        ('mnemonics', '0003_usermnemonicchoice'),
+        ("accounts", "0002_userprofile_fsrs_parameters"),
+        ("mnemonics", "0003_usermnemonicchoice"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='active_pack',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='mnemonics.mnemonicdeck'),
+            model_name="userprofile",
+            name="active_pack",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="mnemonics.mnemonicdeck",
+            ),
         ),
     ]

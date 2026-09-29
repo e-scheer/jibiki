@@ -1,0 +1,1143 @@
+{
+  "measured_on": "2026-09-23",
+  "scope": "local release artifacts and source files; PostgreSQL unavailable (connection timeout)",
+  "packs": {
+    "dict-base": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 16402102,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "words": 23399,
+        "word_forms": 56147,
+        "senses": 192979,
+        "kanji": 2211,
+        "kanji_components": 8309,
+        "kanji_words": 17321,
+        "kana": 208,
+        "kana_usages": 19,
+        "kana_word_examples": 203,
+        "kana_usage_examples": 38,
+        "radicals": 260,
+        "glosses": 120062,
+        "kanji_meanings": 15405,
+        "sense_notes": 2179,
+        "radical_meanings": 260,
+        "kanji_explanations": 1958,
+        "kana_explanations": 208,
+        "kana_usage_translations": 19,
+        "kana_usage_example_translations": 38,
+        "examples": 15462,
+        "example_translations": 15462,
+        "example_sense_links": 17811,
+        "sqlite_stat1": 32
+      },
+      "manifest_counts_match": true,
+      "gloss_coverage": [
+        {
+          "language": "en",
+          "glosses": 90128,
+          "words": 23399,
+          "senses": 38331
+        },
+        {
+          "language": "fr",
+          "glosses": 29934,
+          "words": 13170,
+          "senses": 14216
+        }
+      ],
+      "kanji_coverage": [
+        {
+          "language": "en",
+          "meanings": 7991,
+          "kanji": 2211
+        },
+        {
+          "language": "fr",
+          "meanings": 7414,
+          "kanji": 1992
+        }
+      ],
+      "sense_locale_sets": [
+        {
+          "langs": "en",
+          "senses": 38300
+        },
+        {
+          "langs": "en,fr",
+          "senses": 31
+        },
+        {
+          "langs": "fr",
+          "senses": 14185
+        }
+      ]
+    },
+    "dict-core": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 36904804,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "words": 218758,
+        "word_forms": 499059,
+        "senses": 678102,
+        "kanji": 13108,
+        "kanji_components": 54321,
+        "kanji_words": 45447,
+        "kana": 208,
+        "kana_usages": 19,
+        "kana_word_examples": 214,
+        "kana_usage_examples": 38,
+        "radicals": 260,
+        "sqlite_stat1": 16
+      },
+      "manifest_counts_match": true,
+      "words_with_jmdict_sequence": 218758,
+      "canonical_current_words": 218726,
+      "kanji_grades": [
+        {
+          "grade": null,
+          "n": 10109
+        },
+        {
+          "grade": 1,
+          "n": 80
+        },
+        {
+          "grade": 2,
+          "n": 160
+        },
+        {
+          "grade": 3,
+          "n": 200
+        },
+        {
+          "grade": 4,
+          "n": 202
+        },
+        {
+          "grade": 5,
+          "n": 193
+        },
+        {
+          "grade": 6,
+          "n": 191
+        },
+        {
+          "grade": 8,
+          "n": 1110
+        },
+        {
+          "grade": 9,
+          "n": 651
+        },
+        {
+          "grade": 10,
+          "n": 212
+        }
+      ],
+      "kanji_jlpt": [
+        {
+          "jlpt": null,
+          "n": 10897
+        },
+        {
+          "jlpt": 1,
+          "n": 1232
+        },
+        {
+          "jlpt": 2,
+          "n": 367
+        },
+        {
+          "jlpt": 3,
+          "n": 367
+        },
+        {
+          "jlpt": 4,
+          "n": 161
+        },
+        {
+          "jlpt": 5,
+          "n": 84
+        }
+      ],
+      "words_with_frequency": 0
+    },
+    "dict-locale-en": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 23011863,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "glosses": 443079,
+        "kanji_meanings": 24824,
+        "sense_notes": 6839,
+        "radical_meanings": 260,
+        "kanji_explanations": 1958,
+        "kana_explanations": 208,
+        "kana_usage_translations": 19,
+        "kana_usage_example_translations": 38,
+        "sqlite_stat1": 14
+      },
+      "manifest_counts_match": true,
+      "gloss_coverage": [
+        {
+          "language": "en",
+          "glosses": 443079,
+          "words": 218758,
+          "senses": 253544
+        }
+      ],
+      "kanji_coverage": [
+        {
+          "language": "en",
+          "meanings": 24824,
+          "kanji": 10384
+        }
+      ]
+    },
+    "dict-locale-fr": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 1642998,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "glosses": 33833,
+        "kanji_meanings": 7643,
+        "sense_notes": 0,
+        "radical_meanings": 0,
+        "kanji_explanations": 0,
+        "kana_explanations": 0,
+        "kana_usage_translations": 0,
+        "kana_usage_example_translations": 0,
+        "sqlite_stat1": 8
+      },
+      "manifest_counts_match": true,
+      "gloss_coverage": [
+        {
+          "language": "fr",
+          "glosses": 33833,
+          "words": 15368,
+          "senses": 16521
+        }
+      ],
+      "kanji_coverage": [
+        {
+          "language": "fr",
+          "meanings": 7643,
+          "kanji": 2066
+        }
+      ]
+    },
+    "mnemonics-en": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 5114,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "mnemonics": 92,
+        "sqlite_stat1": 2
+      },
+      "manifest_counts_match": true,
+      "coverage": [
+        {
+          "kind": "kana",
+          "language": "en",
+          "n": 92,
+          "images": 0
+        }
+      ],
+      "review_status": [
+        {
+          "status": "unverified",
+          "n": 92
+        }
+      ]
+    },
+    "mnemonics-fr": {
+      "version": "2026.09.09",
+      "dataset_rev": 2,
+      "compressed_bytes": 5263,
+      "db_sha256_matches": true,
+      "compressed_sha256_matches": true,
+      "integrity": "ok",
+      "counts": {
+        "mnemonics": 92,
+        "sqlite_stat1": 2
+      },
+      "manifest_counts_match": true,
+      "coverage": [
+        {
+          "kind": "kana",
+          "language": "fr",
+          "n": 92,
+          "images": 0
+        }
+      ],
+      "review_status": [
+        {
+          "status": "unverified",
+          "n": 92
+        }
+      ]
+    }
+  },
+  "manifest_schema": "jibiki-packs/3",
+  "pack_hashes": {
+    "dict-core": true,
+    "dict-locale-en": true,
+    "dict-locale-fr": true,
+    "dict-locale-de": true,
+    "dict-locale-es": true,
+    "dict-locale-hu": true,
+    "dict-locale-nl": true,
+    "dict-locale-ru": true,
+    "dict-locale-sl": true,
+    "dict-locale-sv": true,
+    "dict-locale-pt": true,
+    "names": true,
+    "examples-en": true,
+    "mnemonics-en": true,
+    "mnemonics-fr": true
+  },
+  "seeds": {
+    "kana_stories.json": {
+      "targets": 92,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 184,
+      "entries_with_review": 0,
+      "sha256": "86c13c4a97b32b84a96d1ce110a4c0636f78ed2dcf63be09b4b6f1aa2bf123c3"
+    },
+    "kanji_meaning_briefs.n1.json": {
+      "targets": 1232,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 2464,
+      "entries_with_review": 0,
+      "sha256": "465e88f32dd5e1b701a4c0e8a1ac0d6c8337896c8fc75528ae92abb3b2004f06",
+      "most_common_prefixes": [
+        [
+          "A single crooked stroke (乙), like a sprout wriggling up in second place",
+          1
+        ],
+        [
+          "A flat cap (一) driven onto a shaft with a hook (亅), the head of a nail marking each block",
+          1
+        ],
+        [
+          "The curved side view of a nursing body (乃), later lent to grammar",
+          1
+        ]
+      ]
+    },
+    "kanji_meaning_briefs.n2.json": {
+      "targets": 367,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 734,
+      "entries_with_review": 0,
+      "sha256": "57825cfab801eaa909ca15c3a9a9c400e8e04a5586d0dc853111ebd4536436e6",
+      "most_common_prefixes": [
+        [
+          "A newborn swaddled so tight its arms vanish, its body a single line (一) ending in a hook (亅)",
+          1
+        ],
+        [
+          "The number nine (九) rolled up snug around a single dot (丶)",
+          1
+        ],
+        [
+          "A figure (入) with a long stroke (ノ) dragging at its back, held up and delayed on and on",
+          1
+        ]
+      ]
+    },
+    "kanji_meaning_briefs.n3.json": {
+      "targets": 367,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 734,
+      "entries_with_review": 0,
+      "sha256": "9a5e2b6626d433a2e902c99beb5f1cf2e953724e58aa916c23e6d4dac62af239",
+      "most_common_prefixes": [
+        [
+          "Hands wrapping (勹) a gift and passing it across the line (一)",
+          1
+        ],
+        [
+          "Someone hidden away for good beneath a lid (亠), gone from sight",
+          1
+        ],
+        [
+          "A sharp peg (ノ一亅) driven firm into the ground, borrowed to name a keen, gifted mind",
+          1
+        ]
+      ]
+    },
+    "kanji_meaning_briefs.n4.json": {
+      "targets": 166,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 332,
+      "entries_with_review": 0,
+      "sha256": "449f3b465213f3ad03cdafdbf6460bd9a66ff7fea7355323bc21c979d47ae14b",
+      "most_common_prefixes": [
+        [
+          "A single flexed arm straining",
+          1
+        ],
+        [
+          "A wide open mouth",
+          1
+        ],
+        [
+          "A thin crescent showing at dusk",
+          1
+        ]
+      ]
+    },
+    "kanji_meaning_briefs.n5.json": {
+      "targets": 79,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 158,
+      "entries_with_review": 0,
+      "sha256": "b6cee529c1031382dd0a0c7dde8cd24766f7440827d2bb818a964cf727e56d0c",
+      "most_common_prefixes": [
+        [
+          "A single horizontal stroke",
+          1
+        ],
+        [
+          "Two stacked strokes",
+          1
+        ],
+        [
+          "One stroke (一) over two (二)",
+          1
+        ]
+      ]
+    },
+    "kanji_reading_briefs.n1.json": {
+      "targets": 1225,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 2450,
+      "entries_with_review": 0,
+      "sha256": "a8eebfc38dff06ecbf60e7c7e8d84fe0b08e390b5f8de16bd4563f97c1639c5c"
+    },
+    "kanji_reading_briefs.n2.json": {
+      "targets": 367,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 734,
+      "entries_with_review": 0,
+      "sha256": "ad31ab513e67e9e0616fe076121b514276d52556ca3b634bec9205c08096bde1"
+    },
+    "kanji_reading_briefs.n3.json": {
+      "targets": 366,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 732,
+      "entries_with_review": 0,
+      "sha256": "ae6172cfc3cece83f3ca6f2b73faeac557d80bb01e9c7f4b6cb37eab688b4fde"
+    },
+    "kanji_reading_briefs.n4.json": {
+      "targets": 166,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 332,
+      "entries_with_review": 0,
+      "sha256": "b476ca5c04fa335833efcfff48fe0c506cc288c02106351243277fabcbf3fb1f"
+    },
+    "kanji_reading_briefs.n5.json": {
+      "targets": 79,
+      "languages": [
+        "en",
+        "fr"
+      ],
+      "stories": 158,
+      "entries_with_review": 0,
+      "sha256": "5f4a9c72a32f91bcd31b522e4b48b0e1b8b1060099e3a73c63e05241ec4f1044"
+    }
+  },
+  "reading_brief_canonical_mismatches": [],
+  "baseline_proposal": {
+    "kanji": 300,
+    "project_n5_n4": 245,
+    "frequency_extension": 55,
+    "gap_rows": 1016,
+    "status": "proposal_for_discussion_not_published"
+  },
+  "corpus": {
+    "records_recounted": 180161,
+    "historical_report_date": "2026-09-09T14:57:08.971292+00:00",
+    "historical_sites": {
+      "kanjidraw": {
+        "counts": {
+          "rows": 7351,
+          "reference_only_fields": 15909,
+          "catalogued": 7351
+        },
+        "issues": {},
+        "types": {
+          "kanji": 2857,
+          "kana_index": 1,
+          "radical_index": 1,
+          "collection": 131,
+          "dictionary_index": 1,
+          "radical": 198,
+          "collection_index": 1,
+          "kana": 187,
+          "word": 3974
+        },
+        "field_coverage": {
+          "page_type:present": 7351,
+          "entity_key:present": 7351,
+          "dedupe_key:present": 7351,
+          "source_url:present": 7351,
+          "entry_kind:present": 7351,
+          "character:present": 3242,
+          "codepoint_hex:present": 2858,
+          "hero_meaning:present": 6738,
+          "stroke_count:present": 3242,
+          "grade_code:present": 2833,
+          "grade_label:present": 2833,
+          "jlpt_level:present": 5113,
+          "in_study_set:present": 2857,
+          "on_readings:present": 2837,
+          "kun_readings:empty": 431,
+          "meanings:present": 2857,
+          "meanings_by_lang:present": 6937,
+          "badges:present": 6818,
+          "badge_notes:present": 4972,
+          "stroke_svg_default:present": 2858,
+          "stroke_svg_variants:present": 2858,
+          "radical:present": 2857,
+          "components:present": 2743,
+          "popular_usage:present": 1397,
+          "compound_words:present": 2856,
+          "jmdict_entry:present": 5543,
+          "senses:present": 4882,
+          "jmdict_compounds:present": 2237,
+          "sense_examples:present": 3610,
+          "example_sentences:present": 3765,
+          "rtk_mnemonic:present": 2694,
+          "rtk_frame:present": 2694,
+          "kana_cells:present": 1,
+          "romaji_variants:present": 1,
+          "guide_sections:present": 1,
+          "subtitle:present": 2,
+          "radicals:present": 1,
+          "intro:present": 199,
+          "slug:present": 131,
+          "page_number:present": 131,
+          "page_indicator:empty": 38,
+          "next_page_href:empty": 56,
+          "name:present": 131,
+          "description:present": 133,
+          "item_count:present": 103,
+          "items:present": 103,
+          "practice_modes:present": 131,
+          "see_also:present": 131,
+          "note:empty": 113,
+          "upstream_credits:present": 1,
+          "credits_text:present": 1,
+          "search_methods:present": 1,
+          "collection_chips:present": 1,
+          "radical_number:present": 198,
+          "meaning:present": 198,
+          "joyo_count:present": 198,
+          "other_count:present": 198,
+          "variant_forms:empty": 155,
+          "sample_kanji:present": 198,
+          "component_filters:present": 151,
+          "joyo_members:present": 198,
+          "other_members:present": 193,
+          "neighbors:present": 198,
+          "note:present": 216,
+          "component_filters:empty": 47,
+          "variant_forms:present": 43,
+          "other_members:empty": 5,
+          "collections:present": 1,
+          "page_indicator:present": 93,
+          "next_page_href:present": 75,
+          "item_count:empty": 28,
+          "items:empty": 28,
+          "parse_notes:present": 210,
+          "character_label:present": 184,
+          "romaji:present": 185,
+          "script:present": 187,
+          "stroke_step_count:present": 187,
+          "examples:present": 185,
+          "practice_hint:present": 186,
+          "character_label:empty": 2,
+          "romaji:empty": 2,
+          "examples:empty": 1,
+          "kun_readings:present": 2426,
+          "components:empty": 114,
+          "senses:empty": 1949,
+          "sense_examples:empty": 3221,
+          "popular_usage:empty": 1460,
+          "jmdict_compounds:empty": 620,
+          "example_sentences:empty": 3066,
+          "jmdict_entry:empty": 1288,
+          "jlpt_level:empty": 1718,
+          "rtk_mnemonic:empty": 163,
+          "rtk_frame:empty": 163,
+          "on_readings:empty": 20,
+          "grade_code:empty": 24,
+          "grade_label:empty": 24,
+          "badges:empty": 13,
+          "badge_notes:empty": 1859,
+          "surface:present": 3974,
+          "reading:present": 3951,
+          "glosses:present": 3882,
+          "part_of_speech:present": 3353,
+          "verb_group:present": 1158,
+          "component_kanji:present": 3298,
+          "verb_group:empty": 2816,
+          "part_of_speech:empty": 621,
+          "component_kanji:empty": 676,
+          "hero_meaning:empty": 93,
+          "glosses:empty": 92,
+          "meanings_by_lang:empty": 92,
+          "reading:empty": 23,
+          "compound_words:empty": 2
+        },
+        "sha256": "81f846990302c7f3c0cddc9b6279be33d138f159abfd9b258d71f4c265eb61b1",
+        "bytes": 79722030
+      },
+      "kanshudo": {
+        "counts": {
+          "rows": 51229,
+          "reference_only_fields": 52608,
+          "catalogued": 51229
+        },
+        "issues": {},
+        "types": {
+          "kanji": 5178,
+          "word": 45791,
+          "component_index": 3,
+          "collection_index": 16,
+          "kana": 30,
+          "radical": 211
+        },
+        "field_coverage": {
+          "character:present": 5419,
+          "script:present": 4794,
+          "headline:present": 4794,
+          "meanings:present": 4790,
+          "romaji:empty": 4772,
+          "variant_of:empty": 3277,
+          "variant_kind:empty": 4144,
+          "stroke_count:present": 4792,
+          "frequency_rank:present": 2800,
+          "jlpt_level:present": 35692,
+          "usefulness_level:present": 50879,
+          "study_set:present": 3019,
+          "grade:present": 2998,
+          "intermediate_lesson:present": 1007,
+          "beginner_lesson:present": 100,
+          "words_starting_with:present": 2917,
+          "words_containing:present": 2968,
+          "names_containing:present": 2933,
+          "radical_number:empty": 4510,
+          "component_in_kanji:present": 1893,
+          "component_in_joyo_kanji:present": 1893,
+          "character_type:present": 4794,
+          "stroke_order_svg_url:present": 4791,
+          "stroke_order_codepoint:present": 4791,
+          "common_readings:present": 3396,
+          "additional_readings:present": 2763,
+          "composition_pattern:present": 3918,
+          "components:present": 4184,
+          "variants:empty": 3570,
+          "see_also:empty": 3854,
+          "notes:empty": 3295,
+          "notes_attribution:empty": 4568,
+          "references:present": 2142,
+          "usage:present": 3067,
+          "example_words:present": 2877,
+          "cascading_components:present": 3080,
+          "mnemonic_exists:present": 4794,
+          "mnemonic_text:empty": 4794,
+          "surface:present": 45791,
+          "headword:present": 2,
+          "head_note:present": 2,
+          "forms:present": 2,
+          "senses:present": 45778,
+          "part_of_speech:present": 2,
+          "primary_gloss:present": 2,
+          "usefulness:present": 2,
+          "useful_expressions:empty": 1,
+          "example_sentences:present": 2,
+          "component_kanji:present": 2,
+          "collection:present": 46433,
+          "title:present": 19,
+          "component_count:present": 3,
+          "kanji_groups:present": 8,
+          "kanji_count:present": 16,
+          "sets:empty": 8,
+          "kanji_groups:empty": 8,
+          "sets:present": 8,
+          "meanings:empty": 629,
+          "romaji:present": 22,
+          "frequency_rank:empty": 1994,
+          "jlpt_level:empty": 14891,
+          "grade:empty": 1796,
+          "intermediate_lesson:empty": 3787,
+          "beginner_lesson:empty": 4694,
+          "words_starting_with:empty": 1877,
+          "words_containing:empty": 1826,
+          "names_containing:empty": 1861,
+          "component_in_kanji:empty": 2901,
+          "component_in_joyo_kanji:empty": 2901,
+          "common_readings:empty": 1398,
+          "additional_readings:empty": 2031,
+          "composition_pattern:empty": 876,
+          "components:empty": 613,
+          "references:empty": 2652,
+          "cascading_components:empty": 1714,
+          "radical_number:present": 284,
+          "variants:present": 1224,
+          "notes:present": 1499,
+          "notes_attribution:present": 226,
+          "study_set:empty": 1775,
+          "see_also:present": 940,
+          "usage:empty": 1727,
+          "example_words:empty": 1917,
+          "variant_of:present": 1517,
+          "record_type:present": 46414,
+          "set_id:present": 46414,
+          "collection_title:present": 46414,
+          "set_title:present": 46414,
+          "set_size:present": 46414,
+          "set_size_note:present": 46414,
+          "word_id:present": 45789,
+          "reading:present": 45789,
+          "gloss_repeats_previous_row:present": 45789,
+          "pitch_pattern:present": 44202,
+          "audio_kana:present": 45614,
+          "withheld_detail:present": 21145,
+          "withheld_detail:empty": 24644,
+          "pitch_pattern:empty": 1587,
+          "stroke_order_svg_url:empty": 3,
+          "stroke_order_codepoint:empty": 3,
+          "audio_kana:empty": 175,
+          "usefulness_level:empty": 329,
+          "useful_expressions:present": 1,
+          "senses:empty": 13,
+          "kanji_id:present": 625,
+          "depth:present": 625,
+          "on_readings:present": 622,
+          "kun_readings:present": 514,
+          "mnemonic_available:present": 625,
+          "parent:empty": 625,
+          "kun_readings:empty": 111,
+          "on_readings:empty": 3,
+          "variant_kind:present": 650,
+          "stroke_count:empty": 2
+        },
+        "sha256": "d3b568392a8c7bc5d8c3e7d1934eb763a2412e980891e0566cc6a66eac510ed5",
+        "bytes": 280438326
+      },
+      "tanoshii_japanese": {
+        "counts": {
+          "rows": 105610,
+          "reference_only_fields": 79744,
+          "catalogued": 105610
+        },
+        "issues": {},
+        "types": {
+          "kanji": 12376,
+          "word": 79614,
+          "sentence": 13620
+        },
+        "field_coverage": {
+          "record_type:present": 105610,
+          "page_type:present": 105610,
+          "source_url:present": 105610,
+          "dictionary_page:present": 105610,
+          "character:present": 12376,
+          "character_id:present": 12376,
+          "kanji_sprite_url:present": 12307,
+          "english_meanings:present": 91932,
+          "english_meaning_text:present": 12318,
+          "stroke_count:present": 12376,
+          "radical:present": 2399,
+          "radical_residual_strokes:present": 2391,
+          "jlpt_level:present": 9033,
+          "is_jouyou:present": 9984,
+          "grade:present": 9984,
+          "kun_readings:present": 11239,
+          "on_readings:present": 12219,
+          "rejected_readings:empty": 12261,
+          "entry_links:present": 85433,
+          "japanese_meanings:present": 1306,
+          "construction:present": 2256,
+          "variants:present": 1045,
+          "origin:present": 1153,
+          "origin_formation_type:present": 1056,
+          "origin_terms:present": 1143,
+          "radical_summary:present": 2399,
+          "related_groups:present": 2403,
+          "other_language_meanings:present": 1892,
+          "stroke_order_groups:present": 48726,
+          "stroke_order_count:present": 2404,
+          "stroke_sprite_url:present": 2404,
+          "example_words:present": 1764,
+          "source_limitations:present": 12376,
+          "user_comments:empty": 47082,
+          "content_licence:present": 105610,
+          "entry_id:present": 79614,
+          "surface:present": 79614,
+          "reading:present": 79614,
+          "romaji:present": 79594,
+          "headword_part_of_speech:present": 79614,
+          "headword_element_id:present": 79614,
+          "headword_is_inflected:present": 79614,
+          "headword_conjugation_type_id:empty": 53016,
+          "headword_conjugation_label:empty": 53016,
+          "matched_conjugations:empty": 53016,
+          "elements:present": 79614,
+          "senses:present": 79614,
+          "sense_parts_of_speech:present": 79614,
+          "requested_element_id:empty": 17132,
+          "requested_conjugation_type_id:empty": 18514,
+          "headword_is_entry_default_view:present": 46322,
+          "kanji_links:present": 37982,
+          "kanji_meanings:present": 37978,
+          "synonym_senses:present": 17019,
+          "hyponyms:present": 16227,
+          "sample_sentences:present": 9303,
+          "stroke_order_total:present": 46322,
+          "character_ids:present": 37964,
+          "kana_stroke_characters:empty": 9265,
+          "sentence_id:present": 13620,
+          "sentence_japanese:present": 13620,
+          "sentence_english:present": 13619,
+          "sentence_furigana:present": 3638,
+          "source_attribution:present": 3596,
+          "sentence_words:present": 3598,
+          "word_entry_ids:present": 3598,
+          "kana_stroke_characters:present": 37057,
+          "conjugations:present": 9751,
+          "user_comments:present": 1660,
+          "list_route:present": 53270,
+          "list_kind:empty": 10580,
+          "list_key:empty": 10580,
+          "list_label:present": 53270,
+          "page_number:present": 53270,
+          "list_rank:present": 53270,
+          "radical:empty": 9977,
+          "radical_residual_strokes:empty": 9985,
+          "list_kind:present": 42690,
+          "list_key:present": 42690,
+          "kun_readings:empty": 1137,
+          "construction:empty": 164,
+          "variants:empty": 1375,
+          "rejected_readings:present": 115,
+          "jlpt_level:empty": 3343,
+          "is_jouyou:empty": 2392,
+          "grade:empty": 2392,
+          "on_readings:empty": 157,
+          "requested_element_id:present": 29190,
+          "kanji_links:empty": 8340,
+          "kanji_meanings:empty": 8344,
+          "character_ids:empty": 8358,
+          "sentence_furigana:empty": 9982,
+          "detail_href:present": 9938,
+          "sample_sentences:empty": 37019,
+          "synonym_senses:empty": 29303,
+          "hyponyms:empty": 30095,
+          "conjugations:empty": 919,
+          "headword_conjugation_type_id:present": 26598,
+          "headword_conjugation_label:present": 26598,
+          "matched_conjugations:present": 26598,
+          "requested_conjugation_type_id:present": 27808,
+          "romaji:empty": 20,
+          "entry_links:empty": 6557,
+          "kanji_sprite_url:empty": 69,
+          "english_meanings:empty": 58,
+          "english_meaning_text:empty": 58,
+          "japanese_meanings:empty": 1114,
+          "origin:empty": 1267,
+          "origin_formation_type:empty": 1364,
+          "origin_terms:empty": 1277,
+          "example_words:empty": 656,
+          "other_language_meanings:empty": 528,
+          "detail_href:empty": 84,
+          "radical_summary:empty": 21,
+          "related_groups:empty": 17,
+          "stroke_order_groups:empty": 16,
+          "stroke_order_count:empty": 16,
+          "stroke_sprite_url:empty": 16,
+          "sentence_english:empty": 1,
+          "source_attribution:empty": 2
+        },
+        "sha256": "4c651159d980f548d28c7e076fab5ce36c3a1648788031dc6f41f3502620b6f1",
+        "bytes": 1659700443
+      },
+      "the_kanji_map": {
+        "counts": {
+          "rows": 6597,
+          "reference_only_fields": 13150,
+          "catalogued": 6597
+        },
+        "issues": {},
+        "types": {
+          "kanji": 6484,
+          "radical_component": 111,
+          "kana": 2
+        },
+        "field_coverage": {
+          "character:present": 6597,
+          "canonical_character:present": 6597,
+          "variant_aliases:empty": 6588,
+          "entry_kind:present": 6597,
+          "is_navigable_radical:present": 6597,
+          "meanings:present": 6496,
+          "meaning_primary:present": 6496,
+          "meaning_jisho:present": 6499,
+          "meaning_kanjialive:present": 1234,
+          "radical_index_label:empty": 6487,
+          "radical_index:empty": 6487,
+          "radical_index_name:empty": 6495,
+          "stroke_count:present": 6531,
+          "stroke_count_kanjialive:present": 1234,
+          "stroke_count_jisho:present": 6531,
+          "grade:present": 1006,
+          "jlpt_level:present": 2213,
+          "taught_in:present": 2138,
+          "frequency_rank:present": 2501,
+          "on_readings:present": 6340,
+          "kun_readings:present": 5323,
+          "on_readings_romaji:present": 1222,
+          "kun_readings_romaji:present": 891,
+          "nanori:empty": 6597,
+          "radical:present": 6529,
+          "parts:present": 6236,
+          "parts_lists_self:present": 6597,
+          "parts_without_direct_edge:present": 5714,
+          "parts_not_in_graph:present": 4893,
+          "graph_variant:present": 6597,
+          "node_count:present": 6597,
+          "edge_count:present": 6597,
+          "edges:present": 6597,
+          "decomposition:present": 6369,
+          "usage:present": 1440,
+          "components:present": 6369,
+          "used_in:present": 1440,
+          "detached_edge_count:present": 6597,
+          "nodes:present": 6597,
+          "mnemonic_hint:present": 1124,
+          "mnemonic_hint_raw:present": 1234,
+          "mnemonic_hint_kind:present": 6597,
+          "mnemonic_hint_group:present": 1227,
+          "mnemonic_etymology_notes:empty": 6455,
+          "mnemonic_kanji_refs:empty": 6239,
+          "example_words_kanjialive:present": 1234,
+          "example_words_on:present": 4615,
+          "example_words_kun:present": 3428,
+          "stroke_order:present": 6597,
+          "textbooks:present": 1073,
+          "kanjialive_lesson:present": 354,
+          "references:present": 1234,
+          "kanjialive_id:present": 1234,
+          "kanjialive_name:present": 1234,
+          "jisho_uri:present": 6529,
+          "upstreams:present": 6597,
+          "source_url:present": 6597,
+          "parse_notes:present": 6597,
+          "meaning_kanjialive:empty": 5363,
+          "radical_index_label:present": 110,
+          "radical_index:present": 110,
+          "radical_index_name:present": 102,
+          "stroke_count_kanjialive:empty": 5363,
+          "grade:empty": 5591,
+          "jlpt_level:empty": 4384,
+          "taught_in:empty": 4459,
+          "frequency_rank:empty": 4096,
+          "kun_readings:empty": 1274,
+          "on_readings_romaji:empty": 5375,
+          "kun_readings_romaji:empty": 5706,
+          "parts:empty": 361,
+          "parts_without_direct_edge:empty": 883,
+          "parts_not_in_graph:empty": 1704,
+          "mnemonic_hint:empty": 5473,
+          "mnemonic_hint_raw:empty": 5363,
+          "mnemonic_hint_group:empty": 5370,
+          "example_words_kanjialive:empty": 5363,
+          "example_words_on:empty": 1982,
+          "example_words_kun:empty": 3169,
+          "textbooks:empty": 5524,
+          "kanjialive_lesson:empty": 6243,
+          "references:empty": 5363,
+          "kanjialive_id:empty": 5363,
+          "kanjialive_name:empty": 5363,
+          "decomposition:empty": 228,
+          "components:empty": 228,
+          "on_readings:empty": 257,
+          "meanings:empty": 101,
+          "meaning_primary:empty": 101,
+          "mnemonic_kanji_refs:present": 358,
+          "meaning_jisho:empty": 98,
+          "stroke_count:empty": 66,
+          "stroke_count_jisho:empty": 66,
+          "radical:empty": 68,
+          "jisho_uri:empty": 68,
+          "usage:empty": 5157,
+          "used_in:empty": 5157,
+          "mnemonic_etymology_notes:present": 142,
+          "variant_aliases:present": 9
+        },
+        "sha256": "c4847182ab9e101a36cd4b4ad240165b593ecf47bf75b92ec412371dee72cbee",
+        "bytes": 122322816
+      },
+      "wanikani": {
+        "counts": {
+          "rows": 9374,
+          "reference_only_fields": 28425,
+          "catalogued": 9374
+        },
+        "issues": {},
+        "types": {
+          "kanji": 2102,
+          "vocabulary": 6781,
+          "radicals": 491
+        },
+        "field_coverage": {
+          "character:present": 9359,
+          "character_image:empty": 9359,
+          "character_image_label:empty": 9359,
+          "subject_name:present": 9374,
+          "level:present": 9374,
+          "slug:present": 9374,
+          "primary_meaning:present": 9374,
+          "alternative_meanings:present": 5566,
+          "readings:present": 8883,
+          "on_readings:present": 2053,
+          "kun_readings:present": 1581,
+          "nanori:empty": 2080,
+          "primary_reading_type:present": 2102,
+          "radical_combination:present": 2102,
+          "radical_component_names:present": 2102,
+          "visually_similar_kanji:empty": 697,
+          "found_in_vocabulary:present": 2102,
+          "mnemonics:present": 9374,
+          "page_type:present": 9374,
+          "subject_type:present": 9374,
+          "source_url:present": 9374,
+          "word_type:present": 6781,
+          "word_types:present": 6781,
+          "reading_audio:present": 6781,
+          "component_subjects:present": 6721,
+          "context_sentences:present": 6781,
+          "collocations:empty": 4406,
+          "alternative_meanings:empty": 3808,
+          "found_in_kanji:present": 491,
+          "kun_readings:empty": 521,
+          "visually_similar_kanji:present": 1405,
+          "on_readings:empty": 49,
+          "nanori:present": 22,
+          "collocations:present": 2375,
+          "character:empty": 15,
+          "character_image:present": 15,
+          "character_image_label:present": 15,
+          "component_subjects:empty": 60
+        },
+        "sha256": "6f153b9736e1128465ce175fd2c193faa137d8a682e4a9af1094439b9c1815a8",
+        "bytes": 72215699
+      }
+    }
+  },
+  "source_file_sizes_match_catalogue": {
+    "kanjidraw": true,
+    "kanshudo": true,
+    "tanoshii_japanese": true,
+    "the_kanji_map": true,
+    "wanikani": true
+  },
+  "source_conflicts_recorded_20260909": {
+    "jlpt_level": 643,
+    "stroke_count": 128
+  },
+  "samples": {
+    "en": {
+      "files": 4,
+      "extensions": {
+        ".pdf": 2,
+        ".jpg": 1,
+        ".txt": 1
+      },
+      "bytes": 8940411
+    },
+    "fr": {
+      "files": 4,
+      "extensions": {
+        ".png": 1,
+        ".jpg": 1,
+        ".txt": 2
+      },
+      "bytes": 2432287
+    },
+    "generated-tests": {
+      "files": 81,
+      "extensions": {
+        ".md": 15,
+        ".png": 63,
+        ".json": 3
+      },
+      "bytes": 26034597
+    },
+    "references": {
+      "files": 8,
+      "extensions": {
+        ".webp": 8
+      },
+      "bytes": 235686
+    },
+    "tools": {
+      "files": 4,
+      "extensions": {
+        ".ps1": 4
+      },
+      "bytes": 23588
+    }
+  }
+}

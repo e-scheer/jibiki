@@ -21,7 +21,9 @@ CORE_TABLES = [
         jlpt INTEGER,
         freq_rank INTEGER,
         headword TEXT NOT NULL,
-        primary_reading TEXT NOT NULL
+        primary_reading TEXT NOT NULL,
+        provenance TEXT NOT NULL DEFAULT '{}',
+        canonical_word_id INTEGER
     )""",
     """CREATE TABLE word_forms(
         id INTEGER PRIMARY KEY,
@@ -30,7 +32,8 @@ CORE_TABLES = [
         kind INTEGER NOT NULL,
         is_common INTEGER NOT NULL DEFAULT 0,
         ord INTEGER NOT NULL DEFAULT 0,
-        pitch TEXT NOT NULL DEFAULT ''
+        pitch TEXT NOT NULL DEFAULT '',
+        metadata TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE senses(
         id INTEGER PRIMARY KEY,
@@ -38,7 +41,8 @@ CORE_TABLES = [
         ord INTEGER NOT NULL,
         pos TEXT NOT NULL DEFAULT '[]',
         misc TEXT NOT NULL DEFAULT '[]',
-        field TEXT NOT NULL DEFAULT '[]'
+        field TEXT NOT NULL DEFAULT '[]',
+        metadata TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE kanji(
         literal TEXT PRIMARY KEY,
@@ -54,7 +58,9 @@ CORE_TABLES = [
         formation TEXT NOT NULL DEFAULT '',
         phonetic TEXT NOT NULL DEFAULT '',
         stroke_paths TEXT NOT NULL DEFAULT '[]',
-        stroke_viewbox TEXT NOT NULL DEFAULT '0 0 109 109'
+        stroke_viewbox TEXT NOT NULL DEFAULT '0 0 109 109',
+        metadata TEXT NOT NULL DEFAULT '{}',
+        provenance TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE kanji_components(
         kanji TEXT NOT NULL,
@@ -78,6 +84,13 @@ CORE_TABLES = [
         id INTEGER PRIMARY KEY,
         kana TEXT NOT NULL UNIQUE
     )""",
+    """CREATE TABLE kana_word_examples(
+        kana TEXT NOT NULL,
+        word_id INTEGER NOT NULL,
+        reading TEXT NOT NULL,
+        ord INTEGER NOT NULL DEFAULT 0,
+        provenance TEXT NOT NULL DEFAULT '{}'
+    )""",
     """CREATE TABLE kana_usage_examples(
         id INTEGER PRIMARY KEY,
         usage_id INTEGER NOT NULL,
@@ -90,7 +103,8 @@ CORE_TABLES = [
     """CREATE TABLE radicals(
         literal TEXT PRIMARY KEY,
         strokes INTEGER NOT NULL DEFAULT 0,
-        reading TEXT NOT NULL DEFAULT ''
+        reading TEXT NOT NULL DEFAULT '',
+        provenance TEXT NOT NULL DEFAULT '{}'
     )""",
 ]
 
@@ -105,6 +119,7 @@ CORE_INDEXES = [
     "CREATE INDEX idx_kanji_components_component ON kanji_components(component)",
     "CREATE INDEX idx_kanji_words_kanji ON kanji_words(kanji, rank)",
     "CREATE INDEX idx_kana_usage_examples_usage ON kana_usage_examples(usage_id, ord)",
+    "CREATE INDEX idx_kana_word_examples_kana ON kana_word_examples(kana, ord)",
 ]
 
 LOCALIZED_TABLES = [
@@ -116,7 +131,8 @@ LOCALIZED_TABLES = [
         ord INTEGER NOT NULL,
         text TEXT NOT NULL,
         word_rank INTEGER NOT NULL,
-        word_common INTEGER NOT NULL
+        word_common INTEGER NOT NULL,
+        metadata TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE kanji_meanings(
         kanji TEXT NOT NULL,
@@ -176,7 +192,9 @@ NAMES_TABLES = [
         id INTEGER PRIMARY KEY,
         kanji TEXT NOT NULL DEFAULT '',
         reading TEXT NOT NULL,
-        name_types TEXT NOT NULL DEFAULT '[]'
+        name_types TEXT NOT NULL DEFAULT '[]',
+        metadata TEXT NOT NULL DEFAULT '{}',
+        provenance TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE name_translations(
         name_id INTEGER NOT NULL,
@@ -195,17 +213,29 @@ NAMES_INDEXES = [
 EXAMPLES_TABLES = [
     """CREATE TABLE examples(
         id INTEGER PRIMARY KEY,
-        japanese TEXT NOT NULL
+        japanese TEXT NOT NULL,
+        source_key TEXT,
+        provenance TEXT NOT NULL DEFAULT '{}'
     )""",
     """CREATE TABLE example_translations(
         example_id INTEGER NOT NULL,
         language TEXT NOT NULL,
         text TEXT NOT NULL
     )""",
+    """CREATE TABLE example_sense_links(
+        example_id INTEGER NOT NULL,
+        sense_id INTEGER NOT NULL,
+        word_id INTEGER NOT NULL,
+        source TEXT NOT NULL,
+        source_sense_order INTEGER NOT NULL,
+        text TEXT NOT NULL DEFAULT '',
+        provenance TEXT NOT NULL DEFAULT '{}'
+    )""",
 ]
 
 EXAMPLES_INDEXES = [
-    "CREATE INDEX idx_example_translations_example ON example_translations(example_id, language)"
+    "CREATE INDEX idx_example_translations_example ON example_translations(example_id, language)",
+    "CREATE INDEX idx_example_sense_links_word ON example_sense_links(word_id, example_id)",
 ]
 
 MNEMONICS_TABLES = [
@@ -219,10 +249,9 @@ MNEMONICS_TABLES = [
         score INTEGER NOT NULL DEFAULT 0,
         image BLOB,
         image_w INTEGER NOT NULL DEFAULT 0,
-        image_h INTEGER NOT NULL DEFAULT 0
+        image_h INTEGER NOT NULL DEFAULT 0,
+        provenance TEXT NOT NULL DEFAULT '{}'
     )""",
 ]
 
-MNEMONICS_INDEXES = [
-    "CREATE INDEX idx_mnemonics_target ON mnemonics(kind, character, reading)"
-]
+MNEMONICS_INDEXES = ["CREATE INDEX idx_mnemonics_target ON mnemonics(kind, character, reading)"]

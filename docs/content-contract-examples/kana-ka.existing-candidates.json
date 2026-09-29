@@ -1,0 +1,71 @@
+{
+  "example_only": true,
+  "items": [
+    {
+      "id": "example:legacy:ka:en",
+      "target": {
+        "kind": "kana",
+        "key": "か",
+        "sense_id": null,
+        "reading": null,
+        "goals": [
+          "shape",
+          "reading"
+        ]
+      },
+      "language": "en",
+      "story": "A karate fighter kicks through か with a sharp 'ka!'.",
+      "anchor": null,
+      "visual": {
+        "idea": null,
+        "glyph_mapping": [],
+        "image": null
+      },
+      "origin": {
+        "kind": "legacy_seed",
+        "source_refs": [
+          "server/content_sources/mnemonics/kana_stories.json#/entries/5/en"
+        ],
+        "author": null
+      },
+      "review": {
+        "status": "pending",
+        "comment": "Texte repris à l’identique. Ancre et scène non structurées dans le seed. Aucune validation utilisateur enregistrée.",
+        "reviewer": null
+      }
+    },
+    {
+      "id": "example:legacy:ka:fr",
+      "target": {
+        "kind": "kana",
+        "key": "か",
+        "sense_id": null,
+        "reading": null,
+        "goals": [
+          "shape",
+          "reading"
+        ]
+      },
+      "language": "fr",
+      "story": "Le katana de か fend l'air : ka !",
+      "anchor": null,
+      "visual": {
+        "idea": null,
+        "glyph_mapping": [],
+        "image": null
+      },
+      "origin": {
+        "kind": "legacy_seed",
+        "source_refs": [
+          "server/content_sources/mnemonics/kana_stories.json#/entries/5/fr"
+        ],
+        "author": null
+      },
+      "review": {
+        "status": "pending",
+        "comment": "Texte repris à l’identique. Ancre et scène non structurées dans le seed. Aucune validation utilisateur enregistrée.",
+        "reviewer": null
+      }
+    }
+  ]
+}

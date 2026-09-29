@@ -128,26 +128,82 @@ KANA: list[tuple[str, str, str, str, str]] = [
 # *fragment* taken from one. This is the standard derivation table.
 #   romaji → (hiragana source kanji, katakana source kanji)
 KANA_ORIGINS: dict[str, tuple[str, str]] = {
-    "a": ("安", "阿"), "i": ("以", "伊"), "u": ("宇", "宇"), "e": ("衣", "江"), "o": ("於", "於"),
-    "ka": ("加", "加"), "ki": ("幾", "幾"), "ku": ("久", "久"), "ke": ("計", "介"), "ko": ("己", "己"),
-    "sa": ("左", "散"), "shi": ("之", "之"), "su": ("寸", "須"), "se": ("世", "世"), "so": ("曽", "曽"),
-    "ta": ("太", "多"), "chi": ("知", "千"), "tsu": ("川", "川"), "te": ("天", "天"), "to": ("止", "止"),
-    "na": ("奈", "奈"), "ni": ("仁", "二"), "nu": ("奴", "奴"), "ne": ("祢", "祢"), "no": ("乃", "乃"),
-    "ha": ("波", "八"), "hi": ("比", "比"), "fu": ("不", "不"), "he": ("部", "部"), "ho": ("保", "保"),
-    "ma": ("末", "万"), "mi": ("美", "三"), "mu": ("武", "牟"), "me": ("女", "女"), "mo": ("毛", "毛"),
-    "ya": ("也", "也"), "yu": ("由", "由"), "yo": ("与", "与"),
-    "ra": ("良", "良"), "ri": ("利", "利"), "ru": ("留", "流"), "re": ("礼", "礼"), "ro": ("呂", "呂"),
-    "wa": ("和", "和"), "wo": ("遠", "乎"), "n": ("无", "尓"),
+    "a": ("安", "阿"),
+    "i": ("以", "伊"),
+    "u": ("宇", "宇"),
+    "e": ("衣", "江"),
+    "o": ("於", "於"),
+    "ka": ("加", "加"),
+    "ki": ("幾", "幾"),
+    "ku": ("久", "久"),
+    "ke": ("計", "介"),
+    "ko": ("己", "己"),
+    "sa": ("左", "散"),
+    "shi": ("之", "之"),
+    "su": ("寸", "須"),
+    "se": ("世", "世"),
+    "so": ("曽", "曽"),
+    "ta": ("太", "多"),
+    "chi": ("知", "千"),
+    "tsu": ("川", "川"),
+    "te": ("天", "天"),
+    "to": ("止", "止"),
+    "na": ("奈", "奈"),
+    "ni": ("仁", "二"),
+    "nu": ("奴", "奴"),
+    "ne": ("祢", "祢"),
+    "no": ("乃", "乃"),
+    "ha": ("波", "八"),
+    "hi": ("比", "比"),
+    "fu": ("不", "不"),
+    "he": ("部", "部"),
+    "ho": ("保", "保"),
+    "ma": ("末", "万"),
+    "mi": ("美", "三"),
+    "mu": ("武", "牟"),
+    "me": ("女", "女"),
+    "mo": ("毛", "毛"),
+    "ya": ("也", "也"),
+    "yu": ("由", "由"),
+    "yo": ("与", "与"),
+    "ra": ("良", "良"),
+    "ri": ("利", "利"),
+    "ru": ("留", "流"),
+    "re": ("礼", "礼"),
+    "ro": ("呂", "呂"),
+    "wa": ("和", "和"),
+    "wo": ("遠", "乎"),
+    "n": ("无", "尓"),
 }
 
 # A voiced (dakuten ゛) or half-voiced (handakuten ゜) kana is not derived from its
 # own kanji - it is a base gojūon kana wearing a diacritic. Map each to its base.
 _DAKUTEN_BASE: dict[str, str] = {
-    "ga": "ka", "gi": "ki", "gu": "ku", "ge": "ke", "go": "ko",
-    "za": "sa", "ji": "shi", "zu": "su", "ze": "se", "zo": "so",
-    "da": "ta", "di": "chi", "du": "tsu", "de": "te", "do": "to",
-    "ba": "ha", "bi": "hi", "bu": "fu", "be": "he", "bo": "ho",
-    "pa": "ha", "pi": "hi", "pu": "fu", "pe": "he", "po": "ho",
+    "ga": "ka",
+    "gi": "ki",
+    "gu": "ku",
+    "ge": "ke",
+    "go": "ko",
+    "za": "sa",
+    "ji": "shi",
+    "zu": "su",
+    "ze": "se",
+    "zo": "so",
+    "da": "ta",
+    "di": "chi",
+    "du": "tsu",
+    "de": "te",
+    "do": "to",
+    "ba": "ha",
+    "bi": "hi",
+    "bu": "fu",
+    "be": "he",
+    "bo": "ho",
+    "pa": "ha",
+    "pi": "hi",
+    "pu": "fu",
+    "pe": "he",
+    "po": "ho",
 }
 
 # romaji → (hiragana char, katakana char) - for pointing a dakuten kana at its base.
@@ -199,9 +255,13 @@ def kana_origin(romaji: str, script: str, kind: str) -> tuple[str, str]:
             return ("", "")
         origin = src[0] if is_hira else src[1]
         if is_hira:
-            note = f"Cursive simplification of the man'yōgana kanji {origin}, borrowed for its sound."
+            note = (
+                f"Cursive simplification of the man'yōgana kanji {origin}, borrowed for its sound."
+            )
         else:
-            note = f"Taken from a fragment of the man'yōgana kanji {origin}, borrowed for its sound."
+            note = (
+                f"Taken from a fragment of the man'yōgana kanji {origin}, borrowed for its sound."
+            )
         return (origin, note)
 
     if kind == "yoon":
@@ -238,25 +298,52 @@ def kana_origin(romaji: str, script: str, kind: str) -> tuple[str, str]:
 # *job in a sentence* beyond its sound. Written in hiragana, so only the hiragana
 # member of a pair carries it. romaji → (short role label, one-line explanation).
 KANA_USAGE: dict[str, tuple[str, str]] = {
-    "ha": ("Topic particle", "Marks the topic - “as for …”. Written は, but read wa when it's the particle."),
-    "ga": ("Subject particle", "Marks the grammatical subject; between clauses it also means “but”."),
-    "wo": ("Object particle", "Marks the direct object of a verb. Only ever a particle, and read o."),
-    "ni": ("Particle", "Points to a destination, a time, or an indirect object - “to, at, in, on”."),
-    "he": ("Direction particle", "Marks the direction of movement - “to, toward”. Read e as the particle."),
+    "ha": (
+        "Topic particle",
+        "Marks the topic - “as for …”. Written は, but read wa when it's the particle.",
+    ),
+    "ga": (
+        "Subject particle",
+        "Marks the grammatical subject; between clauses it also means “but”.",
+    ),
+    "wo": (
+        "Object particle",
+        "Marks the direct object of a verb. Only ever a particle, and read o.",
+    ),
+    "ni": (
+        "Particle",
+        "Points to a destination, a time, or an indirect object - “to, at, in, on”.",
+    ),
+    "he": (
+        "Direction particle",
+        "Marks the direction of movement - “to, toward”. Read e as the particle.",
+    ),
     "de": ("Particle", "Marks where an action happens or the means used - “at, by, with”."),
     "to": ("Particle", "Joins nouns as a full “and”, means “with”, and marks quotations."),
-    "no": ("Possessive particle", "Links nouns - “’s / of” - and can turn a whole clause into a noun."),
+    "no": (
+        "Possessive particle",
+        "Links nouns - “’s / of” - and can turn a whole clause into a noun.",
+    ),
     "mo": ("Particle", "“Also, too, even” - replaces は or が to add “as well”."),
     "ya": ("Particle", "Lists nouns loosely - “… and … (among others)”."),
-    "ka": ("Question particle", "At a sentence's end it makes a question; between nouns it means “or”."),
-    "wa": ("Sentence-final particle", "Soft emphasis at a sentence's end, common in feminine speech."),
+    "ka": (
+        "Question particle",
+        "At a sentence's end it makes a question; between nouns it means “or”.",
+    ),
+    "wa": (
+        "Sentence-final particle",
+        "Soft emphasis at a sentence's end, common in feminine speech.",
+    ),
     "ne": ("Sentence-final particle", "Seeks agreement - “…, right? / isn't it?”."),
     "yo": ("Sentence-final particle", "Adds emphasis or new information - “… you know!”."),
     "na": ("Sentence-final particle", "Emphasis or a soft prohibition; also links na-adjectives."),
     "sa": ("Sentence-final particle", "Casual filler - “y’know, well …”."),
     "zo": ("Sentence-final particle", "Strong, assertive emphasis (blunt, masculine)."),
     "ze": ("Sentence-final particle", "Casual emphasis (masculine)."),
-    "n": ("Moraic nasal", "The one kana that never begins a word; also a casual squeeze of の (…んです)."),
+    "n": (
+        "Moraic nasal",
+        "The one kana that never begins a word; also a casual squeeze of の (…んです).",
+    ),
 }
 
 
@@ -300,7 +387,9 @@ KANA_USAGE_EXAMPLES: dict[str, list[dict]] = {
         _ex("家", "へ", "帰ります。", "Ie e kaerimasu.", "I'm heading home."),
     ],
     "de": [
-        _ex("図書館", "で", "勉強します。", "Toshokan de benkyō shimasu.", "I study at the library."),
+        _ex(
+            "図書館", "で", "勉強します。", "Toshokan de benkyō shimasu.", "I study at the library."
+        ),
         _ex("バス", "で", "行きます。", "Basu de ikimasu.", "I go by bus."),
     ],
     "to": [
@@ -309,19 +398,43 @@ KANA_USAGE_EXAMPLES: dict[str, list[dict]] = {
     ],
     "no": [
         _ex("私", "の", "本です。", "Watashi no hon desu.", "It's my book."),
-        _ex("日本", "の", "音楽が好きです。", "Nihon no ongaku ga suki desu.", "I like Japanese music."),
+        _ex(
+            "日本",
+            "の",
+            "音楽が好きです。",
+            "Nihon no ongaku ga suki desu.",
+            "I like Japanese music.",
+        ),
     ],
     "mo": [
         _ex("私", "も", "行きます。", "Watashi mo ikimasu.", "I'm going too."),
         _ex("彼", "も", "学生です。", "Kare mo gakusei desu.", "He is a student too."),
     ],
     "ya": [
-        _ex("本", "や", "ペンがあります。", "Hon ya pen ga arimasu.", "There are books, pens, and so on."),
-        _ex("りんご", "や", "みかんを買いました。", "Ringo ya mikan o kaimashita.", "I bought apples, mandarins, and such."),
+        _ex(
+            "本",
+            "や",
+            "ペンがあります。",
+            "Hon ya pen ga arimasu.",
+            "There are books, pens, and so on.",
+        ),
+        _ex(
+            "りんご",
+            "や",
+            "みかんを買いました。",
+            "Ringo ya mikan o kaimashita.",
+            "I bought apples, mandarins, and such.",
+        ),
     ],
     "ka": [
         _ex("これは何です", "か", "。", "Kore wa nan desu ka.", "What is this?"),
-        _ex("犬", "か", "猫を飼いたいです。", "Inu ka neko o kaitai desu.", "I want to get a dog or a cat."),
+        _ex(
+            "犬",
+            "か",
+            "猫を飼いたいです。",
+            "Inu ka neko o kaitai desu.",
+            "I want to get a dog or a cat.",
+        ),
     ],
     "wa": [
         _ex("きれいだ", "わ", "。", "Kirei da wa.", "How pretty!"),
@@ -341,7 +454,13 @@ KANA_USAGE_EXAMPLES: dict[str, list[dict]] = {
     ],
     "sa": [
         _ex("まあ、いい", "さ", "。", "Mā, ii sa.", "Well, it's fine."),
-        _ex("それは", "さ", "、難しいよ。", "Sore wa sa, muzukashii yo.", "That, y'know, is difficult."),
+        _ex(
+            "それは",
+            "さ",
+            "、難しいよ。",
+            "Sore wa sa, muzukashii yo.",
+            "That, y'know, is difficult.",
+        ),
     ],
     "zo": [
         _ex("行く", "ぞ", "！", "Iku zo!", "Here we go!"),
