@@ -10,12 +10,14 @@ class SyncService {
   Future<Map<String, dynamic>> sync({
     String? lastSyncedAt,
     String mode = 'sync',
+    String? replacementId,
     List<Map<String, dynamic>> reviews = const [],
     List<Map<String, dynamic>> ops = const [],
   }) async {
     final data = await _api.post(ApiConfig.studySync, data: {
       'last_synced_at': lastSyncedAt,
       'mode': mode,
+      if (replacementId != null) 'replacement_id': replacementId,
       'reviews': reviews,
       'ops': ops,
     });

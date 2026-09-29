@@ -1,11 +1,14 @@
 import '../models/enums.dart';
+import '../core/study_calendar.dart';
 import '../models/study.dart';
 import '../repositories/study_repository.dart';
 import 'base_view_model.dart';
 
 class DashboardViewModel extends BaseViewModel {
-  DashboardViewModel(this._study);
+  DashboardViewModel(this._study, {String Function()? timezone})
+      : _timezone = timezone ?? (() => 'UTC');
   final StudyRepository _study;
+  final String Function() _timezone;
 
   StudyStats _stats = StudyStats.empty();
   StudyStats get stats => _stats;
@@ -29,7 +32,7 @@ class DashboardViewModel extends BaseViewModel {
 
     final cards = await cardsFuture;
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final calendar = StudyCalendar(_timezone());
     final forecast = List<int>.filled(7, 0);
     final dueByType = <ItemType, int>{};
 
@@ -40,8 +43,7 @@ class DashboardViewModel extends BaseViewModel {
         dueByType.update(card.itemType, (value) => value + 1,
             ifAbsent: () => 1);
       }
-      final dueDay = DateTime(due.year, due.month, due.day);
-      final days = dueDay.difference(today).inDays;
+      final days = calendar.daysBetween(now, due);
       if (days >= 1 && days <= 7) forecast[days - 1]++;
     }
 

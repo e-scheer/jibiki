@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../core/auth_callback_query.dart';
 import '../core/telemetry_route_observer.dart';
 import '../models/enums.dart';
+import '../l10n/l10n.dart';
+import '../views/widgets/neo_pop.dart';
 import '../viewmodels/app_state.dart';
 import '../views/auth/login_view.dart';
 import '../views/auth/register_view.dart';
@@ -35,10 +37,18 @@ import '../views/reference/reference_view.dart';
 ///   unknown → splash · unauthenticated → login · authenticated but
 ///   not onboarded → onboarding · otherwise the home shell.
 GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
+  String? pendingLocation;
+  String resumeLocation() {
+    final location = pendingLocation ?? '/';
+    pendingLocation = null;
+    return location;
+  }
+
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: app,
     observers: [TelemetryRouteObserver()],
+    errorBuilder: (_, __) => const _UnavailableRoute(),
     redirect: (context, state) {
       final loc = state.matchedLocation;
       final atAuth = loc == '/login' || loc == '/register';
@@ -49,7 +59,9 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
 
       if (app.status == AuthStatus.unknown) {
         if (atRecovery) return null;
-        return loc == '/splash' ? null : '/splash';
+        if (loc == '/splash') return null;
+        pendingLocation = state.uri.toString();
+        return '/splash';
       }
       // Email and provider callbacks must survive cold-start bootstrap and stay
       // reachable regardless of the current account or onboarding state.
@@ -57,6 +69,11 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
       // Local-only (no account) counts as signed in: the paid app is fully
       // usable offline; login stays reachable to link an account later.
       if (!app.canEnter) {
+        if (loc == '/splash' &&
+            pendingLocation != null &&
+            pendingLocation != '/') {
+          return resumeLocation();
+        }
         // The landing route still asks for an account, but deep links remain on
         // their intended surface so an account-only panel can explain the gate
         // without throwing the learner into a dead-end login page.
@@ -65,11 +82,20 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
         }
         return null;
       }
-      if (!app.onboarded) return loc == '/onboarding' ? null : '/onboarding';
+      if (!app.onboarded) {
+        if (loc == '/onboarding') return null;
+        if (loc != '/splash' && !atAuth) {
+          pendingLocation = state.uri.toString();
+        }
+        return '/onboarding';
+      }
       if (app.localOnly && atAuth) {
         return null;
       }
-      if (atAuth || loc == '/onboarding' || loc == '/splash') return '/';
+      if (atAuth || loc == '/onboarding' || loc == '/splash') {
+        final destination = resumeLocation();
+        return destination == loc ? '/' : destination;
+      }
       return null;
     },
     routes: [
@@ -140,8 +166,12 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
       GoRoute(
         name: 'word_detail',
         path: '/word/:id',
-        builder: (_, s) =>
-            WordDetailView(wordId: int.parse(s.pathParameters['id']!)),
+        builder: (_, s) {
+          final id = int.tryParse(s.pathParameters['id'] ?? '');
+          return id != null && id > 0
+              ? WordDetailView(wordId: id)
+              : const _UnavailableRoute();
+        },
       ),
       GoRoute(
         name: 'kanji_detail',
@@ -215,10 +245,15 @@ GoRouter buildRouter(AppState app, {String initialLocation = '/'}) {
       GoRoute(
         name: 'community_deck_detail',
         path: '/decks/community/:id',
-        builder: (_, s) => DeckDetailView(
-          deckId: int.parse(s.pathParameters['id']!),
-          owned: s.uri.queryParameters['owned'] == '1',
-        ),
+        builder: (_, s) {
+          final id = int.tryParse(s.pathParameters['id'] ?? '');
+          return id != null && id > 0
+              ? DeckDetailView(
+                  deckId: id,
+                  owned: s.uri.queryParameters['owned'] == '1',
+                )
+              : const _UnavailableRoute();
+        },
       ),
     ],
   );
@@ -252,3 +287,34 @@ CustomTransitionPage<void> _authFlowPage(
         );
       },
     );
+
+class _UnavailableRoute extends StatelessWidget {
+  const _UnavailableRoute();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: NeoCard(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.trText('This page is unavailable.')),
+                      const SizedBox(height: 20),
+                      NeoPrimaryButton(
+                        label: context.trText('Return to Jibiki'),
+                        onTap: () => context.go('/'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}

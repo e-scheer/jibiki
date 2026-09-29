@@ -1,3 +1,4 @@
+import '../../routing/route_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:jibiki/l10n/l10n.dart';
 import 'package:provider/provider.dart';
@@ -177,6 +178,12 @@ class _Storage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.trText(
+                        'Radical data: Kanji alive · CC BY 4.0. Source: https://github.com/kanjialive/kanji-data-media · Licence: https://creativecommons.org/licenses/by/4.0/'),
+                    style: TextStyle(fontSize: 11, color: context.jc.body),
+                  ),
                 ],
               ),
             ),
@@ -199,7 +206,7 @@ class _StorageHeader extends StatelessWidget {
         leading: NeoIconButton(
           icon: Icons.arrow_back_rounded,
           label: context.trText('Back'),
-          onTap: () => Navigator.of(context).maybePop(),
+          onTap: () => popOrGo(context),
         ),
         trailing: const NeoBadge(
           'OFFLINE',

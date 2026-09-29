@@ -47,9 +47,9 @@ void main() {
 
   group('search', () {
     test('japanese exact beats prefix beats contains', () async {
-      final results = await dict.search('食べる');
-      expect(results.words.first.headword, '食べる');
-      // Prefix hits (食べる…compounds) follow, contains later.
+      final results = await dict.search('水');
+      expect(results.words.first.headword, '水');
+      // Genuine compounds follow the exact entry, independently of old aliases.
       expect(results.words.length, greaterThan(1));
     });
 
@@ -68,6 +68,7 @@ void main() {
     test('romaji transliterates and ranks like japanese input', () async {
       final results = await dict.search('taberu');
       expect(results.words.first.headword, '食べる');
+      expect((await dict.search('mizu')).words.first.headword, '水');
     });
 
     test('sha/tsu/sokuon romaji conversions', () {
@@ -99,8 +100,10 @@ void main() {
       expect(word.readings, isNotEmpty);
       expect(word.senses.first.glosses, isNotEmpty);
       expect(word.kanjiBreakdown.map((k) => k.literal), contains('食'));
-      // Base pack has no examples pack attached.
-      expect(word.examples, isEmpty);
+      // The refreshed bundle includes explicit source-linked examples.
+      expect(word.examples, isNotEmpty);
+      expect(word.examples.every((example) => example.language.isNotEmpty),
+          isTrue);
     });
 
     test('kanji detail: meanings, components, strokes and ranked words',
@@ -115,11 +118,13 @@ void main() {
       final first = (kanji.words.first as Map).cast<String, dynamic>();
       expect(first['headword'], isNotEmpty);
       expect(first['is_common'], isA<bool>());
+      expect(first['senses'], isNotEmpty);
     });
 
     test('kana chart and detail', () async {
       final chart = await dict.kana();
-      expect(chart.length, 208);
+      expect(chart.length, greaterThanOrEqualTo(208));
+      expect(chart.map((kana) => kana.char).toSet(), hasLength(chart.length));
       final hira = await dict.kana(script: 'hiragana');
       expect(hira.every((k) => k.isHiragana), isTrue);
       final a = await dict.kanaDetail('あ');
@@ -157,7 +162,13 @@ void main() {
     test('kanji list contains= intersects components', () async {
       final withWater = await dict.kanjiList(contains: '水', limit: 50);
       expect(withWater, isNotEmpty);
-      expect(withWater.every((k) => k.components.contains('水')), isTrue);
+      expect(
+          withWater.every((k) =>
+              k.components.contains('水') ||
+              ((k.metadata['kanjialive'] as Map?)?['radical']
+                      as Map?)?['literal'] ==
+                  '水'),
+          isTrue);
     });
 
     test('radicals list', () async {

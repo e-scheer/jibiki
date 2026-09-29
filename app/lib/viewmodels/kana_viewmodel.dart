@@ -25,6 +25,7 @@ class KanaViewModel extends BaseViewModel {
     if (list != null) {
       _all = list;
       _recompute();
+      notifyListeners();
     }
   }
 

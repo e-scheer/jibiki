@@ -1,3 +1,4 @@
+import '../../routing/route_navigation.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -11,7 +12,6 @@ import '../../core/languages.dart';
 import '../../core/telemetry.dart';
 import '../../l10n/l10n.dart';
 import '../widgets/language_picker.dart';
-import '../widgets/jibiki_brand.dart';
 import '../widgets/neo_pop.dart';
 import '../../models/enums.dart';
 import '../../repositories/study_repository.dart';
@@ -43,7 +43,33 @@ class _Settings extends StatelessWidget {
     final vm = context.read<SettingsViewModel>();
     final profile = app.profile;
     if (profile == null) {
-      return const Scaffold(body: Center(child: NeoChaseLoader()));
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(context.trText('Settings')),
+          leading: IconButton(
+            tooltip: context.trText('Back'),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => popOrGo(context),
+          ),
+        ),
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: NeoCard(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(context.trText(
+                    'Continue with or without an account to save your settings.')),
+                const SizedBox(height: 20),
+                NeoPrimaryButton(
+                    label: context.trText('Continue'),
+                    onTap: () => context.push('/login')),
+              ])),
+            ),
+          ),
+        ),
+      );
     }
     final jc = context.jc;
 

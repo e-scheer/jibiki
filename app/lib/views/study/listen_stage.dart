@@ -106,8 +106,20 @@ class _ListenStageState extends State<ListenStage> {
     await Future.delayed(Duration(milliseconds: _correct ? 700 : 1600));
     if (!mounted) return;
     final rating = _correct ? Rating.good : Rating.again;
-    widget.onRated?.call(card, rating);
-    widget.vm.rate(rating);
+    await _save(card, rating);
+  }
+
+  Rating? _retryRating;
+
+  Future<void> _save(StudyCard card, Rating rating) async {
+    if (widget.vm.isLoading) return;
+    final before = widget.vm.index;
+    await widget.vm.rate(rating);
+    if (widget.vm.index > before) {
+      widget.onRated?.call(card, rating);
+    } else if (mounted) {
+      setState(() => _retryRating = rating);
+    }
   }
 
   @override
@@ -142,10 +154,20 @@ class _ListenStageState extends State<ListenStage> {
           );
     // A win pops a green check; a miss pops a red cross that fades to leave the
     // corrected reading readable. Mutually exclusive, so both wrap the content.
-    return WinOverlay(
-      show: _checked && _correct,
-      child: MissOverlay(show: _checked && !_correct, child: content),
-    );
+    return Column(children: [
+      if (_retryRating != null)
+        TextButton.icon(
+          icon: const Icon(Icons.refresh),
+          label: Text(context.trText('Retry')),
+          onPressed:
+              widget.vm.isLoading ? null : () => _save(card, _retryRating!),
+        ),
+      Expanded(
+          child: WinOverlay(
+        show: _checked && _correct,
+        child: MissOverlay(show: _checked && !_correct, child: content),
+      )),
+    ]);
   }
 
   Widget _promptPanel(BuildContext context, StudyCard card) {

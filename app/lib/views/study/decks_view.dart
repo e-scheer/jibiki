@@ -140,10 +140,13 @@ class _Header extends StatelessWidget {
                 Text(
                   due == 0
                       ? context.trText(
-                          'Everything is up to date. Come back tomorrow.')
-                      : context.trText(
-                          '$due due in total. About $minutes minutes.',
-                        ),
+                          'No reviews are due. Choose a pack to keep learning.')
+                      : context
+                          .trText(
+                            '{count} due in total. About {minutes} minutes.',
+                          )
+                          .replaceAll('{count}', '$due')
+                          .replaceAll('{minutes}', '$minutes'),
                   style: TextStyle(
                     color: context.jc.body,
                     fontSize: 13.5,
@@ -154,7 +157,9 @@ class _Header extends StatelessWidget {
                 if (newCards > 0) ...[
                   const SizedBox(height: 4),
                   Text(
-                    context.trText('$newCards new cards are available.'),
+                    context
+                        .trText('{count} new cards are available.')
+                        .replaceAll('{count}', '$newCards'),
                     style: TextStyle(
                       color: context.jc.brand,
                       fontSize: 12.5,
@@ -269,7 +274,7 @@ class _DeckRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final done = deck.due == 0 && deck.studied > 0;
+    final done = deck.due == 0 && deck.studied >= deck.total;
     return Pressable(
       label: context.trText('Review ${deck.title}'),
       haptic: false,
@@ -317,7 +322,7 @@ class _DeckRow extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     done
-                        ? context.trText('Up to date. Next batch tomorrow.')
+                        ? context.trText('No reviews are due for this pack.')
                         : deck.due > 0
                             ? context.trText(
                                 '${deck.due} due · ${deck.total - deck.studied} not studied',

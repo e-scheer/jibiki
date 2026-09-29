@@ -1,3 +1,4 @@
+import '../../l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +23,9 @@ class HomeShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => DashboardViewModel(ctx.read<StudyRepository>())..load(),
+      create: (ctx) => DashboardViewModel(ctx.read<StudyRepository>(),
+          timezone: () => ctx.read<AppState>().profile?.timezone ?? 'UTC')
+        ..load(),
       child: const _Shell(),
     );
   }
@@ -38,17 +41,18 @@ class _Shell extends StatefulWidget {
 class _ShellState extends State<_Shell> {
   static const _reviewIndex = 2;
   static const _destinations = [
-    _Destination(_NavGlyphKind.book, 'Dico', 'Dico'),
-    _Destination(_NavGlyphKind.kana, 'Kana', 'Kana'),
-    _Destination(_NavGlyphKind.review, 'Review', 'Réviser'),
-    _Destination(_NavGlyphKind.community, 'Commu', 'Commu'),
-    _Destination(_NavGlyphKind.profile, 'Profile', 'Profil'),
+    _Destination(_NavGlyphKind.book, 'Dictionary'),
+    _Destination(_NavGlyphKind.kana, 'Kana'),
+    _Destination(_NavGlyphKind.review, 'Review'),
+    _Destination(_NavGlyphKind.community, 'Community'),
+    _Destination(_NavGlyphKind.profile, 'Profile'),
   ];
 
   int _index = 0;
   int? _navigationTarget;
   bool _initialised = false;
   PageController? _pager;
+  final _pageDeckKey = GlobalKey();
   final _homeTabKey = GlobalKey<_ResponsiveHomeTabState>();
   late final List<Widget> _tabs;
 
@@ -80,7 +84,9 @@ class _ShellState extends State<_Shell> {
   }
 
   void _go(int index) {
-    if (index == 0) _homeTabKey.currentState?.showDashboard();
+    if (index == 0 && index == _index) {
+      _homeTabKey.currentState?.showDashboard();
+    }
     if (index == _index) return;
     setState(() {
       _navigationTarget = index;
@@ -137,7 +143,7 @@ class _ShellState extends State<_Shell> {
     });
     final compact = context.win.isCompact;
     final pageDeck = PageView(
-      key: ValueKey(compact ? 'compact-page-deck' : 'wide-page-deck'),
+      key: _pageDeckKey,
       controller: _pager,
       onPageChanged: _onPageSettled,
       physics: compact
@@ -208,7 +214,10 @@ class _ResponsiveHomeTabState extends State<_ResponsiveHomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.sizeOf(context).width < 768) {
+    final app = context.watch<AppState>();
+    if (MediaQuery.sizeOf(context).width < 768 ||
+        !app.canStudy ||
+        !app.mode.showsDueBadge) {
       return const SearchView();
     }
     return AnimatedSwitcher(
@@ -460,58 +469,70 @@ class _NeoNavButtonState extends State<_NeoNavButton> {
       softWrap: false,
       style: TextStyle(
         color: jc.ink,
-        fontSize: 10.5,
+        fontSize: 11.5,
         height: 1,
         fontWeight: widget.selected ? FontWeight.w900 : FontWeight.w700,
       ),
     );
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Pressable.builder(
-        label: label,
-        selected: widget.selected,
-        focusRadius: 10,
-        onTap: widget.onTap,
-        builder: (context, pressed) => Transform.scale(
-          scale: widget.selected
-              ? 1.08
-              : _hovered
-                  ? 1.055
-                  : 1,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-            decoration: BoxDecoration(
-              color: widget.selected && widget.showSelection
-                  ? jc.acid
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        value: widget.due > 0
+            ? context
+                .trText('Cards due: {count}')
+                .replaceAll('{count}', '${widget.due}')
+            : null,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: Pressable.builder(
+            label: label,
+            selected: widget.selected,
+            focusRadius: 10,
+            onTap: widget.onTap,
+            builder: (context, pressed) => Transform.scale(
+              scale: widget.selected
+                  ? 1.08
                   : _hovered
-                      ? jc.acid.withValues(alpha: .2)
-                      : Colors.transparent,
-              border: widget.selected && widget.showSelection
-                  ? Border.all(color: jc.ink, width: 2.5)
-                  : null,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: widget.selected && widget.showSelection && !pressed
-                  ? [
-                      BoxShadow(
-                        color: jc.ink,
-                        blurRadius: 0,
-                        offset: const Offset(3, 3),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                icon,
-                const SizedBox(height: 3),
-                FittedBox(fit: BoxFit.scaleDown, child: labelWidget),
-              ],
+                      ? 1.055
+                      : 1,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+                decoration: BoxDecoration(
+                  color: widget.selected && widget.showSelection
+                      ? jc.acid
+                      : _hovered
+                          ? jc.acid.withValues(alpha: .2)
+                          : Colors.transparent,
+                  border: widget.selected && widget.showSelection
+                      ? Border.all(color: jc.ink, width: 2.5)
+                      : null,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: widget.selected && widget.showSelection && !pressed
+                      ? [
+                          BoxShadow(
+                            color: jc.ink,
+                            blurRadius: 0,
+                            offset: const Offset(3, 3),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ExcludeSemantics(child: icon),
+                    const SizedBox(height: 3),
+                    ExcludeSemantics(
+                        child: FittedBox(
+                            fit: BoxFit.scaleDown, child: labelWidget)),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -788,14 +809,12 @@ class _NavGlyphPainter extends CustomPainter {
 enum _NavGlyphKind { book, kana, review, community, profile }
 
 class _Destination {
-  const _Destination(this.kind, this.english, this.french);
+  const _Destination(this.kind, this.source);
 
   final _NavGlyphKind kind;
-  final String english;
-  final String french;
+  final String source;
 
-  String label(BuildContext context) =>
-      Localizations.localeOf(context).languageCode == 'fr' ? french : english;
+  String label(BuildContext context) => context.trText(source);
 }
 
 class _KeepAlive extends StatefulWidget {

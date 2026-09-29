@@ -1,3 +1,4 @@
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/enums.dart';
@@ -77,8 +78,7 @@ class _QuizStageState extends State<QuizStage>
     await Future.delayed(Duration(milliseconds: correct ? 850 : 1500));
     if (!mounted) return;
     final rating = correct ? Rating.good : Rating.again;
-    widget.onRated?.call(card, rating);
-    widget.vm.rate(rating);
+    await _save(card, rating);
   }
 
   /// Eased 0..1 entrance value for the option at [i], offset so later rows trail
@@ -87,6 +87,19 @@ class _QuizStageState extends State<QuizStage>
     final start = (i * 0.12).clamp(0.0, 0.6);
     final raw = ((_intro.value - start) / 0.5).clamp(0.0, 1.0);
     return Motion.outStrong.transform(raw);
+  }
+
+  Rating? _retryRating;
+
+  Future<void> _save(StudyCard card, Rating rating) async {
+    if (widget.vm.isLoading) return;
+    final before = widget.vm.index;
+    await widget.vm.rate(rating);
+    if (widget.vm.index > before) {
+      widget.onRated?.call(card, rating);
+    } else if (mounted) {
+      setState(() => _retryRating = rating);
+    }
   }
 
   @override
@@ -126,7 +139,18 @@ class _QuizStageState extends State<QuizStage>
               ),
             ),
           );
-    return WinOverlay(show: _locked && _picked == _correct, child: content);
+    return Column(children: [
+      if (_retryRating != null)
+        TextButton.icon(
+          icon: const Icon(Icons.refresh),
+          label: Text(context.trText('Retry')),
+          onPressed:
+              widget.vm.isLoading ? null : () => _save(card, _retryRating!),
+        ),
+      Expanded(
+          child:
+              WinOverlay(show: _locked && _picked == _correct, child: content)),
+    ]);
   }
 
   Widget _optionsGrid() => LayoutBuilder(

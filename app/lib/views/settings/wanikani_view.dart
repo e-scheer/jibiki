@@ -1,3 +1,4 @@
+import '../../routing/route_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -229,7 +230,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
               leading: NeoIconButton(
                 icon: Icons.arrow_back_rounded,
                 label: context.trText('Back'),
-                onTap: _busy ? null : () => Navigator.of(context).maybePop(),
+                onTap: _busy ? null : () => popOrGo(context),
               ),
               trailing: const NeoBadge('蟹', tone: NeoTone.acid),
             ),
@@ -258,7 +259,7 @@ class _WaniKaniViewState extends State<WaniKaniView> {
             leading: NeoIconButton(
               icon: Icons.arrow_back_rounded,
               label: context.trText('Back'),
-              onTap: _busy ? null : () => Navigator.of(context).maybePop(),
+              onTap: _busy ? null : () => popOrGo(context),
             ),
             trailing: const NeoBadge('蟹', tone: NeoTone.acid, rotate: 2),
           ),

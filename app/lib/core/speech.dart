@@ -30,7 +30,8 @@ class Speech {
         // that may only speak the phone's UI language - otherwise 日本語 comes out
         // read with the device's default (e.g. French) accent.
         try {
-          final engines = (await _tts.getEngines as List?)?.cast<String>() ?? const [];
+          final engines =
+              (await _tts.getEngines as List?)?.cast<String>() ?? const [];
           if (engines.contains('com.google.android.tts')) {
             await _tts.setEngine('com.google.android.tts');
           }
@@ -68,24 +69,35 @@ class Speech {
   /// fixes the pronunciation; a local (offline) voice is preferred when present.
   Future<void> _applyJapaneseVoice() async {
     try {
-      final available = await _tts.isLanguageAvailable('ja-JP');
+      // Windows exposes getVoices but not isLanguageAvailable. The optional
+      // capability probe must not prevent selecting an installed Japanese voice.
+      dynamic available;
+      try {
+        available = await _tts.isLanguageAvailable('ja-JP');
+      } catch (_) {
+        available = null;
+      }
       final raw = await _tts.getVoices;
       final voices = (raw as List?)?.whereType<Map>().toList() ?? const <Map>[];
       final ja = voices.where((v) {
-        final loc = (v['locale'] ?? '').toString().toLowerCase().replaceAll('_', '-');
+        final loc =
+            (v['locale'] ?? '').toString().toLowerCase().replaceAll('_', '-');
         return loc.startsWith('ja');
       }).toList();
-      debugPrint('[Speech] ja-JP available=$available · ${voices.length} voices, '
+      debugPrint(
+          '[Speech] ja-JP available=$available · ${voices.length} voices, '
           '${ja.length} japanese: ${ja.map((v) => v['name']).take(6).toList()}');
       if (ja.isNotEmpty) {
         final v = ja.firstWhere(
           (v) => (v['name'] ?? '').toString().toLowerCase().contains('local'),
           orElse: () => ja.first,
         );
-        await _tts.setVoice({'name': '${v['name']}', 'locale': '${v['locale']}'});
+        await _tts
+            .setVoice({'name': '${v['name']}', 'locale': '${v['locale']}'});
         debugPrint('[Speech] using voice ${v['name']} (${v['locale']})');
       } else {
-        debugPrint('[Speech] no Japanese voice installed - pronunciation will be wrong');
+        debugPrint(
+            '[Speech] no Japanese voice installed - pronunciation will be wrong');
       }
     } catch (e) {
       debugPrint('[Speech] voice selection failed: $e');

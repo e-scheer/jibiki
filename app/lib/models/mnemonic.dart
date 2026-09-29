@@ -20,6 +20,7 @@ class Mnemonic {
     required this.saved,
     this.reading = '',
     this.imageBytes,
+    this.provenance = const {},
   });
 
   final int id;
@@ -41,6 +42,9 @@ class Mnemonic {
   final int score;
   final int myVote; // -1, 0, +1
   final bool saved; // the Instagram 🔖 bookmark
+  final Map<String, dynamic> provenance;
+
+  bool get hasEditorialReview => provenance['review_status'] == 'verified';
 
   /// Set when the mnemonic was read from an offline pack (the WebP travels as
   /// a BLOB in the pack instead of a media URL).
@@ -75,6 +79,8 @@ class Mnemonic {
         score: (j['score'] as num?)?.toInt() ?? 0,
         myVote: (j['my_vote'] as num?)?.toInt() ?? 0,
         saved: j['saved'] as bool? ?? false,
+        provenance:
+            (j['provenance'] as Map?)?.cast<String, dynamic>() ?? const {},
       );
 
   Mnemonic copyWith({int? score, int? myVote, bool? saved}) => Mnemonic(
@@ -94,5 +100,6 @@ class Mnemonic {
         myVote: myVote ?? this.myVote,
         saved: saved ?? this.saved,
         imageBytes: imageBytes,
+        provenance: provenance,
       );
 }

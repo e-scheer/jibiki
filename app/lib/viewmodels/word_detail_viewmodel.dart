@@ -38,6 +38,7 @@ class WordDetailViewModel extends BaseViewModel {
     if (w != null) {
       _word = w;
       unawaited(_history.remember(w.id));
+      notifyListeners();
     }
     if (_loadStudyState && w != null) {
       final states = await runGuarded(

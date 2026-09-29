@@ -88,8 +88,13 @@ class UserDb {
         debugName: 'jibiki-user-db');
     final commands = await handshake.first as SendPort;
     final db = UserDb._(commands);
-    await db._request<void>({'op': 'open', 'path': path});
-    return db;
+    try {
+      await db._request<void>({'op': 'open', 'path': path});
+      return db;
+    } catch (_) {
+      await db.close();
+      rethrow;
+    }
   }
 
   Future<List<Map<String, Object?>>> select(String sql,
@@ -136,10 +141,16 @@ class UserDb {
         switch (msg['op']) {
           case 'open':
             db?.dispose();
+            db = null;
             final opened = sqlite3.open(msg['path'] as String);
-            opened.execute('PRAGMA journal_mode = WAL');
-            opened.execute('PRAGMA foreign_keys = ON');
-            _migrate(opened);
+            try {
+              opened.execute('PRAGMA journal_mode = WAL');
+              opened.execute('PRAGMA foreign_keys = ON');
+              _migrate(opened);
+            } catch (_) {
+              opened.dispose();
+              rethrow;
+            }
             db = opened;
             reply.send(const {'result': null});
           case 'select':
@@ -187,19 +198,25 @@ class UserDb {
   }
 
   static void _migrate(Database db) {
+    // A failed or interrupted upgrade must leave the entire old schema
+    // available for the next attempt, including its version watermark.
+    db.execute('BEGIN IMMEDIATE');
+    try {
+      _migrateInTransaction(db);
+      db.execute('COMMIT');
+    } catch (_) {
+      db.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  static void _migrateInTransaction(Database db) {
     final version = db.select('PRAGMA user_version').first.columnAt(0) as int;
     if (version == 0) {
-      db.execute('BEGIN');
-      try {
-        for (final stmt in _schema) {
-          db.execute(stmt);
-        }
-        db.execute('PRAGMA user_version = 1');
-        db.execute('COMMIT');
-      } catch (_) {
-        db.execute('ROLLBACK');
-        rethrow;
+      for (final stmt in _schema) {
+        db.execute(stmt);
       }
+      db.execute('PRAGMA user_version = 1');
     }
     if (version <= 1) {
       db.execute(

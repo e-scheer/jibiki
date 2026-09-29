@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import '../infrastructure/packs/pack_manager.dart';
@@ -19,7 +20,8 @@ class MnemonicRepository {
     String kind = 'kana',
   }) async {
     try {
-      return await _service.list(character: character, language: language, kind: kind);
+      return await _service.list(
+          character: character, language: language, kind: kind);
     } catch (_) {
       final offline =
           await _fromPack(character: character, language: language, kind: kind);
@@ -35,11 +37,13 @@ class MnemonicRepository {
   }) async {
     final packs = _packs;
     final schema = 'mn_$language';
-    if (packs == null || !packs.ready || !packs.mnemonicSchemas.contains(schema)) {
+    if (packs == null ||
+        !packs.ready ||
+        !packs.mnemonicSchemas.contains(schema)) {
       return const [];
     }
     final rows = await packs.db.select(
-      'SELECT id, kind, character, language, reading, story, score, image, image_w, image_h '
+      'SELECT * '
       'FROM $schema.mnemonics WHERE kind = ? AND character = ? ORDER BY score DESC',
       [kind, character],
     );
@@ -62,8 +66,19 @@ class MnemonicRepository {
           score: r['score'] as int? ?? 0,
           myVote: 0,
           saved: false,
+          provenance: _provenance(r['provenance']),
         ),
     ];
+  }
+
+  static Map<String, dynamic> _provenance(Object? value) {
+    if (value is! String || value.isEmpty) return const {};
+    try {
+      final decoded = jsonDecode(value);
+      return decoded is Map<String, dynamic> ? decoded : const {};
+    } on FormatException {
+      return const {};
+    }
   }
 
   Future<Mnemonic> create({

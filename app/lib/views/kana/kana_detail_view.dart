@@ -16,6 +16,7 @@ import '../../models/study.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../repositories/study_repository.dart';
+import '../../routing/route_navigation.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/mnemonic_viewmodel.dart';
@@ -23,6 +24,8 @@ import '../auth/auth_required_sheet.dart';
 import '../feedback/report_item_sheet.dart';
 import '../widgets/drawing_canvas.dart';
 import '../widgets/mnemonic_panel.dart';
+import '../widgets/mnemonic_quality_note.dart';
+import '../widgets/kana_word_examples.dart';
 import '../widgets/neo_pop.dart';
 import '../widgets/jibiki_brand.dart';
 import '../widgets/origin_section.dart';
@@ -308,7 +311,8 @@ class _KanaDetailState extends State<_KanaDetail> {
             future: _data,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return _DetailError(onRetry: () => context.pop());
+                return _DetailError(
+                    onRetry: () => popOrGo(context, fallback: '/kana'));
               }
               final data = snapshot.data;
               if (data == null) return _DetailSkeleton(char: widget.char);
@@ -455,6 +459,10 @@ class _EmbeddedKanaDetailContent extends StatelessWidget {
               if (grammarKana != null) ...[
                 const SizedBox(height: 16),
                 KanaGrammarSection(kana: grammarKana),
+              ],
+              if (data.focused.wordExamples.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                KanaWordExamplesSection(kana: data.focused),
               ],
               const SizedBox(height: 14),
               KanaWritingReference(targets: targets),
@@ -827,6 +835,10 @@ class _DetailContent extends StatelessWidget {
               KanaOriginSection(kana: data.focused),
               const SizedBox(height: 18),
             ],
+            if (data.focused.wordExamples.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              KanaWordExamplesSection(kana: data.focused),
+            ],
             _FeaturedMnemonic(
               scriptContext: hasPair ? data.focused : null,
             ),
@@ -886,7 +898,7 @@ class _DetailTopBar extends StatelessWidget {
         NeoIconButton(
           icon: Icons.chevron_left_rounded,
           label: _copy(context, 'Back to the chart', 'Retour à la matrice'),
-          onTap: () => context.pop(),
+          onTap: () => popOrGo(context, fallback: '/kana'),
         ),
         const Spacer(),
         if (showBoth)
@@ -1567,6 +1579,8 @@ class _FeaturedMnemonic extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        MnemonicQualityNote(
+                            mnemonic: mnemonic, color: Colors.white),
                         const SizedBox(height: 10),
                         Row(
                           children: [
@@ -2400,7 +2414,7 @@ class _DetailSkeleton extends StatelessWidget {
             NeoIconButton(
               icon: Icons.chevron_left_rounded,
               label: _copy(context, 'Back', 'Retour'),
-              onTap: () => context.pop(),
+              onTap: () => popOrGo(context, fallback: '/kana'),
             ),
             const Spacer(),
             const _Tag(label: 'Kana'),

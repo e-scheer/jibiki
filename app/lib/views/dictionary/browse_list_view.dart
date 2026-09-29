@@ -44,7 +44,7 @@ class _Browse extends StatelessWidget {
           ? const SkeletonCardGrid(
               count: 12, crossAxisCount: 4, childAspectRatio: 0.82)
           : const SkeletonTileList();
-    } else if (vm.hasError) {
+    } else if (vm.hasError && vm.words.isEmpty && vm.kanji.isEmpty) {
       body = ErrorRetry(message: vm.error!, onRetry: vm.load);
     } else if (spec.isKanji) {
       body = vm.kanji.isEmpty
@@ -86,6 +86,29 @@ class _Browse extends StatelessWidget {
     }
 
     return Scaffold(
+      bottomNavigationBar:
+          (vm.words.isNotEmpty || vm.kanji.isNotEmpty) && vm.hasMore
+              ? SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (vm.hasError) Text(context.trText(vm.error!)),
+                        TextButton.icon(
+                          onPressed: vm.isLoading ? null : vm.loadMore,
+                          icon: const Icon(Icons.expand_more),
+                          label: Text(context.trText(vm.isLoading
+                              ? 'Loading…'
+                              : vm.hasError
+                                  ? 'Retry'
+                                  : 'Load more')),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : null,
       body: Column(
         children: [
           NeoPageHeader(

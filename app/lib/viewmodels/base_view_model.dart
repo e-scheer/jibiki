@@ -9,11 +9,12 @@ import '../core/telemetry.dart';
 /// Shared ViewModel plumbing: a loading flag, a last-error message, and a guarded
 /// runner that handles expected API failures and reports unexpected failures.
 abstract class BaseViewModel extends ChangeNotifier {
-  bool _loading = false;
+  int _foregroundOperations = 0;
+  int _latestOperation = 0;
   String? _error;
   bool _disposed = false;
 
-  bool get isLoading => _loading;
+  bool get isLoading => _foregroundOperations > 0;
   String? get error => _error;
   bool get hasError => _error != null;
 
@@ -30,23 +31,28 @@ abstract class BaseViewModel extends ChangeNotifier {
 
   @protected
   Future<T?> runGuarded<T>(Future<T> Function() action,
-      {bool silent = false}) async {
-    if (_loading && !silent) return null;
+      {bool silent = false, bool allowConcurrent = false}) async {
+    if (_disposed || (isLoading && !silent && !allowConcurrent)) return null;
+    final operation = ++_latestOperation;
     if (!silent) {
-      _loading = true;
+      _foregroundOperations++;
       _error = null;
       _safeNotify();
     }
     try {
       return await action();
     } on ApiException catch (e) {
-      _error = e.isUnauthorized ? authRequiredErrorMessage : e.message;
+      if (operation == _latestOperation) {
+        _error = e.isUnauthorized ? authRequiredErrorMessage : e.message;
+      }
       return null;
     } catch (error, stackTrace) {
       if (error is DioException && error.type == DioExceptionType.cancel) {
         return null;
       }
-      _error = 'Something went wrong. Please try again.';
+      if (operation == _latestOperation) {
+        _error = 'Something went wrong. Please try again.';
+      }
       unawaited(Telemetry.instance.recordError(
         error,
         stackTrace,
@@ -55,13 +61,18 @@ abstract class BaseViewModel extends ChangeNotifier {
       ));
       return null;
     } finally {
-      _loading = false;
+      if (!silent) _foregroundOperations--;
       _safeNotify();
     }
   }
 
   void _safeNotify() {
     if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
   }
 
   @override

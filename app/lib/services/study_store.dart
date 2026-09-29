@@ -23,7 +23,8 @@ abstract class StudyStore {
     bool known = false,
   });
   Future<Map<String, int>> states({ItemType? type});
-  Future<StudyCard> review(int cardId, Rating rating, {int durationMs = 0});
+  Future<StudyCard> review(int cardId, Rating rating,
+      {int durationMs = 0, String? clientReviewId});
   Future<List<StudyCard>> cards({ItemType? type});
   Future<void> deleteCard(int id);
   Future<List<Deck>> decks();

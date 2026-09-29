@@ -13,6 +13,9 @@ class MySubmissionsViewModel extends BaseViewModel {
 
   Future<void> load() async {
     final r = await runGuarded(() => _mnemonics.mine());
-    if (r != null) _items = r;
+    if (r != null) {
+      _items = r;
+      notifyListeners();
+    }
   }
 }

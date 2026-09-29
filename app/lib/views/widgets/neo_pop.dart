@@ -548,9 +548,7 @@ class _NeoRefreshBand extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-                      child: AnimatedSize(
-                        duration: Motion.timed(context, Motion.fast),
-                        curve: Motion.outStrong,
+                      child: _RefreshSizeTransition(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -986,4 +984,20 @@ class _NeoSegmentButton<T> extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A zero-duration AnimatedSize can invalidate its own layout on resize.
+/// Reduced motion needs an immediate layout, with no animation render object.
+class _RefreshSizeTransition extends StatelessWidget {
+  const _RefreshSizeTransition({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Motion.enabled(context)
+      ? AnimatedSize(
+          duration: Motion.fast,
+          curve: Motion.outStrong,
+          child: child,
+        )
+      : child;
 }

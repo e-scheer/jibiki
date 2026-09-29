@@ -1,3 +1,4 @@
+import '../../routing/route_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jibiki/l10n/l10n.dart';
@@ -126,6 +127,15 @@ class _SessionState extends State<_Session> {
 
     return Scaffold(
       backgroundColor: context.jc.lavender,
+      appBar: vm.total == 0 && (vm.isLoading || vm.hasError)
+          ? AppBar(
+              leading: IconButton(
+                tooltip: context.trText('Close'),
+                icon: const Icon(Icons.close),
+                onPressed: () => popOrGo(context),
+              ),
+            )
+          : null,
       body: vm.isLoading && vm.total == 0
           ? const LoadingView()
           : vm.hasError && vm.total == 0
@@ -139,7 +149,7 @@ class _SessionState extends State<_Session> {
                       hasMore: vm.hasMoreNew,
                       loadingMore: vm.loadingMore,
                       onMore: vm.studyMore,
-                      onDone: () => context.pop(),
+                      onDone: () => popOrGo(context),
                     )
                   : Column(
                       children: [
@@ -150,11 +160,25 @@ class _SessionState extends State<_Session> {
                           mode: _mode,
                           direction: _direction,
                           streak: streak,
-                          onClose: () => context.pop(),
-                          onMode: _pick,
-                          onDirection: _toggleDirection,
+                          onClose: () => popOrGo(context),
+                          onMode: vm.isLoading ? (_) {} : _pick,
+                          onDirection: vm.isLoading ? () {} : _toggleDirection,
                           onDetails: () => _openCurrentDetail(vm),
                         ),
+                        if (vm.isLoading || vm.hasError)
+                          Semantics(
+                            liveRegion: true,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 8),
+                              child: Text(
+                                vm.isLoading
+                                    ? context.trText('Saving your answer…')
+                                    : vm.error!,
+                                style: TextStyle(color: context.jc.ink),
+                              ),
+                            ),
+                          ),
                         Expanded(
                           child: AnimatedSwitcher(
                             duration: Motion.timed(context, Motion.base),

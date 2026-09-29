@@ -354,7 +354,7 @@ class LocalStudyStore implements StudyStore {
 
   @override
   Future<StudyCard> review(int cardId, Rating rating,
-      {int durationMs = 0}) async {
+      {int durationMs = 0, String? clientReviewId}) async {
     final row = await _rowById(cardId);
     if (row == null) throw StateError('card $cardId not found');
     final card = _toCard(row);

@@ -40,6 +40,7 @@ class _MatchStageState extends State<MatchStage> {
   int? _first;
   bool _busy = false;
   bool _done = false;
+  bool _saveFailed = false;
 
   @override
   void initState() {
@@ -98,13 +99,27 @@ class _MatchStageState extends State<MatchStage> {
     await Future.delayed(
         const Duration(milliseconds: 550)); // let the last pair land
     if (!mounted) return;
-    widget.onRated?.call(_batch, Rating.good);
-    widget.vm.rateMany(_batch, Rating.good);
+    final before = widget.vm.index;
+    await widget.vm.rateMany(_batch, Rating.good);
+    final saved = widget.vm.index - before;
+    if (saved > 0) {
+      widget.onRated?.call(_batch.take(saved).toList(), Rating.good);
+    }
+    if (mounted && saved == 0) setState(() => _saveFailed = true);
   }
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
+    if (_saveFailed) {
+      return Center(
+        child: TextButton.icon(
+          icon: const Icon(Icons.refresh),
+          label: Text(context.trText('Retry')),
+          onPressed: widget.vm.isLoading ? null : _finish,
+        ),
+      );
+    }
     final total = _tiles.length ~/ 2;
     return SafeArea(
       top: false,

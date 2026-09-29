@@ -104,7 +104,7 @@ void main() {
       expect(noGlosses.summaryGloss('en'), '');
     });
 
-    test('glossLanguageFor avoids mixing partial translations per word', () {
+    test('language-specific JMdict senses keep the requested definitions', () {
       final w = WordEntry.fromJson({
         'id': 3,
         'is_common': false,
@@ -127,8 +127,8 @@ void main() {
           },
         ],
       });
-      expect(w.glossLanguageFor('fr'), 'en');
-      expect(w.sensesFor('fr').every((s) => s.hasGlossFor('en')), isTrue);
+      expect(w.glossLanguageFor('fr'), 'fr');
+      expect(w.sensesFor('fr').every((s) => s.hasGlossFor('fr')), isTrue);
     });
   });
 

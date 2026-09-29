@@ -16,6 +16,79 @@ extension LocalizedBuildContext on BuildContext {
 }
 
 const _legacyFrench = <String, String>{
+  'Sorted by relevance.': 'Tri par pertinence.',
+  'Sorted by relevance. Romaji is transliterated.':
+      'Tri par pertinence. Le rōmaji est translittéré.',
+  'A word, kanji or kana...': 'Un mot, un kanji ou un kana…',
+  'A word, kanji or romaji...': 'Un mot, un kanji ou du rōmaji…',
+  'Radical data: Kanji alive · CC BY 4.0. Source: https://github.com/kanjialive/kanji-data-media · Licence: https://creativecommons.org/licenses/by/4.0/':
+      'Données des radicaux : Kanji alive · CC BY 4.0. Source : https://github.com/kanjialive/kanji-data-media · Licence : https://creativecommons.org/licenses/by/4.0/',
+  'Origin explanation · source not documented':
+      'Explication de l’origine · source non documentée',
+  'Glyph origin from Wiktionary · CC BY-SA':
+      'Origine graphique issue de Wiktionary · CC BY-SA',
+  'Phono-semantic': 'Phono-sémantique',
+  'Ideogrammic': 'Idéographique',
+  'Pictogram': 'Pictogramme',
+  'Simplified': 'Simplifié',
+  'Variant': 'Variante',
+  'Abbreviation': 'Abréviation',
+  'Phonetic loan': 'Emprunt phonétique',
+  'Compound': 'Composé',
+  'Contraction': 'Contraction',
+  '{label} · {term}': '{label} · {term}',
+  '音符 · sound component': '音符 · composant phonétique',
+  '{component} suggests a reading for this character.':
+      '{component} suggère une lecture de ce caractère.',
+  'This historical entry is absent from the current source snapshot. It remains available for your saved cards.':
+      'Cette entrée historique est absente de la version actuelle de la source. Elle reste accessible pour vos cartes enregistrées.',
+  'Radical in Kanji alive': 'Radical selon Kanji alive',
+  'Position: {position}': 'Position : {position}',
+  'This source uses a special glyph font; its name is shown here.':
+      'Cette source utilise une police spéciale ; son nom est présenté ici.',
+  'Suggested study strategy': 'Stratégie d’étude suggérée',
+  'Look at the character and choose an image that helps you recall its meaning.':
+      'Observez le caractère et choisissez une image qui vous aide à retrouver son sens.',
+  'Content language: {language}': 'Langue du contenu : {language}',
+  'Usage': 'Usage',
+  'Field': 'Domaine',
+  'Used with these spellings': 'Avec ces graphies',
+  'Used with these readings': 'Avec ces lectures',
+  'Dialect': 'Dialecte',
+  'Related entries': 'Entrées liées',
+  '{label}: {values}': '{label} : {values}',
+  'Words containing {kana}': 'Mots contenant {kana}',
+  'JMdict reading match · editorial review not recorded':
+      'Lecture concordante avec JMdict · relecture non documentée',
+  'Open dictionary entry': 'Ouvrir la fiche du dictionnaire',
+  'English': 'anglais',
+  'French': 'français',
+  'Content in {language} · English translation unavailable':
+      'Contenu en {language} · traduction française indisponible',
+  'Editorial review recorded': 'Relecture éditoriale documentée',
+  'Editorial review recorded · origin undocumented':
+      'Relecture éditoriale documentée · origine non documentée',
+  'No documented editorial review': 'Relecture non documentée',
+  'No documented editorial review · origin undocumented':
+      'Relecture non documentée · origine non documentée',
+  'Continue with or without an account to save your settings.':
+      'Continuez avec ou sans compte pour enregistrer vos réglages.',
+  'Dictionary': 'Dictionnaire',
+  'Community': 'Communauté',
+  'Profile': 'Profil',
+  'Cards due: {count}': 'Cartes à réviser : {count}',
+  'This page is unavailable.': 'Cette page est indisponible.',
+  'Return to Jibiki': 'Retour à Jibiki',
+  'Saving your answer…': 'Enregistrement de votre réponse…',
+  'No reviews are due. Choose a pack to keep learning.':
+      'Aucune révision en attente. Choisissez un paquet pour continuer à apprendre.',
+  '{count} due in total. About {minutes} minutes.':
+      '{count} cartes à réviser. Environ {minutes} minutes.',
+  '{count} new cards are available.':
+      '{count} nouvelles cartes sont disponibles.',
+  'No reviews are due for this pack.':
+      'Aucune révision en attente dans ce paquet.',
+  'Load more': 'Afficher la suite',
   'Back': 'Retour',
   'Cancel': 'Annuler',
   'Check': 'Vérifier',

@@ -6,30 +6,41 @@ import '../models/word.dart';
 import 'dictionary_data_source.dart';
 
 class DictionaryService implements DictionaryDataSource {
-  DictionaryService(this._api);
+  DictionaryService(this._api,
+      {String Function()? language, String Function()? glossLanguage})
+      : _language = language ?? _english,
+        _glossLanguage = glossLanguage ?? language ?? _english;
   final ApiClient _api;
+  final String Function() _language;
+  final String Function() _glossLanguage;
+  static String _english() => 'en';
 
   @override
-  Future<SearchResults> search(String q, {String lang = 'en', int limit = 25}) async {
-    final data = (await _api.get(ApiConfig.dictSearch, query: {'q': q, 'lang': lang, 'limit': limit})) as Map;
+  Future<SearchResults> search(String q,
+      {String lang = 'en', int limit = 25}) async {
+    final data = (await _api.get(ApiConfig.dictSearch,
+        query: {'q': q, 'lang': lang, 'limit': limit})) as Map;
     final words = ((data['results'] as List?) ?? const [])
         .map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>()))
         .toList();
     final names = ((data['names'] as List?) ?? const [])
-        .map((e) => NameItem.fromJson((e as Map).cast<String, dynamic>()))
+        .map((e) => NameItem.fromJson((e as Map).cast<String, dynamic>(),
+            language: lang))
         .toList();
     return SearchResults(words: words, names: names);
   }
 
   @override
   Future<WordEntry> word(int id) async {
-    final data = await _api.get(ApiConfig.dictWord(id));
+    final data = await _api
+        .get(ApiConfig.dictWord(id), query: {'lang': _glossLanguage()});
     return WordEntry.fromJson((data as Map).cast<String, dynamic>());
   }
 
   @override
   Future<KanjiEntry> kanji(String literal) async {
-    final data = await _api.get(ApiConfig.dictKanji(literal));
+    final data = await _api
+        .get(ApiConfig.dictKanji(literal), query: {'lang': _language()});
     return KanjiEntry.fromJson((data as Map).cast<String, dynamic>());
   }
 
@@ -47,8 +58,11 @@ class DictionaryService implements DictionaryDataSource {
       'limit': limit,
       'offset': offset,
     });
-    final results = (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
-    return results.map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>())).toList();
+    final results =
+        (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
+    return results
+        .map((e) => WordEntry.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   @override
@@ -67,28 +81,37 @@ class DictionaryService implements DictionaryDataSource {
       'offset': offset,
     });
     // LimitOffsetPagination wraps the list in {count, results}.
-    final results = (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
-    return results.map((e) => KanjiEntry.fromJson((e as Map).cast<String, dynamic>())).toList();
+    final results =
+        (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
+    return results
+        .map((e) => KanjiEntry.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   /// Radicals (keys) for the "browse kanji by radical" picker.
   @override
   Future<List<Map<String, dynamic>>> radicals() async {
-    final data = await _api.get(ApiConfig.dictRadicals);
-    final list = (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
+    final data =
+        await _api.get(ApiConfig.dictRadicals, query: {'lang': _language()});
+    final list =
+        (data is Map) ? (data['results'] as List? ?? const []) : (data as List);
     return list.map((e) => (e as Map).cast<String, dynamic>()).toList();
   }
 
   @override
   Future<List<KanaEntry>> kana({String? script}) async {
-    final data = await _api.get(ApiConfig.dictKana, query: {if (script != null) 'script': script});
+    final data = await _api.get(ApiConfig.dictKana,
+        query: {if (script != null) 'script': script, 'lang': _language()});
     final list = (data as List);
-    return list.map((e) => KanaEntry.fromJson((e as Map).cast<String, dynamic>())).toList();
+    return list
+        .map((e) => KanaEntry.fromJson((e as Map).cast<String, dynamic>()))
+        .toList();
   }
 
   @override
   Future<KanaEntry> kanaDetail(String char) async {
-    final data = await _api.get(ApiConfig.dictKanaDetail(char));
+    final data = await _api
+        .get(ApiConfig.dictKanaDetail(char), query: {'lang': _language()});
     return KanaEntry.fromJson((data as Map).cast<String, dynamic>());
   }
 }

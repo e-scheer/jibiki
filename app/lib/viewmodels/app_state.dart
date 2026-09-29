@@ -50,6 +50,8 @@ class AppState extends ChangeNotifier {
   /// gives immediate feedback instead of looking inert when it fails again.
   bool get bootstrapping => _bootstrapping;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+  /// Native guests have a personal database; Web study needs an account.
+  bool get canStudy => isAuthenticated || (!kIsWeb && _localOnly);
   bool get onboarded => _auth.onboarded;
 
   /// The user's tier (server-set; mirror only - the API enforces it). All

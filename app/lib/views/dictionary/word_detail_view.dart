@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/breakpoints.dart';
+import '../../core/languages.dart';
 import '../../core/speech.dart';
 import '../../models/enums.dart';
 import '../../models/kanji.dart';
 import '../../models/word.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/study_repository.dart';
+import '../../routing/route_navigation.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/search_viewmodel.dart';
@@ -22,6 +24,7 @@ import '../widgets/neo_pop.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
 import '../widgets/tappable_japanese.dart';
+import '../widgets/content_language_notice.dart';
 
 class WordDetailView extends StatelessWidget {
   const WordDetailView({super.key, required this.wordId});
@@ -32,7 +35,7 @@ class WordDetailView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (ctx) => WordDetailViewModel(
           ctx.read<DictionaryRepository>(), ctx.read<StudyRepository>(), wordId,
-          loadStudyState: ctx.read<AppState>().isAuthenticated)
+          loadStudyState: ctx.read<AppState>().canStudy)
         ..load(),
       child: const _WordDetail(embedded: false),
     );
@@ -51,7 +54,7 @@ class WordDetailPane extends StatelessWidget {
           ctx.read<DictionaryRepository>(),
           ctx.read<StudyRepository>(),
           wordId,
-          loadStudyState: ctx.read<AppState>().isAuthenticated,
+          loadStudyState: ctx.read<AppState>().canStudy,
         )..load(),
         child: const _WordDetail(embedded: true),
       );
@@ -66,7 +69,7 @@ class _WordDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<WordDetailViewModel>();
     final lang = context.watch<AppState>().mnemonicLanguage;
-    final signedIn = context.read<AppState>().isAuthenticated;
+    final signedIn = context.read<AppState>().canStudy;
     final word = vm.word;
     final content = vm.isLoading
         ? const LoadingView()
@@ -93,7 +96,7 @@ class _WordDetail extends StatelessWidget {
                     NeoIconButton(
                       icon: Icons.arrow_back_rounded,
                       label: context.trText('Back'),
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () => popOrGo(context),
                     ),
                     const Spacer(),
                     if (word != null) ...[
@@ -169,6 +172,9 @@ class _WordDetail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
+        if (const {'upstream_not_in_snapshot', 'legacy_merged_entry'}
+            .contains(word.provenance['source_status']))
+          const _HistoricalWordNotice(),
         NeoCard(
           tone: NeoTone.magenta,
           shadow: 6,
@@ -201,11 +207,15 @@ class _WordDetail extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         NeoSectionTitle(context.trText('Meanings')),
+        if (glossLanguage != lang) _LanguageLabel(language: glossLanguage),
         NeoCard(
           child: Column(
             children: [
               for (final entry in senses.asMap().entries)
-                _sense(context, entry.key + 1, entry.value, glossLanguage),
+                _SenseRow(
+                    number: entry.key + 1,
+                    sense: entry.value,
+                    language: glossLanguage),
             ],
           ),
         ),
@@ -241,7 +251,7 @@ class _WordDetail extends StatelessWidget {
           const SizedBox(height: 22),
           NeoSectionTitle(context.trText('Examples')),
           for (final example in word.examples) ...[
-            _ExampleRow(example: example),
+            _ExampleRow(example: example, language: lang),
             const SizedBox(height: 10),
           ],
         ],
@@ -256,7 +266,7 @@ class _WordDetail extends StatelessWidget {
     WordDetailViewModel vm,
   ) {
     final senses = word.sensesFor(lang);
-    final signedIn = context.read<AppState>().isAuthenticated;
+    final signedIn = context.read<AppState>().canStudy;
     final primaryKanji =
         word.kanjiBreakdown.isEmpty ? null : word.kanjiBreakdown.first;
     final related = _relatedWords(
@@ -267,6 +277,9 @@ class _WordDetail extends StatelessWidget {
       key: PageStorageKey('tablet-word-${word.id}'),
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       children: [
+        if (const {'upstream_not_in_snapshot', 'legacy_merged_entry'}
+            .contains(word.provenance['source_status']))
+          const _HistoricalWordNotice(),
         NeoCard(
           tone: NeoTone.magenta,
           shadow: 6,
@@ -308,34 +321,33 @@ class _WordDetail extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
+        if (word.glossLanguageFor(lang) != lang)
+          _LanguageLabel(language: word.glossLanguageFor(lang)),
         _TabletSenses(senses: senses, language: word.glossLanguageFor(lang)),
         if (primaryKanji != null) ...[
           const SizedBox(height: 14),
-          SizedBox(
-            height: 154,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _CompositionCard(
-                    kanji: primaryKanji,
-                    language: lang,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _CompositionCard(
+                  kanji: primaryKanji,
+                  language: lang,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MemoryCard(kanji: primaryKanji, language: lang),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MemoryCard(kanji: primaryKanji, language: lang),
+              ),
+            ],
           ),
         ],
         if (word.examples.isNotEmpty) ...[
           const SizedBox(height: 14),
-          _TabletExample(
-            example: word.examples.first,
-            headword: word.headword,
-          ),
+          for (final example in word.examples) ...[
+            _ExampleRow(example: example, language: lang),
+            const SizedBox(height: 10),
+          ],
         ],
         if (related.isNotEmpty) ...[
           const SizedBox(height: 14),
@@ -402,44 +414,113 @@ class _WordDetail extends StatelessWidget {
     return words;
   }
 
-  /// The pitch pattern of the primary reading (or the first reading that has one).
+  /// Only attach a pitch pattern to the reading it describes.
   String _pitchOf(WordEntry word) {
     for (final r in word.readings) {
       if (r.text == word.primaryReading && r.pitch.isNotEmpty) return r.pitch;
     }
-    for (final r in word.readings) {
-      if (r.pitch.isNotEmpty) return r.pitch;
-    }
     return '';
   }
+}
 
-  Widget _sense(BuildContext context, int n, Sense sense, String lang) {
-    final jc = context.jc;
+class _LanguageLabel extends StatelessWidget {
+  const _LanguageLabel({required this.language});
+  final String language;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Text(
+            context.trText('Content language: {language}').replaceAll(
+                '{language}',
+                switch (language) {
+                  'en' => context.trText('English'),
+                  'fr' => context.trText('French'),
+                  _ => mnemonicLanguageName(language),
+                }),
+            style: TextStyle(color: context.jc.muted, fontSize: 12)),
+      );
+}
+
+class _HistoricalWordNotice extends StatelessWidget {
+  const _HistoricalWordNotice();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(
+            context.trText(
+                'This historical entry is absent from the current source snapshot. It remains available for your saved cards.'),
+            style: TextStyle(color: context.jc.muted, fontSize: 13)),
+      );
+}
+
+class _SenseRow extends StatelessWidget {
+  const _SenseRow(
+      {required this.number, required this.sense, required this.language});
+  final int number;
+  final Sense sense;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    final notes =
+        sense.notes.where((note) => note.language == language).toList();
+    final displayedNotes = notes.isNotEmpty
+        ? notes
+        : sense.notes.where((note) => note.language == 'en').toList();
+    final restrictions = <(String, List<String>)>[
+      ('Usage', sense.misc),
+      ('Field', sense.field),
+      for (final (key, label) in const [
+        ('restricted_kanji', 'Used with these spellings'),
+        ('restricted_readings', 'Used with these readings'),
+        ('dialects', 'Dialect'),
+        ('references', 'Related entries'),
+      ])
+        (
+          label,
+          (sense.metadata[key] as List? ?? const [])
+              .whereType<String>()
+              .toList()
+        ),
+    ];
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(context.trText('$n.'),
-              style: TextStyle(color: jc.muted, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (sense.pos.isNotEmpty)
-                  Text(sense.pos.join(', '),
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                          color: jc.muted)),
-                Text(sense.glossesFor(lang).join('; '),
-                    style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-          ),
-        ],
-      ),
+      key: ValueKey('word-sense-$number'),
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('$number.',
+            style: TextStyle(
+                color: context.jc.muted, fontWeight: FontWeight.w700)),
+        const SizedBox(width: 8),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (sense.pos.isNotEmpty)
+            Text(sense.pos.join(', '),
+                style: TextStyle(fontSize: 12, color: context.jc.muted)),
+          Text(sense.exactGlossesFor(language).join('; '),
+              style: const TextStyle(fontSize: 16)),
+          for (final (label, values) in restrictions)
+            if (values.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                    context
+                        .trText('{label}: {values}')
+                        .replaceAll('{label}', context.trText(label))
+                        .replaceAll('{values}', values.join(', ')),
+                    style: TextStyle(fontSize: 12, color: context.jc.muted)),
+              ),
+          for (final note in displayedNotes) ...[
+            const SizedBox(height: 5),
+            if (note.language != language)
+              _LanguageLabel(language: note.language),
+            Text(note.text,
+                style: TextStyle(fontSize: 13, color: context.jc.body)),
+          ],
+        ])),
+      ]),
     );
   }
 }
@@ -635,28 +716,11 @@ class _TabletSenses extends StatelessWidget {
           children: [
             _TabletLabel(_copy(context, 'MEANINGS', 'SENS')),
             const SizedBox(height: 7),
-            for (final entry in senses.take(4).toList().asMap().entries)
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${entry.key + 1}.  ',
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      TextSpan(
-                        text: entry.value.glossesFor(language).join('; '),
-                      ),
-                    ],
-                  ),
-                  style: const TextStyle(
-                    fontSize: 14.5,
-                    height: 1.32,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            for (final entry in senses.asMap().entries)
+              _SenseRow(
+                  number: entry.key + 1,
+                  sense: entry.value,
+                  language: language),
           ],
         ),
       );
@@ -790,74 +854,7 @@ class _MemoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final components = kanji.componentDetails
-        .map((component) => component.literal)
-        .where((literal) => literal.isNotEmpty)
-        .take(3)
-        .join(' + ');
-    final meaning = kanji.meaningsFor(language).take(2).join(', ');
-    final fallback = _copy(
-      context,
-      components.isEmpty
-          ? 'Anchor ${kanji.literal} to the image "$meaning".'
-          : 'Spot $components, then reconnect the pieces to "$meaning".',
-      components.isEmpty
-          ? 'Associe ${kanji.literal} à l’image « $meaning ».'
-          : 'Repère $components, puis relie les pièces à « $meaning ».',
-    );
-    return Container(
-      padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
-      decoration: BoxDecoration(
-        color: context.jc.brand,
-        border: Border.all(color: context.jc.ink, width: 3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _TabletLabel(
-            _copy(context, 'MEMORY HOOK', 'REPÈRE MÉMOIRE'),
-            light: true,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            kanji.origin.trim().isEmpty ? fallback : kanji.origin.trim(),
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: context.jc.surface,
-              fontSize: 13,
-              height: 1.4,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _copy(context, 'From the dictionary', 'D’après le dictionnaire'),
-            style: TextStyle(
-              color: context.jc.surface.withValues(alpha: 0.82),
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabletExample extends StatelessWidget {
-  const _TabletExample({required this.example, required this.headword});
-
-  final ExampleItem example;
-  final String headword;
-
-  @override
-  Widget build(BuildContext context) {
-    final characters = example.japanese.runes
-        .map(String.fromCharCode)
-        .where((character) => character.trim().isNotEmpty)
-        .take(20);
+    final hasOrigin = kanji.origin.trim().isNotEmpty;
     return Container(
       padding: const EdgeInsets.fromLTRB(15, 12, 15, 13),
       decoration: BoxDecoration(
@@ -868,47 +865,23 @@ class _TabletExample extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TabletLabel(_copy(context, 'IN CONTEXT', 'EN CONTEXTE')),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: [
-              for (final character in characters)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: headword.contains(character)
-                        ? context.jc.acid
-                        : context.jc.canvas,
-                    border: Border.all(color: context.jc.ink, width: 2.5),
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  child: Text(
-                    character,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-            ],
+          _TabletLabel(
+            context.trText(hasOrigin ? 'Origin' : 'Suggested study strategy'),
           ),
-          if (example.translation.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              '« ${example.translation} »',
-              style: TextStyle(
-                color: context.jc.body,
-                fontSize: 12.5,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w600,
-              ),
+          const SizedBox(height: 8),
+          if (hasOrigin) ContentLanguageNotice(language: kanji.originLanguage),
+          Text(
+            hasOrigin
+                ? kanji.origin.trim()
+                : context.trText(
+                    'Look at the character and choose an image that helps you recall its meaning.'),
+            style: TextStyle(
+              color: context.jc.body,
+              fontSize: 13,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -944,16 +917,15 @@ class _RelatedWordButton extends StatelessWidget {
 }
 
 class _TabletLabel extends StatelessWidget {
-  const _TabletLabel(this.label, {this.light = false});
+  const _TabletLabel(this.label);
 
   final String label;
-  final bool light;
 
   @override
   Widget build(BuildContext context) => Text(
         label,
         style: TextStyle(
-          color: light ? context.jc.surface : context.jc.ink,
+          color: context.jc.ink,
           fontSize: 10.5,
           height: 1,
           fontWeight: FontWeight.w900,
@@ -1190,12 +1162,19 @@ class _KanjiRow extends StatelessWidget {
 
 /// A Tanaka-corpus example: Japanese sentence over its English translation.
 class _ExampleRow extends StatelessWidget {
-  const _ExampleRow({required this.example});
+  const _ExampleRow({required this.example, required this.language});
   final ExampleItem example;
+  final String language;
 
   @override
   Widget build(BuildContext context) {
     final jc = context.jc;
+    final translation = example.translationFor(language);
+    final actualLanguage = example.translations.isEmpty
+        ? example.language
+        : example.translations.any((item) => item.language == language)
+            ? language
+            : 'en';
     return NeoCard(
       tone: NeoTone.paper,
       child: Column(
@@ -1203,10 +1182,12 @@ class _ExampleRow extends StatelessWidget {
         children: [
           TappableJapanese(example.japanese,
               style: const TextStyle(fontSize: 16, height: 1.4)),
-          if (example.translation.isNotEmpty)
+          if (translation.isNotEmpty && actualLanguage != language)
+            _LanguageLabel(language: actualLanguage),
+          if (translation.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text(example.translation,
+              child: Text(translation,
                   style:
                       TextStyle(color: jc.muted, fontSize: 13.5, height: 1.35)),
             ),

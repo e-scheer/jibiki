@@ -35,7 +35,7 @@ class _StudyStatusBarState extends State<StudyStatusBar> {
 
   @override
   Widget build(BuildContext context) {
-    final accountReady = context.watch<AppState>().isAuthenticated;
+    final accountReady = context.watch<AppState>().canStudy;
     final selected = switch (widget.status) {
       'learning' => 'learning',
       'known' => 'known',

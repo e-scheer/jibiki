@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'package:jibiki/l10n/l10n.dart';
 import 'package:provider/provider.dart';
@@ -255,11 +256,9 @@ class _TabletResultPane extends StatelessWidget {
             Expanded(child: results),
             const SizedBox(height: 8),
             Text(
-              _copy(
-                context,
-                'Sorted by relevance. Romaji is transliterated.',
-                'Tri : pertinence. Le rōmaji est translittéré.',
-              ),
+              context.trText(kIsWeb
+                  ? 'Sorted by relevance.'
+                  : 'Sorted by relevance. Romaji is transliterated.'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: context.jc.body,
@@ -430,6 +429,8 @@ class _HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final jc = context.jc;
     final streak = context.watch<DashboardViewModel>().stats.streak;
+    final app = context.watch<AppState>();
+    final showStudy = app.canStudy && app.mode.showsDueBadge;
     final hour = DateTime.now().hour;
     final greeting = hour < 12
         ? _copy(context, 'Morning. Ready to begin?', 'Bonjour. On commence ?')
@@ -463,10 +464,11 @@ class _HomeHeader extends StatelessWidget {
                           dotOutline: JibikiBrandColors.ink,
                         ),
                         const Spacer(),
-                        if (context.watch<RewardsViewModel?>()?.available ??
-                            false)
+                        if (showStudy &&
+                            (context.watch<RewardsViewModel?>()?.available ??
+                                false))
                           const BurnChip()
-                        else
+                        else if (showStudy)
                           Text(
                             streak == 1
                                 ? _copy(
@@ -532,11 +534,9 @@ class _HomeHeader extends StatelessWidget {
                                 focusedBorder: InputBorder.none,
                                 disabledBorder: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
-                                hintText: _copy(
-                                  context,
-                                  'A word, kanji or romaji...',
-                                  'Un mot, un kanji, du rōmaji…',
-                                ),
+                                hintText: context.trText(kIsWeb
+                                    ? 'A word, kanji or kana...'
+                                    : 'A word, kanji or romaji...'),
                                 hintStyle: TextStyle(
                                   color: jc.body,
                                   fontSize: 15,
@@ -585,6 +585,8 @@ class _ExploreLanding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dashboard = context.watch<DashboardViewModel>();
+    final app = context.watch<AppState>();
+    final showStudy = app.canStudy && app.mode.showsDueBadge;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
@@ -599,6 +601,17 @@ class _ExploreLanding extends StatelessWidget {
                 _RecentWords(vm: vm),
               ],
             );
+            if (!showStudy) {
+              if (!wide) return editorial;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _WordOfTheDay(vm: vm)),
+                  const SizedBox(width: 26),
+                  Expanded(child: _RecentWords(vm: vm)),
+                ],
+              );
+            }
             if (!wide) {
               return Column(
                 children: [

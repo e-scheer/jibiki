@@ -1,3 +1,4 @@
+import '../../routing/route_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:jibiki/l10n/l10n.dart';
 
@@ -32,6 +33,7 @@ class _ReferenceViewState extends State<ReferenceView> {
           section.title.fr,
           section.body.en,
           section.body.fr,
+          for (final example in section.examples) ...[example.en, example.fr],
         ],
       ].join(' ').toLowerCase();
       return searchable.contains(normalized);
@@ -49,7 +51,7 @@ class _ReferenceViewState extends State<ReferenceView> {
             leading: NeoIconButton(
               icon: Icons.arrow_back_rounded,
               label: context.trText('Back'),
-              onTap: () => Navigator.of(context).maybePop(),
+              onTap: () => popOrGo(context),
             ),
             trailing: const NeoBadge('文法', tone: NeoTone.acid, rotate: 2),
             child: _ReferenceSearch(

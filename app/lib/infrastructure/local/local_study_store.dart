@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
 
+import '../../core/study_calendar.dart';
 import '../../models/deck.dart';
 import '../../models/enums.dart';
 import '../../models/study.dart';
@@ -27,6 +28,7 @@ class LocalStudyStore implements StudyStore {
   final LocalDictionaryDataSource _dictionary;
   final void Function() _onLocalMutation;
   static const _uuid = Uuid();
+  Future<void> _reviewTail = Future<void>.value();
 
   int get _now => DateTime.now().toUtc().millisecondsSinceEpoch;
   String _id() => _uuid.v4();
@@ -41,49 +43,63 @@ class LocalStudyStore implements StudyStore {
     String sourceMedia = '',
   }) async {
     final now = _now;
-    await _user.execute(
-      'INSERT INTO cards (item_type, item_ref, state, due, source_sentence, source_url, source_title, source_media, created_at, updated_at, deleted) '
-      'VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, 0) ON CONFLICT(item_type, item_ref) DO UPDATE SET '
-      'state = 0, step = NULL, stability = NULL, difficulty = NULL, due = excluded.due, '
-      'last_review = NULL, reps = 0, lapses = 0, source_sentence = CASE WHEN excluded.source_sentence != \'\' THEN excluded.source_sentence ELSE cards.source_sentence END, source_url = CASE WHEN excluded.source_url != \'\' THEN excluded.source_url ELSE cards.source_url END, source_title = CASE WHEN excluded.source_title != \'\' THEN excluded.source_title ELSE cards.source_title END, source_media = CASE WHEN excluded.source_media != \'\' THEN excluded.source_media ELSE cards.source_media END, updated_at = excluded.updated_at, deleted = 0',
-      [
-        type.wire,
-        ref,
-        now,
-        sourceSentence,
-        sourceUrl,
-        sourceTitle,
-        sourceMedia,
-        now,
-        now
-      ],
-    );
-    await _op('bulk_add', {
-      'items': [
-        {'item_type': type.wire, 'ref': ref},
-      ],
-      'known': false,
-      'source_sentence': sourceSentence,
-      'source_url': sourceUrl,
-      'source_title': sourceTitle,
-      'source_media': sourceMedia,
-    });
+    await _commit(
+        [
+          (
+            'INSERT INTO cards (item_type, item_ref, state, due, source_sentence, source_url, source_title, source_media, created_at, updated_at, deleted) '
+                'VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, 0) ON CONFLICT(item_type, item_ref) DO UPDATE SET '
+                'source_sentence = CASE WHEN cards.source_sentence = \'\' THEN excluded.source_sentence ELSE cards.source_sentence END, source_url = CASE WHEN cards.source_url = \'\' THEN excluded.source_url ELSE cards.source_url END, source_title = CASE WHEN cards.source_title = \'\' THEN excluded.source_title ELSE cards.source_title END, source_media = CASE WHEN cards.source_media = \'\' THEN excluded.source_media ELSE cards.source_media END, updated_at = excluded.updated_at, deleted = 0',
+            [
+              type.wire,
+              ref,
+              now,
+              sourceSentence,
+              sourceUrl,
+              sourceTitle,
+              sourceMedia,
+              now,
+              now
+            ],
+          ),
+        ],
+        'bulk_add',
+        {
+          'items': [
+            {'item_type': type.wire, 'ref': ref},
+          ],
+          'known': false,
+          'source_sentence': sourceSentence,
+          'source_url': sourceUrl,
+          'source_title': sourceTitle,
+          'source_media': sourceMedia,
+        });
     return _card((await _row(type, ref))!);
   }
 
   @override
   Future<String> setStatus(ItemType type, String ref, String status) async {
+    if (!{'none', 'known', 'learning'}.contains(status)) {
+      throw ArgumentError.value(status, 'status');
+    }
+    final statements = <(String, List<Object?>)>[];
     if (status == 'none') {
-      await _user.execute(
+      statements.add((
         'DELETE FROM cards WHERE item_type = ? AND item_ref = ?',
         [type.wire, ref],
-      );
-    } else if (status == 'known') {
-      await _upsert(type, ref, known: true);
+      ));
     } else {
-      await _upsert(type, ref, known: false);
+      statements.addAll(await _upsert(type, ref, known: status == 'known'));
+      if (status == 'learning') {
+        // Explicitly toggling Study demotes a mature card, while repeating
+        // the action on a learning card preserves its step and history.
+        statements.add((
+          'UPDATE cards SET state = 0, due = ?, updated_at = ? '
+              'WHERE item_type = ? AND item_ref = ? AND state IN (2, 3)',
+          [_now, _now, type.wire, ref],
+        ));
+      }
     }
-    await _op('set_status', {
+    await _commit(statements, 'set_status', {
       'item_type': type.wire,
       'ref': ref,
       'status': status,
@@ -91,27 +107,46 @@ class LocalStudyStore implements StudyStore {
     return status;
   }
 
-  Future<void> _upsert(ItemType type, String ref, {required bool known}) async {
+  Future<List<(String, List<Object?>)>> _upsert(ItemType type, String ref,
+      {required bool known}) async {
     final now = _now;
-    await _user.execute(
-      'INSERT INTO cards (item_type, item_ref, state, stability, difficulty, due, reps, '
-      'created_at, updated_at, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0) '
-      'ON CONFLICT(item_type, item_ref) DO UPDATE SET state = excluded.state, '
-      'step = NULL, stability = excluded.stability, difficulty = excluded.difficulty, '
-      'due = excluded.due, last_review = NULL, reps = excluded.reps, lapses = 0, '
-      'updated_at = excluded.updated_at, deleted = 0',
+    final statements = <(String, List<Object?>)>[
+      (
+        'INSERT INTO cards (item_type, item_ref, state, due, created_at, updated_at) '
+            'VALUES (?, ?, 0, ?, ?, ?) ON CONFLICT(item_type, item_ref) DO NOTHING',
+        [type.wire, ref, now, now, now],
+      ),
+    ];
+    if (!known) return statements;
+    final row = await _row(type, ref);
+    if (row != null &&
+        row['state'] != stateNew &&
+        row['state'] != stateLearning) {
+      return statements;
+    }
+    final at = DateTime.fromMillisecondsSinceEpoch(now, isUtc: true);
+    final before =
+        row == null ? MemoryState(due: at) : _srsCard(row).toMemoryState();
+    final after = (await _scheduler()).review(before, ratingEasy, at);
+    // Prior knowledge is an FSRS Easy seed, not a fabricated review. Preserve
+    // existing reps/lapses and do not create a review log.
+    statements.add((
+      'UPDATE cards SET state = ?, step = ?, stability = ?, difficulty = ?, '
+          'due = ?, last_review = ?, updated_at = ? '
+          'WHERE item_type = ? AND item_ref = ? AND state IN (0, 1)',
       [
+        after.state,
+        after.step,
+        after.stability,
+        after.difficulty,
+        after.due!.millisecondsSinceEpoch,
+        after.lastReview?.millisecondsSinceEpoch,
+        now,
         type.wire,
-        ref,
-        known ? stateReview : stateNew,
-        known ? 30.0 : null,
-        known ? 5.0 : null,
-        known ? now + const Duration(days: 30).inMilliseconds : now,
-        known ? 1 : 0,
-        now,
-        now,
+        ref
       ],
-    );
+    ));
+    return statements;
   }
 
   @override
@@ -119,10 +154,14 @@ class LocalStudyStore implements StudyStore {
     List<({ItemType type, String ref})> items, {
     bool known = false,
   }) async {
-    for (final item in items) {
-      await _upsert(item.type, item.ref, known: known);
+    final statements = <(String, List<Object?>)>[];
+    final unique = items.toSet();
+    var created = 0;
+    for (final item in unique) {
+      if (await _row(item.type, item.ref) == null) created++;
+      statements.addAll(await _upsert(item.type, item.ref, known: known));
     }
-    await _op('bulk_add', {
+    await _commit(statements, 'bulk_add', {
       'items': [
         for (final item in items)
           {'item_type': item.type.wire, 'ref': item.ref},
@@ -132,8 +171,8 @@ class LocalStudyStore implements StudyStore {
     return {
       'requested': items.length,
       'resolved': items.length,
-      'created': items.length,
-      'known': known ? items.length : 0,
+      'created': created,
+      'known': known,
     };
   }
 
@@ -157,7 +196,8 @@ class LocalStudyStore implements StudyStore {
     final now = _now;
     final profile = await _profile();
     final limit =
-        newLimit ?? (profile['new_cards_per_day'] as num?)?.toInt() ?? 15;
+        (newLimit ?? (profile['new_cards_per_day'] as num?)?.toInt() ?? 15)
+            .clamp(0, 500);
     var rows = await _user.select(
       'SELECT rowid AS id, * FROM cards WHERE deleted = 0 '
       'ORDER BY state = 0, due, created_at',
@@ -204,43 +244,36 @@ class LocalStudyStore implements StudyStore {
     int cardId,
     Rating rating, {
     int durationMs = 0,
-  }) async {
+    String? clientReviewId,
+  }) {
+    final result = _reviewTail.then((_) => _review(cardId, rating,
+        durationMs: durationMs, clientReviewId: clientReviewId));
+    // Read/compute/write must be serialized as a unit, including retries.
+    _reviewTail =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
+
+  Future<StudyCard> _review(int cardId, Rating rating,
+      {required int durationMs, String? clientReviewId}) async {
     final rows = await _user.select(
       'SELECT rowid AS id, * FROM cards WHERE rowid = ?',
       [cardId],
     );
     if (rows.isEmpty) throw StateError('Unknown card $cardId');
     final row = rows.single;
-    final profile = await _profile();
-    final parameters = (profile['fsrs_parameters'] as List?)
-        ?.map((value) => (value as num).toDouble())
-        .toList();
-    final scheduler = Fsrs(
-      parameters: parameters,
-      desiredRetention:
-          (profile['desired_retention'] as num?)?.toDouble() ?? 0.9,
-    );
-    final card = SrsCard(
-      itemType: row['item_type'] as String,
-      itemRef: row['item_ref'] as String,
-      state: row['state'] as int,
-      step: row['step'] as int?,
-      stability: (row['stability'] as num?)?.toDouble(),
-      difficulty: (row['difficulty'] as num?)?.toDouble(),
-      due: DateTime.fromMillisecondsSinceEpoch(row['due'] as int, isUtc: true),
-      lastReview: row['last_review'] == null
-          ? null
-          : DateTime.fromMillisecondsSinceEpoch(
-              row['last_review'] as int,
-              isUtc: true,
-            ),
-      reps: row['reps'] as int,
-      lapses: row['lapses'] as int,
-      favorite: row['favorite'] == 1,
-    );
+    if (clientReviewId != null) {
+      final existing = await _user.select(
+        'SELECT seq FROM review_log WHERE client_review_id = ?',
+        [clientReviewId],
+      );
+      if (existing.isNotEmpty) return _card(row);
+    }
+    final scheduler = await _scheduler();
+    final card = _srsCard(row);
     final now = DateTime.now().toUtc();
     final outcome = applyReview(scheduler, card, rating.value, now);
-    final reviewId = _id();
+    final reviewId = clientReviewId ?? _id();
     await _user.tx([
       (
         'UPDATE cards SET stability = ?, difficulty = ?, state = ?, step = ?, due = ?, '
@@ -267,8 +300,8 @@ class LocalStudyStore implements StudyStore {
           card.itemRef,
           rating.value,
           outcome.stateBefore,
-          durationMs,
-          now.millisecondsSinceEpoch,
+          durationMs.clamp(0, 86400000),
+          now.millisecondsSinceEpoch
         ],
       ),
     ]);
@@ -277,6 +310,26 @@ class LocalStudyStore implements StudyStore {
       (await _row(ItemType.fromString(card.itemType), card.itemRef))!,
     );
   }
+
+  SrsCard _srsCard(Map<String, Object?> row) => SrsCard(
+        itemType: row['item_type'] as String,
+        itemRef: row['item_ref'] as String,
+        state: row['state'] as int,
+        step: row['step'] as int?,
+        stability: (row['stability'] as num?)?.toDouble(),
+        difficulty: (row['difficulty'] as num?)?.toDouble(),
+        due:
+            DateTime.fromMillisecondsSinceEpoch(row['due'] as int, isUtc: true),
+        lastReview: row['last_review'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(
+                row['last_review'] as int,
+                isUtc: true,
+              ),
+        reps: row['reps'] as int,
+        lapses: row['lapses'] as int,
+        favorite: row['favorite'] == 1,
+      );
 
   @override
   Future<List<StudyCard>> cards({ItemType? type}) async {
@@ -305,11 +358,8 @@ class LocalStudyStore implements StudyStore {
   @override
   Future<StudyStats> stats() async {
     final now = DateTime.now().toUtc();
-    final start = DateTime.utc(
-      now.year,
-      now.month,
-      now.day,
-    ).millisecondsSinceEpoch;
+    final calendar = StudyCalendar((await _profile())['timezone'] as String?);
+    final start = calendar.startOfDay(now).millisecondsSinceEpoch;
     final rows = await _user.select(
       'SELECT count(*) AS total, '
       'sum(CASE WHEN state = 0 THEN 1 ELSE 0 END) AS new_count, '
@@ -321,7 +371,7 @@ class LocalStudyStore implements StudyStore {
       'SELECT count(*) AS n FROM review_log WHERE reviewed_at >= ?',
       [start],
     );
-    final streak = await _streak();
+    final streak = await _streak(calendar, now);
     final reviewSummary = await _user.select(
       'SELECT count(*) AS total, '
       'sum(CASE WHEN rating >= 2 THEN 1 ELSE 0 END) AS correct, '
@@ -335,14 +385,17 @@ class LocalStudyStore implements StudyStore {
     );
     final historyRows = await _user.select(
       'SELECT reviewed_at, rating FROM review_log WHERE reviewed_at >= ? ORDER BY reviewed_at',
-      [start - const Duration(days: 13).inMilliseconds],
+      [calendar.startOfDay(now, offsetDays: -13).millisecondsSinceEpoch],
     );
     final history = <String, ({int reviews, int correct})>{};
     for (final row in historyRows) {
-      final date = DateTime.fromMillisecondsSinceEpoch(
-        row['reviewed_at'] as int,
-        isUtc: true,
-      ).toIso8601String().substring(0, 10);
+      final date = calendar
+          .day(DateTime.fromMillisecondsSinceEpoch(
+            row['reviewed_at'] as int,
+            isUtc: true,
+          ))
+          .toIso8601String()
+          .substring(0, 10);
       final previous = history[date] ?? (reviews: 0, correct: 0);
       history[date] = (
         reviews: previous.reviews + 1,
@@ -441,18 +494,19 @@ class LocalStudyStore implements StudyStore {
 
   @override
   Future<Deck> enrollDeck(String id) async {
+    await _packs.ensureReady();
     final spec = deckById(id);
     if (spec == null || spec.itemType == null) {
       throw StateError('Unknown content deck $id');
     }
     final refs = await deckUniverseRefs(_packs.db, spec);
     await bulkAdd([for (final ref in refs) (type: spec.itemType!, ref: ref)]);
-    await _op('deck_enroll', {'deck_id': id});
     return (await decks()).firstWhere((deck) => deck.id == id);
   }
 
   @override
   Future<StudyQueue> deckQueue(String id, {int? newLimit}) async {
+    await _packs.ensureReady();
     final spec = deckById(id);
     if (spec == null) throw StateError('Unknown deck $id');
     Set<String> keys;
@@ -476,46 +530,44 @@ class LocalStudyStore implements StudyStore {
       [cardId],
     );
     if (rows.isEmpty) return false;
-    await _user.execute(
-      'UPDATE cards SET favorite = ?, updated_at = ? WHERE rowid = ?',
-      [value ? 1 : 0, _now, cardId],
-    );
-    await _op('favorite', {
-      'item_type': rows.single['item_type'],
-      'ref': rows.single['item_ref'],
-      'value': value,
-    });
+    await _commit(
+        [
+          (
+            'UPDATE cards SET favorite = ?, updated_at = ? WHERE rowid = ?',
+            [value ? 1 : 0, _now, cardId],
+          ),
+        ],
+        'favorite',
+        {
+          'item_type': rows.single['item_type'],
+          'ref': rows.single['item_ref'],
+          'value': value,
+        });
     return value;
   }
 
-  /// Consecutive local-calendar days with at least one review, ending today
-  /// or yesterday. Mirrors the server's streak_days() (srs/services.py) so the
-  /// number does not jump when a user signs in and the source switches.
-  /// Timestamps are folded into 15-minute buckets in SQL and converted to
-  /// local dates in Dart (SQLite's 'localtime' modifier is unreliable on some
-  /// bundled builds).
-  Future<int> _streak() async {
+  /// Consecutive account-calendar dates, using the same timezone as the server.
+  Future<int> _streak(StudyCalendar calendar, DateTime now) async {
     final rows = await _user.select(
-      'SELECT DISTINCT reviewed_at / 900000 AS bucket FROM review_log',
+      'SELECT DISTINCT reviewed_at FROM review_log',
     );
     if (rows.isEmpty) return 0;
     final days = <DateTime>{};
     for (final row in rows) {
-      final local = DateTime.fromMillisecondsSinceEpoch(
-        (row['bucket'] as int) * 900000,
+      final instant = DateTime.fromMillisecondsSinceEpoch(
+        row['reviewed_at'] as int,
         isUtc: true,
-      ).toLocal();
-      days.add(DateTime(local.year, local.month, local.day));
+      );
+      days.add(calendar.day(instant));
     }
-    final now = DateTime.now();
-    var cursor = DateTime(now.year, now.month, now.day);
+    var cursor = calendar.day(now);
     if (!days.contains(cursor)) {
-      cursor = cursor.subtract(const Duration(days: 1));
+      cursor = DateTime.utc(cursor.year, cursor.month, cursor.day - 1);
     }
     var streak = 0;
     while (days.contains(cursor)) {
       streak += 1;
-      cursor = cursor.subtract(const Duration(days: 1));
+      cursor = DateTime.utc(cursor.year, cursor.month, cursor.day - 1);
     }
     return streak;
   }
@@ -560,11 +612,36 @@ class LocalStudyStore implements StudyStore {
             .cast<String, dynamic>();
   }
 
-  Future<void> _op(String kind, Map<String, dynamic> payload) async {
-    await _user.execute(
-      'INSERT INTO op_outbox (client_op_id, kind, payload, performed_at) VALUES (?, ?, ?, ?)',
-      [_id(), kind, jsonEncode(payload), _now],
+  Future<Fsrs> _scheduler() async {
+    final profile = await _profile();
+    final raw = profile['fsrs_parameters'];
+    final weights = raw is List &&
+            raw.length == 21 &&
+            raw.every((v) => v is num && v.isFinite) &&
+            (raw[20] as num) > 0
+        ? raw.map((v) => (v as num).toDouble()).toList()
+        : null;
+    final retention = profile['desired_retention'];
+    return Fsrs(
+      parameters: weights,
+      desiredRetention: retention is num &&
+              retention.isFinite &&
+              retention > 0 &&
+              retention < 1
+          ? retention.toDouble()
+          : 0.9,
     );
+  }
+
+  Future<void> _commit(List<(String, List<Object?>)> statements, String kind,
+      Map<String, dynamic> payload) async {
+    await _user.tx([
+      ...statements,
+      (
+        'INSERT INTO op_outbox (client_op_id, kind, payload, performed_at) VALUES (?, ?, ?, ?)',
+        [_id(), kind, jsonEncode(payload), _now],
+      ),
+    ]);
     _onLocalMutation();
   }
 }

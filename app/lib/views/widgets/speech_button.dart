@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/speech.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/app_theme.dart';
 
 /// A reusable "read it aloud" control. Speaks [text] (Japanese) through the
@@ -27,7 +28,7 @@ class SpeechButton extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: Speech.instance.speaking,
       builder: (context, playing, _) => IconButton(
-        tooltip: tooltip,
+        tooltip: context.trText(tooltip),
         visualDensity: VisualDensity.compact,
         constraints: const BoxConstraints.tightFor(width: 38, height: 38),
         padding: EdgeInsets.zero,
@@ -39,7 +40,7 @@ class SpeechButton extends StatelessWidget {
             : null,
         icon: AnimatedScale(
           scale: playing ? 1.15 : 1.0,
-          duration: Motion.fast,
+          duration: Motion.timed(context, Motion.fast),
           curve: Motion.out,
           child: Icon(
             playing ? Icons.volume_up_rounded : Icons.volume_up_outlined,

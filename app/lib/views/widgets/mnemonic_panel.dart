@@ -1,6 +1,7 @@
 import 'package:jibiki/l10n/l10n.dart';
 
 import 'package:flutter/material.dart';
+import 'mnemonic_quality_note.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/languages.dart';
@@ -477,6 +478,7 @@ class _MnemonicPost extends StatelessWidget {
                     ),
                   ),
                 ),
+                MnemonicQualityNote(mnemonic: m),
               ],
             ),
           ),

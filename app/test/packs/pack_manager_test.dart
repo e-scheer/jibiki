@@ -17,12 +17,14 @@ void main() {
   late Directory tmp;
   late Map<String, List<int>> assets;
   final managers = <PackManager>[];
+  final assetLoads = <String, int>{};
 
   PackManager manager() {
     final value = PackManager(
       root: () async => Directory('${tmp.path}/packs'),
       dio: Dio(), // never reached in these tests
       loadAsset: (key) async {
+        assetLoads[key] = (assetLoads[key] ?? 0) + 1;
         final bytes = assets[key];
         if (bytes == null) throw StateError('missing asset $key');
         return ByteData.sublistView(Uint8List.fromList(bytes));
@@ -49,6 +51,7 @@ void main() {
   }
 
   setUp(() async {
+    assetLoads.clear();
     tmp = await Directory.systemTemp.createTemp('jibiki-packs-test');
     final raw = buildTinyPack();
     final gz = gzip.encode(raw);
@@ -95,14 +98,55 @@ void main() {
       () async {
     final first = manager();
     await first.ensureReady();
-    final installedAt = await File('${tmp.path}/packs/base.db').lastModified();
+    final installedPath = first.installed.single.path;
+    final installedAt = await File(installedPath).lastModified();
 
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     final second = manager();
     await second.ensureReady();
     expect(second.isInstalled(basePackId), isTrue);
     // Untouched file - ensureBase saw the same version in the registry.
-    expect(await File('${tmp.path}/packs/base.db').lastModified(), installedAt);
+    expect(second.installed.single.path, installedPath);
+    expect(await File(installedPath).lastModified(), installedAt);
+  });
+
+  test('concurrent readiness requests install and open exactly once', () async {
+    final packs = manager();
+    await Future.wait([for (var i = 0; i < 12; i++) packs.ensureReady()]);
+    expect(packs.ready, isTrue);
+    expect(packs.lastError, isNull);
+    expect(packs.installed, hasLength(1));
+    expect(assetLoads['assets/packs/base.db.gz'], 1);
+    expect(packs.revision, 1);
+  });
+
+  test('updated packs use new files while an older reader remains usable',
+      () async {
+    final first = manager();
+    await first.ensureReady();
+    final oldPath = first.installed.single.path;
+    final source = sq.sqlite3.open('${tmp.path}/tiny.db');
+    source.execute("UPDATE kana SET romaji = 'updated'");
+    source.dispose();
+    final raw = File('${tmp.path}/tiny.db').readAsBytesSync();
+    final gz = gzip.encode(raw);
+    final manifest =
+        jsonDecode(utf8.decode(assets['assets/packs/base_manifest.json']!))
+            as Map;
+    manifest['version'] = '2026.09.06';
+    manifest['sha256'] = sha256.convert(gz).toString();
+    manifest['sha256_db'] = sha256.convert(raw).toString();
+    assets['assets/packs/base_manifest.json'] =
+        utf8.encode(jsonEncode(manifest));
+    assets['assets/packs/base.db.gz'] = gz;
+    final second = manager();
+    await second.ensureReady();
+    expect(second.ready, isTrue);
+    expect(second.installed.single.path, isNot(oldPath));
+    expect((await first.db.select('SELECT romaji FROM kana')).single['romaji'],
+        'a');
+    expect((await second.db.select('SELECT romaji FROM kana')).single['romaji'],
+        'updated');
   });
 
   test('a corrupted asset fails safe: not ready, error surfaced', () async {

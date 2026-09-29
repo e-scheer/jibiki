@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/core/api_client.dart';
+import 'package:jibiki/core/api_exception.dart';
 import 'package:jibiki/core/session_store.dart';
 import 'package:jibiki/models/enums.dart';
 import 'package:jibiki/models/kanji.dart';
@@ -49,6 +50,8 @@ class _FakeStudyRepo extends StudyRepository {
   _FakeStudyRepo(StudyService service, {required this.pool})
       : super(service, service);
   final List<StudyCard> pool;
+  bool failReview = false;
+  final List<Rating> ratings = [];
 
   @override
   Future<StudyQueue> queue({int? newLimit}) async => StudyQueue(
@@ -59,8 +62,11 @@ class _FakeStudyRepo extends StudyRepository {
 
   @override
   Future<StudyCard> review(int cardId, Rating rating,
-          {int durationMs = 0}) async =>
-      pool.firstWhere((c) => c.id == cardId);
+      {int durationMs = 0, String? clientReviewId}) async {
+    ratings.add(rating);
+    if (failReview) throw ApiException('Offline');
+    return pool.firstWhere((c) => c.id == cardId);
+  }
 }
 
 Future<ReviewViewModel> _vm({bool includeFifth = false}) async {
@@ -86,6 +92,37 @@ Widget _host(Widget child) => MaterialApp(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('quiz save retry preserves the original wrong grade and summary',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final service = StudyService(ApiClient(SessionStore(prefs)));
+    final repo = _FakeStudyRepo(service, pool: [
+      _kanji(1, '水', 'water', 'みず'),
+      _kanji(2, '火', 'fire', 'ひ'),
+    ])
+      ..failReview = true;
+    final vm = ReviewViewModel(repo);
+    await vm.load();
+    final saved = <Rating>[];
+    await tester.pumpWidget(_host(QuizStage(
+        vm: vm, lang: 'en', onRated: (_, rating) => saved.add(rating))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('fire'));
+    await tester.pump(const Duration(milliseconds: 1800));
+    await tester.pumpAndSettle();
+    expect(vm.index, 0);
+    expect(saved, isEmpty);
+    expect(find.text('Retry'), findsOneWidget);
+    repo.failReview = false;
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(repo.ratings, [Rating.again, Rating.again]);
+    expect(saved, [Rating.again]);
+    expect(vm.index, 1);
+    expect(tester.takeException(), isNull);
+  });
 
   group('QuizStage (multiple choice)', () {
     testWidgets('renders the prompt, lettered option chips and every choice',

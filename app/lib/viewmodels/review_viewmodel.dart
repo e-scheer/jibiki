@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:uuid/uuid.dart';
 
 import '../core/telemetry.dart';
 import '../models/enums.dart';
@@ -7,8 +8,8 @@ import '../repositories/study_repository.dart';
 import 'base_view_model.dart';
 
 /// Drives one study session (swipe or quiz) over a queue, the global due queue
-/// or a specific deck. Server is authoritative for scheduling; this only walks
-/// the session and submits ratings.
+/// or a specific deck. A card advances only once its rating is persisted by the
+/// study store (a local transaction on native platforms, the API on web).
 class ReviewViewModel extends BaseViewModel {
   ReviewViewModel(this._study, {this.deckId});
   final StudyRepository _study;
@@ -19,10 +20,13 @@ class ReviewViewModel extends BaseViewModel {
   int _index = 0;
   bool _answerShown = false;
   int _reviewed = 0;
-  int _startedMs = 0;
+  final Stopwatch _cardTimer = Stopwatch();
   bool _moreNewLikely = false; // the pool has new cards we haven't loaded yet
   bool _loadingMore = false;
   bool _sessionCompletionLogged = false;
+  bool _saving = false;
+  final Map<int, ({String id, Rating rating, int duration})> _pendingRatings =
+      {};
 
   int get index => _index;
   int get reviewed => _reviewed;
@@ -59,6 +63,7 @@ class ReviewViewModel extends BaseViewModel {
       _answerShown = false;
       _moreNewLikely = q.newCards.length < q.newAvailable;
       _startCard();
+      notifyListeners();
       unawaited(Telemetry.instance.logEvent(
         'study_session_started',
         parameters: {
@@ -74,7 +79,7 @@ class ReviewViewModel extends BaseViewModel {
   /// resuming the session in place. Robust to reviews mutating the new set: we
   /// request the whole remaining pool and dedup by id rather than paging.
   Future<void> studyMore() async {
-    if (_loadingMore) return;
+    if (_loadingMore || _saving || isLoading || !finished) return;
     _loadingMore = true;
     notifyListeners();
     const all = 100000; // server clamps to its payload cap
@@ -116,61 +121,79 @@ class ReviewViewModel extends BaseViewModel {
 
   Future<void> rate(Rating rating) async {
     final card = current;
-    if (card == null) return;
-    final elapsed = _nowMs() - _startedMs;
-    // Advance the session immediately and submit the rating in the background.
-    // Blocking the next card on the network round-trip made a slow connection
-    // look frozen ("did it hang?") between cards; scheduling is server-side and
-    // fire-and-forget, so the UI never waits on it.
-    _reviewed += 1;
-    _index += 1;
-    _answerShown = false;
-    _startCard();
-    notifyListeners();
-    unawaited(Telemetry.instance.logEvent(
-      'card_rated',
-      parameters: {
-        'item_type': card.itemType.wire,
-        'rating': rating.name,
-        'card_state': card.isNew ? 'new' : 'scheduled',
-        'duration_bucket': _durationBucket(elapsed),
-      },
-    ));
-    _logCompletionIfNeeded();
-    unawaited(runGuarded(
-        () => _study.review(card.id, rating, durationMs: elapsed),
-        silent: true));
+    if (card == null || _saving || isLoading) return;
+    final elapsed = _cardTimer.elapsedMilliseconds;
+    _saving = true;
+    await runGuarded(() async {
+      await _persistRating(card, rating, elapsed);
+      _reviewed += 1;
+      _index += 1;
+      _answerShown = false;
+      _startCard();
+      unawaited(Telemetry.instance.logEvent(
+        'card_rated',
+        parameters: {
+          'item_type': card.itemType.wire,
+          'rating': rating.name,
+          'card_state': card.isNew ? 'new' : 'scheduled',
+          'duration_bucket': _durationBucket(elapsed),
+        },
+      ));
+      _logCompletionIfNeeded();
+    });
+    _saving = false;
   }
 
   /// Grade a whole batch at once and advance past it in a single step. The Match
   /// game plays a round over several cards, then reports them all together; done
   /// card-by-card it would move [current] mid-round and rebuild the board.
   Future<void> rateMany(List<StudyCard> cards, Rating rating) async {
-    if (cards.isEmpty) return;
-    // Advance past the whole batch at once, then submit each rating in the
-    // background so the board never sits waiting on the network (see [rate]).
-    _reviewed += cards.length;
-    _index += cards.length;
-    _answerShown = false;
-    _startCard();
-    notifyListeners();
-    unawaited(Telemetry.instance.logEvent(
-      'card_rated',
-      parameters: {
-        'item_type': 'mixed_batch',
-        'rating': rating.name,
-        'count': cards.length,
-      },
-    ));
-    _logCompletionIfNeeded();
-    for (final c in cards) {
-      unawaited(runGuarded(() => _study.review(c.id, rating, durationMs: 0),
-          silent: true));
+    if (cards.isEmpty || _saving || isLoading) return;
+    // Retry can include the successful prefix of a partially saved round.
+    // Filter it out, then require the remaining cards to match the queue.
+    final completed = _queue.take(_index).map((c) => c.id).toSet();
+    final pending = cards.where((c) => !completed.contains(c.id)).toList();
+    if (pending.isEmpty || _index + pending.length > _queue.length) return;
+    for (var i = 0; i < pending.length; i++) {
+      if (pending[i].id != _queue[_index + i].id) return;
     }
+    final duration = (_cardTimer.elapsedMilliseconds / pending.length).round();
+    _saving = true;
+    await runGuarded(() async {
+      for (final card in pending) {
+        await _persistRating(card, rating, duration);
+        _reviewed += 1;
+        _index += 1;
+      }
+      _answerShown = false;
+      _startCard();
+      unawaited(Telemetry.instance.logEvent(
+        'card_rated',
+        parameters: {
+          'item_type': 'mixed_batch',
+          'rating': rating.name,
+          'count': pending.length,
+        },
+      ));
+      _logCompletionIfNeeded();
+    });
+    _saving = false;
   }
 
-  void _startCard() => _startedMs = _nowMs();
-  int _nowMs() => DateTime.now().millisecondsSinceEpoch;
+  void _startCard() => _cardTimer
+    ..reset()
+    ..start();
+
+  Future<void> _persistRating(
+      StudyCard card, Rating rating, int duration) async {
+    // An HTTP error can arrive after the server committed. A retry must carry
+    // the same event identity and contents so it cannot count twice.
+    final pending = _pendingRatings.putIfAbsent(card.id,
+        () => (id: const Uuid().v4(), rating: rating, duration: duration));
+    await _study.review(card.id, pending.rating,
+        durationMs: pending.duration, clientReviewId: pending.id);
+    _pendingRatings.remove(card.id);
+  }
 
   void _logCompletionIfNeeded() {
     if (!finished || _sessionCompletionLogged) return;

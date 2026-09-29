@@ -72,8 +72,10 @@ class StudyRepository {
 
   Future<Map<String, int>> studyStates({ItemType? type}) =>
       _store.states(type: type);
-  Future<StudyCard> review(int cardId, Rating rating, {int durationMs = 0}) =>
-      _store.review(cardId, rating, durationMs: durationMs);
+  Future<StudyCard> review(int cardId, Rating rating,
+          {int durationMs = 0, String? clientReviewId}) =>
+      _store.review(cardId, rating,
+          durationMs: durationMs, clientReviewId: clientReviewId);
   Future<List<StudyCard>> cards({ItemType? type}) => _store.cards(type: type);
   Future<void> deleteCard(int id) async {
     await _store.deleteCard(id);

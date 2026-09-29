@@ -4,6 +4,7 @@
 /// the client mirror of server/tests/test_srs.py and test_sync.py.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,6 +20,7 @@ import 'package:jibiki/infrastructure/packs/pack_manager.dart';
 import 'package:jibiki/infrastructure/user_db_handle.dart';
 import 'package:jibiki/models/enums.dart';
 import 'package:jibiki/services/sync_service.dart';
+import 'package:jibiki/srs/fsrs.dart';
 import 'package:jibiki/sync/sync_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,12 +34,14 @@ class _FakeSyncService extends SyncService {
   Future<Map<String, dynamic>> sync({
     String? lastSyncedAt,
     String mode = 'sync',
+    String? replacementId,
     List<Map<String, dynamic>> reviews = const [],
     List<Map<String, dynamic>> ops = const [],
   }) async {
     final request = {
       'last_synced_at': lastSyncedAt,
       'mode': mode,
+      if (replacementId != null) 'replacement_id': replacementId,
       'reviews': reviews,
       'ops': ops,
     };
@@ -97,6 +101,7 @@ void main() {
   });
 
   setUp(() async {
+    remote.handler = null;
     user = UserDbHandle(() => UserDb.open(
         '${tmp.path}/user-${DateTime.now().microsecondsSinceEpoch}.db'));
     store =
@@ -160,8 +165,20 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(remote.requests, isEmpty);
 
+    final synced = Completer<void>();
+    void onSync() {
+      if (remote.requests.isNotEmpty &&
+          !engine.syncing &&
+          engine.pendingCount == 0 &&
+          !synced.isCompleted) {
+        synced.complete();
+      }
+    }
+
+    engine.addListener(onSync);
     engine.setOnline(true);
-    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    await synced.future.timeout(const Duration(seconds: 10));
+    engine.removeListener(onSync);
 
     expect(remote.requests, isNotEmpty);
     expect(engine.pendingCount, 0);
@@ -476,4 +493,247 @@ void main() {
             .single;
     expect(row['reps'], 2);
   });
+
+  test('re-adding and enrolling never resets an existing schedule or context',
+      () async {
+    final card =
+        await store.addCard(ItemType.kana, 'あ', sourceTitle: 'Original');
+    await store.review(card.id, Rating.good);
+    final before = (await user.select('SELECT * FROM cards')).single;
+    await store.addCard(ItemType.kana, 'あ',
+        sourceTitle: 'Replacement', sourceUrl: 'https://example.test/source');
+    final summary = await store.bulkAdd([
+      (type: ItemType.kana, ref: 'あ'),
+      (type: ItemType.kana, ref: 'あ'),
+    ]);
+    expect(summary['created'], 0);
+    expect(summary['known'], isFalse);
+    await store.enrollDeck('hiragana');
+    final after =
+        (await user.select('SELECT * FROM cards WHERE item_ref = ?', ['あ']))
+            .single;
+    for (final field in [
+      'state',
+      'step',
+      'stability',
+      'difficulty',
+      'due',
+      'last_review',
+      'reps',
+      'lapses'
+    ]) {
+      expect(after[field], before[field], reason: field);
+    }
+    expect(after['source_title'], 'Original');
+    expect(after['source_url'], 'https://example.test/source');
+  });
+
+  test('known uses FSRS initial Easy without fabricated reps and is idempotent',
+      () async {
+    await store.setStatus(ItemType.kana, 'い', 'known');
+    final before = (await user.select('SELECT * FROM cards')).single;
+    final at = DateTime.fromMillisecondsSinceEpoch(before['last_review'] as int,
+        isUtc: true);
+    final expected = Fsrs().review(MemoryState(due: at), ratingEasy, at);
+    expect(before['due'], expected.due!.millisecondsSinceEpoch);
+    expect(before['stability'], expected.stability);
+    expect(before['difficulty'], expected.difficulty);
+    expect(before['reps'], 0);
+    await store.setStatus(ItemType.kana, 'い', 'known');
+    expect((await user.select('SELECT * FROM cards')).single, before);
+    expect(await user.select('SELECT * FROM review_log'), isEmpty);
+  });
+
+  test('repeated learning status preserves the learning step and past reviews',
+      () async {
+    final card = await store.addCard(ItemType.kana, 'う');
+    await store.review(card.id, Rating.good);
+    final before = (await user.select('SELECT * FROM cards')).single;
+    await store.setStatus(ItemType.kana, 'う', 'learning');
+    expect((await user.select('SELECT * FROM cards')).single, before);
+  });
+
+  test('card and outbox changes roll back together if the outbox write fails',
+      () async {
+    await user.execute("CREATE TRIGGER reject_ops BEFORE INSERT ON op_outbox "
+        "BEGIN SELECT RAISE(ABORT, 'outbox full'); END");
+    await expectLater(store.addCard(ItemType.kana, 'え'), throwsStateError);
+    expect(await user.select('SELECT * FROM cards'), isEmpty);
+    expect(syncPokes, 0);
+  });
+
+  test('invalid cached parameters fall back to FSRS defaults', () async {
+    await user.execute('INSERT INTO kv (key, value) VALUES (?, ?)', [
+      'profile',
+      jsonEncode({'fsrs_parameters': [], 'desired_retention': 1})
+    ]);
+    final card = await store.addCard(ItemType.kana, 'お');
+    final after = await store.review(card.id, Rating.easy);
+    expect(after.state, stateReview);
+    expect(after.due.difference(DateTime.now().toUtc()).inDays, 15);
+  });
+
+  test('duplicate review identity and concurrent reviews cannot lose progress',
+      () async {
+    final card = await store.addCard(ItemType.kana, 'か');
+    const id = 'b076bbf8-18a2-4c42-a0ad-97856dbe89e8';
+    await Future.wait([
+      store.review(card.id, Rating.good, clientReviewId: id),
+      store.review(card.id, Rating.good, clientReviewId: id),
+    ]);
+    expect((await user.select('SELECT reps FROM cards')).single['reps'], 1);
+    expect(await user.select('SELECT * FROM review_log'), hasLength(1));
+    await Future.wait([
+      store.review(card.id, Rating.good),
+      store.review(card.id, Rating.good),
+    ]);
+    expect((await user.select('SELECT reps FROM cards')).single['reps'], 3);
+    expect(await user.select('SELECT * FROM review_log'), hasLength(3));
+  });
+
+  test('pending favorites survive stale card snapshots and deletions',
+      () async {
+    final card = await store.addCard(ItemType.kana, 'き');
+    remote.handler = (request) async {
+      await store.setFavorite(card.id, true);
+      return {
+        ..._FakeSyncService._ackAll(request),
+        'deleted': [
+          {'item_type': 'kana', 'ref': 'き'}
+        ],
+        'cards': [_serverCard('き')],
+      };
+    };
+    await engine.syncNow();
+    expect(engine.lastError, isNull);
+    expect((await user.select('SELECT favorite FROM cards')).single['favorite'],
+        1);
+    expect(await user.select('SELECT * FROM op_outbox'), hasLength(1));
+  });
+
+  test('a pending local removal is not resurrected by a stale snapshot',
+      () async {
+    await store.addCard(ItemType.kana, 'く');
+    remote.handler = (request) async {
+      await store.setStatus(ItemType.kana, 'く', 'none');
+      return {
+        ..._FakeSyncService._ackAll(request),
+        'cards': [_serverCard('く')]
+      };
+    };
+    await engine.syncNow();
+    expect(engine.lastError, isNull);
+    expect(await user.select('SELECT * FROM cards'), isEmpty);
+    expect(await user.select('SELECT * FROM op_outbox'), hasLength(1));
+  });
+
+  test('pending bulk additions survive remote tombstones', () async {
+    remote.handler = (request) async {
+      await store.bulkAdd([(type: ItemType.kana, ref: 'け')]);
+      return {
+        ..._FakeSyncService._ackAll(request),
+        'deleted': [
+          {'item_type': 'kana', 'ref': 'け'}
+        ]
+      };
+    };
+    await engine.syncNow();
+    expect(engine.lastError, isNull);
+    expect(await user.select('SELECT * FROM cards'), hasLength(1));
+  });
+
+  test('profile edits made during sync survive stale server preferences',
+      () async {
+    remote.handler = (request) async {
+      await user.tx([
+        (
+          'INSERT INTO kv (key, value) VALUES (?, ?)',
+          [
+            'profile',
+            jsonEncode({'new_cards_per_day': 7})
+          ]
+        ),
+        (
+          'INSERT INTO op_outbox (client_op_id, kind, payload, performed_at) VALUES (?, ?, ?, ?)',
+          [
+            'fcdd4c4f-5f77-48df-b632-ef941fc67ea4',
+            'profile_patch',
+            jsonEncode({'new_cards_per_day': 7}),
+            DateTime.now().millisecondsSinceEpoch
+          ]
+        ),
+      ]);
+      return {
+        ..._FakeSyncService._ackAll(request),
+        'profile': {'new_cards_per_day': 15}
+      };
+    };
+    await engine.syncNow();
+    expect(engine.lastError, isNull);
+    final value =
+        (await user.select("SELECT value FROM kv WHERE key = 'profile'"))
+            .single['value'];
+    expect(jsonDecode(value as String)['new_cards_per_day'], 7);
+  });
+
+  test('logging out during sync never applies the old account response',
+      () async {
+    await store.addCard(ItemType.kana, 'こ');
+    remote.handler = (request) async {
+      await engine.accountChanged(null);
+      return {
+        ..._FakeSyncService._ackAll(request),
+        'cards': [_serverCard('こ')]
+      };
+    };
+    await engine.syncNow();
+    expect((await user.select('SELECT reps FROM cards')).single['reps'], 0);
+    expect(await user.select('SELECT * FROM op_outbox'), hasLength(1));
+  });
+
+  test('cloud replacement retries retain their identity after a restart',
+      () async {
+    await store.addCard(ItemType.kana, 'さ');
+    remote.handler = (_) async => throw StateError('response lost');
+    await engine.syncNow(replaceCloud: true);
+    final replacementId = remote.requests.single['replacement_id'];
+    expect(replacementId, isNotNull);
+    expect(engine.lastError, isNotNull);
+    engine.dispose();
+
+    engine = SyncEngine(user, remote, canSync: () => true);
+    await engine.init();
+    engine.setOnline(true);
+    await engine.accountChanged(1);
+    remote.handler = null;
+    await engine.syncNow();
+    expect(remote.requests.last['mode'], 'replace_cloud');
+    expect(remote.requests.last['replacement_id'], replacementId);
+    expect(engine.lastError, isNull);
+    expect(
+        await user
+            .select("SELECT value FROM kv WHERE key = 'cloud_replacement_id'"),
+        isEmpty);
+    await engine.syncNow();
+    expect(remote.requests.last['mode'], 'sync');
+    expect(remote.requests.last.containsKey('replacement_id'), isFalse);
+  });
 }
+
+Map<String, dynamic> _serverCard(String ref) => {
+      'id': 999,
+      'item_type': 'kana',
+      'item_ref': ref,
+      'state': 2,
+      'step': null,
+      'stability': 16.1507,
+      'difficulty': 3.3,
+      'due': DateTime.now()
+          .toUtc()
+          .add(const Duration(days: 16))
+          .toIso8601String(),
+      'last_review': DateTime.now().toUtc().toIso8601String(),
+      'reps': 9,
+      'lapses': 0,
+      'favorite': false,
+    };

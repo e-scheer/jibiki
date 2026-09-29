@@ -1,5 +1,9 @@
 class KanjiComponent {
-  KanjiComponent({required this.literal, required this.meaning, required this.reading, required this.isKanji});
+  KanjiComponent(
+      {required this.literal,
+      required this.meaning,
+      required this.reading,
+      required this.isKanji});
   final String literal;
   final String meaning;
   final String reading;
@@ -26,12 +30,15 @@ class KanjiEntry {
     required this.components,
     required this.meanings,
     this.origin = '',
+    this.originLanguage = '',
     this.formation = '',
     this.phonetic = '',
     this.componentDetails = const [],
     this.words = const [],
     this.strokePaths = const [],
     this.strokeViewbox = '0 0 109 109',
+    this.metadata = const {},
+    this.provenance = const {},
   });
 
   final String literal;
@@ -44,21 +51,33 @@ class KanjiEntry {
   final List<String> nanori;
   final List<String> components;
   final List<Map<String, String>> meanings; // {language, text}
-  final String origin; // Wiktionary "Glyph origin" prose (CC BY-SA); '' if unknown
-  final String formation; // phono-semantic | ideogrammic | pictogram | simplified | …
-  final String phonetic; // 音符: the sound-carrying component, when phono-semantic
+  final String
+      origin; // Wiktionary "Glyph origin" prose (CC BY-SA); '' if unknown
+  final String originLanguage;
+  final String
+      formation; // phono-semantic | ideogrammic | pictogram | simplified | …
+  final String
+      phonetic; // 音符: the sound-carrying component, when phono-semantic
   final List<KanjiComponent> componentDetails;
   final List<dynamic> words; // raw word json (kept light to avoid a cycle)
   final List<String> strokePaths; // KanjiVG SVG `d` strings, in stroke order
   final String strokeViewbox;
+  final Map<String, dynamic> metadata;
+  final Map<String, dynamic> provenance;
 
   bool get hasStrokes => strokePaths.isNotEmpty;
   bool get hasOrigin => origin.isNotEmpty;
 
   List<String> meaningsFor(String lang) {
-    final wanted = meanings.where((m) => m['language'] == lang).map((m) => m['text'] ?? '').toList();
+    final wanted = meanings
+        .where((m) => m['language'] == lang)
+        .map((m) => m['text'] ?? '')
+        .toList();
     if (wanted.isNotEmpty) return wanted;
-    final en = meanings.where((m) => m['language'] == 'en').map((m) => m['text'] ?? '').toList();
+    final en = meanings
+        .where((m) => m['language'] == 'en')
+        .map((m) => m['text'] ?? '')
+        .toList();
     return en.isNotEmpty ? en : meanings.map((m) => m['text'] ?? '').toList();
   }
 
@@ -67,6 +86,9 @@ class KanjiEntry {
 
   factory KanjiEntry.fromJson(Map<String, dynamic> j) => KanjiEntry(
         literal: j['literal'] as String? ?? '',
+        metadata: (j['metadata'] as Map? ?? const {}).cast<String, dynamic>(),
+        provenance:
+            (j['provenance'] as Map? ?? const {}).cast<String, dynamic>(),
         grade: (j['grade'] as num?)?.toInt(),
         strokeCount: (j['stroke_count'] as num?)?.toInt() ?? 0,
         jlpt: (j['jlpt'] as num?)?.toInt(),
@@ -76,6 +98,7 @@ class KanjiEntry {
         nanori: _strs(j['nanori']),
         components: _strs(j['components']),
         origin: j['origin'] as String? ?? '',
+        originLanguage: j['origin_language'] as String? ?? '',
         formation: j['formation'] as String? ?? '',
         phonetic: j['phonetic'] as String? ?? '',
         meanings: ((j['meanings'] as List?) ?? const [])
@@ -85,7 +108,8 @@ class KanjiEntry {
                 })
             .toList(),
         componentDetails: ((j['component_details'] as List?) ?? const [])
-            .map((e) => KanjiComponent.fromJson((e as Map).cast<String, dynamic>()))
+            .map((e) =>
+                KanjiComponent.fromJson((e as Map).cast<String, dynamic>()))
             .toList(),
         words: (j['words'] as List?) ?? const [],
         strokePaths: _strs(j['stroke_paths']),

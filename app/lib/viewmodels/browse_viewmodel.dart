@@ -11,7 +11,8 @@ class BrowseSpec {
         grade = null,
         contains = null;
 
-  const BrowseSpec.kanji({required this.title, this.jlpt, this.grade, this.contains})
+  const BrowseSpec.kanji(
+      {required this.title, this.jlpt, this.grade, this.contains})
       : isKanji = true,
         common = false;
 
@@ -35,15 +36,57 @@ class BrowseViewModel extends BaseViewModel {
   List<KanjiEntry> _kanji = [];
   List<KanjiEntry> get kanji => _kanji;
 
-  Future<void> load() async {
+  static const pageSize = 60;
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+  int _offset = 0;
+
+  Future<void> load() => _loadPage(reset: true);
+
+  Future<void> loadMore() => _loadPage(reset: false);
+
+  Future<void> _loadPage({required bool reset}) async {
+    if (isLoading || (!reset && !_hasMore)) return;
+    final offset = reset ? 0 : _offset;
     if (spec.isKanji) {
       final r = await runGuarded(
-        () => _repo.kanjiList(jlpt: spec.jlpt, grade: spec.grade, contains: spec.contains),
+        () => _repo.kanjiList(
+            jlpt: spec.jlpt,
+            grade: spec.grade,
+            contains: spec.contains,
+            limit: pageSize,
+            offset: offset),
       );
-      if (r != null) _kanji = r;
+      if (r != null) {
+        final entries = {
+          for (final entry in reset ? <KanjiEntry>[] : _kanji)
+            entry.literal: entry
+        };
+        for (final entry in r) {
+          entries[entry.literal] = entry;
+        }
+        _kanji = entries.values.toList();
+        _offset = offset + r.length;
+        _hasMore = r.length == pageSize;
+      }
     } else {
-      final r = await runGuarded(() => _repo.words(common: spec.common, jlpt: spec.jlpt));
-      if (r != null) _words = r;
+      final r = await runGuarded(() => _repo.words(
+          common: spec.common,
+          jlpt: spec.jlpt,
+          limit: pageSize,
+          offset: offset));
+      if (r != null) {
+        final entries = {
+          for (final entry in reset ? <WordEntry>[] : _words) entry.id: entry
+        };
+        for (final entry in r) {
+          entries[entry.id] = entry;
+        }
+        _words = entries.values.toList();
+        _offset = offset + r.length;
+        _hasMore = r.length == pageSize;
+      }
     }
+    notifyListeners();
   }
 }

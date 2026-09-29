@@ -1,3 +1,32 @@
+import 'word.dart';
+
+class KanaWordExample {
+  KanaWordExample(
+      {required this.wordId,
+      required this.headword,
+      required this.reading,
+      required this.glosses,
+      this.provenance = const {}});
+  final int wordId;
+  final String headword;
+  final String reading;
+  final List<GlossItem> glosses;
+  final Map<String, dynamic> provenance;
+
+  factory KanaWordExample.fromJson(Map<String, dynamic> json) =>
+      KanaWordExample(
+        wordId: (json['word_id'] as num).toInt(),
+        headword: json['headword'] as String? ?? '',
+        reading: json['reading'] as String? ?? '',
+        glosses: [
+          for (final value in json['glosses'] as List? ?? const [])
+            GlossItem.fromJson((value as Map).cast<String, dynamic>())
+        ],
+        provenance:
+            (json['provenance'] as Map? ?? const {}).cast<String, dynamic>(),
+      );
+}
+
 /// One curated sentence showing a grammatical kana at work. The particle is
 /// kept as its own segment so the UI can highlight it inside the sentence.
 class KanaUsageExample {
@@ -7,6 +36,7 @@ class KanaUsageExample {
     required this.after,
     required this.pronunciation,
     required this.translation,
+    this.language = '',
   });
 
   final String before;
@@ -14,6 +44,7 @@ class KanaUsageExample {
   final String after;
   final String pronunciation; // particle spelled as pronounced (は→wa, を→o, へ→e)
   final String translation;
+  final String language;
 
   String get sentence => '$before$particle$after';
 
@@ -23,6 +54,7 @@ class KanaUsageExample {
         after: j['after'] as String? ?? '',
         pronunciation: j['pronunciation'] as String? ?? '',
         translation: j['translation'] as String? ?? '',
+        language: j['language'] as String? ?? '',
       );
 }
 
@@ -39,6 +71,9 @@ class KanaEntry {
     this.usageLabel = '',
     this.usage = '',
     this.usageExamples = const [],
+    this.originLanguage = '',
+    this.usageLanguage = '',
+    this.wordExamples = const [],
   });
 
   final String char;
@@ -47,11 +82,17 @@ class KanaEntry {
   final String kind; // gojuon | dakuten | handakuten | yoon
   final String row; // a,k,s,...
   final int order;
-  final String origin; // the man'yōgana kanji (or base kana) this glyph came from
+  final String
+      origin; // the man'yōgana kanji (or base kana) this glyph came from
   final String originNote; // one-line "how it got this shape" story
-  final String usageLabel; // short grammatical role, e.g. "Topic particle"; '' if none
+  final String
+      usageLabel; // short grammatical role, e.g. "Topic particle"; '' if none
   final String usage; // one-line "job in a sentence" for the particle kana
-  final List<KanaUsageExample> usageExamples; // curated sentences showing that job
+  final List<KanaUsageExample>
+      usageExamples; // curated sentences showing that job
+  final String originLanguage;
+  final String usageLanguage;
+  final List<KanaWordExample> wordExamples;
 
   bool get isHiragana => script == 'hiragana';
   bool get hasOrigin => origin.isNotEmpty;
@@ -68,6 +109,12 @@ class KanaEntry {
         order: (j['order'] as num?)?.toInt() ?? 0,
         origin: j['origin'] as String? ?? '',
         originNote: j['origin_note'] as String? ?? '',
+        originLanguage: j['origin_language'] as String? ?? '',
+        usageLanguage: j['usage_language'] as String? ?? '',
+        wordExamples: [
+          for (final value in j['word_examples'] as List? ?? const [])
+            KanaWordExample.fromJson((value as Map).cast<String, dynamic>())
+        ],
         usageLabel: j['usage_label'] as String? ?? '',
         usage: j['usage'] as String? ?? '',
         usageExamples: (j['usage_examples'] as List? ?? const [])

@@ -39,6 +39,7 @@ class InstalledPack {
     required this.installedBytes,
     required this.schemaVersion,
     this.languages = const [],
+    this.requires = const [],
   });
 
   final String id;
@@ -47,6 +48,7 @@ class InstalledPack {
   final int installedBytes;
   final int schemaVersion;
   final List<String> languages;
+  final List<PackRequirement> requires;
 
   factory InstalledPack.fromJson(Map<String, dynamic> json) => InstalledPack(
         id: json['id'] as String,
@@ -57,6 +59,10 @@ class InstalledPack {
         languages: [
           for (final value in json['languages'] as List? ?? const []) '$value',
         ],
+        requires: [
+          for (final value in json['requires'] as List? ?? const [])
+            PackRequirement.fromJson((value as Map).cast<String, dynamic>())
+        ],
       );
 
   Map<String, dynamic> toJson() => {
@@ -66,6 +72,10 @@ class InstalledPack {
         'installed_bytes': installedBytes,
         'schema_version': schemaVersion,
         'languages': languages,
+        'requires': [
+          for (final requirement in requires)
+            {'id': requirement.id, 'version': requirement.version}
+        ],
       };
 }
 
@@ -96,6 +106,12 @@ class PackManager extends ChangeNotifier {
   final AssetLoader _loadAsset;
   final TelemetrySink _telemetry;
   final Map<String, CancelToken> _cancellations = {};
+  Future<void>? _initializing;
+  Future<void> _operationTail = Future<void>.value();
+  final Map<String, Future<void>> _downloads = {};
+  final Set<String> _activeSchemas = {};
+  final Set<String> _retiredPaths = {};
+  int revision = 0;
 
   DictDb? _database;
   DictDb get db => _database!;
@@ -111,19 +127,34 @@ class PackManager extends ChangeNotifier {
   int get installedBytesTotal =>
       installed.fold(0, (total, pack) => total + pack.installedBytes);
   List<String> get localeSchemas => _schemas('loc_');
-  List<String> get glossSchemas => hasCore ? localeSchemas : ['main'];
+  List<String> get glossSchemas => [
+        ...localeSchemas,
+        if (!hasCore) 'main',
+        if (_activeSchemas.contains('base')) 'base',
+      ];
   List<String> get mnemonicSchemas => _schemas('mn_');
+  List<String> get exampleSchemas => [
+        ..._schemas('ex_'),
+        if (!hasCore) 'main',
+        if (_activeSchemas.contains('base')) 'base',
+      ];
 
   List<String> _schemas(String prefix) => [
         for (final pack in installed)
-          if ((schemaForPack(pack.id) ?? '').startsWith(prefix))
+          if ((schemaForPack(pack.id) ?? '').startsWith(prefix) &&
+              _activeSchemas.contains(schemaForPack(pack.id)))
             schemaForPack(pack.id)!,
       ];
 
   bool isInstalled(String id) => installed.any((pack) => pack.id == id);
 
-  Future<void> ensureReady() async {
-    if (ready) return;
+  Future<void> ensureReady() {
+    if (ready) return Future<void>.value();
+    return _initializing ??=
+        _initialize().whenComplete(() => _initializing = null);
+  }
+
+  Future<void> _initialize() async {
     lastError = null;
     try {
       _root = await _rootProvider();
@@ -166,14 +197,13 @@ class PackManager extends ChangeNotifier {
       compressed.offsetInBytes,
       compressed.lengthInBytes,
     );
-    await _install(info, payload, filename: 'base.db');
+    await _install(info, payload);
   }
 
   Future<void> _install(
     PackInfo info,
-    List<int> compressed, {
-    String? filename,
-  }) async {
+    List<int> compressed,
+  ) async {
     if (info.sha256.isNotEmpty &&
         sha256.convert(compressed).toString() != info.sha256) {
       throw StateError('Checksum mismatch for ${info.id}');
@@ -183,7 +213,10 @@ class PackManager extends ChangeNotifier {
         sha256.convert(raw).toString() != info.sha256Db) {
       throw StateError('Database checksum mismatch for ${info.id}');
     }
-    final path = '${_root!.path}/${filename ?? '${info.id}.db'}';
+    // Immutable filenames keep the currently open SQLite topology valid on
+    // Windows and make a failed update leave its previous database intact.
+    final digest = sha256.convert(raw).toString();
+    final path = '${_root!.path}/${info.id}-$digest.db';
     final temporary = File('$path.part');
     await temporary.writeAsBytes(raw, flush: true);
     final probe = await DictDb.spawn();
@@ -209,9 +242,12 @@ class PackManager extends ChangeNotifier {
       if (await temporary.exists()) await temporary.delete();
       rethrow;
     }
-    final target = File(path);
-    if (await target.exists()) await target.delete();
-    await temporary.rename(path);
+    final previous = _installed(info.id);
+    if (await File(path).exists()) {
+      await temporary.delete();
+    } else {
+      await temporary.rename(path);
+    }
     installed.removeWhere((pack) => pack.id == info.id);
     installed.add(
       InstalledPack(
@@ -221,9 +257,19 @@ class PackManager extends ChangeNotifier {
         installedBytes: raw.length,
         schemaVersion: info.schemaVersion,
         languages: info.languages,
+        requires: info.requires,
       ),
     );
-    await _writeRegistry();
+    try {
+      await _writeRegistry();
+    } catch (_) {
+      installed.removeWhere((pack) => pack.id == info.id);
+      if (previous != null) installed.add(previous);
+      rethrow;
+    }
+    if (previous != null && previous.path != path) {
+      _retiredPaths.add(previous.path);
+    }
   }
 
   Future<PacksManifest> checkUpdates({bool force = false}) async {
@@ -237,10 +283,24 @@ class PackManager extends ChangeNotifier {
     return available!;
   }
 
-  Future<void> download(String id) => _download(id, <String>{});
+  Future<void> download(String id) => _downloads.putIfAbsent(
+      id,
+      () => _serialize(() => _download(id, <String>{})).whenComplete(() {
+            _downloads.remove(id);
+          }));
+
+  Future<void> _serialize(Future<void> Function() action) {
+    final result = _operationTail.then((_) => action());
+    _operationTail =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
 
   Future<void> _download(String id, Set<String> resolving) async {
     await ensureReady();
+    if (!ready) {
+      throw StateError('Dictionary packs are unavailable: $lastError');
+    }
     final manifest = available ?? await checkUpdates();
     final info = manifest.byId(id);
     if (info == null) throw StateError('Unknown pack $id');
@@ -258,6 +318,9 @@ class PackManager extends ChangeNotifier {
       if (installedDependency == null ||
           installedDependency.version != dependency.version) {
         await _download(dependency.id, resolving);
+      }
+      if (_installed(dependency.id)?.version != dependency.version) {
+        throw StateError('Incompatible dependency ${dependency.id} for $id');
       }
     }
     final token = CancelToken();
@@ -283,8 +346,18 @@ class PackManager extends ChangeNotifier {
           'source': current == null ? 'install' : 'update',
         },
       ));
-      await _install(info, payload);
-      await _openTopology();
+      final previousPacks = installed.toList();
+      try {
+        await _install(info, payload);
+        await _openTopology();
+      } catch (_) {
+        installed
+          ..clear()
+          ..addAll(previousPacks);
+        await _writeRegistry();
+        await _openTopology();
+        rethrow;
+      }
       unawaited(_telemetry.logEvent(
         TelemetryEvent.packInstallCompleted,
         parameters: {
@@ -314,24 +387,39 @@ class PackManager extends ChangeNotifier {
 
   void cancelDownload(String id) => _cancellations[id]?.cancel();
 
-  Future<void> delete(String id) async {
+  Future<void> delete(String id) => _serialize(() => _delete(id));
+
+  Future<void> _delete(String id) async {
     if (id == basePackId) {
       throw StateError('The bundled base pack cannot be deleted.');
     }
     final dependants = installed.where((pack) {
-      final info = available?.byId(pack.id);
-      return info?.requires.any((requirement) => requirement.id == id) ?? false;
+      final requirements = pack.requires.isNotEmpty
+          ? pack.requires
+          : available?.byId(pack.id)?.requires ?? const <PackRequirement>[];
+      return requirements.any((requirement) => requirement.id == id) ||
+          (id == corePackId && pack.id.startsWith('dict-locale-'));
     }).toList();
     if (dependants.isNotEmpty) {
       throw StateError('$id is required by ${dependants.first.id}.');
     }
     final pack = _installed(id);
     if (pack == null) return;
+    final previousPacks = installed.toList();
+    try {
+      installed.removeWhere((value) => value.id == id);
+      await _writeRegistry();
+      await _openTopology();
+    } catch (_) {
+      installed
+        ..clear()
+        ..addAll(previousPacks);
+      await _writeRegistry();
+      await _openTopology();
+      rethrow;
+    }
     final file = File(pack.path);
     if (await file.exists()) await file.delete();
-    installed.removeWhere((value) => value.id == id);
-    await _writeRegistry();
-    await _openTopology();
     notifyListeners();
   }
 
@@ -346,11 +434,39 @@ class PackManager extends ChangeNotifier {
     final main = _installed(corePackId) ?? _installed(basePackId);
     if (main == null) throw StateError('No dictionary core is installed.');
     final attached = <String, String>{};
+    final base = _installed(basePackId);
+    if (hasCore &&
+        base != null &&
+        base.version == main.version &&
+        base.schemaVersion == main.schemaVersion) {
+      attached['base'] = base.path;
+    }
     for (final pack in installed) {
       final schema = schemaForPack(pack.id);
-      if (schema != null) attached[schema] = pack.path;
+      final compatible =
+          pack.requires.every((r) => _installed(r.id)?.version == r.version) &&
+              (!pack.id.startsWith('dict-locale-') ||
+                  (hasCore && pack.version == main.version));
+      if (schema != null && compatible) attached[schema] = pack.path;
     }
     await db.open(main.path, attach: attached);
+    _activeSchemas
+      ..clear()
+      ..addAll(attached.keys);
+    revision++;
+    for (final path in _retiredPaths.toList()) {
+      if (!installed.any((pack) => pack.path == path)) {
+        final file = File(path);
+        try {
+          if (await file.exists()) await file.delete();
+        } on FileSystemException {
+          // Another running app instance may still have the retired pack open.
+          // The new topology is valid; retry reclamation on a later update.
+          continue;
+        }
+      }
+      _retiredPaths.remove(path);
+    }
   }
 
   File get _registry => File('${_root!.path}/registry.json');
@@ -368,15 +484,22 @@ class PackManager extends ChangeNotifier {
     installed.removeWhere((pack) => !File(pack.path).existsSync());
   }
 
-  Future<void> _writeRegistry() => _registry.writeAsString(
+  Future<void> _writeRegistry() async {
+    final temporary = File('${_registry.path}.part');
+    await temporary.writeAsString(
         jsonEncode([for (final pack in installed) pack.toJson()]),
-        flush: true,
-      );
+        flush: true);
+    await temporary.rename(_registry.path);
+  }
 
   Future<void> close() async {
+    await _initializing;
+    await _operationTail;
     final database = _database;
     _database = null;
     ready = false;
+    _activeSchemas.clear();
+    revision++;
     if (database != null) await database.close();
   }
 }

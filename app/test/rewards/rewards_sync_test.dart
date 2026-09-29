@@ -27,6 +27,7 @@ class _FakeSyncService extends SyncService {
   Future<Map<String, dynamic>> sync({
     String? lastSyncedAt,
     String mode = 'sync',
+    String? replacementId,
     List<Map<String, dynamic>> reviews = const [],
     List<Map<String, dynamic>> ops = const [],
   }) async {

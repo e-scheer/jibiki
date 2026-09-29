@@ -6,6 +6,7 @@ import '../../models/kana.dart';
 import '../../models/kanji.dart';
 import '../../theme/app_theme.dart';
 import 'speech_button.dart';
+import 'content_language_notice.dart';
 
 /// The "Origin" block on the kanji detail screen: the glyph-origin story
 /// (Wiktionary, CC BY-SA), a formation badge (pictogram / ideogrammic /
@@ -21,14 +22,23 @@ class KanjiOriginSection extends StatelessWidget {
     final k = kanji;
     if (!k.hasOrigin) return const SizedBox.shrink();
     final jc = context.jc;
+    final wiki = k.provenance['wiktionary'];
+    final sourceUrl = wiki is Map ? wiki['source_url'] as String? : null;
+    final source = sourceUrl == null ? null : Uri.tryParse(sourceUrl);
+    final documentedWiktionary = source != null &&
+        source.scheme == 'https' &&
+        (source.host == 'wiktionary.org' ||
+            source.host.endsWith('.wiktionary.org'));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(context.trText('Origin'), style: context.text.titleMedium),
             if (k.formation.isNotEmpty) ...[
-              const SizedBox(width: 8),
               _FormationBadge(formation: k.formation),
             ],
           ],
@@ -45,13 +55,17 @@ class KanjiOriginSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ContentLanguageNotice(language: k.originLanguage),
               Text(k.origin, style: context.text.bodyMedium),
               if (k.phonetic.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _PhoneticCallout(phonetic: k.phonetic, self: k.literal),
               ],
               const SizedBox(height: 12),
-              Text(context.trText('Glyph origin from Wiktionary · CC BY-SA'),
+              Text(
+                  context.trText(documentedWiktionary
+                      ? 'Glyph origin from Wiktionary · CC BY-SA'
+                      : 'Origin explanation · source not documented'),
                   style: TextStyle(color: jc.muted, fontSize: 11)),
             ],
           ),
@@ -89,7 +103,12 @@ class _FormationBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(Radii.sm),
       ),
       child: Text(
-        jp.isEmpty ? label : '$label · $jp',
+        jp.isEmpty
+            ? context.trText(label)
+            : context
+                .trText('{label} · {term}')
+                .replaceAll('{label}', context.trText(label))
+                .replaceAll('{term}', jp),
         style: TextStyle(
             fontSize: 11.5, fontWeight: FontWeight.w700, color: color),
       ),
@@ -147,7 +166,10 @@ class _PhoneticCallout extends StatelessWidget {
                           fontSize: 12.5)),
                   const SizedBox(height: 2),
                   Text(
-                      '$phonetic is here to hint the reading - not the meaning.',
+                      context
+                          .trText(
+                              '{component} suggests a reading for this character.')
+                          .replaceAll('{component}', phonetic),
                       style: TextStyle(
                           color: jc.body, fontSize: 13, height: 1.35)),
                 ],
@@ -202,6 +224,7 @@ class KanaOriginSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
+              ContentLanguageNotice(language: kana.originLanguage),
               Text(kana.originNote,
                   textAlign: TextAlign.center, style: context.text.bodyMedium),
             ],
@@ -240,6 +263,7 @@ class KanaGrammarSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ContentLanguageNotice(language: kana.usageLanguage),
               if (kana.usageLabel.isNotEmpty) ...[
                 Container(
                   padding:
@@ -314,6 +338,8 @@ class _UsageExampleRow extends StatelessWidget {
                         fontStyle: FontStyle.italic,
                         height: 1.3)),
                 const SizedBox(height: 2),
+                if (example.translation.isNotEmpty)
+                  ContentLanguageNotice(language: example.language),
                 Text(example.translation,
                     style: TextStyle(
                         color: jc.body, fontSize: 13.5, height: 1.35)),

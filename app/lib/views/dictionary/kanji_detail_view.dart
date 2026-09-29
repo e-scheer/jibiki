@@ -8,6 +8,7 @@ import '../../models/kanji.dart';
 import '../../repositories/dictionary_repository.dart';
 import '../../repositories/mnemonic_repository.dart';
 import '../../repositories/study_repository.dart';
+import '../../routing/route_navigation.dart';
 import '../../theme/app_theme.dart';
 import '../../viewmodels/app_state.dart';
 import '../../viewmodels/kanji_detail_viewmodel.dart';
@@ -17,6 +18,7 @@ import '../study/writing_practice_view.dart';
 import '../widgets/study_status_bar.dart';
 import '../widgets/mnemonic_panel.dart';
 import '../widgets/origin_section.dart';
+import '../widgets/kanjialive_radical_section.dart';
 import '../widgets/reading_mnemonic_section.dart';
 import '../widgets/speech_button.dart';
 import '../widgets/status_views.dart';
@@ -48,7 +50,7 @@ class KanjiDetailView extends StatelessWidget {
             ctx.read<DictionaryRepository>(),
             ctx.read<StudyRepository>(),
             literal,
-            loadStudyState: ctx.read<AppState>().isAuthenticated,
+            loadStudyState: ctx.read<AppState>().canStudy,
           )..load(),
         ),
         ChangeNotifierProvider(
@@ -89,7 +91,7 @@ class _KanjiDetail extends StatelessWidget {
                     NeoIconButton(
                       icon: Icons.arrow_back_rounded,
                       label: context.trText('Back'),
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () => popOrGo(context),
                     ),
                     const Spacer(),
                     if (k != null)
@@ -211,6 +213,7 @@ class _KanjiDetail extends StatelessWidget {
         if (k.kunReadings.isNotEmpty) _readings(context, 'Kun', k.kunReadings),
         if (k.onReadings.isNotEmpty) _readings(context, 'On', k.onReadings),
         ReadingMnemonicSection(character: k.literal, language: lang),
+        KanjiAliveRadicalSection(kanji: k),
         if (k.componentDetails.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text(context.trText('Composition'),

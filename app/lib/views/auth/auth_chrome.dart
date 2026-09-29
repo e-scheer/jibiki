@@ -260,13 +260,18 @@ class AuthField extends StatefulWidget {
 }
 
 class _AuthFieldState extends State<AuthField> {
-  bool _hasError = false;
+  final _fieldKey = GlobalKey<FormFieldState<String>>();
+  String? _errorText;
+
+  bool get _hasError => _errorText != null;
 
   String? _validate(String? value) {
     final message = widget.validator?.call(value);
-    if (_hasError != (message != null)) {
+    if (_errorText != message) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _hasError = message != null);
+        if (mounted) {
+          setState(() => _errorText = _fieldKey.currentState?.errorText);
+        }
       });
     }
     return message;
@@ -290,9 +295,7 @@ class _AuthFieldState extends State<AuthField> {
             child: AnimatedContainer(
               duration: Motion.timed(context, Motion.fast),
               decoration: BoxDecoration(
-                color: _hasError
-                    ? context.jc.ratingAgain.withValues(alpha: .12)
-                    : context.jc.surface,
+                color: context.jc.surface,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: widget.enabled
                     ? [
@@ -307,19 +310,24 @@ class _AuthFieldState extends State<AuthField> {
                     : null,
               ),
               child: TextFormField(
+                key: _fieldKey,
                 controller: widget.controller,
                 keyboardType: widget.keyboardType,
                 autofillHints: widget.autofillHints,
                 obscureText: widget.obscureText,
                 enabled: widget.enabled,
                 validator: _validate,
-                onChanged: _hasError
-                    ? (value) {
-                        if (widget.validator?.call(value) == null) {
-                          setState(() => _hasError = false);
-                        }
-                      }
-                    : null,
+                // Keep validation on the field, but render its message outside
+                // the shadow so the error line cannot enlarge the solid offset.
+                errorBuilder: (_, __) => const SizedBox.shrink(),
+                onChanged: (_) {
+                  final field = _fieldKey.currentState;
+                  if (field?.hasError ?? false) {
+                    field!.validate();
+                  } else if (_hasError) {
+                    setState(() => _errorText = null);
+                  }
+                },
                 onFieldSubmitted: widget.onFieldSubmitted,
                 decoration: InputDecoration(
                   hintText: widget.label,
@@ -332,6 +340,17 @@ class _AuthFieldState extends State<AuthField> {
               ),
             ),
           ),
+          if (_errorText != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+              child: Semantics(
+                liveRegion: true,
+                child: Text(
+                  _errorText!,
+                  style: Theme.of(context).inputDecorationTheme.errorStyle,
+                ),
+              ),
+            ),
         ],
       );
 }

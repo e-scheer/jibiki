@@ -46,6 +46,7 @@ class KanjiDetailViewModel extends BaseViewModel {
     if (k != null) {
       _kanji = k;
       _words = null; // invalidate cache for the new kanji
+      notifyListeners();
     }
     if (_loadStudyState && k != null) {
       final states = await runGuarded(

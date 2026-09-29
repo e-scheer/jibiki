@@ -43,6 +43,7 @@ class _SwipeStageState extends State<SwipeStage> {
   final _controller = SwipeCardController();
   final _peek = ValueNotifier<double>(0); // drag progress → deck-behind rises
   bool _revealed = false;
+  Rating? _retryRating;
 
   @override
   void dispose() {
@@ -53,6 +54,24 @@ class _SwipeStageState extends State<SwipeStage> {
   @override
   Widget build(BuildContext context) {
     final card = widget.vm.current!;
+    if (_retryRating != null) {
+      return Center(
+        child: TextButton.icon(
+          icon: const Icon(Icons.refresh),
+          label: Text(context.trText('Retry')),
+          onPressed: widget.vm.isLoading
+              ? null
+              : () async {
+                  final before = widget.vm.index;
+                  final rating = _retryRating!;
+                  await widget.vm.rate(rating);
+                  if (widget.vm.index > before) {
+                    widget.onRated?.call(card, rating);
+                  }
+                },
+        ),
+      );
+    }
     final next = widget.vm.next;
     final landscape = studyUsesLandscapeContract(context);
     final cardStack = Stack(
@@ -68,9 +87,15 @@ class _SwipeStageState extends State<SwipeStage> {
         Positioned.fill(
           child: SwipeCard(
             controller: _controller,
-            onRate: (rating) {
-              widget.onRated?.call(card, rating);
-              widget.vm.rate(rating);
+            onRate: (rating) async {
+              if (widget.vm.isLoading) return;
+              final before = widget.vm.index;
+              await widget.vm.rate(rating);
+              if (widget.vm.index > before) {
+                widget.onRated?.call(card, rating);
+              } else if (mounted) {
+                setState(() => _retryRating = rating);
+              }
             },
             onProgress: (p) => _peek.value = p,
             onRevealChanged: (v) => setState(() => _revealed = v),

@@ -128,7 +128,18 @@ class SearchViewModel extends BaseViewModel {
         'gloss_language': glossLanguage,
       },
     ));
-    final r = await runGuarded(() => _repo.search(q, lang: glossLanguage));
+    final r = await runGuarded(
+      () async {
+        try {
+          return await _repo.search(q, lang: glossLanguage);
+        } catch (_) {
+          // Leaving or changing the query also invalidates its failure.
+          if (q != _query) return null;
+          rethrow;
+        }
+      },
+      allowConcurrent: true,
+    );
     // Ignore a stale response whose query is no longer the current one.
     if (r != null && q == _query) {
       _results = r.words;

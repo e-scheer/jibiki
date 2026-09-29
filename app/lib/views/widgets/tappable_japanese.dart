@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../repositories/dictionary_repository.dart';
+import '../../core/japanese_text.dart';
 import '../../theme/app_theme.dart';
 
 /// One kana/kanji found inside a string that we can open a detail page for.
@@ -38,12 +39,6 @@ const Set<int> _smallKana = {
   0x30F6,
 };
 
-bool _isKanji(int c) =>
-    (c >= 0x4E00 && c <= 0x9FFF) || // CJK Unified
-    (c >= 0x3400 && c <= 0x4DBF) || // Extension A
-    (c >= 0xF900 && c <= 0xFAFF) || // Compatibility ideographs
-    (c >= 0x20000 && c <= 0x2A6DF); // Extension B
-
 // Full-width hiragana (あ‥ん) / katakana (ア‥ン), excluding the small kana above.
 // The narrow ranges leave out ー・゛゜ and the archaic ゐゑ neighbours' marks.
 bool _isKana(int c) =>
@@ -57,7 +52,7 @@ List<Lookupable> lookupableChars(String text) {
   for (final r in text.runes) {
     final ch = String.fromCharCode(r);
     if (!seen.add(ch)) continue;
-    if (_isKanji(r)) {
+    if (isKanjiCodePoint(r)) {
       out.add((char: ch, isKanji: true));
     } else if (_isKana(r)) {
       out.add((char: ch, isKanji: false));

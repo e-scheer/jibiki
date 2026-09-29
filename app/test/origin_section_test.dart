@@ -2,22 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jibiki/models/kana.dart';
 import 'package:jibiki/models/kanji.dart';
+import 'package:jibiki/l10n/l10n.dart';
 import 'package:jibiki/theme/app_theme.dart';
 import 'package:jibiki/views/widgets/origin_section.dart';
 import 'package:jibiki/views/widgets/speech_button.dart';
 
-KanjiEntry _kanji({String origin = '', String formation = '', String phonetic = ''}) =>
+KanjiEntry _kanji(
+        {String origin = '',
+        String formation = '',
+        String phonetic = '',
+        Map<String, dynamic> provenance = const {}}) =>
     KanjiEntry.fromJson({
       'literal': '電',
       'stroke_count': 13,
       'origin': origin,
+      'origin_language': 'en',
+      'provenance': provenance,
       'formation': formation,
       'phonetic': phonetic,
       'meanings': const [],
     });
 
-Widget _host(Widget child) => MaterialApp(
+Widget _host(Widget child, {Locale locale = const Locale('en')}) => MaterialApp(
       theme: AppTheme.light(),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(body: SingleChildScrollView(child: child)),
     );
 
@@ -33,10 +43,12 @@ void main() {
         ),
       )));
       expect(find.text('Origin'), findsOneWidget);
-      expect(find.textContaining('Phono-semantic'), findsWidgets); // prose + badge
+      expect(
+          find.textContaining('Phono-semantic'), findsWidgets); // prose + badge
       expect(find.textContaining('音符'), findsOneWidget);
       expect(find.text('申'), findsOneWidget); // the highlighted phonetic glyph
-      expect(find.textContaining('Wiktionary'), findsOneWidget); // attribution
+      expect(find.textContaining('Wiktionary'), findsNothing);
+      expect(find.textContaining('source not documented'), findsOneWidget);
     });
 
     testWidgets('collapses to nothing when there is no origin', (tester) async {
@@ -46,15 +58,61 @@ void main() {
 
     testWidgets('shows no phonetic callout for a pictogram', (tester) async {
       await tester.pumpWidget(_host(KanjiOriginSection(
-        kanji: _kanji(origin: 'Pictogram – a cloud with rain.', formation: 'pictogram'),
+        kanji: _kanji(
+            origin: 'Pictogram - a cloud with rain.', formation: 'pictogram'),
       )));
       expect(find.textContaining('音符'), findsNothing);
       expect(find.textContaining('Pictogram'), findsWidgets);
     });
+
+    for (final width in [390.0, 1024.0]) {
+      for (final documented in [false, true]) {
+        testWidgets(
+            'origin language and attribution stay accurate at $width (source=$documented)',
+            (tester) async {
+          tester.view.physicalSize = Size(width, 1000);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          await tester.pumpWidget(_host(
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: KanjiOriginSection(
+                    kanji: _kanji(
+                  origin: 'Complete English origin explanation.',
+                  formation: 'phono-semantic',
+                  phonetic: '申',
+                  provenance: documented
+                      ? {
+                          'wiktionary': {
+                            'source_url': 'https://en.wiktionary.org/wiki/電'
+                          }
+                        }
+                      : const {},
+                )),
+              ),
+              locale: const Locale('fr')));
+          await tester.pumpAndSettle();
+          expect(find.textContaining('traduction française indisponible'),
+              findsOneWidget);
+          expect(find.textContaining('Phono-sémantique'), findsOneWidget);
+          expect(find.text('申 suggère une lecture de ce caractère.'),
+              findsOneWidget);
+          expect(find.text('Complete English origin explanation.'),
+              findsOneWidget);
+          expect(
+              find.textContaining(
+                  documented ? 'Wiktionary' : 'source non documentée'),
+              findsOneWidget);
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
   });
 
   group('KanaOriginSection', () {
-    testWidgets('shows the source → kana derivation diagram and note', (tester) async {
+    testWidgets('shows the source → kana derivation diagram and note',
+        (tester) async {
       final kana = KanaEntry.fromJson({
         'char': 'あ',
         'romaji': 'a',
@@ -72,7 +130,8 @@ void main() {
   });
 
   group('KanaGrammarSection', () {
-    testWidgets('shows the role badge and sentence usage for a particle', (tester) async {
+    testWidgets('shows the role badge and sentence usage for a particle',
+        (tester) async {
       final ha = KanaEntry.fromJson({
         'char': 'は',
         'romaji': 'ha',
@@ -123,8 +182,12 @@ void main() {
     });
 
     testWidgets('collapses for a purely phonetic kana', (tester) async {
-      final ki = KanaEntry.fromJson(
-          {'char': 'き', 'romaji': 'ki', 'script': 'hiragana', 'kind': 'gojuon'});
+      final ki = KanaEntry.fromJson({
+        'char': 'き',
+        'romaji': 'ki',
+        'script': 'hiragana',
+        'kind': 'gojuon'
+      });
       await tester.pumpWidget(_host(KanaGrammarSection(kana: ki)));
       expect(find.text('In a sentence'), findsNothing);
     });

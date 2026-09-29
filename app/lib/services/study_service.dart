@@ -104,10 +104,14 @@ class StudyService implements StudyStore {
 
   @override
   Future<StudyCard> review(int cardId, Rating rating,
-      {int durationMs = 0}) async {
+      {int durationMs = 0, String? clientReviewId}) async {
     final data = await _api.post(
       ApiConfig.studyCardReview(cardId),
-      data: {'rating': rating.value, 'duration_ms': durationMs},
+      data: {
+        'rating': rating.value,
+        'duration_ms': durationMs,
+        if (clientReviewId != null) 'client_review_id': clientReviewId,
+      },
     );
     final card = (data as Map)['card'] as Map;
     return StudyCard.fromJson(card.cast<String, dynamic>());

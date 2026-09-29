@@ -56,6 +56,7 @@ class SyncEngine extends ChangeNotifier {
   bool _syncing = false;
   Object? _lastError;
   DateTime? _lastSyncedAt;
+  String? _replacementId;
   int _pendingCount = 0;
   DateTime? _oldestPendingAt;
   bool _online = false;
@@ -98,6 +99,12 @@ class SyncEngine extends ChangeNotifier {
     if (owner.isNotEmpty) {
       _boundAccountId = int.tryParse(owner.single['value'] as String);
     }
+    final replacement = await _user.select(
+      "SELECT value FROM kv WHERE key = 'cloud_replacement_id'",
+    );
+    if (replacement.isNotEmpty) {
+      _replacementId = replacement.single['value'] as String;
+    }
     await _refreshPending();
     _initialized = true;
     _periodic = Timer.periodic(
@@ -139,6 +146,7 @@ class SyncEngine extends ChangeNotifier {
     final accountId = _requestedAccountId;
     if (_disposed ||
         !_initialized ||
+        _syncing ||
         _preparingAccount ||
         accountId == null ||
         !_online ||
@@ -153,6 +161,7 @@ class SyncEngine extends ChangeNotifier {
     try {
       final local = await _localStatus();
       final preview = await _service.sync(mode: 'preview');
+      if (_disposed || _requestedAccountId != accountId) return;
       final cloud =
           (preview['cloud'] as Map? ?? const {}).cast<String, dynamic>();
       final cloudCards = (cloud['cards'] as num?)?.toInt() ?? 0;
@@ -182,6 +191,9 @@ class SyncEngine extends ChangeNotifier {
       notifyListeners();
     } finally {
       _preparingAccount = false;
+      if (!_disposed && _requestedAccountId != accountId) {
+        unawaited(_prepareAccount());
+      }
     }
   }
 
@@ -385,9 +397,13 @@ class SyncEngine extends ChangeNotifier {
       // the account's grants and collection.
       ('DELETE FROM booster_grants', const []),
       ('DELETE FROM collection_cards', const []),
-      ('DELETE FROM kv WHERE key IN (?, ?)', ['last_synced_at', 'profile']),
+      (
+        'DELETE FROM kv WHERE key IN (?, ?, ?)',
+        ['last_synced_at', 'profile', 'cloud_replacement_id']
+      ),
     ]);
     _lastSyncedAt = null;
+    _replacementId = null;
     await _refreshPending();
   }
 
@@ -425,10 +441,20 @@ class SyncEngine extends ChangeNotifier {
       return;
     }
     _syncing = true;
+    final accountId = _requestedAccountId;
     _lastError = null;
     _retry?.cancel();
     notifyListeners();
     try {
+      if (replaceCloud && _replacementId == null) {
+        final id = _uuid.v4();
+        await _user.execute(
+          'INSERT INTO kv (key, value) VALUES (?, ?) '
+          'ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+          ['cloud_replacement_id', id],
+        );
+        _replacementId = id;
+      }
       var cursor = _lastSyncedAt?.toUtc().toIso8601String();
       // Page until the outbox is drained; each response also carries the
       // delta past our cursor (including changes this very upload caused).
@@ -437,12 +463,20 @@ class SyncEngine extends ChangeNotifier {
         final ops = await _pendingOps();
         final response = await _service.sync(
           lastSyncedAt: cursor,
-          mode: replaceCloud ? 'replace_cloud' : 'sync',
+          mode: _replacementId != null ? 'replace_cloud' : 'sync',
+          replacementId: _replacementId,
           reviews: [for (final r in reviews) _reviewWire(r)],
           ops: [for (final o in ops) _opWire(o)],
         );
-        await _apply(response);
-        replaceCloud = false;
+        // A response belongs to the account that started the request. Never
+        // apply it to a newly selected account or continue paging after logout.
+        if (_disposed ||
+            _requestedAccountId != accountId ||
+            _boundAccountId != accountId) {
+          return;
+        }
+        await _apply(response, completesReplacement: _replacementId != null);
+        _replacementId = null;
         cursor = response['synced_at'] as String?;
         if (reviews.length < _reviewPage && ops.length < _opPage) break;
       }
@@ -462,6 +496,9 @@ class SyncEngine extends ChangeNotifier {
       _syncing = false;
       await _refreshPending();
       if (!_disposed) notifyListeners();
+      if (!_disposed && _requestedAccountId != accountId) {
+        unawaited(_prepareAccount());
+      }
     }
   }
 
@@ -491,8 +528,15 @@ class SyncEngine extends ChangeNotifier {
   String _iso(int ms) =>
       DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toIso8601String();
 
-  Future<void> _apply(Map<String, dynamic> response) async {
+  Future<void> _apply(Map<String, dynamic> response,
+      {bool completesReplacement = false}) async {
     final statements = <(String, List<Object?>)>[];
+    if (completesReplacement) {
+      statements.add((
+        "DELETE FROM kv WHERE key = 'cloud_replacement_id'",
+        const [],
+      ));
+    }
 
     // Acked reviews (applied or rejected) leave the outbox but stay in the
     // log - they are the local history.
@@ -530,8 +574,18 @@ class SyncEngine extends ChangeNotifier {
     for (final d in (response['deleted'] as List? ?? const [])) {
       final t = (d as Map).cast<String, dynamic>();
       statements.add((
-        'DELETE FROM cards WHERE item_type = ? AND item_ref = ?',
-        [t['item_type'], t['ref']],
+        'DELETE FROM cards WHERE item_type = ? AND item_ref = ? '
+            'AND NOT (${_pendingCardMutation()})',
+        [
+          t['item_type'],
+          t['ref'],
+          t['item_type'],
+          t['ref'],
+          t['item_type'],
+          t['ref'],
+          t['item_type'],
+          t['ref']
+        ],
       ));
     }
 
@@ -540,23 +594,14 @@ class SyncEngine extends ChangeNotifier {
     // the next loop iteration uploads them and receives the newer state. The
     // rows this very response acks don't count: their synced flag flips in
     // the same transaction below.
-    final ackedSet = {...acked};
-    final stillPending = {
-      for (final r in await _user.select(
-          'SELECT client_review_id, item_type, item_ref FROM review_log WHERE synced = 0'))
-        if (!ackedSet.contains(r['client_review_id']))
-          '${r['item_type']}:${r['item_ref']}',
-    };
     for (final c in (response['cards'] as List? ?? const [])) {
       final card = (c as Map).cast<String, dynamic>();
-      if (stillPending.contains('${card['item_type']}:${card['item_ref']}')) {
-        continue;
-      }
       statements.add((
         'INSERT INTO cards (item_type, item_ref, server_id, stability, difficulty, '
             'state, step, due, last_review, reps, lapses, favorite, source_sentence, '
             'source_url, source_title, source_media, created_at, updated_at, deleted) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0) '
+            'SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0 '
+            'WHERE NOT (${_pendingCardMutation()}) '
             'ON CONFLICT(item_type, item_ref) DO UPDATE SET '
             'server_id = excluded.server_id, stability = excluded.stability, '
             'difficulty = excluded.difficulty, state = excluded.state, '
@@ -584,6 +629,12 @@ class SyncEngine extends ChangeNotifier {
           card['source_media'] ?? '',
           _parseMs(card['created_at']) ?? 0,
           _parseMs(card['updated_at']) ?? 0,
+          card['item_type'],
+          card['item_ref'],
+          card['item_type'],
+          card['item_ref'],
+          card['item_type'],
+          card['item_ref'],
         ],
       ));
     }
@@ -634,7 +685,8 @@ class SyncEngine extends ChangeNotifier {
     final profile = response['profile'];
     if (profile is Map) {
       statements.add((
-        'INSERT INTO kv (key, value) VALUES (?, ?) '
+        'INSERT INTO kv (key, value) SELECT ?, ? '
+            "WHERE NOT EXISTS (SELECT 1 FROM op_outbox WHERE kind = 'profile_patch') "
             'ON CONFLICT(key) DO UPDATE SET value = excluded.value',
         ['profile', jsonEncode(profile)],
       ));
@@ -646,11 +698,28 @@ class SyncEngine extends ChangeNotifier {
             'ON CONFLICT(key) DO UPDATE SET value = excluded.value',
         ['last_synced_at', syncedAt],
       ));
-      _lastSyncedAt = DateTime.tryParse(syncedAt);
     }
 
     await _user.tx(statements);
+    if (syncedAt != null) _lastSyncedAt = DateTime.tryParse(syncedAt);
   }
+
+  /// Evaluated inside the same transaction as acknowledgments, so edits made
+  /// during HTTP or before the database worker executes remain protected.
+  /// Parameters are three repeated (item_type, item_ref) pairs.
+  String _pendingCardMutation() => '''
+    EXISTS (SELECT 1 FROM review_log r WHERE r.synced = 0
+      AND r.item_type = ? AND r.item_ref = ?)
+    OR EXISTS (SELECT 1 FROM op_outbox o WHERE
+      (o.kind IN ('set_status', 'favorite')
+        AND json_extract(o.payload, '\$.item_type') = ?
+        AND json_extract(o.payload, '\$.ref') = ?)
+      OR (o.kind = 'bulk_add' AND EXISTS (
+        SELECT 1 FROM json_each(o.payload, '\$.items') i
+        WHERE json_extract(i.value, '\$.item_type') = ?
+          AND json_extract(i.value, '\$.ref') = ?))
+      OR o.kind = 'deck_enroll')
+  ''';
 
   int? _parseMs(Object? iso) => iso == null
       ? null

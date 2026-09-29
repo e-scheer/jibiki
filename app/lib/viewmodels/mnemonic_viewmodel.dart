@@ -204,12 +204,13 @@ class MnemonicViewModel extends BaseViewModel {
 
   Future<bool> addToStudy() async {
     final type = kind == 'kanji' ? ItemType.kanji : ItemType.kana;
-    await runGuarded(() => _study.addCard(type, character), silent: true);
-    if (!hasError) {
+    clearError();
+    final result = await runGuarded(() => _study.addCard(type, character), silent: true);
+    if (result != null) {
       _added = true;
       notifyListeners();
     }
-    return !hasError;
+    return result != null;
   }
 
   static String _reportCategory(String reason) => switch (reason) {

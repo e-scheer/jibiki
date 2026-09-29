@@ -897,7 +897,7 @@ class _KanaToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final signedIn = context.watch<AppState>().isAuthenticated;
+    final signedIn = context.watch<AppState>().canStudy;
     return Pressable(
       onTap: () {
         if (signedIn) {
@@ -987,7 +987,7 @@ class _ReviewKanaButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final signedIn = context.watch<AppState>().isAuthenticated;
+    final signedIn = context.watch<AppState>().canStudy;
     return Pressable(
       onTap: () {
         if (signedIn) {

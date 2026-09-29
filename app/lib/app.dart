@@ -73,11 +73,22 @@ class _JibikiAppState extends State<JibikiApp> with WidgetsBindingObserver {
 
   // Dictionary reads come from the local packs on mobile (HTTP as a safety
   // net during the offline-first transition), from the API on web.
-  late final LocalDictionaryDataSource? _localDict =
-      _packs == null ? null : LocalDictionaryDataSource(_packs);
+  late final LocalDictionaryDataSource? _localDict = _packs == null
+      ? null
+      : LocalDictionaryDataSource(_packs,
+          language: () => _app.interfaceLanguage,
+          glossLanguage: () => _app.mnemonicLanguage);
+  late final DictionaryService _dictionaryService = DictionaryService(_api,
+      language: () => _app.interfaceLanguage,
+      glossLanguage: () => _app.mnemonicLanguage);
+  Object get _dictionaryRevision =>
+      (_packs?.revision, _app.interfaceLanguage, _app.mnemonicLanguage);
   late final DictionaryRepository _dictRepo = _localDict == null
-      ? DictionaryRepository(DictionaryService(_api))
-      : DictionaryRepository(_localDict, fallback: DictionaryService(_api));
+      ? DictionaryRepository(_dictionaryService,
+          cacheRevision: () => _dictionaryRevision)
+      : DictionaryRepository(_localDict,
+          fallback: _dictionaryService,
+          cacheRevision: () => _dictionaryRevision);
 
   // Study is local-first on mobile: ratings are scheduled on-device (Dart
   // FSRS) and replayed to the server by the sync engine. Web stays HTTP.

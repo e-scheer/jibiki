@@ -1,19 +1,24 @@
 /// Japanese text helpers - the Dart side of server/dictionary/search.py
-/// (`is_japanese`, `kanji_in`) plus a romaji→hiragana transliterator the
-/// server never had: offline search can answer "tabemono" like a native
-/// Japanese query instead of a gloss lookup.
+/// (`is_japanese`, `kanji_in`) and the shared romaji→hiragana transliterator.
+/// Offline and API search can interpret "tabemono" as a Japanese query while
+/// also searching the original input in definitions.
 library;
 
 // Unicode blocks that mark a query as Japanese input (same as the server).
 const int _hiraganaLo = 0x3040, _hiraganaHi = 0x309F;
 const int _katakanaLo = 0x30A0, _katakanaHi = 0x30FF;
-const int _cjkLo = 0x4E00, _cjkHi = 0x9FFF;
+bool isKanjiCodePoint(int cp) =>
+    (cp >= 0x3400 && cp <= 0x4DBF) ||
+    (cp >= 0x4E00 && cp <= 0x9FFF) ||
+    (cp >= 0xF900 && cp <= 0xFAFF) ||
+    (cp >= 0x20000 && cp <= 0x2FA1F) ||
+    (cp >= 0x30000 && cp <= 0x3FFFF);
 
 bool isJapanese(String text) {
   for (final cp in text.runes) {
     if ((cp >= _hiraganaLo && cp <= _hiraganaHi) ||
         (cp >= _katakanaLo && cp <= _katakanaHi) ||
-        (cp >= _cjkLo && cp <= _cjkHi)) {
+        isKanjiCodePoint(cp)) {
       return true;
     }
   }
@@ -26,7 +31,7 @@ List<String> kanjiIn(String text) {
   final out = <String>[];
   final seen = <int>{};
   for (final cp in text.runes) {
-    if (cp >= _cjkLo && cp <= _cjkHi && seen.add(cp)) {
+    if (isKanjiCodePoint(cp) && seen.add(cp)) {
       out.add(String.fromCharCode(cp));
     }
   }
